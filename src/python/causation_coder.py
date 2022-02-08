@@ -1,4 +1,5 @@
 # Caustion coder.
+# Maps cause input to effect output, encoding relationship in the process.
 # ref: https://blog.keras.io/building-autoencoders-in-keras.html
 
 import keras
