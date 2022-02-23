@@ -1,20 +1,15 @@
-# GANs with Deeplearning4j
+# Nesting birds with goal-directed behavior using contextual causation learning.
 
-This repository shows how you can train som sample Generative Adversarial 
-Networks (GAN) with in Deeplearning4j.
+In this project, the Morphognosis and Mona neural network models are combined into
+a comprehensive model for animal learning and behavior.
+Mona features a contextual causation learning with goal-directed motivation.
+Mophognosis features contextual multilayer perceptron (MLP).
 
-To run the App example use the following command:
+A pair of cooperating nest-building and foraging birds are used as a vehicle to demonstrate
+the model. See: http://tom.portegys.com/research.html#mona2
 
-```
-mvn compile exec:java -Dexec.mainClass="io.skymind.example.App"
-```
+Working paper title:
+Goal-directed behavior using contextual causation learning
 
-This app will just continuously train a simple GAN that uses dense layers and 
-display sample outputs from the generator in a window
-
-You should start to see the following output after about 1 hour:
-
-![sample image result](screenshot.png)
-
-The MnistSimpleGAN and MnistDCGAN use a new GAN helper and are 
-still works in progress.
+Mona:
+https://github.com/portegys/Mona
