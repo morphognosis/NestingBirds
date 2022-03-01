@@ -5,14 +5,14 @@
     <!--define folder properties-->
     <property name="dir.buildfile" value="."/>
     <property name="dir.workspace" value="C:/Users/Tom Portegys/eclipse-workspace"/>
-    <property name="dir.jarfile" value="C:/Users/Tom Portegys/Documents/research/AI/Morphognosis/NestingBirds/bin"/>
+    <property name="dir.jarfile" value="C:/Users/Tom Portegys/Documents/research/AI/Mandala/NestingBirds/bin"/>
     <target name="create_run_jar">
         <jar destfile="${dir.jarfile}/nestingbirds.jar" filesetmanifest="mergewithoutmain">
             <manifest>
                 <attribute name="Main-Class" value="mandala.Mandala"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <fileset dir="C:/Users/Tom Portegys/Documents/research/AI/Morphognosis/NestingBirds/target/classes"/>
+            <fileset dir="C:/Users/Tom Portegys/Documents/research/AI/Mandala/NestingBirds/target/classes"/>
             <zipfileset excludes="META-INF/*.SF" src="C:/Users/Tom Portegys/.m2/repository/org/nd4j/nd4j-native-platform/1.0.0-beta6/nd4j-native-platform-1.0.0-beta6.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="C:/Users/Tom Portegys/.m2/repository/org/bytedeco/openblas-platform/0.3.7-1.5.2/openblas-platform-0.3.7-1.5.2.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="C:/Users/Tom Portegys/.m2/repository/org/bytedeco/openblas/0.3.7-1.5.2/openblas-0.3.7-1.5.2.jar"/>
