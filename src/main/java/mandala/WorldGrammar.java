@@ -34,16 +34,17 @@ public class WorldGrammar
 	
 	// Random numbers.
 	public static int RANDOM_SEED = 4517;
-	public static Random randomizer = null;
+	public Random randomizer = null;
 	
 	// File.
 	public static String GRAMMAR_FILENAME = null;	
 	
 	// Grammar.
-	public static Map<String, List<String>> grammar;
+	public Map<String, List<String>> grammar;
 	
 	// World path production string.
-	public static String worldPath = "sAg";
+	public static String INITIAL_WORLD_PATH = "sAg";
+	public String worldPath = INITIAL_WORLD_PATH;
 
     // Usage.
     public static final String Usage =
@@ -61,13 +62,14 @@ public class WorldGrammar
       "        | -loadGrammar <file name>\n" +
       "      World path production:\n" +
       "          [-initialPath <string of terminals and nonterminals>\n" +
-      "              (starting with unique terminal \"s\"tart and ending with unique terminal \"g\"oal, default=\"" + worldPath + "\")]\n" +      
+      "              (starting with unique terminal \"s\"tart and ending with unique terminal \"g\"oal, default=\"" + INITIAL_WORLD_PATH + "\")]\n" +      
       "          [-numNonterminalExpansions <quantity> (default=" + NUM_NONTERMINAL_EXPANSIONS + ")]\n" +
       "      [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +       
       "Exit codes:\n" +
       "  0=success\n" +
       "  1=error";
-	   
+	
+    // Main.
     public static void main(String[] args) 
     {
     	boolean generate = false;
@@ -256,7 +258,7 @@ public class WorldGrammar
                  System.err.println(Usage);
                  System.exit(1);
               }
-              worldPath = args[i];
+              INITIAL_WORLD_PATH = args[i];
               continue;
            }            
            if (args[i].equals("-numNonterminalExpansions"))
@@ -341,15 +343,15 @@ public class WorldGrammar
             System.err.println(Usage);
             System.exit(1);           	
         }      	
-        if (worldPath.length() < 2 || !worldPath.matches("[a-zA-Z]+") ||
-        		!worldPath.startsWith("s") || !worldPath.endsWith("g") ||
-        		StringUtils.countMatches(worldPath, "s") > 1 ||
-        		StringUtils.countMatches(worldPath, "g") > 1)
+        if (INITIAL_WORLD_PATH.length() < 2 || !INITIAL_WORLD_PATH.matches("[a-zA-Z]+") ||
+        		!INITIAL_WORLD_PATH.startsWith("s") || !INITIAL_WORLD_PATH.endsWith("g") ||
+        		StringUtils.countMatches(INITIAL_WORLD_PATH, "s") > 1 ||
+        		StringUtils.countMatches(INITIAL_WORLD_PATH, "g") > 1)
         {
             System.err.println("Invalid initial path");
             System.exit(1);         	
         }
-        char[] symbols = worldPath.toCharArray();
+        char[] symbols = INITIAL_WORLD_PATH.toCharArray();
         for (int i = 0; i < symbols.length; i++)
         {
         	if (symbols[i] >= 'a' && symbols[i] <= 'z')
@@ -373,19 +375,83 @@ public class WorldGrammar
         		}       		
         	}
         }
-
-        // Initialize random numbers.
-        randomizer = new Random(RANDOM_SEED);
-         
-        // Generate grammar.
+        
+        // Create world grammar.
+        WorldGrammar worldGrammar = new WorldGrammar();
+        
+        // Generate grammar?
         if (generate)
         {
-	        grammar = new HashMap<String, List<String>>();
-	        char[] terminals = "abcdefhijklmnopqrtuvwxyz".toCharArray();
-	        int i = 0;
-	        for (; i < NUM_NONTERMINALS && i < NUM_PRODUCTIONS; i++)
+        	worldGrammar.generateGrammar();
+        	
+        	// Save grammar?
+        	if (GRAMMAR_FILENAME != null)
+        	{
+        		worldGrammar.saveGrammar(GRAMMAR_FILENAME);
+        	}
+        } else {
+        	worldGrammar.loadGrammar(GRAMMAR_FILENAME);
+        }
+        System.out.println("Grammar:");
+        for (Map.Entry<String, List<String>> entry : worldGrammar.grammar.entrySet())
+        {
+        	String key = entry.getKey();
+        	for (String value : entry.getValue())
+        	{
+        		System.out.println(key + " ::= " + value);
+        	}
+        }
+        
+        // Produce world path.
+        worldGrammar.produceWorldPath(INITIAL_WORLD_PATH, true);
+        
+        System.exit(0);
+    }
+    
+    // Constructor.
+    public WorldGrammar()
+    {
+        // Initialize random numbers.
+        randomizer = new Random(RANDOM_SEED);
+    }
+    
+    // Generate grammar.
+    public void generateGrammar()
+    {         
+        grammar = new HashMap<String, List<String>>();
+        char[] terminals = "abcdefhijklmnopqrtuvwxyz".toCharArray();
+        int i = 0;
+        for (; i < NUM_NONTERMINALS && i < NUM_PRODUCTIONS; i++)
+        {
+        	int key = i;
+        	String rhs = "";
+        	int n = MIN_PRODUCTION_RHS_LENGTH;
+        	if (MAX_PRODUCTION_RHS_LENGTH > MIN_PRODUCTION_RHS_LENGTH)
+        	{
+        		n += randomizer.nextInt(MAX_PRODUCTION_RHS_LENGTH - MIN_PRODUCTION_RHS_LENGTH);
+        	}
+        	for (int j = 0; j < n; j++)
+        	{
+	        	if (NUM_TERMINALS > 2 && randomizer.nextFloat() < TERMINAL_PRODUCTION_PROBABILITY)
+	    		{
+	        		int k = randomizer.nextInt(NUM_TERMINALS - 2);
+	        		rhs += terminals[k];
+	    		} else if (NUM_NONTERMINALS > 0)
+	    		{
+	        		char c = (char)((int)'A' + randomizer.nextInt(NUM_NONTERMINALS));
+	        		rhs += c;
+	    		}
+        	}
+        	String lhs = "" + (char)((int)key + 'A');
+        	ArrayList<String> value = new ArrayList<String>();
+	        value.add(rhs);
+	        grammar.put(lhs, value);
+        }
+        if (NUM_NONTERMINALS > 0)
+        {
+	        for (; i < NUM_PRODUCTIONS; i++)
 	        {
-	        	int key = i;
+	        	int key = randomizer.nextInt(NUM_NONTERMINALS);
 	        	String rhs = "";
 	        	int n = MIN_PRODUCTION_RHS_LENGTH;
 	        	if (MAX_PRODUCTION_RHS_LENGTH > MIN_PRODUCTION_RHS_LENGTH)
@@ -405,122 +471,95 @@ public class WorldGrammar
 		    		}
 	        	}
 	        	String lhs = "" + (char)((int)key + 'A');
-	        	ArrayList<String> value = new ArrayList<String>();
-		        value.add(rhs);
-		        grammar.put(lhs, value);
-	        }
-	        if (NUM_NONTERMINALS > 0)
-	        {
-		        for (; i < NUM_PRODUCTIONS; i++)
-		        {
-		        	int key = randomizer.nextInt(NUM_NONTERMINALS);
-		        	String rhs = "";
-		        	int n = MIN_PRODUCTION_RHS_LENGTH;
-		        	if (MAX_PRODUCTION_RHS_LENGTH > MIN_PRODUCTION_RHS_LENGTH)
-		        	{
-		        		n += randomizer.nextInt(MAX_PRODUCTION_RHS_LENGTH - MIN_PRODUCTION_RHS_LENGTH);
-		        	}
-		        	for (int j = 0; j < n; j++)
-		        	{
-			        	if (NUM_TERMINALS > 2 && randomizer.nextFloat() < TERMINAL_PRODUCTION_PROBABILITY)
-			    		{
-			        		int k = randomizer.nextInt(NUM_TERMINALS - 2);
-			        		rhs += terminals[k];
-			    		} else if (NUM_NONTERMINALS > 0)
-			    		{
-			        		char c = (char)((int)'A' + randomizer.nextInt(NUM_NONTERMINALS));
-			        		rhs += c;
-			    		}
-		        	}
-		        	String lhs = "" + (char)((int)key + 'A');
-		        	List<String> value = grammar.get(lhs);
-		        	boolean found = false;
-		        	for (String s : value)
-		        	{
-		        		if (s.equals(rhs))
-		        		{
-		        			found = true;
-		        			break;
-		        		}
-		        	}
-		        	if (!found)
-		        	{
-			        	value.add(rhs);
-		        	}		        	
-		        } 
-	        }
-	        
-	        // Save?
-	        if (GRAMMAR_FILENAME != null)
-	        {
-	        	try
+	        	List<String> value = grammar.get(lhs);
+	        	boolean found = false;
+	        	for (String s : value)
 	        	{
-		            FileWriter fileWriter = new FileWriter(GRAMMAR_FILENAME);
-		            PrintWriter printWriter = new PrintWriter(fileWriter);
-		            for (Map.Entry<String, List<String>> entry : grammar.entrySet())
-		            {
-		            	String key = entry.getKey();
-		            	for (String value : entry.getValue())
-		            	{
-		            		printWriter.println(key + " ::= " + value);
-		            	}
-		            }
-		            printWriter.close();
-	        	} catch (IOException e)
-	        	{
-	        		System.err.println("Cannot save grammar to file " + GRAMMAR_FILENAME);
-	        		System.exit(1);
+	        		if (s.equals(rhs))
+	        		{
+	        			found = true;
+	        			break;
+	        		}
 	        	}
-	        }
-        } else {
-        	
-        	// Load grammar.
-        	List<String> productions = null;
-        	try
+	        	if (!found)
+	        	{
+		        	value.add(rhs);
+	        	}		        	
+	        } 
+        }
+    }
+    
+    // Save grammar.
+    public void saveGrammar(String filename)
+    {	        
+    	try
+    	{
+            FileWriter fileWriter = new FileWriter(filename);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            for (Map.Entry<String, List<String>> entry : grammar.entrySet())
+            {
+            	String key = entry.getKey();
+            	for (String value : entry.getValue())
+            	{
+            		printWriter.println(key + " ::= " + value);
+            	}
+            }
+            printWriter.close();
+    	} catch (IOException e)
+    	{
+    		System.err.println("Cannot save grammar to file " + filename);
+    		System.exit(1);
+    	}
+    }
+    
+    // Load grammar from file.
+    public void loadGrammar(String filename)
+    {
+    	List<String> productions = null;
+    	try
+    	{
+    		productions = Files.readAllLines(Paths.get(filename), StandardCharsets.UTF_8);
+    	} catch (IOException e)
+    	{
+    		System.err.println("Cannot load grammar from file " + filename);
+    		System.exit(1);
+    	}
+        grammar = new HashMap<String, List<String>>(); 
+        for (String production : productions)
+        {
+        	String[] parts = production.split("::=");
+        	if (parts == null || parts.length < 2)
         	{
-        		productions = Files.readAllLines(Paths.get(GRAMMAR_FILENAME), StandardCharsets.UTF_8);
-        	} catch (IOException e)
-        	{
-        		System.err.println("Cannot load grammar from file " + GRAMMAR_FILENAME);
+        		System.err.println("Invalid line " + production + " in file " + filename);
         		System.exit(1);
         	}
-	        grammar = new HashMap<String, List<String>>(); 
-	        for (String production : productions)
-	        {
-	        	String[] parts = production.split("::=");
-	        	if (parts == null || parts.length < 2)
-	        	{
-	        		System.err.println("Invalid line " + production + " in file " + GRAMMAR_FILENAME);
-	        		System.exit(1);
-	        	}
-	        	String lhs = parts[0].trim();
-	        	String rhs = parts[1].trim();
-	        	if (grammar.containsKey(lhs))
-	        	{
-	        		List<String> value = grammar.get(lhs);
-	        		value.add(rhs);	        		
-	        	} else {
-	        		ArrayList<String> value = new ArrayList<String>();
-	        		value.add(rhs);
-	        		grammar.put(lhs, value);
-	        	}
-	        }
-        }
-        System.out.println("Grammar:");
-        for (Map.Entry<String, List<String>> entry : grammar.entrySet())
-        {
-        	String key = entry.getKey();
-        	for (String value : entry.getValue())
+        	String lhs = parts[0].trim();
+        	String rhs = parts[1].trim();
+        	if (grammar.containsKey(lhs))
         	{
-        		System.out.println(key + " ::= " + value);
+        		List<String> value = grammar.get(lhs);
+        		value.add(rhs);	        		
+        	} else {
+        		ArrayList<String> value = new ArrayList<String>();
+        		value.add(rhs);
+        		grammar.put(lhs, value);
         	}
         }
-        
-        // Expand world path.
-        System.out.println("Initial world path: " + worldPath);
+    }
+    
+    // Produce world path.
+    public void produceWorldPath(String initialWorldPath)
+    {
+    	produceWorldPath(initialWorldPath, false);    	
+    }
+    
+    public void produceWorldPath(String initialWorldPath, boolean verbose)
+    {
+    	worldPath = new String(initialWorldPath);
+        if (verbose) System.out.println("Initial world path: " + worldPath);
         for (int i = 0; i < NUM_NONTERMINAL_EXPANSIONS; i++)
         {
-        	symbols = worldPath.toCharArray();
+        	char[] symbols = worldPath.toCharArray();
         	int c = 0;
         	for (int j = 0; j < symbols.length; j++)
         	{
@@ -550,9 +589,9 @@ public class WorldGrammar
         	n = randomizer.nextInt(productions.size());
         	String rhs = productions.get(n);
         	worldPath = worldPath.substring(0, k) + rhs + worldPath.substring(k + 1);
-        	System.out.println("Expansion #" + i + ", " + lhs + " ::= " + rhs + ", at position " + k + ", world path: " + worldPath);
+        	if (verbose) System.out.println("Expansion #" + i + ", " + lhs + " ::= " + rhs + ", at position " + k + ", world path: " + worldPath);
         }
-        symbols = worldPath.toCharArray();
+        char[] symbols = worldPath.toCharArray();
         worldPath = "";
     	for (int j = 0; j < symbols.length; j++)
     	{
@@ -561,8 +600,6 @@ public class WorldGrammar
     			worldPath += symbols[j];
     		}
     	}
-        System.out.println("Final world path: " + worldPath);
-
-        System.exit(0);
+    	if (verbose) System.out.println("Final world path: " + worldPath);
     }
 }
