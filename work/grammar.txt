@@ -1,0 +1,10 @@
+A ::= BhiD
+B ::= EcDB
+B ::= fB
+B ::= iDB
+C ::= BAa
+C ::= Afi
+C ::= eEDb
+C ::= bBC
+D ::= EaC
+E ::= Bb
