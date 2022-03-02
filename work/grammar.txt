@@ -1,5 +1,5 @@
-A ::= BhiD
-B ::= EcDB
+A::=BhiD
+B ::=EcDB
 B ::= fB
 B ::= iDB
 C ::= BAa

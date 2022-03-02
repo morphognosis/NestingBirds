@@ -70,14 +70,14 @@ public class WorldGrammar
 	   
     public static void main(String[] args) 
     {
-    	boolean gotGen = false;
+    	boolean generate = false;
     	boolean gotGenparm = false;
-    	boolean gotLoad = false;
+    	boolean load = false;
         for (int i = 0; i < args.length; i++)
         {
            if (args[i].equals("-generateGrammar"))
            {
-              gotGen = true;
+              generate = true;
               continue;
            }
            if (args[i].equals("-numTerminals"))
@@ -244,7 +244,7 @@ public class WorldGrammar
                  System.exit(1);
               }
               GRAMMAR_FILENAME = args[i];
-              gotLoad = true;
+              load = true;
               continue;
            }
            if (args[i].equals("-initialPath"))
@@ -316,15 +316,15 @@ public class WorldGrammar
         }
         
         // Validate options.
-        if (gotGen)
+        if (generate)
         {
-        	if (gotLoad)
+        	if (load)
         	{
                 System.err.println(Usage);
                 System.exit(1);
         	}
         } else {
-        	if (!gotLoad)
+        	if (!load)
         	{
 	            System.err.println(Usage);
 	            System.exit(1); 
@@ -378,7 +378,7 @@ public class WorldGrammar
         randomizer = new Random(RANDOM_SEED);
          
         // Generate grammar.
-        if (gotGen)
+        if (generate)
         {
 	        grammar = new HashMap<String, List<String>>();
 	        char[] terminals = "abcdefhijklmnopqrtuvwxyz".toCharArray();
@@ -473,6 +473,7 @@ public class WorldGrammar
 	        	}
 	        }
         } else {
+        	
         	// Load grammar.
         	List<String> productions = null;
         	try
@@ -486,14 +487,14 @@ public class WorldGrammar
 	        grammar = new HashMap<String, List<String>>(); 
 	        for (String production : productions)
 	        {
-	        	String[] parts = production.split(" ");
-	        	if (parts == null || parts.length != 3)
+	        	String[] parts = production.split("::=");
+	        	if (parts == null || parts.length < 2)
 	        	{
 	        		System.err.println("Invalid line " + production + " in file " + GRAMMAR_FILENAME);
 	        		System.exit(1);
 	        	}
-	        	String lhs = parts[0];
-	        	String rhs = parts[2];
+	        	String lhs = parts[0].trim();
+	        	String rhs = parts[1].trim();
 	        	if (grammar.containsKey(lhs))
 	        	{
 	        		List<String> value = grammar.get(lhs);
@@ -549,7 +550,7 @@ public class WorldGrammar
         	n = randomizer.nextInt(productions.size());
         	String rhs = productions.get(n);
         	worldPath = worldPath.substring(0, k) + rhs + worldPath.substring(k + 1);
-        	System.out.println("Expansion=" + i + ", nonterminal=" + lhs + ", index=" + k + ", world path: " + worldPath);
+        	System.out.println("Expansion #" + i + ", " + lhs + " ::= " + rhs + ", at position " + k + ", world path: " + worldPath);
         }
         symbols = worldPath.toCharArray();
         worldPath = "";
