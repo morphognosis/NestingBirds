@@ -31,6 +31,9 @@ public class WorldGrammar
 	
 	// Path generation parameters.
 	public static int NUM_NONTERMINAL_EXPANSIONS = 10;
+	public static int NUM_PATHS = 1;
+	public static String PATH_DATASET_FILENAME = "world_path_dataset.py";
+	public static float PATH_DATASET_TRAIN_FRACTION = 0.75f;
 	
 	// Random numbers.
 	public static int RANDOM_SEED = 4517;
@@ -42,9 +45,9 @@ public class WorldGrammar
 	// Grammar.
 	public Map<String, List<String>> grammar;
 	
-	// World path production string.
+	// World paths production.
 	public static String INITIAL_WORLD_PATH = "sAg";
-	public String worldPath = INITIAL_WORLD_PATH;
+	public List<String> worldPaths;
 
     // Usage.
     public static final String Usage =
@@ -64,7 +67,10 @@ public class WorldGrammar
       "          [-initialPath <string of terminals and nonterminals>\n" +
       "              (starting with unique terminal \"s\"tart and ending with unique terminal \"g\"oal, default=\"" + INITIAL_WORLD_PATH + "\")]\n" +      
       "          [-numNonterminalExpansions <quantity> (default=" + NUM_NONTERMINAL_EXPANSIONS + ")]\n" +
-      "      [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +       
+      "          [-numPaths <quantity> (default=" + NUM_PATHS + ")]\n" +
+      "          [-exportPathDataset [<file name (default=\"" + PATH_DATASET_FILENAME + "\")>]\n" +
+      "              [-datasetTrainFraction <fraction> (default=" + PATH_DATASET_TRAIN_FRACTION + ")]]\n" +
+      "      [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +
       "Exit codes:\n" +
       "  0=success\n" +
       "  1=error";
@@ -75,6 +81,8 @@ public class WorldGrammar
     	boolean generate = false;
     	boolean gotGenparm = false;
     	boolean load = false;
+    	boolean gotExportPathDataset = false;
+    	boolean gotDatasetTrainFraction = false;
         for (int i = 0; i < args.length; i++)
         {
            if (args[i].equals("-generateGrammar"))
@@ -287,6 +295,69 @@ public class WorldGrammar
               }              
               continue;
            }
+           if (args[i].equals("-numPaths"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid numPaths option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+                 NUM_PATHS = Integer.parseInt(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid numPaths option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (NUM_PATHS < 0)
+              {
+                 System.err.println("Invalid numPaths option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }              
+              continue;
+           }           
+           if (args[i].equals("-exportPathDataset"))
+           {
+        	  gotExportPathDataset = true;
+              if (i < args.length - 1 && !args[i + 1].startsWith("-"))
+              {
+            	 i++;
+            	 PATH_DATASET_FILENAME = args[i];
+              }
+              continue;
+           }
+           if (args[i].equals("-pathDatasetTrainFraction"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid pathDatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+            	  PATH_DATASET_TRAIN_FRACTION = Float.parseFloat(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid pathDatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (PATH_DATASET_TRAIN_FRACTION < 0.0f || PATH_DATASET_TRAIN_FRACTION > 1.0f)
+              {
+                 System.err.println("Invalid pathDatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              gotDatasetTrainFraction = true;
+              continue;
+           }           
            if (args[i].equals("-randomSeed"))
            {
               i++;
@@ -375,6 +446,11 @@ public class WorldGrammar
         		}       		
         	}
         }
+        if (!gotExportPathDataset && gotDatasetTrainFraction)
+    	{
+            System.err.println(Usage);
+            System.exit(1);    	
+    	}
         
         // Create world grammar.
         WorldGrammar worldGrammar = new WorldGrammar();
@@ -402,8 +478,14 @@ public class WorldGrammar
         	}
         }
         
-        // Produce world path.
-        worldGrammar.produceWorldPath(INITIAL_WORLD_PATH, true);
+        // Produce world paths.
+        worldGrammar.produceWorldPaths(INITIAL_WORLD_PATH, NUM_PATHS, true);
+        
+        // Export dataset?
+        if (gotExportPathDataset)
+        {
+        	worldGrammar.exportPathDataset(PATH_DATASET_FILENAME, PATH_DATASET_TRAIN_FRACTION);
+        }
         
         System.exit(0);
     }
@@ -547,59 +629,213 @@ public class WorldGrammar
         }
     }
     
-    // Produce world path.
-    public void produceWorldPath(String initialWorldPath)
+    // Produce world paths.
+    public void produceWorldPaths(String initialWorldPath, int numPaths)
     {
-    	produceWorldPath(initialWorldPath, false);    	
+    	produceWorldPaths(initialWorldPath, numPaths, false);    	
     }
     
-    public void produceWorldPath(String initialWorldPath, boolean verbose)
+    public void produceWorldPaths(String initialWorldPath, int numPaths, boolean verbose)
     {
-    	worldPath = new String(initialWorldPath);
-        if (verbose) System.out.println("Initial world path: " + worldPath);
-        for (int i = 0; i < NUM_NONTERMINAL_EXPANSIONS; i++)
-        {
-        	char[] symbols = worldPath.toCharArray();
-        	int c = 0;
-        	for (int j = 0; j < symbols.length; j++)
-        	{
-        		if (symbols[j] >= 'A' && symbols[j] <= 'Z')
-        		{
-        			c++;
-        		}
-        	}
-        	if (c == 0) break;
-        	int n = randomizer.nextInt(c);
-        	c = 0;
-        	int k = 0;
-        	for (int j = 0; j < symbols.length; j++)
-        	{
-        		if (symbols[j] >= 'A' && symbols[j] <= 'Z')
-        		{
-        			if (c == n)
-        			{
-        				k = j;
-        				break;
-        			}
-        			c++;
-        		}
-        	}
-        	String lhs = worldPath.substring(k, k + 1);
-        	List<String> productions = grammar.get(lhs);
-        	n = randomizer.nextInt(productions.size());
-        	String rhs = productions.get(n);
-        	worldPath = worldPath.substring(0, k) + rhs + worldPath.substring(k + 1);
-        	if (verbose) System.out.println("Expansion #" + i + ", " + lhs + " ::= " + rhs + ", at position " + k + ", world path: " + worldPath);
-        }
-        char[] symbols = worldPath.toCharArray();
-        worldPath = "";
-    	for (int j = 0; j < symbols.length; j++)
+    	worldPaths = new ArrayList<String>();
+    	for (int pathnum = 0; pathnum < NUM_PATHS; pathnum++)
     	{
-    		if (symbols[j] >= 'a' && symbols[j] <= 'z')
+    		if (verbose) System.out.println("Path #" + pathnum + ":");
+    		String path = new String(initialWorldPath);
+	        if (verbose) System.out.println("Initial world path: " + path);
+	        for (int i = 0; i < NUM_NONTERMINAL_EXPANSIONS; i++)
+	        {
+	        	char[] symbols = path.toCharArray();
+	        	int c = 0;
+	        	for (int j = 0; j < symbols.length; j++)
+	        	{
+	        		if (symbols[j] >= 'A' && symbols[j] <= 'Z')
+	        		{
+	        			c++;
+	        		}
+	        	}
+	        	if (c == 0) break;
+	        	int n = randomizer.nextInt(c);
+	        	c = 0;
+	        	int k = 0;
+	        	for (int j = 0; j < symbols.length; j++)
+	        	{
+	        		if (symbols[j] >= 'A' && symbols[j] <= 'Z')
+	        		{
+	        			if (c == n)
+	        			{
+	        				k = j;
+	        				break;
+	        			}
+	        			c++;
+	        		}
+	        	}
+	        	String lhs = path.substring(k, k + 1);
+	        	List<String> productions = grammar.get(lhs);
+	        	n = randomizer.nextInt(productions.size());
+	        	String rhs = productions.get(n);
+	        	path = path.substring(0, k) + rhs + path.substring(k + 1);
+	        	if (verbose) System.out.println("Expansion #" + i + ", " + lhs + " ::= " + rhs + ", at position " + k + ", world path: " + path);
+	        }
+	        char[] symbols = path.toCharArray();
+	        path = "";
+	    	for (int j = 0; j < symbols.length; j++)
+	    	{
+	    		if (symbols[j] >= 'a' && symbols[j] <= 'z')
+	    		{
+	    			path += symbols[j];
+	    		}
+	    	}
+	    	worldPaths.add(path);	    	
+	    	if (verbose) System.out.println("Final world path: " + path);
+    	}
+    }
+    
+    // Export path dataset.
+    public void exportPathDataset()
+    {
+    	exportPathDataset(PATH_DATASET_FILENAME, PATH_DATASET_TRAIN_FRACTION);
+    }
+    
+    public void exportPathDataset(String filename, float trainFraction)
+    {
+    	if (worldPaths == null)
+    	{
+    		System.err.println("No world paths");
+    		System.exit(1);
+    	}
+    	try
+    	{
+            FileWriter fileWriter = new FileWriter(filename);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            int numPaths = worldPaths.size();
+            int pathLength = 0;
+            for (String s : worldPaths)
+            {
+            	if (pathLength < s.length())
+            	{
+            		pathLength = s.length();
+            	}
+            }
+            int n = (int)((float)numPaths * PATH_DATASET_TRAIN_FRACTION);
+            printWriter.println("X_train_shape = [ " + n + ", " + pathLength + ", " + 26 + " ]");
+            printWriter.print("X_train_seq = [ ");
+            for (int i = 0; i < n; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray();
+            	for (int j = 0; j < pathLength; j++)
+        		{
+            		if (j < terminals.length) 
+            		{
+            			printWriter.print(oneHot(terminals[j]));
+            		} else {
+            			printWriter.print(oneHot('g'));          			
+            		}
+                	if (j < pathLength - 1)
+                	{
+                		printWriter.print(", ");
+                	}            		
+        		}
+            	if (i < n - 1)
+            	{
+            		printWriter.print(", ");
+            	}
+            }
+            printWriter.println(" ]");
+            printWriter.println("y_train_shape = [ " + n + ", " + pathLength + ", " + 26 + " ]");
+            printWriter.print("y_train_seq = [ ");
+            for (int i = 0; i < n; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray();
+            	for (int j = 1; j < pathLength; j++)
+        		{
+            		if (j < terminals.length) 
+            		{
+            			printWriter.print(oneHot(terminals[j]));
+            		} else {
+            			printWriter.print(oneHot('g'));          			
+            		}
+                	printWriter.print(", ");          		
+        		}
+    			printWriter.print(oneHot('g'));            	
+            	if (i < n - 1)
+            	{
+            		printWriter.print(", ");
+            	}
+            }
+            printWriter.println(" ]");
+            printWriter.println("X_test_shape = [ " + (numPaths - n) + ", " + pathLength + ", " + 26 + " ]");
+            printWriter.print("X_test_seq = [ ");
+            for (int i = n; i < numPaths; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray();
+            	for (int j = 0; j < pathLength; j++)
+        		{
+            		if (j < terminals.length) 
+            		{
+            			printWriter.print(oneHot(terminals[j]));
+            		} else {
+            			printWriter.print(oneHot('g'));          			
+            		}
+                	if (j < pathLength - 1)
+                	{
+                		printWriter.print(", ");
+                	}            		
+        		}
+            	if (i < numPaths - 1)
+            	{
+            		printWriter.print(", ");
+            	}
+            }
+            printWriter.println(" ]");
+            printWriter.println("y_test_shape = [ " + (numPaths - n) + ", " + pathLength + ", " + 26 + " ]");
+            printWriter.print("y_test_seq = [ ");
+            for (int i = n; i < numPaths; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray();
+            	for (int j = 1; j < pathLength; j++)
+        		{
+            		if (j < terminals.length) 
+            		{
+            			printWriter.print(oneHot(terminals[j]));
+            		} else {
+            			printWriter.print(oneHot('g'));          			
+            		}
+                	printWriter.print(", ");          		
+        		}
+    			printWriter.print(oneHot('g'));            	
+            	if (i < numPaths - 1)
+            	{
+            		printWriter.print(", ");
+            	}
+            }
+            printWriter.println(" ]");               
+            printWriter.close();
+    	} catch (IOException e)
+    	{
+    		System.err.println("Cannot write path dataset to file " + filename);
+    		System.exit(1);
+    	}    	
+    }
+    
+    // One-hot coding of terminal.
+    public String oneHot(char terminal)
+    {
+    	int t = terminal - 'a';
+    	String code = "";
+    	for (int i = 0; i < 26; i++)
+    	{
+    		if (i == t)
     		{
-    			worldPath += symbols[j];
+    			code += "1";
+    		} else {
+    			code += "0";
+    		}
+    		if (i < 25)
+    		{
+    			code += ", ";
     		}
     	}
-    	if (verbose) System.out.println("Final world path: " + worldPath);
+    	return code;
     }
 }
