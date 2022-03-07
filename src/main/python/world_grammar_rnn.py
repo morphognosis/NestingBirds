@@ -1,6 +1,6 @@
 # For conditions of distribution and use, see copyright notice in Mandala.java
-#
 # World grammar learning RNN.
+
 from numpy import array, argmax
 from keras.models import Sequential
 from keras.layers import Dense
@@ -11,6 +11,9 @@ import sys, getopt
 # define LSTM configuration
 n_neurons = 128
 n_epochs = 1000
+
+# results file name
+results_filename = 'world_grammar_rnn_results.json'
 
 # get options
 try:
@@ -127,7 +130,7 @@ print("Train correct paths/total = ", trainOK, "/", X_train_shape[0], sep='', en
 if X_train_shape[0] > 0:
     r = (float(trainOK) / float(X_train_shape[0])) * 100.0
     print(" (", str(round(r, 2)), "%)", sep='', end='')
-print(", errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
+print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
 if trainTotal > 0:
     r = (float(trainErrors) / float(trainTotal)) * 100.0
     print(" (", str(round(r, 2)), "%)", sep='', end='')
@@ -136,9 +139,23 @@ print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='
 if X_test_shape[0] > 0:
     r = (float(testOK) / float(X_test_shape[0])) * 100.0
     print(" (", str(round(r, 2)), "%)", sep='', end='')
-print(", errors/total = ", testErrors, "/", testTotal, sep='', end='')
+print(", prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
 if testTotal > 0:
     r = (float(testErrors) / float(testTotal)) * 100.0
     print(" (", str(round(r, 2)), "%)", sep='', end='')
 print('')
+
+# Write results to file.
+with open(results_filename, 'w') as f:
+    f.write('{')
+    f.write('\"train_correct_paths\":\"'+str(trainOK)+'\",')
+    f.write('\"train_total_paths\":\"'+str(X_train_shape[0])+'\",')
+    f.write('\"train_prediction_errors\":\"'+str(trainErrors)+'\",')
+    f.write('\"train_total_predictions\":\"'+str(trainTotal)+'\",')
+    f.write('\"test_correct_paths\":\"'+str(testOK)+'\",')
+    f.write('\"test_total_paths\":\"'+str(X_test_shape[0])+'\",')
+    f.write('\"test_prediction_errors\":\"'+str(testErrors)+'\",')
+    f.write('\"test_total_predictions\":\"'+str(testTotal)+'\",')
+    f.write('}\n')
+
 sys.exit(0)
