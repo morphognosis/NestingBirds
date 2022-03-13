@@ -30,8 +30,8 @@ for opt, arg in opts:
   elif opt in ("-e", "--epochs"):
      n_epochs = int(arg)
 
-# prepare data
-from world_path_dataset import X_train_shape, y_train_shape, X_train_seq, y_train_seq, X_test_shape, y_test_shape, X_test_seq, y_test_seq
+# import dataset
+from world_path_rnn_dataset import X_train_shape, y_train_shape, X_train_seq, y_train_seq, X_test_shape, y_test_shape, X_test_seq, y_test_seq
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
@@ -42,12 +42,13 @@ model = Sequential()
 model.add(LSTM(n_neurons, input_shape=(X_train_shape[1], X_train_shape[2]), return_sequences=True))
 model.add(TimeDistributed(Dense(y_train_shape[2])))
 model.compile(loss='mean_squared_error', optimizer='adam')
-print(model.summary())
+#print(model.summary())
 
 # train
 model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=2)
+#model.save("model.dat")
 
-# evaluate
+# evaluate training
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
@@ -87,6 +88,7 @@ for path in range(X_train_shape[0]):
         print('')
     trainTotal += len(p)
 
+# predict
 seq = array(X_test_seq)
 X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
 seq = array(y_test_seq)
@@ -155,7 +157,7 @@ with open(results_filename, 'w') as f:
     f.write('\"test_correct_paths\":\"'+str(testOK)+'\",')
     f.write('\"test_total_paths\":\"'+str(X_test_shape[0])+'\",')
     f.write('\"test_prediction_errors\":\"'+str(testErrors)+'\",')
-    f.write('\"test_total_predictions\":\"'+str(testTotal)+'\",')
+    f.write('\"test_total_predictions\":\"'+str(testTotal)+'\"')
     f.write('}\n')
 
 sys.exit(0)
