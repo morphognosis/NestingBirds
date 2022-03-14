@@ -36,6 +36,8 @@ public class WorldGrammar
 	// Dataset exports.
 	public static String PATH_RNN_DATASET_FILENAME = "world_path_rnn_dataset.py";
 	public static float PATH_RNN_DATASET_TRAIN_FRACTION = 0.75f;
+	public static String PATH_TCN_DATASET_FILENAME = "world_path_tcn_dataset.py";
+	public static float PATH_TCN_DATASET_TRAIN_FRACTION = 0.75f;	
 	public static String PATH_TDNN_DATASET_FILENAME = "world_path_tdnn_dataset.py";
 	public static int TDNN_FRAME_LENGTH = 4;
 	public static float PATH_TDNN_DATASET_TRAIN_FRACTION = 0.75f;
@@ -75,6 +77,8 @@ public class WorldGrammar
       "          [-numPaths <quantity> (default=" + NUM_PATHS + ")]\n" +
       "          [-exportPathRNNdataset [<file name (default=\"" + PATH_RNN_DATASET_FILENAME + "\")>]\n" +
       "              [-RNNdatasetTrainFraction <fraction> (default=" + PATH_RNN_DATASET_TRAIN_FRACTION + ")]]\n" +
+      "          [-exportPathTCNdataset [<file name (default=\"" + PATH_TCN_DATASET_FILENAME + "\")>]\n" +
+      "              [-TCNdatasetTrainFraction <fraction> (default=" + PATH_TCN_DATASET_TRAIN_FRACTION + ")]]\n" +      
       "          [-exportPathTDNNdataset [<file name (default=\"" + PATH_TDNN_DATASET_FILENAME + "\")>]\n" +
       "              [-TDNNframeLength <length> (default=" + TDNN_FRAME_LENGTH + ")]]\n" +      
       "              [-TDNNdatasetTrainFraction <fraction> (default=" + PATH_TDNN_DATASET_TRAIN_FRACTION + ")]]\n" +      
@@ -91,6 +95,8 @@ public class WorldGrammar
     	boolean load = false;
     	boolean gotExportPathRNNdataset = false;
     	boolean gotRNNdatasetTrainFraction = false;
+    	boolean gotExportPathTCNdataset = false;
+    	boolean gotTCNdatasetTrainFraction = false;    	
     	boolean gotExportPathTDNNdataset = false;
     	boolean gotTDNNframeLength = false;
     	boolean gotTDNNdatasetTrainFraction = false;
@@ -370,6 +376,43 @@ public class WorldGrammar
               gotRNNdatasetTrainFraction = true;
               continue;
            }
+           if (args[i].equals("-exportPathTCNdataset"))
+           {
+        	  gotExportPathTCNdataset = true;
+              if (i < args.length - 1 && !args[i + 1].startsWith("-"))
+              {
+            	 i++;
+            	 PATH_RNN_DATASET_FILENAME = args[i];
+              }
+              continue;
+           }           
+           if (args[i].equals("-pathTCNdatasetTrainFraction"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid pathTCNdatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+            	  PATH_TCN_DATASET_TRAIN_FRACTION = Float.parseFloat(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid pathTCNdatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (PATH_TCN_DATASET_TRAIN_FRACTION < 0.0f || PATH_TCN_DATASET_TRAIN_FRACTION > 1.0f)
+              {
+                 System.err.println("Invalid pathTCNdatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              gotTCNdatasetTrainFraction = true;
+              continue;
+           }           
            if (args[i].equals("-exportPathTDNNdataset"))
            {
         	  gotExportPathTDNNdataset = true;
@@ -527,6 +570,11 @@ public class WorldGrammar
             System.err.println(Usage);
             System.exit(1);    	
     	}
+        if (!gotExportPathTCNdataset && gotTCNdatasetTrainFraction)
+    	{
+            System.err.println(Usage);
+            System.exit(1);    	
+    	}        
         if (!gotExportPathTDNNdataset && (gotTDNNframeLength || gotTDNNdatasetTrainFraction))
     	{
             System.err.println(Usage);
@@ -565,8 +613,12 @@ public class WorldGrammar
         // Export datasets?
         if (gotExportPathRNNdataset)
         {
-        	worldGrammar.exportPathRNNdataset(PATH_RNN_DATASET_FILENAME, PATH_RNN_DATASET_TRAIN_FRACTION);
+        	worldGrammar.exportPathDataset(PATH_RNN_DATASET_FILENAME, PATH_RNN_DATASET_TRAIN_FRACTION);
         }
+        if (gotExportPathTCNdataset)
+        {
+        	worldGrammar.exportPathDataset(PATH_TCN_DATASET_FILENAME, PATH_TCN_DATASET_TRAIN_FRACTION);
+        }        
         if (gotExportPathTDNNdataset)
         {
         	worldGrammar.exportPathTDNNdataset(PATH_TDNN_DATASET_FILENAME, TDNN_FRAME_LENGTH, PATH_TDNN_DATASET_TRAIN_FRACTION);
@@ -779,10 +831,16 @@ public class WorldGrammar
     // Export path RNN dataset.
     public void exportPathRNNdataset()
     {
-    	exportPathRNNdataset(PATH_RNN_DATASET_FILENAME, PATH_RNN_DATASET_TRAIN_FRACTION);
+    	exportPathDataset(PATH_RNN_DATASET_FILENAME, PATH_RNN_DATASET_TRAIN_FRACTION);
     }
     
-    public void exportPathRNNdataset(String filename, float trainFraction)
+    // Export path TCN dataset.
+    public void exportPathTCNdataset()
+    {
+    	exportPathDataset(PATH_TCN_DATASET_FILENAME, PATH_TCN_DATASET_TRAIN_FRACTION);
+    }
+    
+    public void exportPathDataset(String filename, float trainFraction)
     {
     	if (worldPaths == null)
     	{

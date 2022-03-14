@@ -37,6 +37,12 @@ for opt, arg in opts:
 
 # Import dataset.
 from world_path_tdnn_dataset import X_train_shape, y_train_shape, X_train_seq, y_train_seq, X_test_shape, y_test_shape, X_test_seq, y_test_seq
+if X_train_shape[0] == 0:
+    print('Empty train dataset')
+    sys.exit(1)
+if X_test_shape[0] == 0:
+    print('Empty test dataset')
+    sys.exit(1)
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
