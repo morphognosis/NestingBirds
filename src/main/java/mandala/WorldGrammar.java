@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -23,7 +24,7 @@ import org.nd4j.linalg.primitives.Pair;
 public class WorldGrammar
 {
 	// Grammar generation parameters.
-	public static int NUM_NONTERMINALS = 5;
+	public static int NUM_NONTERMINALS = 10;
 	public static int MIN_NONTERMINAL_PRODUCTIONS = 1;		
 	public static int MAX_NONTERMINAL_PRODUCTIONS = 3;	
 	public static int MIN_PRODUCTION_RHS_LENGTH = 2;
@@ -49,12 +50,13 @@ public class WorldGrammar
 	// Verbosity.
 	public static boolean VERBOSE = true;
 	
-	// File.
-	public static String GRAMMAR_FILENAME = null;	
+	// Files.
+	public static String GRAMMAR_FILENAME = null;
+	public static String GRAMMAR_GRAPH_FILENAME = "grammar.dot";
 	
 	// Grammar.
 	public Map<String, List<String>> grammar;
-	
+		
 	// World paths production.
 	public static String INITIAL_WORLD_PATH = "sAg";
 	public List<String> worldPaths;
@@ -72,6 +74,7 @@ public class WorldGrammar
       "          [-maxProductionRightHandSideLength <quantity> (default=" + MAX_PRODUCTION_RHS_LENGTH + ")]\n" +
       "          [-saveGrammar <file name>]\n" +       
       "        | -loadGrammar <file name>\n" +
+      "        [-exportGrammarGraph <file name> (Graphviz dot format, default=" + GRAMMAR_GRAPH_FILENAME + ")]\n" +      
       "      World path expansion:\n" +
       "          [-initialPath <string of terminals and nonterminals>\n" +
       "              (starting with unique terminal \"s\"tart and ending with unique terminal \"g\"oal, default=\"" + INITIAL_WORLD_PATH + "\")]\n" +      
@@ -84,7 +87,7 @@ public class WorldGrammar
       "          [-exportPathTDNNdataset [<file name (default=\"" + PATH_TDNN_DATASET_FILENAME + "\")>]\n" +
       "              [-TDNNframeLength <length> (default=" + TDNN_FRAME_LENGTH + ")]]\n" +      
       "              [-TDNNdatasetTrainFraction <fraction> (default=" + PATH_TDNN_DATASET_TRAIN_FRACTION + ")]]\n" +      
-      "      [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +
+      "      [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +      
       "      [-verbose <\"true\" | \"false\"> (verbosity, default=" + VERBOSE + ")]\n" +      
       "Exit codes:\n" +
       "  0=success\n" +
@@ -96,6 +99,7 @@ public class WorldGrammar
     	boolean generate = false;
     	boolean gotGenparm = false;
     	boolean load = false;
+    	boolean exportGrammarGraph = false;
     	boolean gotExportPathRNNdataset = false;
     	boolean gotRNNdatasetTrainFraction = false;
     	boolean gotExportPathTCNdataset = false;
@@ -278,6 +282,19 @@ public class WorldGrammar
               load = true;
               continue;
            }
+           if (args[i].equals("-exportGrammarGraph"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid exportGrammarGraph option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              GRAMMAR_GRAPH_FILENAME = args[i];
+              exportGrammarGraph = true;
+              continue;
+           }           
            if (args[i].equals("-initialPath"))
            {
               i++;
@@ -626,6 +643,12 @@ public class WorldGrammar
 	        }
         }
         
+        // Export grammar graph?
+        if (exportGrammarGraph)
+        {
+        	worldGrammar.exportGrammarGraph(GRAMMAR_GRAPH_FILENAME);
+        }
+        
         // Produce world paths.
         worldGrammar.produceWorldPaths(INITIAL_WORLD_PATH, NUM_PATHS, VERBOSE);
         
@@ -764,7 +787,12 @@ public class WorldGrammar
     
     // Save grammar.
     public void saveGrammar(String filename)
-    {	        
+    {
+    	if (grammar == null)
+    	{
+    		System.err.println("No grammar");
+    		System.exit(1);
+    	}    	
     	try
     	{
             FileWriter fileWriter = new FileWriter(filename);
@@ -862,6 +890,52 @@ public class WorldGrammar
         }
     }
     
+    // Export grammar graph (Graphviz dot format).
+    public void exportGrammarGraph(String filename)
+    {
+    	if (grammar == null)
+    	{
+    		System.err.println("No grammar");
+    		System.exit(1);
+    	}    	    	
+    	try
+    	{
+            FileWriter fileWriter = new FileWriter(filename);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+        	printWriter.println("digraph grammar {");
+        	HashSet<String> visited = new HashSet<String>();
+        	printNode("A", printWriter, visited);
+        	printWriter.println("}");            
+            printWriter.close();
+    	} catch (IOException e)
+    	{
+    		System.err.println("Cannot save grammar graph to file " + filename);
+    		System.exit(1);
+    	}    	
+    }
+    
+    // Print graph node recursively.
+    void printNode(String name, PrintWriter printWriter, HashSet<String> visited)
+    {
+    	if (!visited.contains(name))
+    	{
+    		visited.add(name);
+	    	for (int i = 0; i < name.length(); i++)
+	    	{
+	    		String lhs = name.substring(i, i + 1);
+		    	List<String> values = grammar.get(lhs);
+		    	if (values != null)
+		    	{
+			        for (String rhs : values)
+			        {
+			        	printWriter.println(name + " -> " + rhs + " [label=\"" + lhs + "\"]");
+			        	printNode(rhs, printWriter, visited);
+			        }
+		    	}
+	    	}
+    	}
+    }
+    
     // Produce world paths.
     public void produceWorldPaths(String initialWorldPath, int numPaths)
     {
@@ -870,6 +944,11 @@ public class WorldGrammar
     
     public void produceWorldPaths(String initialWorldPath, int numPaths, boolean verbose)
     {
+    	if (grammar == null)
+    	{
+    		System.err.println("No grammar");
+    		System.exit(1);
+    	}    	
     	worldPaths = new ArrayList<String>();
     	for (int pathnum = 0; pathnum < NUM_PATHS; pathnum++)
     	{
@@ -907,7 +986,7 @@ public class WorldGrammar
 	        	int n = path.indexOf(lhs);
 	        	path = path.substring(0, n) + rhs + path.substring(n + 1);
 	        	if (verbose) System.out.println("Expansion: " + lhs + " ::= " + rhs + 
-	        			", at position " + n + ", world path: " + path);
+	        			", position " + n + ": " + path);
 	        	symbols = rhs.toCharArray();
 	        	for (int i = 0; i < symbols.length; i++)
 	        	{

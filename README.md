@@ -1,7 +1,7 @@
 # Nesting birds with goal-directed behavior using contextual causation learning.
 
 In this project, the Morphognosis and Mona neural network models are combined into
-a comprehensive model for animal learning and behavior.
+Mandala, a comprehensive model for animal learning and behavior.
 Mona features a contextual causation learning with goal-directed motivation.
 Mophognosis features contextual multilayer perceptron (MLP).
 
@@ -13,3 +13,5 @@ Goal-directed behavior using contextual causation learning
 
 Mona:
 https://github.com/portegys/Mona
+
+Build with Eclipse project and export to bin/nestingbirds.jar to run with scripts in work directory. 
