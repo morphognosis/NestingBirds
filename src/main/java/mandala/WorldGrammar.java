@@ -18,20 +18,20 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
+import org.nd4j.linalg.primitives.Pair;
 
 public class WorldGrammar
 {
 	// Grammar generation parameters.
-	public static int NUM_TERMINALS = 10;
 	public static int NUM_NONTERMINALS = 5;
-	public static int NUM_PRODUCTIONS = 10;
+	public static int MIN_NONTERMINAL_PRODUCTIONS = 1;		
+	public static int MAX_NONTERMINAL_PRODUCTIONS = 3;	
 	public static int MIN_PRODUCTION_RHS_LENGTH = 2;
 	public static int MAX_PRODUCTION_RHS_LENGTH = 5;
-	public static float TERMINAL_PRODUCTION_PROBABILITY = 0.5f;
 	
-	// Path generation parameters.
-	public static int NUM_NONTERMINAL_EXPANSIONS = 10;
-	public static int NUM_PATHS = 1;
+	// Path expansion parameters.
+	public static int NUM_PATHS = 5;
+	public static int NUM_PATH_EXPANSIONS = 3;
 	
 	// Dataset exports.
 	public static String PATH_RNN_DATASET_FILENAME = "world_path_rnn_dataset.py";
@@ -45,6 +45,9 @@ public class WorldGrammar
 	// Random numbers.
 	public static int RANDOM_SEED = 4517;
 	public Random randomizer = null;
+	
+	// Verbosity.
+	public static boolean VERBOSE = true;
 	
 	// File.
 	public static String GRAMMAR_FILENAME = null;	
@@ -62,19 +65,18 @@ public class WorldGrammar
       "    java mandala.WorldGrammar\n" +
       "      Grammar:\n" +    		  
       "        -generateGrammar (terminals: [a-z] s=start/g=goal, nonterminals: [A-Z])\n" +
-      "          [-numTerminals <quantity> (default=" + NUM_TERMINALS + ")]\n" +
       "          [-numNonterminals <quantity> (default=" + NUM_NONTERMINALS + ")]\n" +
+      "          [-minNonterminalProductions <quantity> (default=" + MIN_NONTERMINAL_PRODUCTIONS + ")]\n" +
+      "          [-maxNonterminalProductions <quantity> (default=" + MAX_NONTERMINAL_PRODUCTIONS + ")]\n" +
       "          [-minProductionRightHandSideLength <quantity> (default=" + MIN_PRODUCTION_RHS_LENGTH + ")]\n" +
       "          [-maxProductionRightHandSideLength <quantity> (default=" + MAX_PRODUCTION_RHS_LENGTH + ")]\n" +
-      "          [-terminalProductionProbability <probability>\n" +
-      "              (probability of generating terminal vs. nonterminal in production, default=" + TERMINAL_PRODUCTION_PROBABILITY + ")]\n" +
       "          [-saveGrammar <file name>]\n" +       
       "        | -loadGrammar <file name>\n" +
-      "      World path production:\n" +
+      "      World path expansion:\n" +
       "          [-initialPath <string of terminals and nonterminals>\n" +
       "              (starting with unique terminal \"s\"tart and ending with unique terminal \"g\"oal, default=\"" + INITIAL_WORLD_PATH + "\")]\n" +      
-      "          [-numNonterminalExpansions <quantity> (default=" + NUM_NONTERMINAL_EXPANSIONS + ")]\n" +
       "          [-numPaths <quantity> (default=" + NUM_PATHS + ")]\n" +
+      "          [-numPathExpansions <quantity> (number of breadth first expansions, default=" + NUM_PATH_EXPANSIONS + ")]\n" +      
       "          [-exportPathRNNdataset [<file name (default=\"" + PATH_RNN_DATASET_FILENAME + "\")>]\n" +
       "              [-RNNdatasetTrainFraction <fraction> (default=" + PATH_RNN_DATASET_TRAIN_FRACTION + ")]]\n" +
       "          [-exportPathTCNdataset [<file name (default=\"" + PATH_TCN_DATASET_FILENAME + "\")>]\n" +
@@ -83,6 +85,7 @@ public class WorldGrammar
       "              [-TDNNframeLength <length> (default=" + TDNN_FRAME_LENGTH + ")]]\n" +      
       "              [-TDNNdatasetTrainFraction <fraction> (default=" + PATH_TDNN_DATASET_TRAIN_FRACTION + ")]]\n" +      
       "      [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +
+      "      [-verbose <\"true\" | \"false\"> (verbosity, default=" + VERBOSE + ")]\n" +      
       "Exit codes:\n" +
       "  0=success\n" +
       "  1=error";
@@ -107,34 +110,7 @@ public class WorldGrammar
            {
               generate = true;
               continue;
-           }
-           if (args[i].equals("-numTerminals"))
-           {
-              i++;
-              if (i >= args.length)
-              {
-                 System.err.println("Invalid numTerminals option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              try
-              {
-                 NUM_TERMINALS = Integer.parseInt(args[i]);
-              }
-              catch (NumberFormatException e) {
-                 System.err.println("Invalid numTerminals option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              if (NUM_TERMINALS < 2 || NUM_TERMINALS > 26)
-              {
-                 System.err.println("Minimum of two and maximum of 26 terminals");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              gotGenparm = true;
-              continue;
-           }           
+           }       
            if (args[i].equals("-numNonterminals"))
            {
               i++;
@@ -159,9 +135,63 @@ public class WorldGrammar
                  System.err.println(Usage);
                  System.exit(1);
               }              
-              if (NUM_NONTERMINALS > 26)
+              if (NUM_NONTERMINALS > 24)
               {
-                 System.err.println("Maximum of 26 nonterminals");
+                 System.err.println("Maximum of 24 nonterminals");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              gotGenparm = true;
+              continue;
+           }
+           if (args[i].equals("-minNonterminalProductions"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid minNonterminalProductions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+                 MIN_NONTERMINAL_PRODUCTIONS = Integer.parseInt(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid minNonterminalProductions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (MIN_NONTERMINAL_PRODUCTIONS < 0)
+              {
+                 System.err.println("Invalid minNonterminalProductions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              gotGenparm = true;
+              continue;
+           }
+           if (args[i].equals("-maxNonterminalProductions"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid maxNonterminalProductions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+                 MAX_NONTERMINAL_PRODUCTIONS = Integer.parseInt(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid maxNonterminalProductions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (MAX_NONTERMINAL_PRODUCTIONS < 0)
+              {
+                 System.err.println("Invalid maxNonterminalProductions option");
                  System.err.println(Usage);
                  System.exit(1);
               }
@@ -221,34 +251,7 @@ public class WorldGrammar
               }
               gotGenparm = true;
               continue;
-           } 
-           if (args[i].equals("-terminalProductionProbability"))
-           {
-              i++;
-              if (i >= args.length)
-              {
-                 System.err.println("Invalid terminalProductionProbability option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              try
-              {
-                 TERMINAL_PRODUCTION_PROBABILITY = Float.parseFloat(args[i]);
-              }
-              catch (NumberFormatException e) {
-                 System.err.println("Invalid terminalProductionProbability option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              if (TERMINAL_PRODUCTION_PROBABILITY < 0.0f || TERMINAL_PRODUCTION_PROBABILITY > 1.0f)
-              {
-                 System.err.println("Invalid terminalProductionProbability option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              gotGenparm = true;
-              continue;
-           }
+           }            
            if (args[i].equals("-saveGrammar"))
            {
               i++;
@@ -287,32 +290,6 @@ public class WorldGrammar
               INITIAL_WORLD_PATH = args[i];
               continue;
            }            
-           if (args[i].equals("-numNonterminalExpansions"))
-           {
-              i++;
-              if (i >= args.length)
-              {
-                 System.err.println("Invalid numNonterminalExpansions option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              try
-              {
-                 NUM_NONTERMINAL_EXPANSIONS = Integer.parseInt(args[i]);
-              }
-              catch (NumberFormatException e) {
-                 System.err.println("Invalid numNonterminalExpansions option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              if (NUM_NONTERMINAL_EXPANSIONS < 0)
-              {
-                 System.err.println("Invalid numNonterminalExpansions option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }              
-              continue;
-           }
            if (args[i].equals("-numPaths"))
            {
               i++;
@@ -338,7 +315,33 @@ public class WorldGrammar
                  System.exit(1);
               }              
               continue;
-           }           
+           } 
+           if (args[i].equals("-numPathExpansions"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid numPathExpansions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+                 NUM_PATH_EXPANSIONS = Integer.parseInt(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid numPathExpansions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (NUM_PATH_EXPANSIONS < 0)
+              {
+                 System.err.println("Invalid numPathExpansions option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }              
+              continue;
+           }                     
            if (args[i].equals("-exportPathRNNdataset"))
            {
         	  gotExportPathRNNdataset = true;
@@ -528,19 +531,27 @@ public class WorldGrammar
         		}
         	}
         }
+        if (MIN_NONTERMINAL_PRODUCTIONS > MAX_NONTERMINAL_PRODUCTIONS)
+        {
+            System.err.println(Usage);
+            System.exit(1);           	
+        }              
         if (MIN_PRODUCTION_RHS_LENGTH > MAX_PRODUCTION_RHS_LENGTH)
         {
             System.err.println(Usage);
             System.exit(1);           	
         }      	
         if (INITIAL_WORLD_PATH.length() < 2 || !INITIAL_WORLD_PATH.matches("[a-zA-Z]+") ||
-        		!INITIAL_WORLD_PATH.startsWith("s") || !INITIAL_WORLD_PATH.endsWith("g") ||
+        		INITIAL_WORLD_PATH.contains("S") || INITIAL_WORLD_PATH.contains("G") ||        		
+        		!INITIAL_WORLD_PATH.startsWith("s") || !INITIAL_WORLD_PATH.endsWith("g") ||        		
         		StringUtils.countMatches(INITIAL_WORLD_PATH, "s") > 1 ||
         		StringUtils.countMatches(INITIAL_WORLD_PATH, "g") > 1)
         {
             System.err.println("Invalid initial path");
             System.exit(1);         	
         }
+        String terminals = "abcdefhijklmnopqrtuvwxyz";
+        String nonterminals = "ABCDEFHIJKLMNOPQRTUVWXYZ";        
         char[] symbols = INITIAL_WORLD_PATH.toCharArray();
         for (int i = 0; i < symbols.length; i++)
         {
@@ -548,8 +559,8 @@ public class WorldGrammar
         	{
         		if (symbols[i] != 's' && symbols[i] != 'g')
         		{
-	        		int n = symbols[i] - 'a';
-	        		if (n >= NUM_TERMINALS)
+	        		int n = terminals.indexOf(symbols[i]);
+	        		if (n >= NUM_NONTERMINALS)
 	        		{
 	                    System.err.println("Initial path contains terminal " + symbols[i] + " that cannot be processed");
 	                    System.exit(1);         			
@@ -557,7 +568,7 @@ public class WorldGrammar
         		}
         	} else if (symbols[i] >= 'A' && symbols[i] <= 'Z')
         	{
-        		int n = symbols[i] - 'A';
+        		int n = nonterminals.indexOf(symbols[i]);
         		if (n >= NUM_NONTERMINALS)
         		{
                     System.err.println("Initial path contains nonterminal " + symbols[i] + " that cannot be processed");
@@ -597,18 +608,26 @@ public class WorldGrammar
         } else {
         	worldGrammar.loadGrammar(GRAMMAR_FILENAME);
         }
-        System.out.println("Grammar:");
-        for (Map.Entry<String, List<String>> entry : worldGrammar.grammar.entrySet())
+        if (VERBOSE)
         {
-        	String key = entry.getKey();
-        	for (String value : entry.getValue())
-        	{
-        		System.out.println(key + " ::= " + value);
-        	}
+	        System.out.println("Grammar:");
+	        System.out.println("NUM_NONTERMINALS = " + NUM_NONTERMINALS);
+	        System.out.println("MIN_NONTERMINAL_PRODUCTIONS = " + MIN_NONTERMINAL_PRODUCTIONS);		
+	        System.out.println("MAX_NONTERMINAL_PRODUCTIONS = " + MAX_NONTERMINAL_PRODUCTIONS);	
+	        System.out.println("MIN_PRODUCTION_RHS_LENGTH = " + MIN_PRODUCTION_RHS_LENGTH);
+	        System.out.println("MAX_PRODUCTION_RHS_LENGTH = " + MAX_PRODUCTION_RHS_LENGTH); 
+	        for (Map.Entry<String, List<String>> entry : worldGrammar.grammar.entrySet())
+	        {
+	        	String key = entry.getKey();
+	        	for (String value : entry.getValue())
+	        	{
+	        		System.out.println(key + " ::= " + value);
+	        	}
+	        }
         }
         
         // Produce world paths.
-        worldGrammar.produceWorldPaths(INITIAL_WORLD_PATH, NUM_PATHS, true);
+        worldGrammar.produceWorldPaths(INITIAL_WORLD_PATH, NUM_PATHS, VERBOSE);
         
         // Export datasets?
         if (gotExportPathRNNdataset)
@@ -633,79 +652,114 @@ public class WorldGrammar
         // Initialize random numbers.
         randomizer = new Random(RANDOM_SEED);
     }
-    
+       
     // Generate grammar.
     public void generateGrammar()
-    {         
+    {    	
         grammar = new HashMap<String, List<String>>();
-        char[] terminals = "abcdefhijklmnopqrtuvwxyz".toCharArray();
-        int i = 0;
-        for (; i < NUM_NONTERMINALS && i < NUM_PRODUCTIONS; i++)
+        if (NUM_NONTERMINALS == 0) return;
+    	ArrayList<String> open = new ArrayList<String>();
+    	open.add("A");
+    	ArrayList<String> openNonterminals = new ArrayList<String>();
+        openNonterminals.add("BCDEFHIJKLMNOPQRTUVWXYZ".substring(0, NUM_NONTERMINALS - 1));
+        while (open.size() > 0)
         {
-        	int key = i;
-        	String rhs = "";
-        	int n = MIN_PRODUCTION_RHS_LENGTH;
+        	String lhs = open.get(0);
+        	open.remove(0);
+        	String nonterminals = openNonterminals.get(0);
+        	openNonterminals.remove(0);
+        	if (grammar.containsKey(lhs)) continue;        	
+        	int n = MIN_NONTERMINAL_PRODUCTIONS;
+        	if (MAX_NONTERMINAL_PRODUCTIONS > MIN_NONTERMINAL_PRODUCTIONS)
+        	{
+        		n += randomizer.nextInt(MAX_NONTERMINAL_PRODUCTIONS - MIN_NONTERMINAL_PRODUCTIONS);
+        	}        	
+        	int l = MIN_PRODUCTION_RHS_LENGTH;
         	if (MAX_PRODUCTION_RHS_LENGTH > MIN_PRODUCTION_RHS_LENGTH)
         	{
-        		n += randomizer.nextInt(MAX_PRODUCTION_RHS_LENGTH - MIN_PRODUCTION_RHS_LENGTH);
+        		l += randomizer.nextInt(MAX_PRODUCTION_RHS_LENGTH - MIN_PRODUCTION_RHS_LENGTH);
         	}
-        	for (int j = 0; j < n; j++)
+        	if (l > nonterminals.length()) 
         	{
-	        	if (NUM_TERMINALS > 2 && randomizer.nextFloat() < TERMINAL_PRODUCTION_PROBABILITY)
-	    		{
-	        		int k = randomizer.nextInt(NUM_TERMINALS - 2);
-	        		rhs += terminals[k];
-	    		} else if (NUM_NONTERMINALS > 0)
-	    		{
-	        		char c = (char)((int)'A' + randomizer.nextInt(NUM_NONTERMINALS));
-	        		rhs += c;
-	    		}
+        		l = nonterminals.length();
         	}
-        	String lhs = "" + (char)((int)key + 'A');
-        	ArrayList<String> value = new ArrayList<String>();
-	        value.add(rhs);
-	        grammar.put(lhs, value);
-        }
-        if (NUM_NONTERMINALS > 0)
-        {
-	        for (; i < NUM_PRODUCTIONS; i++)
-	        {
-	        	int key = randomizer.nextInt(NUM_NONTERMINALS);
-	        	String rhs = "";
-	        	int n = MIN_PRODUCTION_RHS_LENGTH;
-	        	if (MAX_PRODUCTION_RHS_LENGTH > MIN_PRODUCTION_RHS_LENGTH)
-	        	{
-	        		n += randomizer.nextInt(MAX_PRODUCTION_RHS_LENGTH - MIN_PRODUCTION_RHS_LENGTH);
-	        	}
-	        	for (int j = 0; j < n; j++)
-	        	{
-		        	if (NUM_TERMINALS > 2 && randomizer.nextFloat() < TERMINAL_PRODUCTION_PROBABILITY)
-		    		{
-		        		int k = randomizer.nextInt(NUM_TERMINALS - 2);
-		        		rhs += terminals[k];
-		    		} else if (NUM_NONTERMINALS > 0)
-		    		{
-		        		char c = (char)((int)'A' + randomizer.nextInt(NUM_NONTERMINALS));
-		        		rhs += c;
-		    		}
-	        	}
-	        	String lhs = "" + (char)((int)key + 'A');
-	        	List<String> value = grammar.get(lhs);
-	        	boolean found = false;
-	        	for (String s : value)
-	        	{
-	        		if (s.equals(rhs))
+        	ArrayList<String> next = new ArrayList<String>();
+        	for (int i = 0; i < n; i++)
+        	{
+        		String rhs = "";
+        		for (int j = 0; j < l; j++)
+        		{
+            		int idx = randomizer.nextInt(nonterminals.length());
+            		String nonterminal = nonterminals.substring(idx, idx + 1);      		
+            		if (!produces(nonterminal, lhs))            		
+            		{
+	            		rhs += nonterminal;
+	            		if (!next.contains(nonterminal))
+	            		{
+	            			next.add(nonterminal);
+	            		}
+            		}
+        		}
+        		if (!rhs.isEmpty())
+        		{
+	        		if (grammar.containsKey(lhs))
 	        		{
-	        			found = true;
-	        			break;
+			        	List<String> value = grammar.get(lhs);
+			        	boolean found = false;
+			        	for (String v : value)
+			        	{
+			        		if (v.equals(rhs))
+			        		{
+			        			found = true;
+			        			break;
+			        		}
+			        	}
+			        	if (!found)
+			        	{
+				        	value.add(rhs);
+			        	}
+	        		} else {
+			        	ArrayList<String> value = new ArrayList<String>();
+				        value.add(rhs);
+				        grammar.put(lhs, value);
 	        		}
-	        	}
-	        	if (!found)
-	        	{
-		        	value.add(rhs);
-	        	}		        	
-	        } 
+        		}
+	        }
+        	for (String nonterminal : next)
+        	{
+        		nonterminals = nonterminals.replace(nonterminal, "");
+        	}
+        	for (String nonterminal : next)
+        	{     	
+				open.add(nonterminal);
+				openNonterminals.add(nonterminals);
+        	}
         }
+    }
+    
+    // Given nonterminal produces another? 
+	public boolean produces(String from, String to)
+    {
+    	if (grammar.containsKey(from))
+    	{  		
+    		List<String> values = grammar.get(from);
+    		for (String rhs : values)
+    		{
+    			if (rhs.indexOf(to) != -1)
+    			{
+    				return true;
+    			} else {
+    				for (int i = 0; i < rhs.length(); i++) 
+    				{
+    					produces(rhs.substring(i, i + 1), to);
+    					{
+    						return true;
+    					}
+    				}
+    			}
+    		}
+    	}
+    	return false;
     }
     
     // Save grammar.
@@ -715,6 +769,11 @@ public class WorldGrammar
     	{
             FileWriter fileWriter = new FileWriter(filename);
             PrintWriter printWriter = new PrintWriter(fileWriter);
+        	printWriter.println("NUM_NONTERMINALS = " + NUM_NONTERMINALS);
+        	printWriter.println("MIN_NONTERMINAL_PRODUCTIONS = " + MIN_NONTERMINAL_PRODUCTIONS);		
+        	printWriter.println("MAX_NONTERMINAL_PRODUCTIONS = " + MAX_NONTERMINAL_PRODUCTIONS);	
+        	printWriter.println("MIN_PRODUCTION_RHS_LENGTH = " + MIN_PRODUCTION_RHS_LENGTH);
+        	printWriter.println("MAX_PRODUCTION_RHS_LENGTH = " + MAX_PRODUCTION_RHS_LENGTH);        	            
             for (Map.Entry<String, List<String>> entry : grammar.entrySet())
             {
             	String key = entry.getKey();
@@ -734,7 +793,7 @@ public class WorldGrammar
     // Load grammar from file.
     public void loadGrammar(String filename)
     {
-    	List<String> productions = null;
+    	List<String> productions = null;    	
     	try
     	{
     		productions = Files.readAllLines(Paths.get(filename), StandardCharsets.UTF_8);
@@ -743,9 +802,46 @@ public class WorldGrammar
     		System.err.println("Cannot load grammar from file " + filename);
     		System.exit(1);
     	}
+    	int i = 0;
+    	String parm = productions.get(i);
+    	if (parm.startsWith("NUM_NONTERMINALS"))
+    	{
+        	String[] parts = parm.split("=");
+        	NUM_NONTERMINALS = Integer.parseInt(parts[1].trim());
+    		i++;
+    	}
+    	parm = productions.get(i);
+    	if (parm.startsWith("MIN_NONTERMINAL_PRODUCTIONS"))
+    	{
+        	String[] parts = parm.split("=");
+        	MIN_NONTERMINAL_PRODUCTIONS = Integer.parseInt(parts[1].trim());
+    		i++;
+    	}
+    	parm = productions.get(i);
+    	if (parm.startsWith("MAX_NONTERMINAL_PRODUCTIONS"))
+    	{
+        	String[] parts = parm.split("=");
+        	MAX_NONTERMINAL_PRODUCTIONS = Integer.parseInt(parts[1].trim());
+    		i++;
+    	}
+    	parm = productions.get(i);
+    	if (parm.startsWith("MIN_PRODUCTION_RHS_LENGTH"))
+    	{
+        	String[] parts = parm.split("=");
+        	MIN_PRODUCTION_RHS_LENGTH = Integer.parseInt(parts[1].trim());
+    		i++;
+    	}
+    	parm = productions.get(i);
+    	if (parm.startsWith("MAX_PRODUCTION_RHS_LENGTH"))
+    	{
+        	String[] parts = parm.split("=");
+        	MAX_PRODUCTION_RHS_LENGTH = Integer.parseInt(parts[1].trim());
+    		i++;
+    	}    	     	
         grammar = new HashMap<String, List<String>>(); 
-        for (String production : productions)
+        for (; i < productions.size(); i++)
         {
+        	String production = productions.get(i);
         	String[] parts = production.split("::=");
         	if (parts == null || parts.length < 2)
         	{
@@ -780,48 +876,53 @@ public class WorldGrammar
     		if (verbose) System.out.println("Path #" + pathnum + ":");
     		String path = new String(initialWorldPath);
 	        if (verbose) System.out.println("Initial world path: " + path);
-	        for (int i = 0; i < NUM_NONTERMINAL_EXPANSIONS; i++)
-	        {
-	        	char[] symbols = path.toCharArray();
-	        	int c = 0;
-	        	for (int j = 0; j < symbols.length; j++)
+	        HashMap<String, String> expandedNonterminals = new HashMap<String, String>();
+	        ArrayList<Pair<String, Integer>> open = new ArrayList<Pair<String, Integer>>();
+        	char[] symbols = path.toCharArray();
+        	for (int i = 0; i < symbols.length; i++)
+        	{
+        		String symbol = String.valueOf(symbols[i]);
+        		if (grammar.containsKey(symbol))
+        		{
+        			open.add(new Pair<String, Integer>(symbol, 0));
+        		}
+        	}
+	        while (open.size() > 0)
+	        {	        			
+	        	Pair<String, Integer> pair = open.get(0);
+	        	String lhs = pair.getFirst();
+	        	int pass = pair.getSecond();
+	        	if (pass >= NUM_PATH_EXPANSIONS) break;
+	        	open.remove(0);
+	        	String rhs = "";
+	        	if (expandedNonterminals.containsKey(lhs))
 	        	{
-	        		if (symbols[j] >= 'A' && symbols[j] <= 'Z')
-	        		{
-	        			c++;
-	        		}
+	        		rhs = expandedNonterminals.get(lhs);
+	        	} else {
+		        	List<String> productions = grammar.get(lhs);
+		        	int n = randomizer.nextInt(productions.size());
+		        	rhs = productions.get(n);
+	        		expandedNonterminals.put(lhs, rhs);		        	
 	        	}
-	        	if (c == 0) break;
-	        	int n = randomizer.nextInt(c);
-	        	c = 0;
-	        	int k = 0;
-	        	for (int j = 0; j < symbols.length; j++)
+	        	int n = path.indexOf(lhs);
+	        	path = path.substring(0, n) + rhs + path.substring(n + 1);
+	        	if (verbose) System.out.println("Expansion: " + lhs + " ::= " + rhs + 
+	        			", at position " + n + ", world path: " + path);
+	        	symbols = rhs.toCharArray();
+	        	for (int i = 0; i < symbols.length; i++)
 	        	{
-	        		if (symbols[j] >= 'A' && symbols[j] <= 'Z')
+	        		String symbol = String.valueOf(symbols[i]);
+	        		if (grammar.containsKey(symbol))
 	        		{
-	        			if (c == n)
-	        			{
-	        				k = j;
-	        				break;
-	        			}
-	        			c++;
+	        			open.add(new Pair<String, Integer>(symbol, pass + 1));
 	        		}
-	        	}
-	        	String lhs = path.substring(k, k + 1);
-	        	List<String> productions = grammar.get(lhs);
-	        	n = randomizer.nextInt(productions.size());
-	        	String rhs = productions.get(n);
-	        	path = path.substring(0, k) + rhs + path.substring(k + 1);
-	        	if (verbose) System.out.println("Expansion #" + i + ", " + lhs + " ::= " + rhs + ", at position " + k + ", world path: " + path);
+	        	}	        	
 	        }
-	        char[] symbols = path.toCharArray();
+	        symbols = path.toCharArray();
 	        path = "";
 	    	for (int j = 0; j < symbols.length; j++)
 	    	{
-	    		if (symbols[j] >= 'a' && symbols[j] <= 'z')
-	    		{
-	    			path += symbols[j];
-	    		}
+	    		path += Character.toLowerCase(symbols[j]);
 	    	}
 	    	worldPaths.add(path);	    	
 	    	if (verbose) System.out.println("Final world path: " + path);
