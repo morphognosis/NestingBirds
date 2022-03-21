@@ -1,41 +1,40 @@
 # Test world grammar RNN performance.
 
 # Parameters:
-minTerminals=5
-incrTerminals=3
-maxTerminals=11
 minNonterminals=1
-incrNonTerminals=3
-maxNonterminals=10
-minProductionRightHandSideLength=5
-maxProductionRightHandSideLength=15
-minTerminalProductionProbability=.2
-incrTerminalProductionProbability=.2
-maxTerminalProductionProbability=.8
-minNonterminalExpansions=5
-incrNonterminalsExpansions=5
-maxNonterminalExpansions=15
+incrNonterminals=3
+maxNonterminals=16
+minNonterminalProductions=1
+incrNonterminalProductions=2
+maxNonterminalProductions=5
+minProductionRightHandSideLength=1
+incrProductionRightHandSideLength=2
+maxProductionRightHandSideLength=5
 minPaths=10
 incrPaths=5
 maxPaths=30
+minPathExpansions=1
+incrPathExpansions=1
+maxPathExpansions=4
 
 randomSeed=$RANDOM
 echo "random seed =" $randomSeed
 
-for terminals in $(seq $minTerminals $incrTerminals $maxTerminals)
+echo numNonterminals,nonTerminalProductions,productionRightHandSideLength,numPaths,numPathExpansions,train_correct_paths,train_total_paths,train_prediction_errors,train_total_predictions,test_correct_paths,test_total_paths,test_prediction_errors,test_total_predictions > world_grammar_rnn_test_results.csv
+
+for numNonterminals in $(seq $minNonterminals $incrNonterminals $maxNonterminals)
 do
-  for nonTerminals in $(seq $minNonterminals $incrNonterminals $maxNonterminals)
+  for nonTerminalProductions in $(seq $minNonterminalProductions $incrNonterminalProductions $maxNonterminalProductions)
   do
-    for terminalProductionProbability in $(seq $minTerminalProductionProbability $incrTerminalProductionProbability $maxTerminalProductionProbability)
+    for productionRightHandSideLength in $(seq $minProductionRightHandSideLength $incrProductionRightHandSideLength $maxProductionRightHandSideLength)
     do
-      for numNonterminalExpansions in $(seq $minNonterminalExpansions $incrNonterminalExpansions $maxNonterminalExpansions)
+      for numPaths in $(seq $minPaths $incrPaths $maxPaths)
       do
-        for numPaths in $(seq $minPaths $incrPaths $maxPaths)
+        for numPathExpansions in $(seq $minPathExpansions $incrPathExpansions $maxPathExpansions)
         do
-             echo terminals = $terminals nonTerminals = $nonTerminals minProductionRightHandSideLength = $minProductionRightHandSideLength maxProductionRightHandSideLength = $maxProductionRightHandSideLength terminalProductionProbability = $terminalProductionProbability numNonterminalExpansions = $numNonterminalExpansions numPaths = $numPaths
-             ./world_grammar.sh -generateGrammar -numTerminals $terminals -numNonterminals $nonTerminals -minProductionRightHandSideLength $minProductionRightHandSideLength -maxProductionRightHandSideLength $maxProductionRightHandSideLength -terminalProductionProbability $terminalProductionProbability -numNonterminalExpansions $numNonterminalExpansions -numPaths $numPaths -exportPathDataset
-             python world_grammar_rnn.py
-             cat world_grammar_rnn_results.json
+           ./world_grammar.sh -generateGrammar -numNonterminals $numNonterminals -minNonterminalProductions $nonTerminalProductions -maxNonterminalProductions $nonTerminalProductions -minProductionRightHandSideLength $productionRightHandSideLength -maxProductionRightHandSideLength $productionRightHandSideLength -numPaths $numPaths -numPathExpansions $numPathExpansions -exportPathRNNdataset
+           python world_grammar_rnn.py
+           echo ${numNonterminals},${nonTerminalProductions},${productionRightHandSideLength},${numPaths},${numPathExpansions},$(cat world_grammar_rnn_results.json | cut -d'"' -f4,8,12,16,20,24,28,32 | sed 's/"/,/g') >> world_grammar_rnn_test_results.csv
         done
       done
     done
