@@ -28,80 +28,36 @@ package mandala;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.Adam;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class Mandala
 {
     // Version.
     public static final String VERSION = "1.0";
 	
-	// Dimensions of cause, code, and effect.
-	public static int cause_dim = 16;
-	public static int code_dim = 8;
-	public static int effect_dim = 16;
-
-	// Hidden layer dimensions.
-	public static int hidden_dim = 128;
-
 	// Causations.
 	public static int num_causations = 2;
 	public static int num_cause_features = 2;
 	public static int num_effect_features = 2;
-
+	
 	// Dataset size.
 	public static int dataset_size = num_causations + 1;
-
+	
+	// Neural network.
+	public static MandalaNN mandalaNN;
+	
     public static void main(String[] args) 
     {
-        // Configure model.
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .seed(12345)
-                .weightInit(WeightInit.XAVIER)
-                .updater(new Adam(1e-3))
-                .list()
-                .layer(0, new DenseLayer.Builder().nIn(cause_dim).nOut(hidden_dim)
-                		.activation(Activation.RELU)
-                        .build())
-                .layer(1, new DenseLayer.Builder().nIn(hidden_dim).nOut(code_dim)
-                		.activation(Activation.RELU)
-                		.l1(10e-5)                		
-                        .build())
-                .layer(2, new DenseLayer.Builder().nIn(code_dim).nOut(hidden_dim)                		
-                		.activation(Activation.RELU)
-                        .build())
-                .layer(3, new DenseLayer.Builder().nIn(hidden_dim).nOut(hidden_dim)                		
-                		.activation(Activation.RELU)
-                        .build())                   
-                .layer(4, new OutputLayer.Builder().nIn(hidden_dim).nOut(effect_dim)
-                        .activation(Activation.SIGMOID)
-                        .lossFunction(LossFunctions.LossFunction.MSE)
-                        .build())
-                .setInputType(InputType.feedForward(cause_dim))                
-                .build();
-
-        // Build network model.
-        MultiLayerNetwork causation_model = new MultiLayerNetwork(conf);
-        causation_model.init();
-        causation_model.setListeners(Collections.singletonList(new ScoreIterationListener(10)));
+    	// Create network.
+    	mandalaNN = new MandalaNN();
 
         // Generate cause and effect pairs.
         // off=0.0, on=1.0
         ArrayList<ArrayList<Integer>> cause_feature_idxs = new ArrayList<ArrayList<Integer>>();
         ArrayList<Integer> shuffle_idxs = new ArrayList<Integer>();
-        for (int i = 0; i < cause_dim; i++)
+        for (int i = 0; i < mandalaNN.CAUSE_DIMENSION; i++)
         {
         	shuffle_idxs.add(i);
         }
@@ -138,7 +94,7 @@ public class Mandala
         }
         ArrayList<ArrayList<Integer>> effect_feature_idxs = new ArrayList<ArrayList<Integer>>();
         shuffle_idxs = new ArrayList<Integer>();
-        for (int i = 0; i < effect_dim; i++)
+        for (int i = 0; i < mandalaNN.EFFECT_DIMENSION; i++)
         {
         	shuffle_idxs.add(i);
         }
@@ -173,16 +129,16 @@ public class Mandala
                 }
             }
         }        
-        INDArray cause_data = Nd4j.create(dataset_size, cause_dim);
-        float[] vals = new float[cause_dim];
-        float[] accum_vals = new float[cause_dim];
-    	for (int j = 0; j < cause_dim; j++)
+        INDArray cause_data = Nd4j.create(dataset_size, mandalaNN.CAUSE_DIMENSION);
+        float[] vals = new float[mandalaNN.CAUSE_DIMENSION];
+        float[] accum_vals = new float[mandalaNN.CAUSE_DIMENSION];
+    	for (int j = 0; j < mandalaNN.CAUSE_DIMENSION; j++)
     	{       
     		accum_vals[j] = 0.0f;
     	}                
         for (int i = 0; i < cause_feature_idxs.size(); i++)
         {
-        	for (int j = 0; j < cause_dim; j++)
+        	for (int j = 0; j < mandalaNN.CAUSE_DIMENSION; j++)
         	{       
         		vals[j] = 0.0f;
         	}            	
@@ -196,16 +152,16 @@ public class Mandala
         	cause_data.putRow(i, Nd4j.createFromArray(vals));
         }
     	cause_data.putRow(dataset_size - 1, Nd4j.createFromArray(accum_vals));        
-        INDArray effect_data = Nd4j.create(dataset_size, effect_dim);        
-        vals = new float[effect_dim];
-        accum_vals = new float[effect_dim];
-    	for (int j = 0; j < effect_dim; j++)
+        INDArray effect_data = Nd4j.create(dataset_size, mandalaNN.EFFECT_DIMENSION);        
+        vals = new float[mandalaNN.EFFECT_DIMENSION];
+        accum_vals = new float[mandalaNN.EFFECT_DIMENSION];
+    	for (int j = 0; j < mandalaNN.EFFECT_DIMENSION; j++)
     	{       
     		accum_vals[j] = 0.0f;
     	}                
         for (int i = 0; i < effect_feature_idxs.size(); i++)
         {
-        	for (int j = 0; j < effect_dim; j++)
+        	for (int j = 0; j < mandalaNN.EFFECT_DIMENSION; j++)
         	{       
         		vals[j] = 0.0f;
         	}            	
@@ -219,21 +175,14 @@ public class Mandala
         	effect_data.putRow(i, Nd4j.createFromArray(vals));
         }
     	effect_data.putRow(dataset_size - 1, Nd4j.createFromArray(accum_vals));
-    	
-        // Train model.    	
-    	DataSet train_data = new DataSet(cause_data, effect_data);
-        int nEpochs = 100;
-        for (int epoch=0; epoch < nEpochs; epoch++)
-        {
-            causation_model.fit(train_data);
-            System.out.println("Epoch " + epoch + " complete");
-        }
+        mandalaNN.trainDataset = new DataSet(cause_data, effect_data);
+        mandalaNN.causePredictionData = cause_data;
+        mandalaNN.effectPredictionData = effect_data;
+        		
+        // Train network.
+    	mandalaNN.train(100);
         
-        // Predict.
-    	System.out.println("causations: " + train_data);        
-        INDArray predictions = causation_model.output(cause_data);   	        
-        System.out.println("predictions: " + predictions);        
-        INDArray codes = causation_model.activateSelectedLayers(0, 1, cause_data);
-        System.out.println("codes: " + codes);
+        // Test.      
+        mandalaNN.test();
     }
 }
