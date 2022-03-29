@@ -32,13 +32,25 @@ public class MandalaNN
 	// Hidden layer dimension.
 	public static int HIDDEN_DIMENSION = 128;
 	
+	// Number of steps per sequence.
+	public static int steps;
+	
     // Network model.
     public MultiLayerNetwork causationModel;
     
-    // Datasets. 
+    // Datasets.   
 	public DataSet trainDataset;
-	public INDArray causePredictionData;
-	public INDArray effectPredictionData;
+	public INDArray trainCauseData;
+	public INDArray trainEffectData;
+	public INDArray testCauseData;	
+	public INDArray testEffectData;
+	
+	// Predictions.
+	INDArray trainPredictions;
+	INDArray testPredictions;
+	
+	// Codes
+	INDArray codes;
 	
 	// Training epochs.
 	public int EPOCHS = 1000;
@@ -48,28 +60,189 @@ public class MandalaNN
       "Usage:\n" +
       "    java mandala.MandalaNN\n" + 
       "      -datasetFilename <file name>\n" +     		  
-      "      [-causeDimension <quantity> (default=" + CAUSE_DIMENSION + ")]\n" +
       "      [-codeDimension <quantity> (default=" + CODE_DIMENSION + ")]\n" +
-      "      [-effectDimension <quantity> (default=" + EFFECT_DIMENSION + ")]\n" +
       "      [-hiddenDimension <quantity> (default=" + HIDDEN_DIMENSION + ")]\n" +                   
       "Exit codes:\n" +
       "  0=success\n" +
       "  1=error";   
 	
 	// Constructors.
-	public MandalaNN(int causeDim, int codeDim, int effectDim, int hiddenDim)
+	public MandalaNN(int codeDim, int hiddenDim)
 	{
-		CAUSE_DIMENSION = causeDim;
 		CODE_DIMENSION = codeDim;
-		EFFECT_DIMENSION = effectDim;
 		HIDDEN_DIMENSION = hiddenDim;
-		build();
 	}
 	
     public MandalaNN() 
     {
-    	build();
     }
+    
+    /* 
+       Import dataset file.
+       File format:
+       X_train_shape=[<number of vectors>,<sequence steps>,<cause vector dimension>]
+       <cause vectors>
+       y_train_shape=[<number of vectors>,<sequence steps>,<effect vector dimension>]
+       <effect vectors>
+       Optionally:
+       X_test_shape=[<number of vectors>,<sequence steps>,<cause vector dimension>]
+       <cause vectors>
+       y_test_shape=[<number of vectors>,<sequence steps>,<effect vector dimension>]
+       <effect vectors>
+     */
+    public void importDataset(String filename)
+    {    	
+    	try (BufferedReader br = new BufferedReader(new FileReader(filename))) 
+    	{
+    	    String line;
+    	    if ((line = br.readLine()) == null)
+    	    {
+	           System.err.println("Cannot read X train shape from file " + filename);
+	           System.exit(1);    	    	
+    	    }
+    	    if (!line.startsWith("X_train_shape"))
+    	    {
+ 	           System.err.println("Invalid X train shape from file " + filename);
+ 	           System.exit(1);     	    	
+    	    }
+    	    String[] parts = line.split(",");
+    	    int numCause = Integer.parseInt(parts[1].trim());
+    	    steps = Integer.parseInt(parts[2].trim());
+    	    CAUSE_DIMENSION = Integer.parseInt(parts[3].trim());
+    	    trainCauseData = Nd4j.create(numCause, CAUSE_DIMENSION);
+    	    float[] values = new float[CAUSE_DIMENSION];
+    	    for (int i = 0; i < numCause; i++)
+    	    {
+        	    if ((line = br.readLine()) == null)
+        	    {
+    	           System.err.println("Cannot read X train data from file " + filename);
+    	           System.exit(1);    	    	
+        	    }
+        	    parts = line.split(",");
+        	    for (int j = 0; j < CAUSE_DIMENSION; j++)
+    	    	{
+        	    	values[j] = Float.parseFloat(parts[j].trim());
+    	    	}
+        	    trainCauseData.putRow(i, Nd4j.createFromArray(values));    	    	
+    	    }
+    	    if ((line = br.readLine()) == null)
+    	    {
+	           System.err.println("Cannot read y train shape from file " + filename);
+	           System.exit(1);    	    	
+    	    }
+    	    if (!line.startsWith("y_train_shape"))
+    	    {
+ 	           System.err.println("Invalid y train shape from file " + filename);
+ 	           System.exit(1);     	    	
+    	    }
+    	    parts = line.split(",");
+    	    int numEffect = Integer.parseInt(parts[1].trim());
+    	    if (numCause != numEffect)
+    	    {
+  	           System.err.println("X and y training data must have equal number of vectors");
+  	           System.exit(1);     	    	
+    	    }
+    	    EFFECT_DIMENSION = Integer.parseInt(parts[3].trim());
+    	    trainEffectData = Nd4j.create(numEffect, EFFECT_DIMENSION);
+    	    values = new float[EFFECT_DIMENSION];
+    	    for (int i = 0; i < numEffect; i++)
+    	    {
+        	    if ((line = br.readLine()) == null)
+        	    {
+    	           System.err.println("Cannot read y train data from file " + filename);
+    	           System.exit(1);    	    	
+        	    } 
+        	    parts = line.split(",");
+        	    for (int j = 0; j < EFFECT_DIMENSION; j++)
+    	    	{
+        	    	values[j] = Float.parseFloat(parts[j].trim());
+    	    	}
+            	trainEffectData.putRow(i, Nd4j.createFromArray(values));    	    	
+    	    }
+    	    
+    	    // Create training dataset.
+        	trainDataset = new DataSet(trainCauseData, trainEffectData);
+        	
+        	// Testing data available?
+    	    if ((line = br.readLine()) == null)
+    	    {
+	           return;    	    	
+    	    }
+    	    if (!line.startsWith("X_test_shape"))
+    	    {
+ 	           System.err.println("Invalid X test shape from file " + filename);
+ 	           System.exit(1);     	    	
+    	    }
+    	    parts = line.split(",");
+    	    numCause = Integer.parseInt(parts[1].trim());
+    	    int n = Integer.parseInt(parts[3].trim());
+    	    if (n != CAUSE_DIMENSION)
+    	    {
+   	           System.err.println("X train and X test vectors must have equal dimensions");
+   	           System.exit(1);     	    	
+    	    }
+    	    testCauseData = Nd4j.create(numCause, CAUSE_DIMENSION);
+    	    values = new float[CAUSE_DIMENSION];
+    	    for (int i = 0; i < numCause; i++)
+    	    {
+        	    if ((line = br.readLine()) == null)
+        	    {
+    	           System.err.println("Cannot read X test data from file " + filename);
+    	           System.exit(1);    	    	
+        	    } 
+        	    parts = line.split(",");
+        	    for (int j = 0; j < CAUSE_DIMENSION; j++)
+    	    	{
+        	    	values[j] = Float.parseFloat(parts[j].trim());
+    	    	}
+            	testCauseData.putRow(i, Nd4j.createFromArray(values));    	    	
+    	    }
+    	    if ((line = br.readLine()) == null)
+    	    {
+	           System.err.println("Cannot read y test shape from file " + filename);
+	           System.exit(1);    	    	
+    	    }
+    	    if (!line.startsWith("y_test_shape"))
+    	    {
+ 	           System.err.println("Invalid y test shape from file " + filename);
+ 	           System.exit(1);     	    	
+    	    }
+    	    parts = line.split(",");
+    	    numEffect = Integer.parseInt(parts[1].trim());
+    	    if (numCause != numEffect)
+    	    {
+  	           System.err.println("X and y testing data must have equal number of vectors");
+  	           System.exit(1);     	    	
+    	    }
+    	    n = Integer.parseInt(parts[3].trim());
+    	    if (n != EFFECT_DIMENSION)
+    	    {
+   	           System.err.println("y train and y test vectors must have equal dimensions");
+   	           System.exit(1);     	    	
+    	    }  	    
+    	    testEffectData = Nd4j.create(numEffect, EFFECT_DIMENSION);
+    	    values = new float[EFFECT_DIMENSION];
+    	    for (int i = 0; i < numEffect; i++)
+    	    {
+        	    if ((line = br.readLine()) == null)
+        	    {
+    	           System.err.println("Cannot read y test data from file " + filename);
+    	           System.exit(1);    	    	
+        	    } 
+        	    parts = line.split(",");
+        	    for (int j = 0; j < EFFECT_DIMENSION; j++)
+    	    	{
+        	    	values[j] = Float.parseFloat(parts[j].trim());
+    	    	}
+            	testEffectData.putRow(i, Nd4j.createFromArray(values));    	    	
+    	    }    	     	    
+        }
+        catch (Exception e)
+        {
+           System.err.println("Cannot import dataset from file " + filename + ": " + e.getMessage());
+           System.exit(1);
+        }
+     }
     
     // Build NN.
     public void build()
@@ -105,175 +278,7 @@ public class MandalaNN
         causationModel.init();
         causationModel.setListeners(Collections.singletonList(new ScoreIterationListener(10)));
     }
-    
-    /* 
-       Import dataset file.
-       File format:
-       X_train_shape=[<number of vectors>,<cause vector dimension>]
-       <cause vectors>
-       y_train_shape=[<number of vectors>,<effect vector dimension>]
-       <effect vectors>
-       Optionally:
-       X_test_shape=[<number of vectors>,<cause vector dimension>]
-       <cause vectors>
-       y_test_shape=[<number of vectors>,<effect vector dimension>]
-       <effect vectors>
-     */
-    public void importDataset(String filename)
-    {    	
-    	try (BufferedReader br = new BufferedReader(new FileReader(filename))) 
-    	{
-    	    String line;
-    	    if ((line = br.readLine()) == null)
-    	    {
-	           System.err.println("Cannot read X train shape from file " + filename);
-	           System.exit(1);    	    	
-    	    }
-    	    if (!line.startsWith("X_train_shape"))
-    	    {
- 	           System.err.println("Invalid X train shape from file " + filename);
- 	           System.exit(1);     	    	
-    	    }
-    	    String[] parts = line.split(",");
-    	    int numCause = Integer.parseInt(parts[1].trim());
-    	    int causeDim = Integer.parseInt(parts[2].trim());
-    	    INDArray causeData = Nd4j.create(numCause, causeDim);
-    	    float[] values = new float[causeDim];
-    	    for (int i = 0; i < numCause; i++)
-    	    {
-        	    if ((line = br.readLine()) == null)
-        	    {
-    	           System.err.println("Cannot read X train data from file " + filename);
-    	           System.exit(1);    	    	
-        	    }
-        	    parts = line.split(",");
-        	    for (int j = 0; j < causeDim; j++)
-    	    	{
-        	    	values[j] = Float.parseFloat(parts[j].trim());
-    	    	}
-            	causeData.putRow(i, Nd4j.createFromArray(values));    	    	
-    	    }
-    	    if ((line = br.readLine()) == null)
-    	    {
-	           System.err.println("Cannot read y train shape from file " + filename);
-	           System.exit(1);    	    	
-    	    }
-    	    if (!line.startsWith("y_train_shape"))
-    	    {
- 	           System.err.println("Invalid y train shape from file " + filename);
- 	           System.exit(1);     	    	
-    	    }
-    	    parts = line.split(",");
-    	    int numEffect = Integer.parseInt(parts[1].trim());
-    	    if (numCause != numEffect)
-    	    {
-  	           System.err.println("X and y training data must have equal number of vectors");
-  	           System.exit(1);     	    	
-    	    }
-    	    int effectDim = Integer.parseInt(parts[2].trim());
-    	    INDArray effectData = Nd4j.create(numEffect, effectDim);
-    	    values = new float[effectDim];
-    	    for (int i = 0; i < numEffect; i++)
-    	    {
-        	    if ((line = br.readLine()) == null)
-        	    {
-    	           System.err.println("Cannot read y train data from file " + filename);
-    	           System.exit(1);    	    	
-        	    } 
-        	    parts = line.split(",");
-        	    for (int j = 0; j < effectDim; j++)
-    	    	{
-        	    	values[j] = Float.parseFloat(parts[j].trim());
-    	    	}
-            	effectData.putRow(i, Nd4j.createFromArray(values));    	    	
-    	    }
-    	    
-    	    // Create training dataset.
-        	trainDataset = new DataSet(causeData, effectData);
-        	
-        	// Testing data?
-    	    if ((line = br.readLine()) == null)
-    	    {
-	           return;    	    	
-    	    }
-    	    if (!line.startsWith("X_test_shape"))
-    	    {
- 	           System.err.println("Invalid X test shape from file " + filename);
- 	           System.exit(1);     	    	
-    	    }
-    	    parts = line.split(",");
-    	    numCause = Integer.parseInt(parts[1].trim());
-    	    int n = Integer.parseInt(parts[2].trim());
-    	    if (n != causeDim)
-    	    {
-   	           System.err.println("X train and X test vectors must have equal dimensions");
-   	           System.exit(1);     	    	
-    	    }
-    	    causeDim = n;
-    	    causePredictionData = Nd4j.create(numCause, causeDim);
-    	    values = new float[causeDim];
-    	    for (int i = 0; i < numCause; i++)
-    	    {
-        	    if ((line = br.readLine()) == null)
-        	    {
-    	           System.err.println("Cannot read X test data from file " + filename);
-    	           System.exit(1);    	    	
-        	    } 
-        	    parts = line.split(",");
-        	    for (int j = 0; j < causeDim; j++)
-    	    	{
-        	    	values[j] = Float.parseFloat(parts[j].trim());
-    	    	}
-            	causePredictionData.putRow(i, Nd4j.createFromArray(values));    	    	
-    	    }
-    	    if ((line = br.readLine()) == null)
-    	    {
-	           System.err.println("Cannot read y test shape from file " + filename);
-	           System.exit(1);    	    	
-    	    }
-    	    if (!line.startsWith("y_test_shape"))
-    	    {
- 	           System.err.println("Invalid y test shape from file " + filename);
- 	           System.exit(1);     	    	
-    	    }
-    	    parts = line.split(",");
-    	    n = Integer.parseInt(parts[1].trim());
-    	    if (n != effectDim)
-    	    {
-   	           System.err.println("y train and y test vectors must have equal dimensions");
-   	           System.exit(1);     	    	
-    	    }    	    
-    	    numEffect = n;
-    	    if (numCause != numEffect)
-    	    {
-  	           System.err.println("X and y testing data must have equal number of vectors");
-  	           System.exit(1);     	    	
-    	    }
-    	    effectDim = Integer.parseInt(parts[2].trim());
-    	    effectPredictionData = Nd4j.create(numEffect, effectDim);
-    	    values = new float[effectDim];
-    	    for (int i = 0; i < numEffect; i++)
-    	    {
-        	    if ((line = br.readLine()) == null)
-        	    {
-    	           System.err.println("Cannot read y test data from file " + filename);
-    	           System.exit(1);    	    	
-        	    } 
-        	    parts = line.split(",");
-        	    for (int j = 0; j < effectDim; j++)
-    	    	{
-        	    	values[j] = Float.parseFloat(parts[j].trim());
-    	    	}
-            	effectPredictionData.putRow(i, Nd4j.createFromArray(values));    	    	
-    	    }    	     	    
-        }
-        catch (Exception e)
-        {
-           System.err.println("Cannot import dataset from file " + filename + ": " + e.getMessage());
-           System.exit(1);
-        }
-     }
-	       
+    	       
     // Train NN.
     public void train()
     {
@@ -294,20 +299,37 @@ public class MandalaNN
         }
     }
     
+    // Validate training.
+    public void validate()
+    {
+    	if (trainCauseData == null)
+    	{
+            System.err.println("No train dataset");
+            System.exit(1);    		
+    	}
+    	System.out.println("Training:");
+    	System.out.println("causes: " + trainCauseData);        
+        trainPredictions = causationModel.output(trainCauseData);   	        
+        System.out.println("predictions: " + trainPredictions);        
+    	System.out.println("effects: " + trainEffectData);
+        codes = causationModel.activateSelectedLayers(0, 1, trainCauseData);
+        System.out.println("codes: " + codes);    	
+    }
+        
     // Test NN.
     public void test()
     {
-    	if (causePredictionData == null)
+    	if (testCauseData == null)
     	{
             System.err.println("No test dataset");
             System.exit(1);    		
     	}
     	System.out.println("Testing:");
-    	System.out.println("causes: " + causePredictionData);        
-        INDArray predictions = causationModel.output(causePredictionData);   	        
-        System.out.println("predictions: " + predictions);        
-    	System.out.println("effects: " + effectPredictionData);
-        INDArray codes = causationModel.activateSelectedLayers(0, 1, causePredictionData);
+    	System.out.println("causes: " + testCauseData);        
+        testPredictions = causationModel.output(testCauseData);   	        
+        System.out.println("predictions: " + testPredictions);        
+    	System.out.println("effects: " + testEffectData);
+        codes = causationModel.activateSelectedLayers(0, 1, testCauseData);
         System.out.println("codes: " + codes);    	
     }
     
@@ -335,32 +357,58 @@ public class MandalaNN
               datasetFilename = args[i];
               continue;
            }       
-           if (args[i].equals("-causeDimension"))
+           if (args[i].equals("-codeDimension"))
            {
               i++;
               if (i >= args.length)
               {
-                 System.err.println("Invalid causeDimension option");
+                 System.err.println("Invalid codeDimension option");
                  System.err.println(Usage);
                  System.exit(1);
               }
               try
               {
-                 CAUSE_DIMENSION = Integer.parseInt(args[i]);
+                 CODE_DIMENSION = Integer.parseInt(args[i]);
               }
               catch (NumberFormatException e) {
-                 System.err.println("Invalid causeDimension option");
+                 System.err.println("Invalid codeDimension option");
                  System.err.println(Usage);
                  System.exit(1);
               }
-              if (CAUSE_DIMENSION < 0)
+              if (CODE_DIMENSION < 0)
               {
-                 System.err.println("Invalid causeDimension option");
+                 System.err.println("Invalid codeDimension option");
                  System.err.println(Usage);
                  System.exit(1);
               }              
               continue;
            }
+           if (args[i].equals("-hiddenDimension"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid hiddenDimension option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+                 HIDDEN_DIMENSION = Integer.parseInt(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid hiddenDimension option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (HIDDEN_DIMENSION < 0)
+              {
+                 System.err.println("Invalid hiddenDimension option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }              
+              continue;
+           }           
            if (args[i].equals("-help"))
            {
                  System.out.println(Usage);
@@ -370,11 +418,6 @@ public class MandalaNN
            System.err.println(Usage);
            System.exit(1);
         }
-        datasetFilename = "world_path_tdnn_dataset.csv"; // flibber
-        CAUSE_DIMENSION = 338;  // flibber
-        CODE_DIMENSION = 128;
-        HIDDEN_DIMENSION = 128;
-        EFFECT_DIMENSION = 26;
         if (datasetFilename == null)
         {
             System.err.println(Usage);
@@ -387,9 +430,15 @@ public class MandalaNN
         // Import dataset file.
         mandalaNN.importDataset(datasetFilename);
         
+        // Build NN.
+        mandalaNN.build();
+        
         // Train.
         mandalaNN.train(1000);
         
+        // Validate.
+        mandalaNN.validate();       
+                
         // Test.
         mandalaNN.test();       
         

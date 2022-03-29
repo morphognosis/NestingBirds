@@ -54,7 +54,7 @@ model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=2)
 #model.save("model.dat")
 
-# evaluate training
+# validate training
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
@@ -139,18 +139,20 @@ if X_train_shape[0] > 0:
     r = (float(trainOK) / float(X_train_shape[0])) * 100.0
     print(" (", str(round(r, 2)), "%)", sep='', end='')
 print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
+trainErrorPct=0
 if trainTotal > 0:
-    r = (float(trainErrors) / float(trainTotal)) * 100.0
-    print(" (", str(round(r, 2)), "%)", sep='', end='')
+    trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
+    print(" (", str(round(trainErrorPct, 2)), "%)", sep='', end='')
 print('')
 print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
 if X_test_shape[0] > 0:
     r = (float(testOK) / float(X_test_shape[0])) * 100.0
     print(" (", str(round(r, 2)), "%)", sep='', end='')
 print(", prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
+testErrorPct=0
 if testTotal > 0:
-    r = (float(testErrors) / float(testTotal)) * 100.0
-    print(" (", str(round(r, 2)), "%)", sep='', end='')
+    testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
+    print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
 print('')
 
 # Write results to file.
@@ -160,10 +162,12 @@ with open(results_filename, 'w') as f:
     f.write('\"train_total_paths\":\"'+str(X_train_shape[0])+'\",')
     f.write('\"train_prediction_errors\":\"'+str(trainErrors)+'\",')
     f.write('\"train_total_predictions\":\"'+str(trainTotal)+'\",')
+    f.write('\"train_error_pct\":\"'+str(round(trainErrorPct, 2))+'\",')
     f.write('\"test_correct_paths\":\"'+str(testOK)+'\",')
     f.write('\"test_total_paths\":\"'+str(X_test_shape[0])+'\",')
     f.write('\"test_prediction_errors\":\"'+str(testErrors)+'\",')
-    f.write('\"test_total_predictions\":\"'+str(testTotal)+'\"')
+    f.write('\"test_total_predictions\":\"'+str(testTotal)+'\",')
+    f.write('\"test_error_pct\":\"'+str(round(testErrorPct, 2))+'\"')
     f.write('}\n')
 
 sys.exit(0)

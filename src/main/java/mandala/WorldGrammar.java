@@ -39,8 +39,8 @@ public class WorldGrammar
 	public static float PATH_RNN_DATASET_TRAIN_FRACTION = 0.75f;
 	public static String PATH_TCN_DATASET_FILENAME = "world_path_tcn_dataset.py";
 	public static float PATH_TCN_DATASET_TRAIN_FRACTION = 0.75f;	
-	public static String PATH_TDNN_DATASET_FILENAME = "world_path_tdnn_dataset.csv";
-	public static float PATH_TDNN_DATASET_TRAIN_FRACTION = 0.75f;
+	public static String PATH_NN_DATASET_FILENAME = "world_path_nn_dataset.csv";
+	public static float PATH_NN_DATASET_TRAIN_FRACTION = 0.75f;
 	
 	// Random numbers.
 	public static int RANDOM_SEED = 4517;
@@ -78,13 +78,13 @@ public class WorldGrammar
       "          [-initialPath <string of terminals and nonterminals>\n" +
       "              (starting with unique terminal \"s\"tart and ending with unique terminal \"g\"oal, default=\"" + INITIAL_WORLD_PATH + "\")]\n" +      
       "          [-numPaths <quantity> (default=" + NUM_PATHS + ")]\n" +
-      "          [-numPathExpansions <quantity> (number of breadth first expansions, default=" + NUM_PATH_EXPANSIONS + ")]\n" +      
+      "          [-numPathExpansions <quantity> (number of breadth first expansions, default=" + NUM_PATH_EXPANSIONS + ")]\n" +
+      "          [-exportPathNNdataset [<file name (default=\"" + PATH_NN_DATASET_FILENAME + "\")>]\n" +     
+      "              [-NNdatasetTrainFraction <fraction> (default=" + PATH_NN_DATASET_TRAIN_FRACTION + ")]]\n" +      
       "          [-exportPathRNNdataset [<file name (default=\"" + PATH_RNN_DATASET_FILENAME + "\")>]\n" +
       "              [-RNNdatasetTrainFraction <fraction> (default=" + PATH_RNN_DATASET_TRAIN_FRACTION + ")]]\n" +
       "          [-exportPathTCNdataset [<file name (default=\"" + PATH_TCN_DATASET_FILENAME + "\")>]\n" +
-      "              [-TCNdatasetTrainFraction <fraction> (default=" + PATH_TCN_DATASET_TRAIN_FRACTION + ")]]\n" +      
-      "          [-exportPathTDNNdataset [<file name (default=\"" + PATH_TDNN_DATASET_FILENAME + "\")>]\n" +     
-      "              [-TDNNdatasetTrainFraction <fraction> (default=" + PATH_TDNN_DATASET_TRAIN_FRACTION + ")]]\n" +      
+      "              [-TCNdatasetTrainFraction <fraction> (default=" + PATH_TCN_DATASET_TRAIN_FRACTION + ")]]\n" +           
       "      [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +      
       "      [-verbose <\"true\" | \"false\"> (verbosity, default=" + VERBOSE + ")]\n" +      
       "Exit codes:\n" +
@@ -98,12 +98,12 @@ public class WorldGrammar
     	boolean gotGenparm = false;
     	boolean load = false;
     	boolean exportGrammarGraph = false;
+    	boolean gotExportPathNNdataset = false;
+    	boolean gotNNdatasetTrainFraction = false;    	
     	boolean gotExportPathRNNdataset = false;
     	boolean gotRNNdatasetTrainFraction = false;
     	boolean gotExportPathTCNdataset = false;
     	boolean gotTCNdatasetTrainFraction = false;    	
-    	boolean gotExportPathTDNNdataset = false;
-    	boolean gotTDNNdatasetTrainFraction = false;
     	
         for (int i = 0; i < args.length; i++)
         {
@@ -355,7 +355,44 @@ public class WorldGrammar
                  System.exit(1);
               }              
               continue;
-           }                     
+           }
+           if (args[i].equals("-exportPathNNdataset"))
+           {
+        	  gotExportPathNNdataset = true;
+              if (i < args.length - 1 && !args[i + 1].startsWith("-"))
+              {
+            	 i++;
+            	 PATH_NN_DATASET_FILENAME = args[i];
+              }
+              continue;
+           }               
+           if (args[i].equals("-pathNNdatasetTrainFraction"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid pathNNdatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+            	  PATH_NN_DATASET_TRAIN_FRACTION = Float.parseFloat(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid pathNNdatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (PATH_NN_DATASET_TRAIN_FRACTION < 0.0f || PATH_NN_DATASET_TRAIN_FRACTION > 1.0f)
+              {
+                 System.err.println("Invalid pathNNdatasetTrainFraction option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              gotNNdatasetTrainFraction = true;
+              continue;
+           }                  
            if (args[i].equals("-exportPathRNNdataset"))
            {
         	  gotExportPathRNNdataset = true;
@@ -429,44 +466,7 @@ public class WorldGrammar
               }
               gotTCNdatasetTrainFraction = true;
               continue;
-           }           
-           if (args[i].equals("-exportPathTDNNdataset"))
-           {
-        	  gotExportPathTDNNdataset = true;
-              if (i < args.length - 1 && !args[i + 1].startsWith("-"))
-              {
-            	 i++;
-            	 PATH_TDNN_DATASET_FILENAME = args[i];
-              }
-              continue;
-           }               
-           if (args[i].equals("-pathTDNNdatasetTrainFraction"))
-           {
-              i++;
-              if (i >= args.length)
-              {
-                 System.err.println("Invalid pathTDNNdatasetTrainFraction option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              try
-              {
-            	  PATH_TDNN_DATASET_TRAIN_FRACTION = Float.parseFloat(args[i]);
-              }
-              catch (NumberFormatException e) {
-                 System.err.println("Invalid pathTDNNdatasetTrainFraction option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              if (PATH_TDNN_DATASET_TRAIN_FRACTION < 0.0f || PATH_TDNN_DATASET_TRAIN_FRACTION > 1.0f)
-              {
-                 System.err.println("Invalid pathTDNNdatasetTrainFraction option");
-                 System.err.println(Usage);
-                 System.exit(1);
-              }
-              gotTDNNdatasetTrainFraction = true;
-              continue;
-           }                      
+           }                          
            if (args[i].equals("-randomSeed"))
            {
               i++;
@@ -498,7 +498,6 @@ public class WorldGrammar
         }
         
         // Validate options.
-        generate = true; NUM_PATHS = 5; gotExportPathTDNNdataset = true; // flibber
         if (generate)
         {
         	if (load)
@@ -574,7 +573,7 @@ public class WorldGrammar
             System.err.println(Usage);
             System.exit(1);    	
     	}        
-        if (!gotExportPathTDNNdataset && gotTDNNdatasetTrainFraction)
+        if (!gotExportPathNNdataset && gotNNdatasetTrainFraction)
     	{
             System.err.println(Usage);
             System.exit(1);    	
@@ -624,6 +623,10 @@ public class WorldGrammar
         worldGrammar.produceWorldPaths(INITIAL_WORLD_PATH, NUM_PATHS, VERBOSE);
         
         // Export datasets?
+        if (gotExportPathNNdataset)
+        {
+        	worldGrammar.exportPathNNdataset(PATH_NN_DATASET_FILENAME, PATH_NN_DATASET_TRAIN_FRACTION);
+        }        
         if (gotExportPathRNNdataset)
         {
         	worldGrammar.exportPathDataset(PATH_RNN_DATASET_FILENAME, PATH_RNN_DATASET_TRAIN_FRACTION);
@@ -632,10 +635,6 @@ public class WorldGrammar
         {
         	worldGrammar.exportPathDataset(PATH_TCN_DATASET_FILENAME, PATH_TCN_DATASET_TRAIN_FRACTION);
         }        
-        if (gotExportPathTDNNdataset)
-        {
-        	worldGrammar.exportPathTDNNdataset(PATH_TDNN_DATASET_FILENAME, PATH_TDNN_DATASET_TRAIN_FRACTION);
-        }
         
         System.exit(0);
     }
@@ -979,6 +978,133 @@ public class WorldGrammar
     	}
     }
     
+    // Export path NN dataset.
+    public void exportPathNNdataset()
+    {
+    	exportPathNNdataset(PATH_NN_DATASET_FILENAME, PATH_NN_DATASET_TRAIN_FRACTION);
+    }
+    
+    public void exportPathNNdataset(String filename, float trainFraction)
+    {
+    	if (worldPaths == null)
+    	{
+    		System.err.println("No world paths");
+    		System.exit(1);
+    	}
+    	try
+    	{
+            FileWriter fileWriter = new FileWriter(filename);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            int numPaths = worldPaths.size();
+            int pathLength = 0;
+            for (String s : worldPaths)
+            {
+            	if (pathLength < s.length())
+            	{
+            		pathLength = s.length();
+            	}
+            }
+            int n = (int)((float)numPaths * trainFraction);
+            printWriter.println("X_train_shape, " + (n * pathLength) + ", " + pathLength + ", " + (26 * pathLength));
+            for (int i = 0; i < n; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray(); 
+        		char[] terminalFrame = new char[pathLength];
+        		for (int j = 0; j < pathLength; j++)
+        		{
+        			terminalFrame[j] = ' ';
+        		}            	
+            	for (int j = 0; j < pathLength; j++)
+            	{
+	            	for (int k = 0; k < terminals.length; k++)
+	        		{
+	            		int idx = k + pathLength - j - 1;
+	            		if (idx < pathLength)
+	            		{
+	            			terminalFrame[idx] = terminals[k]; 
+	            		}
+	        		}
+	            	for (int k = 0; k < pathLength; k++)
+	        		{
+	            		printWriter.print(oneHot(terminalFrame[k]));
+	                	if (k < pathLength - 1)
+	                	{
+	                		printWriter.print(", ");
+	                	}            		
+	        		}
+	            	printWriter.println();    	
+            	}
+            }
+            printWriter.println("y_train_shape, " + (n * pathLength) + ", " + pathLength + ", " + 26);
+            for (int i = 0; i < n; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray();
+            	for (int j = 1; j < pathLength; j++)        		
+            	{            		
+            		if (j < terminals.length) 
+            		{
+            			printWriter.print(oneHot(terminals[j]));          			
+            		} else {
+            			printWriter.print(oneHot('g'));             			
+            		}
+                	printWriter.println();                	
+        		}
+    			printWriter.println(oneHot('g'));
+            }
+            printWriter.println("X_test_shape, " + ((numPaths - n) * pathLength) + ", " + pathLength + ", " + (26 * pathLength));
+            for (int i = n; i < numPaths; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray(); 
+        		char[] terminalFrame = new char[pathLength];
+        		for (int j = 0; j < pathLength; j++)
+        		{
+        			terminalFrame[j] = ' ';
+        		}            	
+            	for (int j = 0; j < pathLength; j++)
+            	{
+	            	for (int k = 0; k < terminals.length; k++)
+	        		{
+	            		int idx = k + pathLength - j - 1;
+	            		if (idx < pathLength)
+	            		{
+	            			terminalFrame[idx] = terminals[k]; 
+	            		}
+	        		}
+	            	for (int k = 0; k < pathLength; k++)
+	        		{
+	            		printWriter.print(oneHot(terminalFrame[k]));
+	                	if (k < pathLength - 1)
+	                	{
+	                		printWriter.print(", ");
+	                	}            		
+	        		}
+	            	printWriter.println();         	
+            	}
+            }
+            printWriter.println("y_test_shape, " + ((numPaths - n) * pathLength) + ", " + pathLength + ", " + 26);
+            for (int i = n; i < numPaths; i++)
+            {
+            	char[] terminals = worldPaths.get(i).toCharArray();
+            	for (int j = 1; j < pathLength; j++)
+        		{
+            		if (j < terminals.length) 
+            		{
+            			printWriter.print(oneHot(terminals[j]));
+            		} else {
+            			printWriter.print(oneHot('g'));          			
+            		}
+                	printWriter.println();          		
+        		}
+    			printWriter.println(oneHot('g'));            	
+            }               
+            printWriter.close();
+    	} catch (IOException e)
+    	{
+    		System.err.println("Cannot write path dataset to file " + filename);
+    		System.exit(1);
+    	}    	
+    }
+        
     // Export path RNN dataset.
     public void exportPathRNNdataset()
     {
@@ -1111,134 +1237,7 @@ public class WorldGrammar
     		System.exit(1);
     	}    	
     }
-    
-    // Export path TDNN dataset.
-    public void exportPathTDNNdataset()
-    {
-    	exportPathTDNNdataset(PATH_TDNN_DATASET_FILENAME, PATH_TDNN_DATASET_TRAIN_FRACTION);
-    }
-    
-    public void exportPathTDNNdataset(String filename, float trainFraction)
-    {
-    	if (worldPaths == null)
-    	{
-    		System.err.println("No world paths");
-    		System.exit(1);
-    	}
-    	try
-    	{
-            FileWriter fileWriter = new FileWriter(filename);
-            PrintWriter printWriter = new PrintWriter(fileWriter);
-            int numPaths = worldPaths.size();
-            int pathLength = 0;
-            for (String s : worldPaths)
-            {
-            	if (pathLength < s.length())
-            	{
-            		pathLength = s.length();
-            	}
-            }
-            int n = (int)((float)numPaths * trainFraction);
-            printWriter.println("X_train_shape, " + (n * pathLength) + ", " + (26 * pathLength));
-            for (int i = 0; i < n; i++)
-            {
-            	char[] terminals = worldPaths.get(i).toCharArray(); 
-        		char[] terminalFrame = new char[pathLength];
-        		for (int j = 0; j < pathLength; j++)
-        		{
-        			terminalFrame[j] = ' ';
-        		}            	
-            	for (int j = 0; j < pathLength; j++)
-            	{
-	            	for (int k = 0; k < terminals.length; k++)
-	        		{
-	            		int idx = k + pathLength - j - 1;
-	            		if (idx < pathLength)
-	            		{
-	            			terminalFrame[idx] = terminals[k]; 
-	            		}
-	        		}
-	            	for (int k = 0; k < pathLength; k++)
-	        		{
-	            		printWriter.print(oneHot(terminalFrame[k]));
-	                	if (k < pathLength - 1)
-	                	{
-	                		printWriter.print(", ");
-	                	}            		
-	        		}
-	            	printWriter.println();    	
-            	}
-            }
-            printWriter.println("y_train_shape, " + (n * pathLength) + ", " + 26);
-            for (int i = 0; i < n; i++)
-            {
-            	char[] terminals = worldPaths.get(i).toCharArray();
-            	for (int j = 1; j < pathLength; j++)        		
-            	{            		
-            		if (j < terminals.length) 
-            		{
-            			printWriter.print(oneHot(terminals[j]));          			
-            		} else {
-            			printWriter.print(oneHot('g'));             			
-            		}
-                	printWriter.println();                	
-        		}
-    			printWriter.println(oneHot('g'));
-            }
-            printWriter.println("X_test_shape, " + ((numPaths - n) * pathLength) + ", " + (26 * pathLength));
-            for (int i = n; i < numPaths; i++)
-            {
-            	char[] terminals = worldPaths.get(i).toCharArray(); 
-        		char[] terminalFrame = new char[pathLength];
-        		for (int j = 0; j < pathLength; j++)
-        		{
-        			terminalFrame[j] = ' ';
-        		}            	
-            	for (int j = 0; j < pathLength; j++)
-            	{
-	            	for (int k = 0; k < terminals.length; k++)
-	        		{
-	            		int idx = k + pathLength - j - 1;
-	            		if (idx < pathLength)
-	            		{
-	            			terminalFrame[idx] = terminals[k]; 
-	            		}
-	        		}
-	            	for (int k = 0; k < pathLength; k++)
-	        		{
-	            		printWriter.print(oneHot(terminalFrame[k]));
-	                	if (k < pathLength - 1)
-	                	{
-	                		printWriter.print(", ");
-	                	}            		
-	        		}
-	            	printWriter.println();         	
-            	}
-            }
-            printWriter.println("y_test_shape, " + ((numPaths - n) * pathLength) + ", " + 26);
-            for (int i = n; i < numPaths; i++)
-            {
-            	char[] terminals = worldPaths.get(i).toCharArray();
-            	for (int j = 1; j < pathLength; j++)
-        		{
-            		if (j < terminals.length) 
-            		{
-            			printWriter.print(oneHot(terminals[j]));
-            		} else {
-            			printWriter.print(oneHot('g'));          			
-            		}
-                	printWriter.println();          		
-        		}
-    			printWriter.println(oneHot('g'));            	
-            }               
-            printWriter.close();
-    	} catch (IOException e)
-    	{
-    		System.err.println("Cannot write path dataset to file " + filename);
-    		System.exit(1);
-    	}    	
-    }
-    
+
     // One-hot coding of terminal.
     public String oneHot(char terminal)
     {

@@ -176,12 +176,17 @@ public class Mandala
         }
     	effect_data.putRow(dataset_size - 1, Nd4j.createFromArray(accum_vals));
         mandalaNN.trainDataset = new DataSet(cause_data, effect_data);
-        mandalaNN.causePredictionData = cause_data;
-        mandalaNN.effectPredictionData = effect_data;
+        mandalaNN.trainCauseData = cause_data;
+        mandalaNN.trainEffectData = effect_data;
+        mandalaNN.testCauseData = cause_data;
+        mandalaNN.testEffectData = effect_data;
+        
+        // Build network.
+        mandalaNN.build();
         		
         // Train network.
     	mandalaNN.train(100);
-        
+       
         // Test.      
         mandalaNN.test();
     }
