@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in Mandala.java
 
-// World grammar neural network.
+// World path neural network.
 
 package mandala;
 
@@ -10,13 +10,13 @@ import java.io.PrintWriter;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-public class WorldGrammarNN
+public class WorldPathNN
 {
 	// Dataset file name.
 	public static String DATASET_FILE_NAME = "world_path_nn_dataset.csv";
 	
 	// Results file name.
-	public static String RESULTS_FILE_NAME = "world_grammar_nn_results.json";
+	public static String RESULTS_FILE_NAME = "world_path_nn_results.json";
 	
 	// Dimensions of code and hidden vectors.
 	public static int CODE_DIMENSION = 128;
@@ -25,7 +25,7 @@ public class WorldGrammarNN
     // Usage.
     public static final String Usage =
       "Usage:\n" +
-      "    java mandala.WorldGrammarNN\n" + 
+      "    java mandala.WorldPathNN\n" +
       "      [-datasetFilename <file name> (default=" + DATASET_FILE_NAME + ")]\n" +     		  
       "      [-codeDimension <quantity> (default=" + CODE_DIMENSION + ")]\n" +
       "      [-hiddenDimension <quantity> (default=" + HIDDEN_DIMENSION + ")]\n" +

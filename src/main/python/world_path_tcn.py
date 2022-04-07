@@ -1,5 +1,5 @@
 # For conditions of distribution and use, see copyright notice in Mandala.java
-# World grammar learning TCN.
+# World path TCN (Temporal Convolutional Network).
 
 import numpy as np
 from numpy import array, argmax
@@ -12,12 +12,12 @@ n_kernels = 2
 n_epochs = 1000
 
 # results file name
-results_filename = 'world_grammar_tcn_results.json'
+results_filename = 'world_path_tcn_results.json'
 
 # Get options.
 import getopt
 import sys
-usage = 'usage: python world_grammar_tcn.py [--kernel_size <kernel size>] [--epochs <number of epochs>]'
+usage = 'usage: python world_path_tcn.py [--kernel_size <kernel size>] [--epochs <number of epochs>]'
 try:
   opts, args = getopt.getopt(sys.argv[1:],"h",["help","kernel_size=","epochs="])
 except getopt.GetoptError:
@@ -74,26 +74,35 @@ X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1], y_train_shape[2])
 predictions = model.predict(X, batch_size=X_train_shape[0], verbose=2)
+letters=False
+if y_train_shape[2] == 26:
+    letters=True
 terminals = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-print('Train results:')
+if letters:
+    print('Train results:')
 trainOK = 0
 trainErrors = 0
 trainTotal = 0
 for path in range(X_train_shape[0]):
-    print('Path =', path, 'predictions: ', end='')
+    if letters:
+        print('Path =', path, 'predictions: ', end='')
     p = []
     for step in range(X_train_shape[1]):
         r = argmax(predictions[path][step])
         p.append(r)
-        print(terminals[r], ' ', sep='', end='')
-    print('targets: ', end='')
+        if letters:
+            print(terminals[r], ' ', sep='', end='')
+    if letters:
+        print('targets: ', end='')
     t = []
     for step in range(X_train_shape[1]):
         r = argmax(y[path][step])
         t.append(r)
-        print(terminals[r], ' ', sep='', end='')
+        if letters:
+            print(terminals[r], ' ', sep='', end='')
     if p == t:
-        print('OK')
+        if letters:
+            print('OK')
         trainOK += 1
     else:
         errs = 0
@@ -101,11 +110,12 @@ for path in range(X_train_shape[0]):
             if p[i] != t[i]:
                 errs += 1
         trainErrors += errs
-        print('Errors = ', errs, '/', len(p), sep='', end='')
-        if len(p) > 0:
-            r = (float(errs) / float(len(p))) * 100.0
-            print(" (", str(round(r, 2)), "%)", sep='', end='')
-        print('')
+        if letters:
+            print('Errors = ', errs, '/', len(p), sep='', end='')
+            if len(p) > 0:
+                r = (float(errs) / float(len(p))) * 100.0
+                print(" (", str(round(r, 2)), "%)", sep='', end='')
+            print('')
     trainTotal += len(p)
 
 # predict
@@ -114,25 +124,34 @@ X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
 seq = array(y_test_seq)
 y = seq.reshape(y_test_shape[0], y_test_shape[1], y_test_shape[2])
 predictions = model.predict(X, batch_size=X_test_shape[0], verbose=2)
-print('Test results:')
+letters=False
+if y_test_shape[2] == 26:
+    letters=True
+if letters:
+    print('Test results:')
 testOK = 0
 testErrors = 0
 testTotal = 0
 for path in range(X_test_shape[0]):
-    print('Path =', path, 'predictions: ', end='')
+    if letters:
+        print('Path =', path, 'predictions: ', end='')
     p = []
     for step in range(X_test_shape[1]):
         r = argmax(predictions[path][step])
         p.append(r)
-        print(terminals[r], ' ', sep='', end='')
-    print('targets: ', end='')
+        if letters:
+            print(terminals[r], ' ', sep='', end='')
+    if letters:
+        print('targets: ', end='')
     t = []
     for step in range(X_test_shape[1]):
         r = argmax(y[path][step])
         t.append(r)
-        print(terminals[r], ' ', sep='', end='')
+        if letters:
+            print(terminals[r], ' ', sep='', end='')
     if p == t:
-        print('OK')
+        if letters:
+            print('OK')
         testOK += 1
     else:
         errs = 0
@@ -140,11 +159,12 @@ for path in range(X_test_shape[0]):
             if p[i] != t[i]:
                 errs += 1
         testErrors += errs
-        print('Errors = ', errs, '/', len(p), sep='', end='')
-        if len(p) > 0:
-            r = (float(errs) / float(len(p))) * 100.0
-            print(" (", str(round(r, 2)), "%)", sep='', end='')
-        print('')
+        if letters:
+            print('Errors = ', errs, '/', len(p), sep='', end='')
+            if len(p) > 0:
+                r = (float(errs) / float(len(p))) * 100.0
+                print(" (", str(round(r, 2)), "%)", sep='', end='')
+            print('')
     testTotal += len(p)
 
 # Print results.
