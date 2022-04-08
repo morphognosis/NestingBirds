@@ -1,7 +1,7 @@
 // For conditions of distribution and use, see copyright notice in Mandala.java
 
 // World composer.
-// Compose modular paths from starting to ending states.
+// Compose paths by inserting, substituting, and deleting modular segments on a base path.
 
 package mandala;
 
@@ -352,11 +352,16 @@ public class WorldComposer
     public void createPaths()
     {
     	// Training paths.
+    	System.out.println("Training paths:");
+    	System.out.print("Base path = ");
         basePath = new int[BASE_PATH_LENGTH];
         for (int i = 0; i < BASE_PATH_LENGTH; i++)
         {
         	basePath[i] = randomizer.nextInt(pathEncodedValueSize);
+        	System.out.print("0:" + basePath[i] + " ");
         }
+        System.out.println();
+    	System.out.println("Modular paths: ");        
         modularPaths = new ArrayList<int[]>();
         for (int i = 0; i < NUM_MODULAR_PATHS; i++)
         {
@@ -371,14 +376,18 @@ public class WorldComposer
             for (int j = 0; j < path.length; j++)
             {
             	path[j] = randomizer.nextInt(pathEncodedValueSize);
+            	System.out.print((i + 1) + ":" + path[j] + " ");
             }
-        	modularPaths.add(path);            
+        	System.out.println();            
+        	modularPaths.add(path); 
         }
         
         // Testing paths.
+        System.out.println("Test paths:");
         testPaths = new ArrayList<int[]>();
         testPathTypes = new ArrayList<int[]>();        
         if (NUM_MODULAR_PATHS == 0) return;
+        System.out.println("Insertion:");
         for (int i = 0; i < NUM_INSERTION_TEST_PATHS; i++)
         {
         	int m = randomizer.nextInt(NUM_MODULAR_PATHS);        	
@@ -391,20 +400,25 @@ public class WorldComposer
             {
             	path[j] = basePath[j];
             	types[j] = 0;
+            	System.out.print(types[j] + ":" + path[j] + " ");
             }
             for (int k = 0; k < mpath.length; k++, j++)
             {
             	path[j] = mpath[k];
             	types[j] = m + 1;
+            	System.out.print(types[j] + ":" + path[j] + " ");            	
             }
             for (int k = n; k < BASE_PATH_LENGTH; k++, j++)
             {
             	path[j] = basePath[k];
             	types[j] = 0;
-            }            
+            	System.out.print(types[j] + ":" + path[j] + " ");            	
+            } 
+            System.out.println();
         	testPaths.add(path); 
         	testPathTypes.add(types);         	
         }
+        System.out.println("Substitution:");        
         for (int i = 0; i < NUM_SUBSTITUTION_TEST_PATHS; i++)
         {
         	int m = randomizer.nextInt(NUM_MODULAR_PATHS);         	
@@ -417,20 +431,25 @@ public class WorldComposer
             {
             	path[j] = basePath[j];
             	types[j] = 0;
+            	System.out.print(types[j] + ":" + path[j] + " ");            	
             }
             for (int k = 0; k < mpath.length && j < BASE_PATH_LENGTH; k++, j++)
             {
             	path[j] = mpath[k];
-            	types[j] = m + 1;            	
+            	types[j] = m + 1; 
+            	System.out.print(types[j] + ":" + path[j] + " ");            	
             }
             for (int k = mpath.length + n; k < BASE_PATH_LENGTH; k++, j++)
             {
             	path[j] = basePath[k];
             	types[j] = 0;
-            }            
+            	System.out.print(types[j] + ":" + path[j] + " ");            	
+            }
+        	System.out.println();            
         	testPaths.add(path); 
         	testPathTypes.add(types);        	
         }
+        System.out.println("Deletion:");        
         for (int i = 0; i < NUM_DELETION_TEST_PATHS; i++)
         {
         	int[] mpath = modularPaths.get(randomizer.nextInt(NUM_MODULAR_PATHS));
@@ -449,12 +468,15 @@ public class WorldComposer
             {
             	path[j] = basePath[j];
             	types[j] = 0;
+            	System.out.print(types[j] + ":" + path[j] + " ");            	
             }
             for (int k = mpath.length + n; k < BASE_PATH_LENGTH; k++, j++)
             {
             	path[j] = basePath[k];
             	types[j] = 0;
-            }            
+            	System.out.print(types[j] + ":" + path[j] + " ");            	
+            }
+            System.out.println();
         	testPaths.add(path);
         	testPathTypes.add(types);
         }               
