@@ -19,9 +19,9 @@ public class WorldPathNN
 	public static String RESULTS_FILE_NAME = "world_path_nn_results.json";
 	
 	// Dimensions of code and hidden vectors.
-	public static int CODE_DIMENSION = 128;
-	public static int HIDDEN_DIMENSION = 128;
-		
+	public static int CODE_DIMENSION = 384;
+	public static int HIDDEN_DIMENSION = 384;
+	
     // Usage.
     public static final String Usage =
       "Usage:\n" +
@@ -134,38 +134,17 @@ public class WorldPathNN
         // Results.
         INDArray effects = mandalaNN.trainEffectData;
         INDArray predictions = mandalaNN.trainPredictions;
-        int pathLength = MandalaNN.steps;
-        int trainPaths = predictions.rows() / pathLength;
-        int trainOK = 0;
         int trainErrors = 0;
         int trainTotal = 0;
-        for (int i = 0; i < trainPaths; i++)
+        for (int i = 0, j = predictions.rows(); i < j; i++)
         { 
-        	boolean pathOK = true;
-        	for (int j = 0; j < pathLength; j++)
-        	{
-        		int n = (i * pathLength) + j;
-        		if (maxValIdx(effects.getRow(n)) != maxValIdx(predictions.getRow(n)))
-				{
-        			pathOK = false;
-        			trainErrors++;			
-				}
-        		trainTotal++;     		
-        	}
-        	if (pathOK)
-        	{
-        		trainOK++;
-        	}
+    		if (maxValIdx(effects.getRow(i)) != maxValIdx(predictions.getRow(i)))
+			{
+    			trainErrors++;			
+			}
+    		trainTotal++;     		
         }
-        System.out.print("Train correct paths/total = " + trainOK + "/" + trainPaths);
-        if (trainPaths > 0)
-        {
-            float r = ((float)trainOK / (float)trainPaths) * 100.0f;
-            System.out.print(" (");
-            System.out.printf("%.2f", r);
-            System.out.print("%)");            
-        }
-        System.out.print(", prediction errors/total = " + trainErrors + "/" + trainTotal);
+        System.out.print("Train prediction errors/total = " + trainErrors + "/" + trainTotal);
         float trainErrorPct = 0.0f;
         if (trainTotal > 0)
         {
@@ -177,38 +156,17 @@ public class WorldPathNN
         System.out.println();
         effects = mandalaNN.testEffectData;
         predictions = mandalaNN.testPredictions;
-        pathLength = MandalaNN.steps;
-        int testPaths = predictions.rows() / pathLength;
-        int testOK = 0;
         int testErrors = 0;
         int testTotal = 0;
-        for (int i = 0; i < testPaths; i++)
+        for (int i = 0, j = predictions.rows(); i < j; i++)
         { 
-        	boolean pathOK = true;
-        	for (int j = 0; j < pathLength; j++)
-        	{
-        		int n = (i * pathLength) + j;
-        		if (maxValIdx(effects.getRow(n)) != maxValIdx(predictions.getRow(n)))
-				{
-        			pathOK = false;
-        			testErrors++;			
-				}
-        		testTotal++;     		
-        	}
-        	if (pathOK)
-        	{
-        		testOK++;
-        	}
+    		if (maxValIdx(effects.getRow(i)) != maxValIdx(predictions.getRow(i)))
+			{
+    			testErrors++;			
+			}
+    		testTotal++;     		
         }
-        System.out.print("Test correct paths/total = " + testOK + "/" + testPaths);
-        if (testPaths > 0)
-        {
-            float r = ((float)testOK / (float)testPaths) * 100.0f;
-            System.out.print(" (");
-            System.out.printf("%.2f", r);
-            System.out.print("%)");            
-        }
-        System.out.print(", prediction errors/total = " + testErrors + "/" + testTotal);
+        System.out.print("Test prediction errors/total = " + testErrors + "/" + testTotal);
         float testErrorPct = 0.0f;
         if (testTotal > 0)
         {
@@ -222,14 +180,10 @@ public class WorldPathNN
 		{
 	        FileWriter fileWriter = new FileWriter(RESULTS_FILE_NAME);
 	        PrintWriter printWriter = new PrintWriter(fileWriter);
-	        printWriter.write("{");
-	        printWriter.write("\"train_correct_paths\":\"" + trainOK + "\",");	        
-	        printWriter.write("\"train_total_paths\":\"" + trainPaths + "\",");	        	        
+	        printWriter.write("{");        	        
 	        printWriter.write("\"train_prediction_errors\":\"" + trainErrors + "\",");	        
 	        printWriter.write("\"train_total_predictions\":\"" + trainTotal + "\",");	  	        
-	        printWriter.write("\"train_error_pct\":\"" + trainErrorPct + "\",");	        
-	        printWriter.write("\"test_correct_paths\":\"" + testOK + "\",");	        
-	        printWriter.write("\"test_total_paths\":\"" + testPaths + "\",");	        	        
+	        printWriter.write("\"train_error_pct\":\"" + trainErrorPct + "\",");	        	        	        
 	        printWriter.write("\"test_prediction_errors\":\"" + testErrors + "\",");	        
 	        printWriter.write("\"test_total_predictions\":\"" + testTotal + "\",");	  	        
 	        printWriter.write("\"test_error_pct\":\"" + testErrorPct + "\"");	        	        

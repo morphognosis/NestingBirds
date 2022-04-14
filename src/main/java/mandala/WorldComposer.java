@@ -40,6 +40,13 @@ public class WorldComposer
 	public List<int[]> testPaths;
 	public List<int[]> testPathTypes;
 	
+	// Event dilation.
+	public static final int NO_DILATION = 0;
+	public static final int OVERLAY_DILATION = 1;
+	public static final int ACCUMULATE_DILATION = 0;
+	public static final int NORMALIZE_DILATION = 0;
+	public static int DILATE_EVENTS = NO_DILATION;
+	
 	// Random numbers.
 	public static int RANDOM_SEED = 4517;
 	public Random randomizer = null;
@@ -54,7 +61,8 @@ public class WorldComposer
       "        [-numModularPaths <quantity> (default=" + NUM_MODULAR_PATHS + ")]\n" +
       "        [-numInsertionTestPaths <quantity> (default=" + NUM_INSERTION_TEST_PATHS + ")]\n" + 
       "        [-numSubstitutionTestPaths <quantity> (default=" + NUM_SUBSTITUTION_TEST_PATHS + ")]\n" + 
-      "        [-numDeletionTestPaths <quantity> (default=" + NUM_DELETION_TEST_PATHS + ")]\n" +       
+      "        [-numDeletionTestPaths <quantity> (default=" + NUM_DELETION_TEST_PATHS + ")]\n" +
+      "        [-dilateEvents <\"overlay\" | \"accumulate\" | \"normalize\"> (dilate relatively recent events into the past)]\n" +     
       "        [-exportPathNNdatasetFilename (default=\"" + PATH_NN_DATASET_FILENAME + "\")>]\n" +     
       "        [-exportPathRNNdatasetFilename (default=\"" + PATH_RNN_DATASET_FILENAME + "\")>]\n" +
       "        [-exportPathTCNdatasetFilename (default=\"" + PATH_TCN_DATASET_FILENAME + "\")>]\n" +
@@ -249,7 +257,31 @@ public class WorldComposer
                  System.exit(1);
               }
               continue;
-           }                        
+           } 
+           if (args[i].equals("-dilateEvents"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid dilateEvents option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (args[i].equals("overlay"))
+              {
+            	  DILATE_EVENTS = OVERLAY_DILATION;
+              } else if (args[i].equals("accumulate"))
+              {
+            	  DILATE_EVENTS = ACCUMULATE_DILATION;
+              } else if (args[i].equals("normalize"))
+              {
+            	  DILATE_EVENTS = NORMALIZE_DILATION;            	  
+              } else {
+                  System.err.println("Invalid dilateEvents option");
+                  System.err.println(Usage);
+                  System.exit(1);            	  
+              }
+           }
            if (args[i].equals("-exportPathNNdatasetFilename"))
            {
               if (i < args.length - 1 && !args[i + 1].startsWith("-"))
@@ -500,12 +532,14 @@ public class WorldComposer
             FileWriter fileWriter = new FileWriter(filename);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             int pathLength = basePath.length;
+            int numPaths = basePath.length - 1;
             for (int[] p : modularPaths)
             {
             	if (pathLength < p.length)
             	{
             		pathLength = p.length;
             	}
+            	numPaths += p.length - 1;
             }            
             for (int[] p : testPaths)
             {
@@ -514,24 +548,33 @@ public class WorldComposer
             		pathLength = p.length;
             	}
             }
-            int n = modularPaths.size() + 1;            
-            printWriter.println("X_train_shape, " + (n * pathLength) + ", " + pathLength + ", " + 
-            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
+        	if (DILATE_EVENTS == NO_DILATION)
+        	{            
+	            printWriter.println("X_train_shape, " + numPaths + ", " + pathLength + ", " + 
+	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
+        	} else {
+	            printWriter.println("X_train_shape, " + numPaths + ", " + pathLength + ", " + 
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * pathLength));        		
+        	}
+    		System.out.println("X_train:");
+    		int n = modularPaths.size() + 1;
             for (int i = 0; i < n; i++)
-            {
+            {           	
             	int[] values;
             	if (i == 0)
             	{
-            		values = basePath;            		
+            		values = basePath;
+                	System.out.println("base path");            		
             	} else {
-            		values = modularPaths.get(i - 1); 
+            		values = modularPaths.get(i - 1);
+                	System.out.println("modular path " + (i - 1));            		
             	}
         		int[] valueFrame = new int[pathLength];
         		for (int j = 0; j < pathLength; j++)
         		{
         			valueFrame[j] = -1;
-        		}            	
-            	for (int j = 0; j < pathLength; j++)
+        		}
+            	for (int j = 0, j2 = values.length - 1; j < j2; j++)
             	{
 	            	for (int k = 0; k < values.length; k++)
 	        		{
@@ -541,45 +584,145 @@ public class WorldComposer
 	            			valueFrame[idx] = values[k]; 
 	            		}
 	        		}
-	            	for (int k = 0; k < pathLength; k++)
-	        		{
-	            		printWriter.print(oneHot(i, valueFrame[k]));
-	                	if (k < pathLength - 1)
-	                	{
-	                		printWriter.print(", ");
-	                	}            		
-	        		}
-	            	printWriter.println();    	
+	            	if (DILATE_EVENTS == NO_DILATION)
+	            	{	            		
+		            	for (int k = 0; k < pathLength; k++)
+		        		{
+		            		if (valueFrame[k] != -1)
+		            		{
+			            		printWriter.print(oneHot(i, valueFrame[k]));
+			            		System.out.print(i + ":" + valueFrame[k]);
+		            		} else {
+			            		printWriter.print(oneHot(-1, valueFrame[k]));
+			            		System.out.print("?:-1");		            			
+		            		}
+		                	if (k < pathLength - 1)
+		                	{
+		                		printWriter.print(", ");
+		                		System.out.print(", ");
+		                	}            		
+		        		}
+		            	printWriter.println();
+		            	System.out.println();
+	            	} else {
+		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
+		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
+		        		for (int k = 0; k < pathLength; k++)
+		        		{
+		        			typeAccum.add(new ArrayList<Integer>());
+		        			valueAccum.add(new ArrayList<Integer>());	        			
+		        		}
+		            	for (int k = 0; k < pathLength; k++)
+		        		{
+		            		if (valueFrame[k] != -1)
+		            		{
+			            		for (int p = 0; p <= k; p++)
+			            		{
+			            			typeAccum.get(p).add(i);
+			            			valueAccum.get(p).add(valueFrame[k]);
+			            		}
+		            		}        		
+		        		}
+		            	for (int k = 0; k < pathLength; k++)
+		        		{
+		            		System.out.print("{");
+		            		ArrayList<Integer> t = typeAccum.get(k);
+		            		ArrayList<Integer> v = valueAccum.get(k);
+		            		printWriter.print(multiHot(t, v));		            		
+		            		for (int p = 0, q = t.size(); p < q; p++)
+		            		{		            			
+		            			System.out.print(t.get(p) + ":" + v.get(p));
+		            			if (p < q - 1)
+		            			{		            				
+		            				System.out.print(",");
+		            			}		
+		            		}
+		            		if (k < pathLength - 1)
+		            		{
+		                		printWriter.print(", ");		            			
+		            		}
+		                	System.out.print("} ");           		
+		        		}
+		            	printWriter.println();		            	
+		            	System.out.println();	            		
+	            	}
             	}
             }
-            printWriter.println("y_train_shape, " + (n * pathLength) + ", " + pathLength + ", " + 
-            		(pathEncodedTypeSize + pathEncodedValueSize));
+        	if (DILATE_EVENTS == NO_DILATION)
+        	{            
+                printWriter.println("y_train_shape, " + numPaths + ", " + pathLength + ", " + 
+                		(pathEncodedTypeSize + pathEncodedValueSize));
+        	} else {
+                printWriter.println("y_train_shape, " + numPaths + ", " + pathLength + ", " + 
+                		(pathEncodedTypeSize * pathEncodedValueSize));     		
+        	}            
+    		System.out.println("y_train:");
             for (int i = 0; i < n; i++)
             {
                	int[] values;
             	if (i == 0)
             	{
-            		values = basePath;            		
+            		values = basePath;
+                	System.out.println("base path");            		
             	} else {
-            		values = modularPaths.get(i - 1); 
+            		values = modularPaths.get(i - 1);
+                	System.out.println("modular path " + (i - 1));            		
+            	}            	
+            	if (DILATE_EVENTS == NO_DILATION)
+            	{            	
+	            	for (int j = 1, j2 = values.length; j < j2; j++)        		
+	            	{
+	            		if (j < values.length) 
+	            		{
+	            			printWriter.print(oneHot(i, values[j])); 
+		            		System.out.print(i + ":" + values[j]);	            			
+	            		} else {
+	            			printWriter.print(oneHot(-1, -1));
+		            		System.out.print("?:-1");	            			
+	            		}
+	                	printWriter.println();
+	                	System.out.println();
+	        		}
+            	} else {
+	        		ArrayList<Integer> t = new ArrayList<Integer>();
+	        		ArrayList<Integer> v = new ArrayList<Integer>();	           		
+	            	for (int j = 1, j2 = values.length; j < j2; j++)        		
+	            	{
+	            		t.clear();
+	            		v.clear();		            		
+	            		if (j < values.length) 
+	            		{
+		            		t.add(i);	            			
+	            			v.add(values[j]);
+	            			printWriter.print(multiHot(t, v)); 
+		            		System.out.print(i + ":" + values[j]);	            			            			
+	            		} else {
+	            			printWriter.print(multiHot(t, v)); 
+		            		System.out.print("?:-1");		            			
+	            		}
+	                	printWriter.println();
+	                	System.out.println();
+	        		}           		
             	}
-            	for (int j = 1; j < pathLength; j++)        		
-            	{            		
-            		if (j < values.length) 
-            		{
-            			printWriter.print(oneHot(i, values[j]));          			
-            		} else {
-            			printWriter.print(oneHot(i, -1));             			
-            		}
-                	printWriter.println();                	
-        		}
-    			printWriter.println(oneHot(i, -1));
             }
-            n = testPaths.size();
-            printWriter.println("X_test_shape, " + (n * pathLength) + ", " + pathLength + ", " + 
-            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
+            numPaths = 0;
+            for (int[] p : testPaths)
+            {
+            	numPaths += p.length - 1;
+            }            
+        	if (DILATE_EVENTS == NO_DILATION)
+        	{             
+	            printWriter.println("X_test_shape, " + numPaths + ", " + pathLength + ", " + 
+	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
+        	} else {
+	            printWriter.println("X_test_shape, " + numPaths + ", " + pathLength + ", " + 
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * pathLength));        		
+        	}
+    		System.out.println("X_test:");        	
+            n = testPaths.size();        	        	
             for (int i = 0; i < n; i++)
             {
+                System.out.println("path " + i);            		       	
             	int[] values = testPaths.get(i);
             	int[] types = testPathTypes.get(i);
         		int[] valuesFrame = new int[pathLength];
@@ -587,10 +730,10 @@ public class WorldComposer
         		for (int j = 0; j < pathLength; j++)
         		{
         			valuesFrame[j] = -1;
-        			typesFrame[j] = 0;
-        		}            	
-            	for (int j = 0; j < pathLength; j++)
-            	{
+        			typesFrame[j] = -1;
+        		}
+            	for (int j = 0, j2 = values.length - 1; j < j2; j++)
+            	{        		
 	            	for (int k = 0; k < values.length; k++)
 	        		{
 	            		int idx = k + pathLength - j - 1;
@@ -600,34 +743,114 @@ public class WorldComposer
 	            			typesFrame[idx] = types[k];
 	            		}
 	        		}
-	            	for (int k = 0; k < pathLength; k++)
-	        		{
-	            		printWriter.print(oneHot(typesFrame[k], valuesFrame[k]));
-	                	if (k < pathLength - 1)
-	                	{
-	                		printWriter.print(", ");
-	                	}            		
-	        		}
-	            	printWriter.println();         	
+	            	if (DILATE_EVENTS == NO_DILATION)
+	            	{	            	
+		            	for (int k = 0; k < pathLength; k++)
+		        		{
+		            		printWriter.print(oneHot(typesFrame[k], valuesFrame[k]));
+		            		System.out.print(typesFrame[k] + ":" + valuesFrame[k]);
+		                	if (k < pathLength - 1)
+		                	{
+		                		printWriter.print(", ");
+		                		System.out.print(", ");
+		                	}            		
+		        		}
+		            	printWriter.println(); 
+		            	System.out.println();
+	            	} else {
+		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
+		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
+		        		for (int k = 0; k < pathLength; k++)
+		        		{
+		        			typeAccum.add(new ArrayList<Integer>());
+		        			valueAccum.add(new ArrayList<Integer>());	        			
+		        		}
+		            	for (int k = 0; k < pathLength; k++)
+		        		{
+		            		if (valuesFrame[k] != -1)
+		            		{
+			            		for (int p = 0; p <= k; p++)
+			            		{
+			            			typeAccum.get(p).add(typesFrame[k]);
+			            			valueAccum.get(p).add(valuesFrame[k]);
+			            		}
+		            		}        		
+		        		}
+		            	for (int k = 0; k < pathLength; k++)
+		        		{
+		            		System.out.print("{");
+		            		ArrayList<Integer> t = typeAccum.get(k);
+		            		ArrayList<Integer> v = valueAccum.get(k);
+		            		printWriter.print(multiHot(t, v));		            		
+		            		for (int p = 0, q = t.size(); p < q; p++)
+		            		{		            			
+		            			System.out.print(t.get(p) + ":" + v.get(p));
+		            			if (p < q - 1)
+		            			{		            				
+		            				System.out.print(",");
+		            			}		
+		            		}
+		            		if (k < pathLength - 1)
+		            		{
+		                		printWriter.print(", ");		            			
+		            		}
+		                	System.out.print("} ");           		
+		        		}
+		            	printWriter.println();		            	
+		            	System.out.println();	            		
+	            	}
             	}
             }
-            printWriter.println("y_test_shape, " + (n * pathLength) + ", " + pathLength + ", " + 
-            		(pathEncodedTypeSize + pathEncodedValueSize));
+        	if (DILATE_EVENTS == NO_DILATION)
+        	{            
+	            printWriter.println("y_test_shape, " + numPaths + ", " + pathLength + ", " + 
+	            		(pathEncodedTypeSize + pathEncodedValueSize));
+        	} else {
+	            printWriter.println("y_test_shape, " + numPaths + ", " + pathLength + ", " + 
+	            		(pathEncodedTypeSize * pathEncodedValueSize));        		
+        	}
+    		System.out.println("y_test:");        	
             for (int i = 0; i < n; i++)
             {
+                System.out.println("path " + i);               	
             	int[] values = testPaths.get(i);
             	int[] types = testPathTypes.get(i);
-            	for (int j = 1; j < pathLength; j++)
-        		{
-            		if (j < values.length) 
-            		{
-            			printWriter.print(oneHot(types[j], values[j]));
-            		} else {
-            			printWriter.print(oneHot(0, -1));          			
-            		}
-                	printWriter.println();          		
-        		}
-    			printWriter.println(oneHot(0, -1));            	
+            	if (DILATE_EVENTS == NO_DILATION)
+            	{            	
+	            	for (int j = 1, j2 = values.length; j < j2; j++)
+	        		{
+	            		if (j < values.length) 
+	            		{
+	            			printWriter.print(oneHot(types[j], values[j]));
+	            			System.out.print(types[j] + ":" + values[j]);	            			
+	            		} else {
+	            			printWriter.print(oneHot(0, -1));
+	            			System.out.print("?:-1");
+	            		}
+	                	printWriter.println();
+	                	System.out.println();
+	        		}   			
+            	} else {
+	        		ArrayList<Integer> t = new ArrayList<Integer>();
+	        		ArrayList<Integer> v = new ArrayList<Integer>();	           		
+	            	for (int j = 1, j2 = values.length; j < j2; j++)       		
+	            	{
+	            		t.clear();
+	            		v.clear();		            		
+	            		if (j < values.length) 
+	            		{
+		            		t.add(types[j]);	            			
+	            			v.add(values[j]);
+	            			printWriter.print(multiHot(t, v)); 
+		            		System.out.print(types[j] + ":" + values[j]);	            			            			
+	            		} else {
+	            			printWriter.print(multiHot(t, v)); 
+		            		System.out.print("?:-1");		            			
+	            		}
+	                	printWriter.println();
+	                	System.out.println();
+	        		}          		
+            	}
             }               
             printWriter.close();
     	} catch (IOException e)
@@ -823,5 +1046,61 @@ public class WorldComposer
     		}
     	}
     	return code;
-    }    
+    }
+    
+    // Multi-hot coding of types and values.
+    public String multiHot(ArrayList<Integer> types, ArrayList<Integer> values)
+    {
+    	String code = "";
+    	for (int i = 0; i < pathEncodedTypeSize; i++)
+    	{
+    		float[] hotValues = new float[pathEncodedValueSize];    		
+    		for (int j = 0, k = types.size(); j < k; j++)
+    		{
+    			int t = types.get(j);
+    			if (t == i)
+    			{
+    				int v = values.get(j);
+    				if (v != -1)
+    				{
+    					hotValues[v] += 1.0f;
+    				}
+    			}
+    		}
+    		if (DILATE_EVENTS == OVERLAY_DILATION)
+    		{
+        		for (int j = 0; j < pathEncodedValueSize; j++)
+        		{
+        			if (hotValues[j] > 1.0f)
+					{
+						hotValues[j] = 1.0f;
+					}
+        		}
+    		} else if (DILATE_EVENTS == NORMALIZE_DILATION)
+    		{
+    			float accum = 0.0f;
+        		for (int j = 0; j < pathEncodedValueSize; j++)
+        		{
+					accum += hotValues[j];
+        		}
+        		for (int j = 0; j < pathEncodedValueSize; j++)
+        		{
+					hotValues[j] /= accum;
+        		}            		
+    		}
+    		for (int j = 0; j < pathEncodedValueSize; j++)
+    		{
+    			code += hotValues[j] + "";
+    			if (j < pathEncodedValueSize - 1)
+    			{
+    				code += ", ";
+    			}
+    		}
+    		if (i < pathEncodedTypeSize - 1)
+    		{
+    			code += ", ";
+    		}
+    	}
+    	return code;
+    }
 }
