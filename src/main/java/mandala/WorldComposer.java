@@ -281,6 +281,7 @@ public class WorldComposer
                   System.err.println(Usage);
                   System.exit(1);            	  
               }
+              continue;
            }
            if (args[i].equals("-exportPathNNdatasetFilename"))
            {
