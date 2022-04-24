@@ -1005,7 +1005,7 @@ public class WorldGrammar
             	}
             }
             int n = (int)((float)numPaths * trainFraction);
-            printWriter.println("X_train_shape, " + (n * pathLength) + ", " + pathLength + ", " + (26 * pathLength));
+            printWriter.println("X_train_shape, " + (n * pathLength) + ", " + (26 * pathLength));
             for (int i = 0; i < n; i++)
             {
             	char[] terminals = worldPaths.get(i).toCharArray(); 
@@ -1035,7 +1035,7 @@ public class WorldGrammar
 	            	printWriter.println();    	
             	}
             }
-            printWriter.println("y_train_shape, " + (n * pathLength) + ", " + pathLength + ", " + 26);
+            printWriter.println("y_train_shape, " + (n * pathLength) + ", " + 26);
             for (int i = 0; i < n; i++)
             {
             	char[] terminals = worldPaths.get(i).toCharArray();
@@ -1051,7 +1051,7 @@ public class WorldGrammar
         		}
     			printWriter.println(oneHot('g'));
             }
-            printWriter.println("X_test_shape, " + ((numPaths - n) * pathLength) + ", " + pathLength + ", " + (26 * pathLength));
+            printWriter.println("X_test_shape, " + ((numPaths - n) * pathLength) + ", " + (26 * pathLength));
             for (int i = n; i < numPaths; i++)
             {
             	char[] terminals = worldPaths.get(i).toCharArray(); 
@@ -1081,7 +1081,7 @@ public class WorldGrammar
 	            	printWriter.println();         	
             	}
             }
-            printWriter.println("y_test_shape, " + ((numPaths - n) * pathLength) + ", " + pathLength + ", " + 26);
+            printWriter.println("y_test_shape, " + ((numPaths - n) * pathLength) + ", " + 26);
             for (int i = n; i < numPaths; i++)
             {
             	char[] terminals = worldPaths.get(i).toCharArray();

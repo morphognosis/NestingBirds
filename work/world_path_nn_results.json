@@ -1,1 +1,1 @@
-{"train_prediction_errors":"5","train_total_predictions":"20","train_error_pct":"25.0","test_prediction_errors":"28","test_total_predictions":"138","test_error_pct":"20.289854"}
+{"train_correct_paths":"30","train_total_paths":"30","train_prediction_errors":"0","train_total_predictions":"450","train_error_pct":"0.0","test_correct_paths":"224","test_total_paths":"224","test_prediction_errors":"0","test_total_predictions":"3360","test_error_pct":"0.0"}

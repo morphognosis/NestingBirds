@@ -32,9 +32,6 @@ public class MandalaNN
 	// Hidden layer dimension.
 	public static int HIDDEN_DIMENSION = 128;
 	
-	// Number of steps per sequence.
-	public static int steps;
-	
     // Network model.
     public MultiLayerNetwork causationModel;
     
@@ -80,14 +77,14 @@ public class MandalaNN
     /* 
        Import dataset file.
        File format:
-       X_train_shape=[<number of vectors>,<sequence steps>,<cause vector dimension>]
+       X_train_shape=[<number of vectors>,<cause vector dimension>]
        <cause vectors>
-       y_train_shape=[<number of vectors>,<sequence steps>,<effect vector dimension>]
+       y_train_shape=[<number of vectors>,<effect vector dimension>]
        <effect vectors>
        Optionally:
-       X_test_shape=[<number of vectors>,<sequence steps>,<cause vector dimension>]
+       X_test_shape=[<number of vectors>,<cause vector dimension>]
        <cause vectors>
-       y_test_shape=[<number of vectors>,<sequence steps>,<effect vector dimension>]
+       y_test_shape=[<number of vectors>,<effect vector dimension>]
        <effect vectors>
      */
     public void importDataset(String filename)
@@ -107,8 +104,7 @@ public class MandalaNN
     	    }
     	    String[] parts = line.split(",");
     	    int numCause = Integer.parseInt(parts[1].trim());
-    	    steps = Integer.parseInt(parts[2].trim());
-    	    CAUSE_DIMENSION = Integer.parseInt(parts[3].trim());
+    	    CAUSE_DIMENSION = Integer.parseInt(parts[2].trim());
     	    trainCauseData = Nd4j.create(numCause, CAUSE_DIMENSION);
     	    float[] values = new float[CAUSE_DIMENSION];
     	    for (int i = 0; i < numCause; i++)
@@ -142,7 +138,7 @@ public class MandalaNN
   	           System.err.println("X and y training data must have equal number of vectors");
   	           System.exit(1);     	    	
     	    }
-    	    EFFECT_DIMENSION = Integer.parseInt(parts[3].trim());
+    	    EFFECT_DIMENSION = Integer.parseInt(parts[2].trim());
     	    trainEffectData = Nd4j.create(numEffect, EFFECT_DIMENSION);
     	    values = new float[EFFECT_DIMENSION];
     	    for (int i = 0; i < numEffect; i++)
@@ -175,7 +171,7 @@ public class MandalaNN
     	    }
     	    parts = line.split(",");
     	    numCause = Integer.parseInt(parts[1].trim());
-    	    int n = Integer.parseInt(parts[3].trim());
+    	    int n = Integer.parseInt(parts[2].trim());
     	    if (n != CAUSE_DIMENSION)
     	    {
    	           System.err.println("X train and X test vectors must have equal dimensions");
@@ -214,7 +210,7 @@ public class MandalaNN
   	           System.err.println("X and y testing data must have equal number of vectors");
   	           System.exit(1);     	    	
     	    }
-    	    n = Integer.parseInt(parts[3].trim());
+    	    n = Integer.parseInt(parts[2].trim());
     	    if (n != EFFECT_DIMENSION)
     	    {
    	           System.err.println("y train and y test vectors must have equal dimensions");

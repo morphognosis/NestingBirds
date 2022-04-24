@@ -1,1 +1,1 @@
-{"train_correct_paths":"1","train_total_paths":"6","train_prediction_errors":"11","train_total_predictions":"78","train_error_pct":"14.1","test_correct_paths":"0","test_total_paths":"15","test_prediction_errors":"69","test_total_predictions":"195","test_error_pct":"35.38"}
+{"train_correct_paths":"0","train_total_paths":"6","train_prediction_errors":"101","train_total_predictions":"144","train_error_pct":"70.14","test_correct_paths":"0","test_total_paths":"15","test_prediction_errors":"71","test_total_predictions":"360","test_error_pct":"19.72"}
