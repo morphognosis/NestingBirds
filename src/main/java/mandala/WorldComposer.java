@@ -80,7 +80,7 @@ public class WorldComposer
 	
     // Main.
     public static void main(String[] args) 
-    { 
+    {
         for (int i = 0; i < args.length; i++)
         {
            if (args[i].equals("-predictPath"))
@@ -1100,7 +1100,7 @@ public class WorldComposer
 		        		{
 		            		ArrayList<Integer> t = typeAccum.get(k);
 		            		ArrayList<Integer> v = valueAccum.get(k);
-		            		X_train += multiHot(t, v);		            		
+		            		X_train += multiHot(t, v);
 		                	if (k < pathLength - 1 || j < vl - 1 || i < n - 1)
 		            		{
 		                		X_train += ", ";		            			
@@ -1644,7 +1644,7 @@ public class WorldComposer
     		code += "}, ";    		
     		return  code;
     	} 
-		float[] hotValues = new float[pathEncodedValueSize * pathEncodedValueSize];    	
+		float[] hotValues = new float[pathEncodedTypeSize * pathEncodedValueSize];
     	for (int i = 0; i < pathEncodedTypeSize; i++)
     	{   		
     		for (int j = 0, k = types.size(); j < k; j++)
