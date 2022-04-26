@@ -88,18 +88,20 @@ for path in range(X_train_shape[0]):
         print('Path =', path, 'predictions: ', end='')
     p = []
     for step in range(X_train_shape[1]):
-        r = argmax(predictions[path][step])
-        p.append(r)
-        if letters:
-            print(terminals[r], ' ', sep='', end='')
+        if not all([ v == 0 for v in y[path][step]]):
+            r = argmax(predictions[path][step])
+            p.append(r)
+            if letters:
+                print(terminals[r], ' ', sep='', end='')
     if letters:
         print('targets: ', end='')
     t = []
     for step in range(X_train_shape[1]):
-        r = argmax(y[path][step])
-        t.append(r)
-        if letters:
-            print(terminals[r], ' ', sep='', end='')
+        if not all([ v == 0 for v in y[path][step]]):
+            r = argmax(y[path][step])
+            t.append(r)
+            if letters:
+                print(terminals[r], ' ', sep='', end='')
     if p == t:
         if letters:
             print('OK')
@@ -137,18 +139,20 @@ for path in range(X_test_shape[0]):
         print('Path =', path, 'predictions: ', end='')
     p = []
     for step in range(X_test_shape[1]):
-        r = argmax(predictions[path][step])
-        p.append(r)
-        if letters:
-            print(terminals[r], ' ', sep='', end='')
+        if not all([ v == 0 for v in y[path][step]]):
+            r = argmax(predictions[path][step])
+            p.append(r)
+            if letters:
+                print(terminals[r], ' ', sep='', end='')
     if letters:
         print('targets: ', end='')
     t = []
     for step in range(X_test_shape[1]):
-        r = argmax(y[path][step])
-        t.append(r)
-        if letters:
-            print(terminals[r], ' ', sep='', end='')
+        if not all([ v == 0 for v in y[path][step]]):
+            r = argmax(y[path][step])
+            t.append(r)
+            if letters:
+                print(terminals[r], ' ', sep='', end='')
     if p == t:
         if letters:
             print('OK')
