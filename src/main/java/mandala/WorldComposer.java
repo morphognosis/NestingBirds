@@ -46,11 +46,17 @@ public class WorldComposer
 	public List<int[]> testResponses;	
 	
 	// Event dilation.
+	// Does not apply to RNN or TCN.
 	public static final int NO_DILATION = 0;
 	public static final int OVERLAY_DILATION = 1;
 	public static final int ACCUMULATE_DILATION = 2;
 	public static final int NORMALIZE_DILATION = 3;
-	public static int DILATE_EVENTS = NO_DILATION;	
+	public static int DILATE_EVENTS = NO_DILATION;
+	
+	// Time interval consolidation factor.
+	// e.g. 2 means double interval temporal size and halve number of intervals.
+	// Does not apply to RNN or TCN.
+	public static int TIME_CONSOLIDATION_FACTOR = 1;
 	
 	// Random numbers.
 	public static int RANDOM_SEED = 4517;
@@ -68,8 +74,9 @@ public class WorldComposer
       "        [-numInsertionTestPaths <quantity> (default=" + NUM_INSERTION_TEST_PATHS + ")]\n" + 
       "        [-numSubstitutionTestPaths <quantity> (default=" + NUM_SUBSTITUTION_TEST_PATHS + ")]\n" + 
       "        [-numDeletionTestPaths <quantity> (default=" + NUM_DELETION_TEST_PATHS + ")]\n" +
-      "        [-dilateEvents <\"overlay\" | \"accumulate\" | \"normalize\"> (dilate relatively recent events into the past)]\n" +     
-      "        [-exportPathNNdatasetCSV (default=\"" + PATH_NN_DATASET_CSV_FILENAME + "\")>]\n" + 
+      "        [-dilateEvents <\"overlay\" | \"accumulate\" | \"normalize\"> (stretch events over time)\n" +     
+      "            [-consolidateTime <factor> (consolidate time intervals by given factor, default=" + TIME_CONSOLIDATION_FACTOR + ")]\n" +     
+      "        [-exportPathNNdatasetCSV (default=\"" + PATH_NN_DATASET_CSV_FILENAME + "\")>]]\n" + 
       "        [-exportPathNNdataset (default=\"" + PATH_NN_DATASET_FILENAME + "\")>]\n" +         
       "        [-exportPathRNNdataset (default=\"" + PATH_RNN_DATASET_FILENAME + "\")>]\n" +
       "        [-exportPathTCNdataset (default=\"" + PATH_TCN_DATASET_FILENAME + "\")>]\n" +
@@ -81,6 +88,8 @@ public class WorldComposer
     // Main.
     public static void main(String[] args) 
     {
+    	boolean gotDilate = false;
+    	boolean gotConsolidate = false;
         for (int i = 0; i < args.length; i++)
         {
            if (args[i].equals("-predictPath"))
@@ -293,8 +302,36 @@ public class WorldComposer
                   System.err.println(Usage);
                   System.exit(1);            	  
               }
+              gotDilate = true;
               continue;
            }
+           if (args[i].equals("-consolidateTime"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid consolidateTime option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+                 TIME_CONSOLIDATION_FACTOR = Integer.parseInt(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid consolidateTime option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (TIME_CONSOLIDATION_FACTOR < 1)
+              {
+                 System.err.println("Invalid consolidateTime option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              gotConsolidate = true;
+              continue;
+           }            
            if (args[i].equals("-exportPathNNdatasetCSV"))
            {
               if (i < args.length - 1 && !args[i + 1].startsWith("-"))
@@ -371,7 +408,13 @@ public class WorldComposer
         {
             System.err.println(Usage);
             System.exit(1);           	
-        } 
+        }
+        if (gotConsolidate && (!gotDilate || DILATE_EVENTS == NO_DILATION))
+        {
+        	System.err.println("Incompatible dilateEvents and consolidateTime options");
+            System.err.println(Usage);
+            System.exit(1);           	
+        }
         
         // Create world composer.
         WorldComposer worldComposer = new WorldComposer();
@@ -655,14 +698,23 @@ public class WorldComposer
             	{
             		pathLength = p.length;
             	}
-            } 
+            }
+            int consolidatedPathLength = pathLength;
+            if (DILATE_EVENTS != NO_DILATION)
+            {
+            	consolidatedPathLength /= TIME_CONSOLIDATION_FACTOR;
+            	if (pathLength % TIME_CONSOLIDATION_FACTOR != 0)
+				{
+					consolidatedPathLength++;
+				}      	
+            }
         	if (DILATE_EVENTS == NO_DILATION)
         	{            
 	            printWriter.println("X_train_shape, " + numPaths + ", " + 
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
         	} else {
 	            printWriter.println("X_train_shape, " + numPaths + ", " + 
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * pathLength));        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength));        		
         	}
     		System.out.println("X_train:");
     		int n = modularPaths.size() + 1;
@@ -717,7 +769,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < pathLength; k++)
+		        		for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -728,12 +780,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			typeAccum.get(p).add(i);
-			            			valueAccum.get(p).add(valueFrame[k]);
+			            			int q = p / TIME_CONSOLIDATION_FACTOR;
+			            			typeAccum.get(q).add(i);
+			            			valueAccum.get(q).add(valueFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < pathLength; k++)
+		            	for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		            		System.out.print("{");
 		            		ArrayList<Integer> t = typeAccum.get(k);
@@ -841,7 +894,7 @@ public class WorldComposer
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
         	} else {
 	            printWriter.println("X_test_shape, " + numPaths + ", " +
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * pathLength));        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength));        		
         	}
     		System.out.println("X_test:");
     		n = testPaths.size(); 
@@ -887,7 +940,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < pathLength; k++)
+		        		for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -898,12 +951,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			typeAccum.get(p).add(typesFrame[k]);
-			            			valueAccum.get(p).add(valuesFrame[k]);
+			            			int q = p / TIME_CONSOLIDATION_FACTOR;
+			            			typeAccum.get(q).add(typesFrame[k]);
+			            			valueAccum.get(q).add(valuesFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < pathLength; k++)
+		            	for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		            		System.out.print("{");
 		            		ArrayList<Integer> t = typeAccum.get(k);
@@ -1024,14 +1078,23 @@ public class WorldComposer
             	{
             		pathLength = p.length;
             	}
-            }            
+            } 
+            int consolidatedPathLength = pathLength;
+            if (DILATE_EVENTS != NO_DILATION)
+            {
+            	consolidatedPathLength /= TIME_CONSOLIDATION_FACTOR;
+            	if (pathLength % TIME_CONSOLIDATION_FACTOR != 0)
+				{
+					consolidatedPathLength++;
+				}         	
+            }
         	if (DILATE_EVENTS == NO_DILATION)
         	{            
 	            printWriter.println("X_train_shape = [ " + numPaths + ", " + 
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength) + " ]");
         	} else {
 	            printWriter.println("X_train_shape = [ " + numPaths + ", " + 
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * pathLength) + " ]");        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength) + " ]");        		
         	}
             printWriter.print("X_train = [ ");
             String X_train = "";
@@ -1080,7 +1143,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < pathLength; k++)
+		        		for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -1091,12 +1154,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			typeAccum.get(p).add(i);
-			            			valueAccum.get(p).add(valueFrame[k]);
+			            			int q = p / TIME_CONSOLIDATION_FACTOR;
+			            			typeAccum.get(q).add(i);
+			            			valueAccum.get(q).add(valueFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < pathLength; k++)
+		            	for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		            		ArrayList<Integer> t = typeAccum.get(k);
 		            		ArrayList<Integer> v = valueAccum.get(k);
@@ -1204,7 +1268,7 @@ public class WorldComposer
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength) + " ]");
         	} else {
 	            printWriter.println("X_test_shape = [ " + numPaths + ", " +
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * pathLength) + " ]");        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength) + " ]");        		
         	}
         	printWriter.print("X_test = [ ");
             String X_test = "";
@@ -1246,7 +1310,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < pathLength; k++)
+		        		for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -1257,12 +1321,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			typeAccum.get(p).add(typesFrame[k]);
-			            			valueAccum.get(p).add(valuesFrame[k]);
+			            			int q = p / TIME_CONSOLIDATION_FACTOR;
+			            			typeAccum.get(q).add(typesFrame[k]);
+			            			valueAccum.get(q).add(valuesFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < pathLength; k++)
+		            	for (int k = 0; k < consolidatedPathLength; k++)
 		        		{
 		            		ArrayList<Integer> t = typeAccum.get(k);
 		            		ArrayList<Integer> v = valueAccum.get(k);
