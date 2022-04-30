@@ -2,7 +2,7 @@
 
 if [ "$1" = "" ]
 then
-   echo "Usage: world_composer.sh <number of runs>"
+   echo "Usage: world_composer_test.sh <number of runs>"
    exit 1
 fi
 runs=$1
