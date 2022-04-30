@@ -75,8 +75,8 @@ public class WorldComposer
       "        [-numSubstitutionTestPaths <quantity> (default=" + NUM_SUBSTITUTION_TEST_PATHS + ")]\n" + 
       "        [-numDeletionTestPaths <quantity> (default=" + NUM_DELETION_TEST_PATHS + ")]\n" +
       "        [-dilateEvents <\"overlay\" | \"accumulate\" | \"normalize\"> (stretch events over time)\n" +     
-      "            [-consolidateTime <factor> (consolidate time intervals by given factor, default=" + TIME_CONSOLIDATION_FACTOR + ")]\n" +     
-      "        [-exportPathNNdatasetCSV (default=\"" + PATH_NN_DATASET_CSV_FILENAME + "\")>]]\n" + 
+      "            [-consolidateTime <factor> (consolidate time intervals by given factor, default=" + TIME_CONSOLIDATION_FACTOR + ")]]\n" +     
+      "        [-exportPathNNdatasetCSV (default=\"" + PATH_NN_DATASET_CSV_FILENAME + "\")>]\n" + 
       "        [-exportPathNNdataset (default=\"" + PATH_NN_DATASET_FILENAME + "\")>]\n" +         
       "        [-exportPathRNNdataset (default=\"" + PATH_RNN_DATASET_FILENAME + "\")>]\n" +
       "        [-exportPathTCNdataset (default=\"" + PATH_TCN_DATASET_FILENAME + "\")>]\n" +
