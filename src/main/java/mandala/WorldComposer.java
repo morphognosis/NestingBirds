@@ -53,10 +53,20 @@ public class WorldComposer
 	public static final int NORMALIZE_DILATION = 3;
 	public static int DILATE_EVENTS = NO_DILATION;
 	
-	// Time interval consolidation factor.
+	// Time interval size consolidation.
 	// e.g. 2 means double interval temporal size and halve number of intervals.
 	// Does not apply to RNN or TCN.
-	public static int TIME_CONSOLIDATION_FACTOR = 1;
+	public static int INTERVAL_SIZE_CONSOLIDATION = 1;
+	
+	// Interval size skew.
+	// Skews interval sizes into past, larger intervals contain more events.
+	// 0.0: intervals are unskewed and equal size.
+	// > 0.0 <= 1.0: intervals in the past are greater size and have greater event capacity.
+	public static float INTERVAL_SIZE_SKEW = 0.0f;
+	
+	// mapIntervals() output.
+	public int numIntervals;
+	public int[] intervalMap;
 	
 	// Random numbers.
 	public static int RANDOM_SEED = 4517;
@@ -75,7 +85,8 @@ public class WorldComposer
       "        [-numSubstitutionTestPaths <quantity> (default=" + NUM_SUBSTITUTION_TEST_PATHS + ")]\n" + 
       "        [-numDeletionTestPaths <quantity> (default=" + NUM_DELETION_TEST_PATHS + ")]\n" +
       "        [-dilateEvents <\"overlay\" | \"accumulate\" | \"normalize\"> (stretch events over time)\n" +     
-      "            [-consolidateTime <factor> (consolidate time intervals by given factor, default=" + TIME_CONSOLIDATION_FACTOR + ")]]\n" +     
+      "            [-consolidateIntervals <factor> (consolidate time interval sizes, default=" + INTERVAL_SIZE_CONSOLIDATION + ")]\n" +
+      "            [-skewIntervals <skew> (skew interval sizes into past, larger intervals contain more events, default=" + INTERVAL_SIZE_SKEW + ")]]\n" +      
       "        [-exportPathNNdatasetCSV (default=\"" + PATH_NN_DATASET_CSV_FILENAME + "\")>]\n" + 
       "        [-exportPathNNdataset (default=\"" + PATH_NN_DATASET_FILENAME + "\")>]\n" +         
       "        [-exportPathRNNdataset (default=\"" + PATH_RNN_DATASET_FILENAME + "\")>]\n" +
@@ -90,6 +101,7 @@ public class WorldComposer
     {
     	boolean gotDilate = false;
     	boolean gotConsolidate = false;
+    	boolean gotSkew = false;
         for (int i = 0; i < args.length; i++)
         {
            if (args[i].equals("-predictPath"))
@@ -305,31 +317,58 @@ public class WorldComposer
               gotDilate = true;
               continue;
            }
-           if (args[i].equals("-consolidateTime"))
+           if (args[i].equals("-consolidateIntervals"))
            {
               i++;
               if (i >= args.length)
               {
-                 System.err.println("Invalid consolidateTime option");
+                 System.err.println("Invalid consolidateIntervals option");
                  System.err.println(Usage);
                  System.exit(1);
               }
               try
               {
-                 TIME_CONSOLIDATION_FACTOR = Integer.parseInt(args[i]);
+                 INTERVAL_SIZE_CONSOLIDATION = Integer.parseInt(args[i]);
               }
               catch (NumberFormatException e) {
-                 System.err.println("Invalid consolidateTime option");
+                 System.err.println("Invalid consolidateIntervals option");
                  System.err.println(Usage);
                  System.exit(1);
               }
-              if (TIME_CONSOLIDATION_FACTOR < 1)
+              if (INTERVAL_SIZE_CONSOLIDATION < 1)
               {
-                 System.err.println("Invalid consolidateTime option");
+                 System.err.println("Invalid consolidateIntervals option");
                  System.err.println(Usage);
                  System.exit(1);
               }
               gotConsolidate = true;
+              continue;
+           } 
+           if (args[i].equals("-skewIntervals"))
+           {
+              i++;
+              if (i >= args.length)
+              {
+                 System.err.println("Invalid skewIntervals option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              try
+              {
+                 INTERVAL_SIZE_SKEW = Float.parseFloat(args[i]);
+              }
+              catch (NumberFormatException e) {
+                 System.err.println("Invalid skewIntervals option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              if (INTERVAL_SIZE_SKEW < 0.0f || INTERVAL_SIZE_SKEW > 1.0f)
+              {
+                 System.err.println("Invalid skewIntervals option");
+                 System.err.println(Usage);
+                 System.exit(1);
+              }
+              gotSkew = true;
               continue;
            }            
            if (args[i].equals("-exportPathNNdatasetCSV"))
@@ -411,7 +450,13 @@ public class WorldComposer
         }
         if (gotConsolidate && (!gotDilate || DILATE_EVENTS == NO_DILATION))
         {
-        	System.err.println("Incompatible dilateEvents and consolidateTime options");
+        	System.err.println("Incompatible dilateEvents and consolidateIntervals options");
+            System.err.println(Usage);
+            System.exit(1);           	
+        }
+        if (gotSkew && (!gotDilate || DILATE_EVENTS == NO_DILATION))
+        {
+        	System.err.println("Incompatible dilateEvents and skewIntervals options");
             System.err.println(Usage);
             System.exit(1);           	
         }
@@ -699,22 +744,14 @@ public class WorldComposer
             		pathLength = p.length;
             	}
             }
-            int consolidatedPathLength = pathLength;
-            if (DILATE_EVENTS != NO_DILATION)
-            {
-            	consolidatedPathLength /= TIME_CONSOLIDATION_FACTOR;
-            	if (pathLength % TIME_CONSOLIDATION_FACTOR != 0)
-				{
-					consolidatedPathLength++;
-				}      	
-            }
         	if (DILATE_EVENTS == NO_DILATION)
         	{            
 	            printWriter.println("X_train_shape, " + numPaths + ", " + 
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
         	} else {
+        		mapIntervals(pathLength);
 	            printWriter.println("X_train_shape, " + numPaths + ", " + 
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength));        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * numIntervals));        		
         	}
     		System.out.println("X_train:");
     		int n = modularPaths.size() + 1;
@@ -769,7 +806,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < consolidatedPathLength; k++)
+		        		for (int k = 0; k < numIntervals; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -780,13 +817,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			int q = p / TIME_CONSOLIDATION_FACTOR;
+			            			int q = intervalMap[p];
 			            			typeAccum.get(q).add(i);
 			            			valueAccum.get(q).add(valueFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < consolidatedPathLength; k++)
+		            	for (int k = 0; k < numIntervals; k++)
 		        		{
 		            		System.out.print("{");
 		            		ArrayList<Integer> t = typeAccum.get(k);
@@ -894,7 +931,7 @@ public class WorldComposer
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength));
         	} else {
 	            printWriter.println("X_test_shape, " + numPaths + ", " +
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength));        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * numIntervals));        		
         	}
     		System.out.println("X_test:");
     		n = testPaths.size(); 
@@ -940,7 +977,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < consolidatedPathLength; k++)
+		        		for (int k = 0; k < numIntervals; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -951,13 +988,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			int q = p / TIME_CONSOLIDATION_FACTOR;
-			            			typeAccum.get(q).add(typesFrame[k]);
-			            			valueAccum.get(q).add(valuesFrame[k]);
+			            			int q = intervalMap[p];
+				            		typeAccum.get(q).add(typesFrame[k]);
+				            		valueAccum.get(q).add(valuesFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < consolidatedPathLength; k++)
+		            	for (int k = 0; k < numIntervals; k++)
 		        		{
 		            		System.out.print("{");
 		            		ArrayList<Integer> t = typeAccum.get(k);
@@ -1079,22 +1116,14 @@ public class WorldComposer
             		pathLength = p.length;
             	}
             } 
-            int consolidatedPathLength = pathLength;
-            if (DILATE_EVENTS != NO_DILATION)
-            {
-            	consolidatedPathLength /= TIME_CONSOLIDATION_FACTOR;
-            	if (pathLength % TIME_CONSOLIDATION_FACTOR != 0)
-				{
-					consolidatedPathLength++;
-				}         	
-            }
         	if (DILATE_EVENTS == NO_DILATION)
         	{            
 	            printWriter.println("X_train_shape = [ " + numPaths + ", " + 
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength) + " ]");
         	} else {
+        		mapIntervals(pathLength);
 	            printWriter.println("X_train_shape = [ " + numPaths + ", " + 
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength) + " ]");        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * numIntervals) + " ]");        		
         	}
             printWriter.print("X_train = [ ");
             String X_train = "";
@@ -1143,7 +1172,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < consolidatedPathLength; k++)
+		        		for (int k = 0; k < numIntervals; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -1154,13 +1183,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			int q = p / TIME_CONSOLIDATION_FACTOR;
-			            			typeAccum.get(q).add(i);
-			            			valueAccum.get(q).add(valueFrame[k]);
+			            			int q = intervalMap[p];
+				            		typeAccum.get(q).add(i);
+				            		valueAccum.get(q).add(valueFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < consolidatedPathLength; k++)
+		            	for (int k = 0; k < numIntervals; k++)
 		        		{
 		            		ArrayList<Integer> t = typeAccum.get(k);
 		            		ArrayList<Integer> v = valueAccum.get(k);
@@ -1268,7 +1297,7 @@ public class WorldComposer
 	            		((pathEncodedTypeSize + pathEncodedValueSize) * pathLength) + " ]");
         	} else {
 	            printWriter.println("X_test_shape = [ " + numPaths + ", " +
-	            		((pathEncodedTypeSize * pathEncodedValueSize) * consolidatedPathLength) + " ]");        		
+	            		((pathEncodedTypeSize * pathEncodedValueSize) * numIntervals) + " ]");        		
         	}
         	printWriter.print("X_test = [ ");
             String X_test = "";
@@ -1310,7 +1339,7 @@ public class WorldComposer
 	            	} else {
 		        		ArrayList<ArrayList<Integer>> typeAccum = new ArrayList<ArrayList<Integer>>();
 		        		ArrayList<ArrayList<Integer>> valueAccum = new ArrayList<ArrayList<Integer>>();	        		
-		        		for (int k = 0; k < consolidatedPathLength; k++)
+		        		for (int k = 0; k < numIntervals; k++)
 		        		{
 		        			typeAccum.add(new ArrayList<Integer>());
 		        			valueAccum.add(new ArrayList<Integer>());	        			
@@ -1321,13 +1350,13 @@ public class WorldComposer
 		            		{
 			            		for (int p = 0; p <= k; p++)
 			            		{
-			            			int q = p / TIME_CONSOLIDATION_FACTOR;
+			            			int q = intervalMap[p];
 			            			typeAccum.get(q).add(typesFrame[k]);
 			            			valueAccum.get(q).add(valuesFrame[k]);
 			            		}
 		            		}        		
 		        		}
-		            	for (int k = 0; k < consolidatedPathLength; k++)
+		            	for (int k = 0; k < numIntervals; k++)
 		        		{
 		            		ArrayList<Integer> t = typeAccum.get(k);
 		            		ArrayList<Integer> v = valueAccum.get(k);
@@ -1627,6 +1656,103 @@ public class WorldComposer
     		System.err.println("Cannot write path dataset to file " + filename);
     		System.exit(1);
     	}    	
+    }
+    
+    // Interval maps.
+	public int numConsolidatedIntervals;
+	public int[] consolidatedIntervalMap;
+	public int numSkewedIntervals;
+	public int[] skewedIntervalMap;
+			
+    // Map intervals.
+    public void mapIntervals(int pathLength)
+    {
+    	consolidateIntervals(pathLength);
+    	skewIntervals(numConsolidatedIntervals);
+
+    	// Combine maps.
+    	numIntervals = numSkewedIntervals;
+    	intervalMap = new int[pathLength];
+    	for (int i = 0; i < pathLength; i++)
+    	{
+    		intervalMap[i] = skewedIntervalMap[consolidatedIntervalMap[i]];
+    	} 
+    }
+    
+    // Consolidate intervals.
+    public void consolidateIntervals(int pathLength)
+    {
+    	numConsolidatedIntervals = pathLength / INTERVAL_SIZE_CONSOLIDATION;
+    	if (pathLength % INTERVAL_SIZE_CONSOLIDATION != 0)
+		{
+    		numConsolidatedIntervals++;
+		}
+    	consolidatedIntervalMap = new int[pathLength];
+    	for (int i = 0; i < pathLength; i++)
+    	{
+    		consolidatedIntervalMap[i] = i / INTERVAL_SIZE_CONSOLIDATION;
+    	}
+    }
+    
+    // Skew intervals.
+    public void skewIntervals(int pathLength)
+    {
+        float[] intervalSizes = new float[pathLength];
+        for (int i = 0; i < pathLength; i++)
+        {
+           intervalSizes[i] = 1.0f;
+        }
+        float pathVal = (float)pathLength - 1.0f;
+        for (int i = 0, j = pathLength - 1; i < j; i++)
+        {
+           float d = pathVal * INTERVAL_SIZE_SKEW;
+           intervalSizes[i] += d;
+           d /= (float)(pathLength - (i + 1));
+           pathVal = 0.0f;
+           for (int n = i + 1, k = n; k < pathLength; k++)
+           {
+              intervalSizes[k] -= d;
+              if (k > n) { pathVal += intervalSizes[k]; }
+           }
+        }
+        int[] intervalShift = new int[pathLength];
+        ArrayList <ArrayList<Integer>> intervalMapWrk = new ArrayList<ArrayList<Integer>> ();
+        for (int i = 0; i < pathLength; i++)
+        {
+           intervalShift[i] = 1;
+           ArrayList<Integer> intervals = new ArrayList<Integer>();
+           intervals.add(i);
+           intervalMapWrk.add(intervals);
+        }
+        for (int i = 0, j = pathLength - 1; i < j; i++)
+        {
+           while (intervalSizes[i] - (float)intervalShift[i] > 1.0f && intervalShift[i + 1] == 1.0f)
+           {
+              for (int k = i + 1; k < pathLength; k++)
+              {
+                 if (intervalShift[k] == 1)
+                 {
+                    intervalShift[k - 1] += 1;
+                    intervalShift[k]      = 0;
+                    intervalMapWrk.get(k - 1).add(intervalMapWrk.get(k).get(0));
+                    intervalMapWrk.get(k).clear();
+                 }
+              }
+           }
+        }
+        numSkewedIntervals = 0;
+        for (int i = 0; i < pathLength; i++)
+        {
+           if (intervalShift[i] != 0) { numSkewedIntervals++; }
+        }
+        skewedIntervalMap = new int[pathLength];
+        for (int i = 0; i < pathLength; i++)
+        {
+           for (int j : intervalMapWrk.get(i))
+           {
+              skewedIntervalMap[j] = i;
+           }
+        }
     }
     
     public boolean hotDebug = false;
