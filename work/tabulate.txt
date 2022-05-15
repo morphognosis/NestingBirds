@@ -1,0 +1,200 @@
+basePathLength,numModularPaths = 10,5
+modification = insert
+nn_dilate_accumulate : 128 neurons: 16.548 256 neurons: 17.22 delta:  -0.6720000000000006
+nn_dilate_normalize_consolidate_2 : 128 neurons: 10.964 256 neurons: 11.392 delta:  -0.42799999999999905
+nn_dilate_normalize_consolidate_3 : 128 neurons: 11.484 256 neurons: 10.048 delta:  1.436
+nn_dilate_normalize_skew_25 : 128 neurons: 8.971 256 neurons: 7.343 delta:  1.6280000000000001
+nn_dilate_normalize_skew_5 : 128 neurons: 6.461 256 neurons: 5.458 delta:  1.0030000000000001
+nn_dilate_normalize : 128 neurons: 9.405 256 neurons: 8.691 delta:  0.7139999999999986
+nn_dilate_overlay : 128 neurons: 15.828 256 neurons: 17.107 delta:  -1.279
+nn : 128 neurons: 20.968 256 neurons: 24.027 delta:  -3.059000000000001
+rnn : 128 neurons: 12.1 256 neurons: 11.045 delta:  1.0549999999999997
+modification = substitute
+nn_dilate_accumulate : 128 neurons: 17.2 256 neurons: 19.6 delta:  -2.400000000000002
+nn_dilate_normalize_consolidate_2 : 128 neurons: 12.6 256 neurons: 13.8 delta:  -1.200000000000001
+nn_dilate_normalize_consolidate_3 : 128 neurons: 6.6 256 neurons: 10 delta:  -3.4000000000000004
+nn_dilate_normalize_skew_25 : 128 neurons: 11 256 neurons: 7.8 delta:  3.2
+nn_dilate_normalize_skew_5 : 128 neurons: 10 256 neurons: 6 delta:  4
+nn_dilate_normalize : 128 neurons: 10.6 256 neurons: 10.4 delta:  0.1999999999999993
+nn_dilate_overlay : 128 neurons: 15.4 256 neurons: 18.4 delta:  -2.9999999999999982
+nn : 128 neurons: 16.4 256 neurons: 17 delta:  -0.6000000000000014
+rnn : 128 neurons: 16.2 256 neurons: 15.8 delta:  0.3999999999999986
+modification = delete
+nn_dilate_accumulate : 128 neurons: 11.061 256 neurons: 14.148 delta:  -3.0869999999999997
+nn_dilate_normalize_consolidate_2 : 128 neurons: 8.403 256 neurons: 8.613 delta:  -0.20999999999999908
+nn_dilate_normalize_consolidate_3 : 128 neurons: 5.547 256 neurons: 8.648 delta:  -3.101
+nn_dilate_normalize_skew_25 : 128 neurons: 9.727 256 neurons: 8.185 delta:  1.5419999999999998
+nn_dilate_normalize_skew_5 : 128 neurons: 8.915 256 neurons: 7.38 delta:  1.5349999999999993
+nn_dilate_normalize : 128 neurons: 5.184 256 neurons: 4.647 delta:  0.5369999999999999
+nn_dilate_overlay : 128 neurons: 10.811 256 neurons: 12.004 delta:  -1.1929999999999996
+nn : 128 neurons: 23.871 256 neurons: 24.658 delta:  -0.7870000000000026
+rnn : 128 neurons: 12.044 256 neurons: 18.838 delta:  -6.7940000000000005
+modification = all
+nn_dilate_accumulate : 128 neurons: 17.354 256 neurons: 17.329 delta:  0.02499999999999858
+nn_dilate_normalize_consolidate_2 : 128 neurons: 13.009 256 neurons: 11.214 delta:  1.795
+nn_dilate_normalize_consolidate_3 : 128 neurons: 11.131 256 neurons: 10.835 delta:  0.2959999999999994
+nn_dilate_normalize_skew_25 : 128 neurons: 9.648 256 neurons: 7.699 delta:  1.9489999999999998
+nn_dilate_normalize_skew_5 : 128 neurons: 7.788 256 neurons: 6.364 delta:  1.4240000000000004
+nn_dilate_normalize : 128 neurons: 8.712 256 neurons: 9.289 delta:  -0.577
+nn_dilate_overlay : 128 neurons: 16.147 256 neurons: 17.486 delta:  -1.3390000000000022
+nn : 128 neurons: 19.177 256 neurons: 22.715 delta:  -3.5380000000000003
+rnn : 128 neurons: 11.283 256 neurons: 13.57 delta:  -2.287000000000001
+basePathLength,numModularPaths = 10,10
+modification = insert
+nn_dilate_accumulate : 128 neurons: 25.503 256 neurons: 22.903 delta:  2.6000000000000014
+nn_dilate_normalize_consolidate_2 : 128 neurons: 8.683 256 neurons: 9.21 delta:  -0.527000000000001
+nn_dilate_normalize_consolidate_3 : 128 neurons: 9.276 256 neurons: 9.275 delta:  0.0009999999999994458
+nn_dilate_normalize_skew_25 : 128 neurons: 7.067 256 neurons: 6.933 delta:  0.13400000000000034
+nn_dilate_normalize_skew_5 : 128 neurons: 6.868 256 neurons: 7.134 delta:  -0.266
+nn_dilate_normalize : 128 neurons: 24.289 256 neurons: 22.331 delta:  1.958000000000002
+nn_dilate_overlay : 128 neurons: 24.899 256 neurons: 23.053 delta:  1.846
+nn : 128 neurons: 25.853 256 neurons: 23.73 delta:  2.123000000000001
+rnn : 128 neurons: 14.153 256 neurons: 10.513 delta:  3.6400000000000006
+modification = substitute
+nn_dilate_accumulate : 128 neurons: 22.4 256 neurons: 19.2 delta:  3.1999999999999993
+nn_dilate_normalize_consolidate_2 : 128 neurons: 9.013 256 neurons: 9.341 delta:  -0.3279999999999994
+nn_dilate_normalize_consolidate_3 : 128 neurons: 8.946 256 neurons: 8.882 delta:  0.06400000000000006
+nn_dilate_normalize_skew_25 : 128 neurons: 6.935 256 neurons: 6.601 delta:  0.33399999999999963
+nn_dilate_normalize_skew_5 : 128 neurons: 6.868 256 neurons: 6.668 delta:  0.20000000000000018
+nn_dilate_normalize : 128 neurons: 21 256 neurons: 19.2 delta:  1.8000000000000007
+nn_dilate_overlay : 128 neurons: 22 256 neurons: 18.8 delta:  3.1999999999999993
+nn : 128 neurons: 21.4 256 neurons: 18.4 delta:  3.0
+rnn : 128 neurons: 22 256 neurons: 15.2 delta:  6.800000000000001
+modification = delete
+nn_dilate_accumulate : 128 neurons: 26.642 256 neurons: 28.087 delta:  -1.4450000000000003
+nn_dilate_normalize_consolidate_2 : 128 neurons: 9.079 256 neurons: 8.552 delta:  0.527000000000001
+nn_dilate_normalize_consolidate_3 : 128 neurons: 9.012 256 neurons: 8.815 delta:  0.19700000000000095
+nn_dilate_normalize_skew_25 : 128 neurons: 7.133 256 neurons: 6.601 delta:  0.532
+nn_dilate_normalize_skew_5 : 128 neurons: 6.801 256 neurons: 6.735 delta:  0.06599999999999984
+nn_dilate_normalize : 128 neurons: 25.792 256 neurons: 27.826 delta:  -2.033999999999999
+nn_dilate_overlay : 128 neurons: 25.814 256 neurons: 27.309 delta:  -1.495000000000001
+nn : 128 neurons: 26.905 256 neurons: 28.637 delta:  -1.7319999999999993
+rnn : 128 neurons: 15.005 256 neurons: 18.025 delta:  -3.019999999999998
+modification = all
+nn_dilate_accumulate : 128 neurons: 22.68 256 neurons: 21.17 delta:  1.509999999999998
+nn_dilate_normalize_consolidate_2 : 128 neurons: 9.078 256 neurons: 9.144 delta:  -0.06600000000000072
+nn_dilate_normalize_consolidate_3 : 128 neurons: 9.934 256 neurons: 9.144 delta:  0.7899999999999991
+nn_dilate_normalize_skew_25 : 128 neurons: 6.867 256 neurons: 6.867 delta:  0.0
+nn_dilate_normalize_skew_5 : 128 neurons: 6.999 256 neurons: 7.066 delta:  -0.06700000000000017
+nn_dilate_normalize : 128 neurons: 22.228 256 neurons: 21.019 delta:  1.2090000000000032
+nn_dilate_overlay : 128 neurons: 21.963 256 neurons: 20.904 delta:  1.059000000000001
+nn : 128 neurons: 22.23 256 neurons: 21.035 delta:  1.1950000000000003
+rnn : 128 neurons: 14.894 256 neurons: 13.122 delta:  1.7720000000000002
+basePathLength,numModularPaths = 20,5
+modification = insert
+nn_dilate_accumulate : 128 neurons: 15.045 256 neurons: 15.333 delta:  -0.28800000000000026
+nn_dilate_normalize_consolidate_2 : 128 neurons: 8.879 256 neurons: 9.186 delta:  -0.3070000000000004
+nn_dilate_normalize_consolidate_3 : 128 neurons: 9.862 256 neurons: 10.444 delta:  -0.5820000000000007
+nn_dilate_normalize_skew_25 : 128 neurons: 7.015 256 neurons: 5.269 delta:  1.7459999999999996
+nn_dilate_normalize_skew_5 : 128 neurons: 5.973 256 neurons: 4.349 delta:  1.6239999999999997
+nn_dilate_normalize : 128 neurons: 9.162 256 neurons: 8.947 delta:  0.21500000000000163
+nn_dilate_overlay : 128 neurons: 15.421 256 neurons: 16.716 delta:  -1.2950000000000017
+nn : 128 neurons: 24.389 256 neurons: 23.011 delta:  1.3780000000000001
+rnn : 128 neurons: 6.456 256 neurons: 4.589 delta:  1.867
+modification = substitute
+nn_dilate_accumulate : 128 neurons: 16.8 256 neurons: 17.95 delta:  -1.1499999999999986
+nn_dilate_normalize_consolidate_2 : 128 neurons: 9.8 256 neurons: 10.65 delta:  -0.8499999999999996
+nn_dilate_normalize_consolidate_3 : 128 neurons: 8.3 256 neurons: 9.9 delta:  -1.5999999999999996
+nn_dilate_normalize_skew_25 : 128 neurons: 7.3 256 neurons: 6.05 delta:  1.25
+nn_dilate_normalize_skew_5 : 128 neurons: 6.5 256 neurons: 4.6 delta:  1.9000000000000004
+nn_dilate_normalize : 128 neurons: 9.05 256 neurons: 9.3 delta:  -0.25
+nn_dilate_overlay : 128 neurons: 16.25 256 neurons: 14.9 delta:  1.3499999999999996
+nn : 128 neurons: 9.25 256 neurons: 10.5 delta:  -1.25
+rnn : 128 neurons: 6.55 256 neurons: 6.4 delta:  0.14999999999999947
+modification = delete
+nn_dilate_accumulate : 128 neurons: 9.008 256 neurons: 11.267 delta:  -2.2590000000000003
+nn_dilate_normalize_consolidate_2 : 128 neurons: 4.337 256 neurons: 5.012 delta:  -0.6749999999999998
+nn_dilate_normalize_consolidate_3 : 128 neurons: 3.461 256 neurons: 5.515 delta:  -2.054
+nn_dilate_normalize_skew_25 : 128 neurons: 3.443 256 neurons: 2.249 delta:  1.194
+nn_dilate_normalize_skew_5 : 128 neurons: 2.807 256 neurons: 1.677 delta:  1.13
+nn_dilate_normalize : 128 neurons: 3.965 256 neurons: 3.713 delta:  0.2519999999999998
+nn_dilate_overlay : 128 neurons: 8.727 256 neurons: 9.871 delta:  -1.1440000000000001
+nn : 128 neurons: 24.551 256 neurons: 26.797 delta:  -2.246000000000002
+rnn : 128 neurons: 3.967 256 neurons: 5.404 delta:  -1.4369999999999998
+modification = all
+nn_dilate_accumulate : 128 neurons: 15.361 256 neurons: 15.534 delta:  -0.17300000000000004
+nn_dilate_normalize_consolidate_2 : 128 neurons: 8.256 256 neurons: 8.299 delta:  -0.04299999999999926
+nn_dilate_normalize_consolidate_3 : 128 neurons: 9.005 256 neurons: 10.007 delta:  -1.001999999999999
+nn_dilate_normalize_skew_25 : 128 neurons: 5.916 256 neurons: 5.107 delta:  0.8090000000000002
+nn_dilate_normalize_skew_5 : 128 neurons: 5.503 256 neurons: 4.391 delta:  1.112
+nn_dilate_normalize : 128 neurons: 7.88 256 neurons: 7.641 delta:  0.23899999999999988
+nn_dilate_overlay : 128 neurons: 14.831 256 neurons: 14.369 delta:  0.46199999999999974
+nn : 128 neurons: 18.96 256 neurons: 20.438 delta:  -1.477999999999998
+rnn : 128 neurons: 5.965 256 neurons: 4.725 delta:  1.2400000000000002
+basePathLength,numModularPaths = 20,10
+modification = insert
+nn_dilate_accumulate : 128 neurons: 14.052 256 neurons: 12.921 delta:  1.1310000000000002
+nn_dilate_normalize_consolidate_2 : 128 neurons: 8.328 256 neurons: 8.99 delta:  -0.6620000000000008
+nn_dilate_normalize_consolidate_3 : 128 neurons: 10.05 256 neurons: 10.414 delta:  -0.363999999999999
+nn_dilate_normalize_skew_25 : 128 neurons: 5.513 256 neurons: 6.181 delta:  -0.6680000000000001
+nn_dilate_normalize_skew_5 : 128 neurons: 4.161 256 neurons: 4.7 delta:  -0.5390000000000006
+nn_dilate_normalize : 128 neurons: 8.105 256 neurons: 8.092 delta:  0.0129999999999999
+nn_dilate_overlay : 128 neurons: 14.762 256 neurons: 16.079 delta:  -1.3170000000000002
+nn : 128 neurons: 24.59 256 neurons: 24.799 delta:  -0.20899999999999963
+rnn : 128 neurons: 7.25 256 neurons: 6.222 delta:  1.0279999999999996
+modification = substitute
+nn_dilate_accumulate : 128 neurons: 13.45 256 neurons: 15.6 delta:  -2.1500000000000004
+nn_dilate_normalize_consolidate_2 : 128 neurons: 9.9 256 neurons: 10.2 delta:  -0.29999999999999893
+nn_dilate_normalize_consolidate_3 : 128 neurons: 9.35 256 neurons: 9 delta:  0.34999999999999964
+nn_dilate_normalize_skew_25 : 128 neurons: 5.6 256 neurons: 5.75 delta:  -0.15000000000000036
+nn_dilate_normalize_skew_5 : 128 neurons: 4.3 256 neurons: 4.2 delta:  0.09999999999999964
+nn_dilate_normalize : 128 neurons: 8.1 256 neurons: 9.3 delta:  -1.200000000000001
+nn_dilate_overlay : 128 neurons: 14.35 256 neurons: 15.35 delta:  -1.0
+nn : 128 neurons: 9.6 256 neurons: 10.85 delta:  -1.25
+rnn : 128 neurons: 7.95 256 neurons: 7.95 delta:  0.0
+modification = delete
+nn_dilate_accumulate : 128 neurons: 7.7 256 neurons: 10.012 delta:  -2.3120000000000003
+nn_dilate_normalize_consolidate_2 : 128 neurons: 4.298 256 neurons: 5.404 delta:  -1.1059999999999999
+nn_dilate_normalize_consolidate_3 : 128 neurons: 3.343 256 neurons: 4.71 delta:  -1.367
+nn_dilate_normalize_skew_25 : 128 neurons: 2.223 256 neurons: 2.592 delta:  -0.3690000000000002
+nn_dilate_normalize_skew_5 : 128 neurons: 2.218 256 neurons: 2.007 delta:  0.21099999999999985
+nn_dilate_normalize : 128 neurons: 3.451 256 neurons: 4.358 delta:  -0.9069999999999996
+nn_dilate_overlay : 128 neurons: 9.069 256 neurons: 9.03 delta:  0.03900000000000148
+nn : 128 neurons: 23.353 256 neurons: 25.766 delta:  -2.4129999999999967
+rnn : 128 neurons: 3.574 256 neurons: 5.952 delta:  -2.378
+modification = all
+nn_dilate_accumulate : 128 neurons: 13.391 256 neurons: 12.962 delta:  0.42900000000000027
+nn_dilate_normalize_consolidate_2 : 128 neurons: 8.615 256 neurons: 9.027 delta:  -0.41199999999999903
+nn_dilate_normalize_consolidate_3 : 128 neurons: 9.208 256 neurons: 9.323 delta:  -0.11500000000000021
+nn_dilate_normalize_skew_25 : 128 neurons: 5.069 256 neurons: 5.445 delta:  -0.37600000000000033
+nn_dilate_normalize_skew_5 : 128 neurons: 3.99 256 neurons: 4.249 delta:  -0.25899999999999945
+nn_dilate_normalize : 128 neurons: 7.176 256 neurons: 7.238 delta:  -0.06200000000000028
+nn_dilate_overlay : 128 neurons: 14.107 256 neurons: 12.862 delta:  1.2449999999999992
+nn : 128 neurons: 19.056 256 neurons: 20.075 delta:  -1.0189999999999984
+rnn : 128 neurons: 5.931 256 neurons: 6.039 delta:  -0.10799999999999965
+basePathLength,numModularPaths = 10,5
+modification = insert
+tcn : kernel 2: 23.326 kernel 4: 24.528 delta:  -1.2019999999999982
+modification = substitute
+tcn : kernel 2: 18.8 kernel 4: 18.8 delta:  0.0
+modification = delete
+tcn : kernel 2: 20.676 kernel 4: 32.269 delta:  -11.593
+modification = all
+tcn : kernel 2: 19.692 kernel 4: 21.698 delta:  -2.0060000000000002
+basePathLength,numModularPaths = 10,10
+modification = insert
+tcn : kernel 2: 17.368 kernel 4: 21.294 delta:  -3.926000000000002
+modification = substitute
+tcn : kernel 2: 15.2 kernel 4: 15 delta:  0.1999999999999993
+modification = delete
+tcn : kernel 2: 17.993 kernel 4: 23.441 delta:  -5.448
+modification = all
+tcn : kernel 2: 18.64 kernel 4: 21.127 delta:  -2.4869999999999983
+basePathLength,numModularPaths = 20,5
+modification = insert
+tcn : kernel 2: 16.663 kernel 4: 24.89 delta:  -8.227
+modification = substitute
+tcn : kernel 2: 9.2 kernel 4: 9.05 delta:  0.14999999999999858
+modification = delete
+tcn : kernel 2: 13.124 kernel 4: 21.86 delta:  -8.735999999999999
+modification = all
+tcn : kernel 2: 12.981 kernel 4: 18.816 delta:  -5.834999999999999
+basePathLength,numModularPaths = 20,10
+modification = insert
+tcn : kernel 2: 15.974 kernel 4: 22.778 delta:  -6.8039999999999985
+modification = substitute
+tcn : kernel 2: 9.55 kernel 4: 9 delta:  0.5500000000000007
+modification = delete
+tcn : kernel 2: 13.879 kernel 4: 23.733 delta:  -9.854000000000001
+modification = all
+tcn : kernel 2: 12.827 kernel 4: 18.23 delta:  -5.4030000000000005

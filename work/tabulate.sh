@@ -1,27 +1,36 @@
-mode=sub
-for k in 128,${mode} 256,${mode}
+for prefix in 10,5 10,10 20,5 20,10
 do
-echo neurons = $k
-for i in 10,5,${k} 10,10,${k} 20,5,${k} 20,10,${k}
+echo basePathLength,numModularPaths = $prefix
+for mod in insert substitute delete all
 do
-echo prefix = $i
-for j in $(ls world_composer_*nn*_test_results.csv)
+echo modification = $mod
+for file in $(ls world_composer_*nn*_test_results.csv)
 do
-echo file = $j
-grep ^${i} $j | cut -d"," -f10 | awk '{sum += $0; count += 1} END {print sum/count}'
+f=$(basename $file .csv)
+f=${f/_test_results/}
+f=$(echo $f | cut -c16-)
+echo -n $f ": "
+nn128=$(grep ^${prefix},128,${mod} $file | cut -d"," -f10 | awk '{sum += $0; count += 1} END {print sum/count}')
+nn256=$(grep ^${prefix},256,${mod} $file | cut -d"," -f10 | awk '{sum += $0; count += 1} END {print sum/count}')
+python -c "print('128 neurons:', ${nn128}, '256 neurons:', ${nn256}, 'delta: ', ${nn128} - ${nn256})"
 done
 done
 done
-for k in 2,${mode} 4,${mode}
+for prefix in 10,5 10,10 20,5 20,10
 do
-echo neurons = $k
-for i in 10,5,${k} 10,10,${k} 20,5,${k} 20,10,${k}
+echo basePathLength,numModularPaths = $prefix
+for mod in insert substitute delete all
 do
-echo prefix = $i
-for j in $(ls world_composer_tcn_test_results.csv)
+echo modification = $mod
+for file in $(ls world_composer_tcn_test_results.csv)
 do
-echo file = $j
-grep ^${i} $j | cut -d"," -f10 | awk '{sum += $0; count += 1} END {print sum/count}'
+f=$(basename $file .csv)
+f=${f/_test_results/}
+f=$(echo $f | cut -c16-)
+echo -n $f ": "
+k2=$(grep ^${prefix},2,${mod} $file | cut -d"," -f10 | awk '{sum += $0; count += 1} END {print sum/count}')
+k4=$(grep ^${prefix},4,${mod} $file | cut -d"," -f10 | awk '{sum += $0; count += 1} END {print sum/count}')
+python -c "print('kernel 2:', ${k2}, 'kernel 4:', ${k4}, 'delta: ', ${k2} - ${k4})"
 done
 done
 done
