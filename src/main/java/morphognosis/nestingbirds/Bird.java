@@ -1,4 +1,4 @@
-// For conditions of distribution and use, see copyright notice in Mandala.java
+// For conditions of distribution and use, see copyright notice in Morphognosis.java
 
 // Bird: morphognosis organism.
 

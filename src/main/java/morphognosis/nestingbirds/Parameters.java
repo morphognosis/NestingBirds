@@ -1,4 +1,4 @@
-// For conditions of distribution and use, see copyright notice in Mandala.java
+// For conditions of distribution and use, see copyright notice in Morphognosis.java
 
 // Parameters.
 
@@ -7,7 +7,7 @@ package morphognosis.nestingbirds;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import morphognosis.Utility;
+import morphognosis.network.Utility;
 
 public class Parameters
 {
