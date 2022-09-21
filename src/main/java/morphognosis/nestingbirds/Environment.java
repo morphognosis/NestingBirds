@@ -68,7 +68,8 @@ public class Environment
    public Cell[][] world;
 
    // Birds.
-   public Bird birds[];
+   public Bird male;
+   public Bird female;
 
    // Disrupt nest.
    private int disruptNest = 0;
@@ -114,34 +115,37 @@ public class Environment
       }
 
       // Create birds.
-      birds = new Bird[2];
-      Bird bird = new Bird(Bird.MALE);
-      birds[0]  = bird;
-      bird.x    = width / 2;
-      bird.y    = height / 2;
-      bird.food = Bird.FOOD_DURATION;
-      bird.sensors[Bird.LOCALE_SENSOR] = world[bird.x][bird.y].locale;
-      bird.sensors[Bird.OBJECT_SENSOR] = world[bird.x][bird.y].object;
-      bird      = new Bird(Bird.FEMALE);
-      birds[1]  = bird;
-      bird.x    = width / 2;
-      bird.y    = height / 2;
-      bird.food = 0;
-      bird.sensors[Bird.LOCALE_SENSOR] = world[bird.x][bird.y].locale;
-      bird.sensors[Bird.OBJECT_SENSOR] = world[bird.x][bird.y].object;
+      male = new MaleBird();
+      male.x    = width / 2;
+      male.y    = height / 2;
+      male.food = Bird.FOOD_DURATION;
+      male.sensors[Bird.LOCALE_SENSOR] = world[male.x][male.y].locale;
+      male.sensors[Bird.OBJECT_SENSOR] = world[male.x][male.y].object;
+      female      = new FemaleBird();
+      female.x    = width / 2;
+      female.y    = height / 2;
+      female.food = 0;
+      female.sensors[Bird.LOCALE_SENSOR] = world[female.x][female.y].locale;
+      female.sensors[Bird.OBJECT_SENSOR] = world[female.x][female.y].object;
    }
 
 
    // Run bird response.
-   public void run(Bird bird)
+   public void run(int gender)
    {
-      Bird male   = birds[0];
-      Bird female = birds[1];
+	  Bird bird = male;
+	  if (gender == Bird.FEMALE) 
+	  {
+		  bird = female;
+	  }
       Cell cell   = world[bird.x][bird.y];
 
       // Clear sensors.
-      bird.sensors[Bird.WANT_FOOD_SENSOR]  = 0;
-      bird.sensors[Bird.WANT_STONE_SENSOR] = 0;
+      if (bird.gender == Bird.MALE) 
+      {
+	      bird.sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
+	      bird.sensors[MaleBird.WANT_STONE_SENSOR] = 0;
+      }
 
       // Disrupt nest to motivate female to fix it.
       if ((disruptNest == 1) && (bird.gender == Bird.FEMALE)) { disruptNest++; }
@@ -273,7 +277,7 @@ public class Environment
          {
             if ((bird.x == male.x) && (bird.y == male.y))
             {
-               male.sensors[Bird.WANT_FOOD_SENSOR] = 1;
+               male.sensors[MaleBird.WANT_FOOD_SENSOR] = 1;
             }
          }
          break;
@@ -297,7 +301,7 @@ public class Environment
          {
             if ((bird.x == male.x) && (bird.y == male.y))
             {
-               male.sensors[Bird.WANT_STONE_SENSOR] = 1;
+               male.sensors[MaleBird.WANT_STONE_SENSOR] = 1;
             }
          }
          break;
@@ -352,9 +356,9 @@ public class Environment
    public static void main(String[] args)
    {
       Environment environment = new Environment();
-      environment.birds[Bird.MALE].response = Bird.RESPONSE.STEP;
-      environment.run(environment.birds[Bird.MALE]);
-      environment.birds[Bird.FEMALE].response = Bird.RESPONSE.LAY_EGG;
-      environment.run(environment.birds[Bird.FEMALE]);
+      environment.male.response = Bird.RESPONSE.STEP;
+      environment.run(Bird.MALE);
+      environment.female.response = Bird.RESPONSE.LAY_EGG;
+      environment.run(Bird.FEMALE);
    }
 }

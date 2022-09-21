@@ -25,9 +25,7 @@ public class Bird
    // Sensors.
    public static final int LOCALE_SENSOR     = 0;
    public static final int OBJECT_SENSOR     = 1;
-   public static final int WANT_FOOD_SENSOR  = 2;
-   public static final int WANT_STONE_SENSOR = 3;
-   public static final int NUM_SENSORS       = 4;
+   public static final int NUM_SENSORS       = 2;
    public int[]            sensors;
    
    // Responses.
@@ -79,7 +77,7 @@ public class Bird
 
 
    // Print bird.
-   public void print()
+   public void print(int gender)
    {
       System.out.print("Sensors: [");
       switch (sensors[Bird.LOCALE_SENSOR])
@@ -99,38 +97,63 @@ public class Bird
       switch (sensors[Bird.OBJECT_SENSOR])
       {
       case OBJECT.NO_OBJECT:
-         System.out.print("NO_OBJECT,");
+         System.out.print("NO_OBJECT");
          break;
 
       case OBJECT.EGG:
-         System.out.print("EGG,");
+         System.out.print("EGG");
          break;
 
       case OBJECT.MOUSE:
-         System.out.print("MOUSE,");
+         System.out.print("MOUSE");
          break;
 
       case OBJECT.STONE:
-         System.out.print("STONE,");
+         System.out.print("STONE");
          break;
       }
-      if (sensors[Bird.WANT_FOOD_SENSOR] == 0)
+      if (gender == MALE)
       {
-         System.out.print("!WANT_FOOD,");
+	      if (sensors[MaleBird.WANT_FOOD_SENSOR] == 0)
+	      {
+	         System.out.print(",!WANT_FOOD");
+	      }
+	      else
+	      {
+	         System.out.print(",WANT_FOOD");
+	      }
+	      if (sensors[MaleBird.WANT_STONE_SENSOR] == 0)
+	      {
+	         System.out.print(",!WANT_STONE]");
+	      }
+	      else
+	      {
+	         System.out.print(",WANT_STONE]");
+	      }
+      } else {
+    	  System.out.print("]");
       }
-      else
+      System.out.print(", Orientation: ");
+      switch (orientation)
       {
-         System.out.print("WANT_FOOD,");
+      case ORIENTATION.NORTH:
+    	 System.out.print("NORTH, ");
+         break;
+
+      case ORIENTATION.SOUTH:
+     	 System.out.print("SOUTH, ");
+         break;
+
+      case ORIENTATION.EAST:
+     	 System.out.print("EAST, ");
+         break;
+
+      case ORIENTATION.WEST:
+     	 System.out.print("WEST, ");
+         break;
       }
-      if (sensors[Bird.WANT_STONE_SENSOR] == 0)
-      {
-         System.out.print("!WANT_STONE]");
-      }
-      else
-      {
-         System.out.print("WANT_STONE]");
-      }
-      System.out.print(", Object: ");
+      System.out.print("Food: " + food + ", ");      
+      System.out.print(", Has_object: ");
       switch (hasObject)
       {
       case OBJECT.EGG:
@@ -151,59 +174,52 @@ public class Bird
       System.out.println();
    }
 
-
    // Print response.
    public void printResponse(int response)
+   {
+	   System.out.print(getResponseName(response));
+   }
+   
+   public String getResponseName(int response)
    {
       switch (response)
       {
       case RESPONSE.DO_NOTHING:
-         System.out.print("DO_NOTHING");
-         break;
+         return("DO_NOTHING");
 
       case RESPONSE.EAT:
-         System.out.print("EAT");
-         break;
+    	  return("EAT");
 
       case RESPONSE.GET:
-         System.out.print("GET");
-         break;
+    	  return("GET");
 
       case RESPONSE.PUT:
-         System.out.print("PUT");
-         break;
+    	  return("PUT");
 
       case RESPONSE.TOSS:
-         System.out.print("TOSS");
-         break;
+    	  return("TOSS");
 
       case RESPONSE.STEP:
-         System.out.print("STEP");
-         break;
+    	  return("STEP");
 
       case RESPONSE.TURN:
-         System.out.print("TURN");
-         break;
+    	  return("TURN");
 
       case RESPONSE.WANT_FOOD:
-         System.out.print("WANT_FOOD");
-         break;
+    	  return("WANT_FOOD");
 
       case RESPONSE.GIVE_FOOD:
-         System.out.print("GIVE_FOOD");
-         break;
+    	  return("GIVE_FOOD");
 
       case RESPONSE.WANT_STONE:
-         System.out.print("WANT_STONE");
-         break;
+    	  return("WANT_STONE");
 
       case RESPONSE.GIVE_STONE:
-         System.out.print("GIVE_STONE");
-         break;
+    	  return("GIVE_STONE");
 
       case RESPONSE.LAY_EGG:
-         System.out.print("LAY_EGG");
-         break;
+    	  return("LAY_EGG");
       }
+      return "UNKNOWN";
    }
 }

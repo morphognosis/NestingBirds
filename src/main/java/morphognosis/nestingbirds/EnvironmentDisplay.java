@@ -65,8 +65,9 @@ public class EnvironmentDisplay extends JFrame
    // Controls.
    public Controls controls;
 
-   // Bird dashboard.
-   public BirdDashboard birdDashboard;
+   // Bird dashboards.
+   public BirdDashboard maleDashboard;
+   public BirdDashboard femaleDashboard;
 
    // Step frequency (ms).
    public static final int MIN_STEP_DELAY = 0;
@@ -129,11 +130,16 @@ public class EnvironmentDisplay extends JFrame
    // Close.
    public void close()
    {
-      if (birdDashboard != null)
+      if (maleDashboard != null)
       {
-         birdDashboard.close();
-         birdDashboard = null;
+         maleDashboard.close();
+         maleDashboard = null;
       }
+      if (femaleDashboard != null)
+      {
+         femaleDashboard.close();
+         femaleDashboard = null;
+      }      
       setVisible(false);
    }
 
@@ -142,8 +148,6 @@ public class EnvironmentDisplay extends JFrame
    public boolean update(int step)
    {
       controls.updateStepCounter(step);
-      controls.updateNectarCounter(world.collectedNectar);
-      controls.updateDriver(world.driver);
       return(update());
    }
 
@@ -151,8 +155,6 @@ public class EnvironmentDisplay extends JFrame
    public boolean update(int step, int steps)
    {
       controls.updateStepCounter(step, steps);
-      controls.updateNectarCounter(world.collectedNectar);
-      controls.updateDriver(world.driver);
       return(update());
    }
 
@@ -162,12 +164,16 @@ public class EnvironmentDisplay extends JFrame
    {
       if (quit) { return(false); }
 
-      // Update bee dashboard.
-      if (beeDashboard != null)
+      // Update bird dashboards.
+      if (maleDashboard != null)
       {
-         beeDashboard.update();
+         maleDashboard.update();
       }
-
+      if (femaleDashboard != null)
+      {
+         femaleDashboard.update();
+      }
+      
       // Update display.
       display.update();
 
@@ -222,26 +228,31 @@ public class EnvironmentDisplay extends JFrame
       private static final long serialVersionUID = 0L;
 
       // Image files.
-      public static final String BEE_IMAGE_FILENAME    = "honeybee.png";
-      public static final String FLOWER_IMAGE_FILENAME = "flower.png";
-      public static final String NECTAR_IMAGE_FILENAME = "nectar.png";
-
+      public static final String MALE_IMAGE_FILENAME    = "male.gif";
+      public static final String FEMALE_IMAGE_FILENAME    = "male.gif";
+      public static final String CACTUS_IMAGE_FILENAME    = "cactus.gif";
+      public static final String TREE_IMAGE_FILENAME    = "tree.gif";            
+      public static final String MOUSE_IMAGE_FILENAME = "mouse.gif";
+      public static final String STONE_IMAGE_FILENAME = "stone.gif";
+      public static final String EGG_IMAGE_FILENAME = "egg.gif";
+      
       // Colors.
-      public final Color HIVE_COLOR  = Color.YELLOW;
-      public final Color WORLD_COLOR = Color.GREEN;
-      public final Color SELECTED_BEE_HIGHLIGHT_COLOR = Color.RED;
+      public final Color DESERT_COLOR  = Color.YELLOW;
+      public final Color FOREST_COLOR = Color.GREEN;
+      public final Color GRASSLAND_COLOR = Color.WHITE;      
+      public final Color SELECTED_BIRD_HIGHLIGHT_COLOR = Color.RED;
 
       // Images and graphics.
       Graphics      graphics;
       BufferedImage canvasImage;
       Graphics2D    canvasGraphics;
-      BufferedImage[] beeOrientedImages;
-      BufferedImage flowerImage;
-      BufferedImage nectarImage;
-
-      // Sound.
-      public static final String BEE_SOUND_FILENAME = "bees.wav";
-      public Clip                beeSound;
+      BufferedImage maleImage;
+      BufferedImage femaleImage;
+      BufferedImage cactusImage;
+      BufferedImage treeImage;
+      BufferedImage mouseImage;
+      BufferedImage stoneImage;
+      BufferedImage eggImage;
 
       // Font.
       public Font font;
@@ -264,16 +275,13 @@ public class EnvironmentDisplay extends JFrame
          addMouseMotionListener(new CanvasMouseMotionListener());
 
          // Set initial message.
-         messageText = "Click bee for dashboard";
+         messageText = "Click bird for dashboard";
 
          // Compute sizes.
-         width      = Parameters.WORLD_WIDTH;
-         height     = Parameters.WORLD_HEIGHT;
+         width      = environment.width;
+         height     = environment.height;
          cellWidth  = (float)canvasSize.width / (float)width;
          cellHeight = (float)canvasSize.height / (float)height;
-
-         // Initialize sounds.
-         initSounds();
       }
 
 
@@ -307,13 +315,17 @@ public class EnvironmentDisplay extends JFrame
                  y < height;
                  y++, y2 = (int)(cellHeight * (double)(height - (y + 1))))
             {
-               if (world.cells[x][y].hive)
+               switch(environment.world[x][y].locale)
                {
-                  canvasGraphics.setColor(HIVE_COLOR);
-               }
-               else
-               {
-                  canvasGraphics.setColor(WORLD_COLOR);
+               	case Environment.LOCALE.DESERT:
+                  canvasGraphics.setColor(DESERT_COLOR);
+                  break;
+               	case Environment.LOCALE.FOREST:
+                    canvasGraphics.setColor(FOREST_COLOR);
+                    break;
+               	case Environment.LOCALE.GRASSLAND:
+                    canvasGraphics.setColor(GRASSLAND_COLOR);
+                    break;                    
                }
                canvasGraphics.fillRect(x2, y2, (int)cellWidth + 1, (int)cellHeight + 1);
                canvasGraphics.setColor(Color.WHITE);
@@ -477,8 +489,8 @@ public class EnvironmentDisplay extends JFrame
          {
             try
             {
-               beeImage    = ImageIO.read(getClass().getResource(BEE_IMAGE_FILENAME));
-               flowerImage = ImageIO.read(getClass().getResource(FLOWER_IMAGE_FILENAME));
+               beeImage    = ImageIO.read(getClass().getResource(MALE_IMAGE_FILENAME));
+               flowerImage = ImageIO.read(getClass().getResource(FEMALE_IMAGE_FILENAME));
                nectarImage = ImageIO.read(getClass().getResource(NECTAR_IMAGE_FILENAME));
             }
             catch (Exception e)

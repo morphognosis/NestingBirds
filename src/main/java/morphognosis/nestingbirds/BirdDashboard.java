@@ -21,6 +21,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import morphognosis.nestingbirds.Bird.ORIENTATION;
+
 public class BirdDashboard extends JFrame
 {
    private static final long serialVersionUID = 0L;
@@ -107,13 +109,13 @@ public class BirdDashboard extends JFrame
       private static final long serialVersionUID = 0L;
 
       // Components.
-      JTextField hiveText;
-      JTextField nectarText;
-      JTextField nectarDanceDirectionText;
-      JTextField nectarDanceDistanceText;
+      JTextField localeText;
+      JTextField objectText;
+      JTextField wantFoodText;
+      JTextField wantStoneText;
       JTextField orientationText;
-      JTextField nectarCarryText;
-      JTextField nectarDistanceDisplayText;
+      JTextField foodText;
+      JTextField hasObjectText;
       JTextField responseText;
 
       // Constructor.
@@ -124,73 +126,58 @@ public class BirdDashboard extends JFrame
                       BorderFactory.createLineBorder(Color.black),
                       "State"));
          JPanel sensorsPanel = new JPanel();
-         sensorsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
+         sensorsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          sensorsPanel.setBorder(BorderFactory.createTitledBorder(
                                    BorderFactory.createLineBorder(Color.black),
                                    "Sensors"));
          add(sensorsPanel, BorderLayout.NORTH);
-         JPanel hivePanel = new JPanel();
-         hivePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         sensorsPanel.add(hivePanel);
-         hivePanel.add(new JLabel("Hive presence:"));
-         hiveText = new JTextField(10);
-         hiveText.setEditable(false);
-         hivePanel.add(hiveText);
-         JPanel nectarPanel = new JPanel();
-         nectarPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         sensorsPanel.add(nectarPanel);
-         nectarPanel.add(new JLabel("Nectar presence:"));
-         nectarText = new JTextField(10);
-         nectarText.setEditable(false);
-         nectarPanel.add(nectarText);
-         JPanel nectarDanceDirectionPanel = new JPanel();
-         nectarDanceDirectionPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         sensorsPanel.add(nectarDanceDirectionPanel);
-         nectarDanceDirectionPanel.add(new JLabel("Nectar dance direction:"));
-         nectarDanceDirectionText = new JTextField(10);
-         nectarDanceDirectionText.setEditable(false);
-         nectarDanceDirectionPanel.add(nectarDanceDirectionText);
-         JPanel nectarDanceDistancePanel = new JPanel();
-         nectarDanceDistancePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         sensorsPanel.add(nectarDanceDistancePanel);
-         nectarDanceDistancePanel.add(new JLabel("Nectar dance distance:"));
-         nectarDanceDistanceText = new JTextField(10);
-         nectarDanceDistanceText.setEditable(false);
-         nectarDanceDistancePanel.add(nectarDanceDistanceText);
+         sensorsPanel.add(new JLabel("Locale:"));
+         localeText = new JTextField(10);
+         localeText.setEditable(false);
+         sensorsPanel.add(localeText);
+         sensorsPanel.add(new JLabel("Object:"));
+         objectText = new JTextField(10);
+         objectText.setEditable(false);
+         sensorsPanel.add(objectText);
+         if (bird.gender == Bird.MALE) 
+         {
+             sensorsPanel.add(new JLabel("Want food:"));
+             wantFoodText = new JTextField(5);
+             wantFoodText.setEditable(false);
+             sensorsPanel.add(wantFoodText);
+             sensorsPanel.add(new JLabel("Want stone:"));
+             wantStoneText = new JTextField(5);
+             wantStoneText.setEditable(false);
+             sensorsPanel.add(wantStoneText);        	 
+         }
          JPanel responsePanel = new JPanel();
          responsePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         responsePanel.setBorder(BorderFactory.createTitledBorder(
+                                   BorderFactory.createLineBorder(Color.black),
+                                   "Response"));
          add(responsePanel, BorderLayout.CENTER);
          responsePanel.add(new JLabel("Response:"));
          responseText = new JTextField(25);
          responseText.setEditable(false);
          responsePanel.add(responseText);
          JPanel statePanel = new JPanel();
-         statePanel.setLayout(new BoxLayout(statePanel, BoxLayout.Y_AXIS));
+         statePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          statePanel.setBorder(BorderFactory.createTitledBorder(
                                  BorderFactory.createLineBorder(Color.black),
                                  "Internal"));
          add(statePanel, BorderLayout.SOUTH);
-         JPanel orientationPanel = new JPanel();
-         orientationPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         statePanel.add(orientationPanel);
-         orientationPanel.add(new JLabel("Orientation: "));
+         statePanel.add(new JLabel("Orientation: "));
          orientationText = new JTextField(10);
          orientationText.setEditable(false);
-         orientationPanel.add(orientationText);
-         JPanel nectarCarryPanel = new JPanel();
-         nectarCarryPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         statePanel.add(nectarCarryPanel);
-         nectarCarryPanel.add(new JLabel("Nectar carry: "));
-         nectarCarryText = new JTextField(10);
-         nectarCarryText.setEditable(false);
-         nectarCarryPanel.add(nectarCarryText);
-         JPanel nectarDistanceDisplayPanel = new JPanel();
-         nectarDistanceDisplayPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         statePanel.add(nectarDistanceDisplayPanel);
-         nectarDistanceDisplayPanel.add(new JLabel("Nectar distance display: "));
-         nectarDistanceDisplayText = new JTextField(10);
-         nectarDistanceDisplayText.setEditable(false);
-         nectarDistanceDisplayPanel.add(nectarDistanceDisplayText);
+         statePanel.add(orientationText);
+         statePanel.add(new JLabel("Food: "));
+         foodText = new JTextField(10);
+         foodText.setEditable(false);
+         statePanel.add(foodText);
+         statePanel.add(new JLabel("Has object: "));
+         hasObjectText = new JTextField(10);
+         hasObjectText.setEditable(false);
+         statePanel.add(hasObjectText);              
       }
 
 
@@ -198,59 +185,87 @@ public class BirdDashboard extends JFrame
       public void update()
       {
          // Get sensor values.
-         int[] sensors = bird.sensors;
-         if (sensors[HoneyBee.HIVE_PRESENCE_INDEX] == 1.0f)
+         switch(bird.sensors[Bird.LOCALE_SENSOR])
          {
-            hiveText.setText("true");
+         case Environment.LOCALE.DESERT:
+        	 localeText.setText("desert");
+        	 break;
+         case Environment.LOCALE.FOREST:
+        	 localeText.setText("forest");
+        	 break;
+         case Environment.LOCALE.GRASSLAND:
+        	 localeText.setText("grassland");
+        	 break;        	 
          }
-         else
+         switch(bird.sensors[Bird.OBJECT_SENSOR])
          {
-            hiveText.setText("false");
+         case Environment.OBJECT.NO_OBJECT:
+        	 objectText.setText("none");
+        	 break;
+         case Environment.OBJECT.MOUSE:
+        	 objectText.setText("mouse");
+        	 break;
+         case Environment.OBJECT.STONE:
+        	 objectText.setText("stone");
+        	 break;
+         case Environment.OBJECT.EGG:
+        	 objectText.setText("egg");
+        	 break;          	 
          }
-         if (sensors[HoneyBee.NECTAR_PRESENCE_INDEX] == 1.0f)
+         if (bird.gender == Bird.MALE)
          {
-            nectarText.setText("true");
+        	 if (bird.sensors[MaleBird.WANT_FOOD_SENSOR] == 0)
+        	 {
+        		 wantFoodText.setText("false");
+        	 } else {
+        		 wantFoodText.setText("true");
+        	 }
+        	 if (bird.sensors[MaleBird.WANT_STONE_SENSOR] == 0)
+        	 {
+        		 wantStoneText.setText("false");
+        	 } else {
+        		 wantStoneText.setText("true");
+        	 }        	 
          }
-         else
+         
+         // Internal state.
+         switch (bird.orientation)
          {
-            nectarText.setText("false");
-         }
-         if (sensors[HoneyBee.NECTAR_DANCE_DIRECTION_INDEX] >= 0.0f)
-         {
-            nectarDanceDirectionText.setText(Orientation.toName(
-                                                (int)sensors[HoneyBee.NECTAR_DANCE_DIRECTION_INDEX]));
-         }
-         else
-         {
-            nectarDanceDirectionText.setText("NA");
-         }
-         if (sensors[HoneyBee.NECTAR_DANCE_DISTANCE_INDEX] == 0.0f)
-         {
-            nectarDanceDistanceText.setText("long");
-         }
-         else if (sensors[HoneyBee.NECTAR_DANCE_DISTANCE_INDEX] == 1.0f)
-         {
-            nectarDanceDistanceText.setText("short");
-         }
-         else
-         {
-            nectarDanceDistanceText.setText("NA");
-         }
+         case ORIENTATION.NORTH:
+       	    orientationText.setText("NORTH");
+            break;
 
-         // Update response.
-         responseText.setText(HoneyBee.getResponseName(bee.response));
+         case ORIENTATION.SOUTH:
+        	orientationText.setText("SOUTH");
+            break;
 
-         // Update state.
-         orientationText.setText(Orientation.toName(bee.orientation));
-         nectarCarryText.setText(bee.nectarCarry + "");
-         if (bee.nectarDistanceDisplay == -1)
+         case ORIENTATION.EAST:
+        	orientationText.setText("EAST");
+            break;
+
+         case ORIENTATION.WEST:
+        	orientationText.setText("WEST");
+            break;
+         } 
+         foodText.setText(bird.food + "");         
+         switch(bird.hasObject)
          {
-            nectarDistanceDisplayText.setText("NA");
-         }
-         else
-         {
-            nectarDistanceDisplayText.setText(bee.nectarDistanceDisplay + "");
-         }
+         case Environment.OBJECT.NO_OBJECT:
+        	 hasObjectText.setText("none");
+        	 break;
+         case Environment.OBJECT.MOUSE:
+        	 hasObjectText.setText("mouse");
+        	 break;
+         case Environment.OBJECT.STONE:
+        	 hasObjectText.setText("stone");
+        	 break;
+         case Environment.OBJECT.EGG:
+        	 hasObjectText.setText("egg");
+        	 break;          	 
+         }         
+         
+         // Response.
+         responseText.setText(bird.getResponseName(bird.response));
       }
    }
 
