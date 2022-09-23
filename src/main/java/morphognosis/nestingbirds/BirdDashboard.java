@@ -193,8 +193,8 @@ public class BirdDashboard extends JFrame
          case Environment.LOCALE.FOREST:
         	 localeText.setText("forest");
         	 break;
-         case Environment.LOCALE.GRASSLAND:
-        	 localeText.setText("grassland");
+         case Environment.LOCALE.PLAIN:
+        	 localeText.setText("plain");
         	 break;        	 
          }
          switch(bird.sensors[Bird.OBJECT_SENSOR])
@@ -265,7 +265,12 @@ public class BirdDashboard extends JFrame
          }         
          
          // Response.
-         responseText.setText(bird.getResponseName(bird.response));
+         if (bird.gender == Bird.MALE) 
+         {
+        	 responseText.setText(MaleBird.responseToString(bird.response));
+         } else {
+        	 responseText.setText(FemaleBird.responseToString(bird.response));        	 
+         }
       }
    }
 

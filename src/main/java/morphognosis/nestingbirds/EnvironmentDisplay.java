@@ -4,116 +4,207 @@
 
 package morphognosis.nestingbirds;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Choice;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Label;
+import java.awt.MediaTracker;
+import java.awt.Point;
+import java.awt.ScrollPane;
+import java.awt.Scrollbar;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class EnvironmentDisplay extends JFrame
+public class EnvironmentDisplay extends JFrame implements Runnable
 {
    private static final long serialVersionUID = 0L;
 
    // Environment.
    public Environment environment;
+	
+   // Milliseconds between responses.
+   static final int MIN_RESPONSE_DELAY = 100;
+   static final int MAX_RESPONSE_DELAY = 1000;
 
-   // Dimensions.
-   public static final Dimension DISPLAY_SIZE = new Dimension(550, 750);
+   // Milliseconds between display updates.
+   static final int DISPLAY_UPDATE_DELAY = 50;
 
-   // Environment display.
-   public EnvironmentDisplay environmentDisplay;
+   // World image dimensions.
+   static final Dimension SCREEN_SIZE       = new Dimension(652, 600);
+   static final Dimension CANVAS_SIZE       = new Dimension(850, 1100);
+   static final Dimension STATUS_PANEL_SIZE = new Dimension(652, 100);
+   static final Dimension CELL_SIZE         = new Dimension(30, 30);
+   static final Dimension LOCALE_SIZE       = new Dimension(15, 15);
+   static final Dimension OBJECT_SIZE       = new Dimension(20, 20);
+   static final Dimension SMALL_BIRD_SIZE   = new Dimension(15, 15);
+   static final Dimension BIRD_SIZE         = new Dimension(80, 80);
+
+   // Screen size.
+   Dimension screenSize;
 
    // Display.
-   public Display display;
+   Graphics graphics;   
+   ScrollPane canvasScroll;
+   Dimension  canvasScrollSize;
+   Canvas     canvas;
+   Graphics   canvasGraphics;
+   Image      worldImage;
+   Graphics   worldImageGraphics;
+   Dimension  worldImageSize;
+   Point      femaleStatusLocation;
+   Point      femaleImageLocation;
+   Point      femaleObjectLocation;
+   Point      maleStatusLocation;
+   Point      maleImageLocation;
+   Point      maleObjectLocation;
+   Point      statusInfoOffset;
+   Point      localeImageOffset;
+   Point      objectImageOffset;
+   Point      femaleImageOffset;
+   Point      maleImageOffset;
+   Thread displayThread;
 
-   // Controls.
-   public Controls controls;
+   // Control panel.
+   JPanel     controlPanel;
+   Dimension controlPanelSize;
+   Checkbox  stepButton;
+   JSlider   responseSlider;
+   int       response = MAX_RESPONSE_DELAY;
 
-   // Bird dashboards.
-   public BirdDashboard maleDashboard;
-   public BirdDashboard femaleDashboard;
+   // Images
+   Image maleImage;
+   Image maleSmallImage;
+   Image femaleImage;
+   Image femaleSmallImage;
+   Image treeImage;
+   Image cactusImage;
+   Image mouseImage;
+   Image stoneImage;
+   Image eggImage;
+   Image maleNetImage;
+   Image femaleNetImage;
 
-   // Step frequency (ms).
-   public static final int MIN_STEP_DELAY = 0;
-   public static final int MAX_STEP_DELAY = 150;
-   public int              stepDelay      = MAX_STEP_DELAY;
-
-   // Quit.
-   public boolean quit;
+   // Font.
+   Font        font = new Font("Helvetica", Font.BOLD, 12);
+   FontMetrics fontMetrics;
+   int         fontAscent;
+   int         fontWidth;
+   int         fontHeight;
 
    // Constructor.
    public EnvironmentDisplay(Environment environment)
    {
       this.environment   = environment;
-      environmentDisplay = this;
 
       // Set up display.
       setTitle("Nesting birds");
-      addWindowListener(new WindowAdapter()
-                        {
-                           public void windowClosing(WindowEvent e)
-                           {
-                              close();
-                              quit = true;
-                           }
-                        }
-                        );
-      setBounds(0, 0, DISPLAY_SIZE.width, DISPLAY_SIZE.height);
-      JPanel basePanel = (JPanel)getContentPane();
-      basePanel.setLayout(new BorderLayout());
-
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      setBounds(0, 0, 667, 655);
+      setLayout(new GridLayout(1, 1));
+      
       // Create display.
-      Dimension displaySize = new Dimension(DISPLAY_SIZE.width,
-                                            (int)((double)DISPLAY_SIZE.height * .7));
-      display = new Display(displaySize);
-      basePanel.add(display, BorderLayout.NORTH);
+      screenSize = SCREEN_SIZE;
+      setSize(screenSize);
+      setLayout(new BorderLayout());
+      canvasScroll     = new ScrollPane();
+      canvasScrollSize = new Dimension(screenSize.width, (int)((double)screenSize.height * .95));
+      canvasScroll.setBounds(0, 0, canvasScrollSize.width, canvasScrollSize.height);
+      canvas = new Canvas();
+      canvas.setBounds(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
+      add(canvasScroll, BorderLayout.NORTH);
+      canvasScroll.add(canvas, null);
 
-      // Create controls.
-      controls = new Controls();
-      basePanel.add(controls, BorderLayout.SOUTH);
+      // Create control panel.
+      controlPanel     = new JPanel();
+      controlPanelSize = new Dimension(screenSize.width,
+                                       (int)((double)screenSize.height * .05));
+      controlPanel.setBounds(0, canvasScrollSize.height,
+                             controlPanelSize.width, controlPanelSize.height);
+      add(controlPanel);
+      stepButton = new Checkbox("Step");
+      controlPanel.add(stepButton);
+      controlPanel.add(new Label("Fast", Label.RIGHT));
+      responseSlider = new JSlider(Scrollbar.HORIZONTAL, MIN_RESPONSE_DELAY,
+                                   MAX_RESPONSE_DELAY, MAX_RESPONSE_DELAY);
+      responseSlider.addChangeListener(new responseSliderListener());
+      controlPanel.add(responseSlider);
+      controlPanel.add(new Label("Stop", Label.LEFT));
+
+      // Get images.
+      MediaTracker tracker = new MediaTracker(this);
+      Image image   = loadImage("male.gif");
+      tracker.addImage(image, 0);
+      maleImage = image.getScaledInstance(BIRD_SIZE.width,
+                                          BIRD_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(maleImage, 0);
+      maleSmallImage = image.getScaledInstance(SMALL_BIRD_SIZE.width,
+                                               SMALL_BIRD_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(maleSmallImage, 0);
+      image = loadImage("female.gif");
+      tracker.addImage(image, 0);
+      femaleImage = image.getScaledInstance(BIRD_SIZE.width,
+                                            BIRD_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(femaleImage, 0);
+      femaleSmallImage = image.getScaledInstance(SMALL_BIRD_SIZE.width,
+                                                 SMALL_BIRD_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(femaleSmallImage, 0);
+      image = loadImage("tree.gif");
+      tracker.addImage(image, 0);
+      treeImage = image.getScaledInstance(LOCALE_SIZE.width,
+                                          LOCALE_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(treeImage, 0);
+      image = loadImage("cactus.gif");
+      tracker.addImage(image, 0);
+      cactusImage = image.getScaledInstance(LOCALE_SIZE.width,
+                                            LOCALE_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(cactusImage, 0);
+      image = loadImage("mouse.gif");
+      tracker.addImage(image, 0);
+      mouseImage = image.getScaledInstance(OBJECT_SIZE.width,
+                                           OBJECT_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(mouseImage, 0);
+      image = loadImage("stone.gif");
+      tracker.addImage(image, 0);
+      stoneImage = image.getScaledInstance(OBJECT_SIZE.width,
+                                           OBJECT_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(stoneImage, 0);
+      image = loadImage("egg.gif");
+      tracker.addImage(image, 0);
+      eggImage = image.getScaledInstance(OBJECT_SIZE.width,
+                                         OBJECT_SIZE.height, Image.SCALE_DEFAULT);
+      tracker.addImage(eggImage, 0);
+      try
+      {
+         tracker.waitForAll();
+      }
+      catch (InterruptedException e) {
+         status("Image loading interrupted");
+         System.exit(1);
+      }
 
       // Make display visible.
       pack();
       setLocation();
-      setVisible(true);
+      setVisible(true);      
    }
-
 
    public void setLocation()
    {
@@ -126,809 +217,320 @@ public class EnvironmentDisplay extends JFrame
       setLocation(x, y);
    }
 
-
-   // Close.
-   public void close()
+   // Start.
+   public void start()
    {
-      if (maleDashboard != null)
+      // Create display update thread.
+      if (displayThread == null)
       {
-         maleDashboard.close();
-         maleDashboard = null;
+         displayThread = new Thread(this);
+         displayThread.start();
       }
-      if (femaleDashboard != null)
-      {
-         femaleDashboard.close();
-         femaleDashboard = null;
-      }      
-      setVisible(false);
    }
 
 
-   // Update display.
-   public boolean update(int step)
+   // Stop.
+   public void stop()
    {
-      controls.updateStepCounter(step);
-      return(update());
+      if (displayThread != null)
+      {
+         displayThread = null;
+      }
    }
 
 
-   public boolean update(int step, int steps)
+   // Run.
+   public void run()
    {
-      controls.updateStepCounter(step, steps);
-      return(update());
-   }
+      // Lower this thread's priority and get the current time.
+      Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-
-   private int timer = 0;
-   public boolean update()
-   {
-      if (quit) { return(false); }
-
-      // Update bird dashboards.
-      if (maleDashboard != null)
+      // Display update loop.
+      while (Thread.currentThread() == displayThread)
       {
-         maleDashboard.update();
-      }
-      if (femaleDashboard != null)
-      {
-         femaleDashboard.update();
-      }
-      
-      // Update display.
-      display.update();
+         updateDisplay();
 
-      // Timer loop: count down delay by 1ms.
-      for (timer = stepDelay; timer > 0 && !quit; )
-      {
          try
          {
-            Thread.sleep(1);
+            Thread.sleep(DISPLAY_UPDATE_DELAY);
          }
-         catch (InterruptedException e) {
-            break;
-         }
-
-         display.update();
-
-         if (stepDelay < MAX_STEP_DELAY)
-         {
-            timer--;
-         }
+         catch (InterruptedException e) { break; }
       }
-      return(!quit);
    }
 
-
-   // Set step delay.
-   public void setStepDelay(int delay)
+   // Update display.
+   public void updateDisplay()
    {
-      stepDelay = timer = delay;
-   }
-
-
-   // Step.
-   public void step()
-   {
-      setStepDelay(MAX_STEP_DELAY);
-      controls.speedSlider.setValue(MAX_STEP_DELAY);
-      timer = 0;
-   }
-
-
-   // Set message
-   public void setMessage(String message)
-   {
-      display.messageText = message;
-   }
-
-
-   // Display.
-   public class Display extends Canvas
-   {
-      private static final long serialVersionUID = 0L;
-
-      // Image files.
-      public static final String MALE_IMAGE_FILENAME    = "male.gif";
-      public static final String FEMALE_IMAGE_FILENAME    = "male.gif";
-      public static final String CACTUS_IMAGE_FILENAME    = "cactus.gif";
-      public static final String TREE_IMAGE_FILENAME    = "tree.gif";            
-      public static final String MOUSE_IMAGE_FILENAME = "mouse.gif";
-      public static final String STONE_IMAGE_FILENAME = "stone.gif";
-      public static final String EGG_IMAGE_FILENAME = "egg.gif";
+      int    x, y, x2, y2, i;
+      String s;
       
-      // Colors.
-      public final Color DESERT_COLOR  = Color.YELLOW;
-      public final Color FOREST_COLOR = Color.GREEN;
-      public final Color GRASSLAND_COLOR = Color.WHITE;      
-      public final Color SELECTED_BIRD_HIGHLIGHT_COLOR = Color.RED;
-
-      // Images and graphics.
-      Graphics      graphics;
-      BufferedImage canvasImage;
-      Graphics2D    canvasGraphics;
-      BufferedImage maleImage;
-      BufferedImage femaleImage;
-      BufferedImage cactusImage;
-      BufferedImage treeImage;
-      BufferedImage mouseImage;
-      BufferedImage stoneImage;
-      BufferedImage eggImage;
-
-      // Font.
-      public Font font;
-
-      // Message.
-      public String messageText;
-
-      // Sizes.
-      Dimension canvasSize;
-      int       width, height;
-      float     cellWidth, cellHeight;
-
-      // Constructor.
-      public Display(Dimension canvasSize)
-      {
-         // Configure canvas.
-         this.canvasSize = canvasSize;
-         setBounds(0, 0, canvasSize.width, canvasSize.height);
-         addMouseListener(new CanvasMouseListener());
-         addMouseMotionListener(new CanvasMouseMotionListener());
-
-         // Set initial message.
-         messageText = "Click bird for dashboard";
-
-         // Compute sizes.
-         width      = environment.width;
-         height     = environment.height;
-         cellWidth  = (float)canvasSize.width / (float)width;
-         cellHeight = (float)canvasSize.height / (float)height;
-      }
-
-
-      // Update display.
-      void update()
-      {
-         int x, y, x2, y2;
-
-         // Initialize graphics.
-         if (graphics == null)
-         {
-            graphics = getGraphics();
-            if (graphics == null)
-            {
-               return;
-            }
-            canvasImage    = new BufferedImage(canvasSize.width, canvasSize.height, BufferedImage.TYPE_INT_ARGB);
-            canvasGraphics = canvasImage.createGraphics();
-            initGraphics();
-         }
-
-         // Clear display.
-         canvasGraphics.setColor(Color.WHITE);
-         canvasGraphics.fillRect(0, 0, canvasSize.width, canvasSize.height);
-
-         // Draw cells.
-         for (x = x2 = 0; x < width;
-              x++, x2 = (int)(cellWidth * (double)x))
-         {
-            for (y = 0, y2 = canvasSize.height - (int)cellHeight;
-                 y < height;
-                 y++, y2 = (int)(cellHeight * (double)(height - (y + 1))))
-            {
-               switch(environment.world[x][y].locale)
-               {
-               	case Environment.LOCALE.DESERT:
-                  canvasGraphics.setColor(DESERT_COLOR);
-                  break;
-               	case Environment.LOCALE.FOREST:
-                    canvasGraphics.setColor(FOREST_COLOR);
-                    break;
-               	case Environment.LOCALE.GRASSLAND:
-                    canvasGraphics.setColor(GRASSLAND_COLOR);
-                    break;                    
-               }
-               canvasGraphics.fillRect(x2, y2, (int)cellWidth + 1, (int)cellHeight + 1);
-               canvasGraphics.setColor(Color.WHITE);
-            }
-         }
-
-         // Draw objects.
-         BasicStroke thickLine  = new BasicStroke(3);
-         BasicStroke dashedLine = new BasicStroke(1, BasicStroke.CAP_BUTT,
-                                                  BasicStroke.JOIN_BEVEL, 0, new float[] { 9 }, 0);
-         BasicStroke thinLine   = new BasicStroke(1);
-         int         nectarYoff = (int)(cellHeight / 2.0f);
-         for (x = x2 = 0; x < width;
-              x++, x2 = (int)(cellWidth * (double)x))
-         {
-            for (y = 0, y2 = canvasSize.height - (int)cellHeight;
-                 y < height;
-                 y++, y2 = (int)(cellHeight * (double)(height - (y + 1))))
-            {
-               // Draw flower and nectar?
-               Flower flower = world.cells[x][y].flower;
-               if (flower != null)
-               {
-                  canvasGraphics.drawImage(flowerImage, x2, y2,
-                                           (int)cellWidth + 1, (int)cellHeight + 1, null);
-                  if (flower.nectar)
-                  {
-                     canvasGraphics.drawImage(nectarImage, x2, y2 + nectarYoff,
-                                              (int)(cellWidth / 2.0f), (int)(cellHeight / 2.0f), null);
-                  }
-               }
-
-               // Draw bee?
-               HoneyBee bee = world.cells[x][y].bee;
-               if (bee != null)
-               {
-                  canvasGraphics.drawImage(beeOrientedImages[bee.orientation], x2, y2,
-                                           (int)cellWidth + 1, (int)cellHeight + 1, null);
-
-                  // Carrying nectar?
-                  if (bee.nectarCarry)
-                  {
-                     canvasGraphics.drawImage(nectarImage, x2, y2,
-                                              (int)(cellWidth / 2.0f), (int)(cellHeight / 2.0f), null);
-                  }
-
-                  // Bee displaying distance to nectar?
-                  if (bee.nectarDistanceDisplay != -1)
-                  {
-                     int maxDist  = Math.max(Parameters.WORLD_WIDTH, Parameters.WORLD_HEIGHT) / 2;
-                     int unitDist = maxDist / 2;
-                     int d        = 0;
-                     if (bee.nectarDistanceDisplay == 0)
-                     {
-                        d = 1;
-                     }
-                     int nectarDist = (d * unitDist) + (unitDist / 2);
-                     int toX        = bee.x;
-                     int toY        = bee.y;
-                     switch (bee.orientation)
-                     {
-                     case Orientation.NORTH:
-                        toY += nectarDist;
-                        break;
-
-                     case Orientation.NORTHEAST:
-                        toX += nectarDist;
-                        toY += nectarDist;
-                        break;
-
-                     case Orientation.EAST:
-                        toX += nectarDist;
-                        break;
-
-                     case Orientation.SOUTHEAST:
-                        toX += nectarDist;
-                        toY -= nectarDist;
-                        break;
-
-                     case Orientation.SOUTH:
-                        toY -= nectarDist;
-                        break;
-
-                     case Orientation.SOUTHWEST:
-                        toX -= nectarDist;
-                        toY -= nectarDist;
-                        break;
-
-                     case Orientation.WEST:
-                        toX -= nectarDist;
-                        break;
-
-                     case Orientation.NORTHWEST:
-                        toX -= nectarDist;
-                        toY += nectarDist;
-                        break;
-                     }
-                     canvasGraphics.setColor(Color.BLACK);
-                     canvasGraphics.setStroke(dashedLine);
-                     int fromX = x2 + (int)(cellWidth / 2.0f);
-                     int fromY = y2 + (int)(cellHeight / 2.0f);
-                     toX = (int)((float)toX * cellWidth) + (int)(cellWidth / 2.0f);
-                     toY = (int)(cellHeight * (float)(height - (toY + 1))) + (int)(cellHeight / 2.0f);
-                     canvasGraphics.drawLine(fromX, fromY, toX, toY);
-                     canvasGraphics.setColor(Color.WHITE);
-                     canvasGraphics.setStroke(thinLine);
-                  }
-
-                  // Highlight selected bee?
-                  if ((beeDashboard != null) && (beeDashboard.bee == bee))
-                  {
-                     canvasGraphics.setColor(SELECTED_BEE_HIGHLIGHT_COLOR);
-                     canvasGraphics.setStroke(thickLine);
-                     canvasGraphics.drawRect(x2 + 1, y2 + 1, (int)cellWidth - 1, (int)cellHeight - 1);
-                     canvasGraphics.setColor(Color.WHITE);
-                     canvasGraphics.setStroke(thinLine);
-                  }
-               }
-            }
-         }
-
-         // Draw grid.
-         canvasGraphics.setColor(Color.BLACK);
-         y2 = canvasSize.height;
-         for (x = 1, x2 = (int)cellWidth; x < width;
-              x++, x2 = (int)(cellWidth * (double)x))
-         {
-            canvasGraphics.drawLine(x2, 0, x2, y2);
-         }
-         x2 = canvasSize.width;
-         for (y = 1, y2 = (int)cellHeight; y < height;
-              y++, y2 = (int)(cellHeight * (double)y))
-         {
-            canvasGraphics.drawLine(0, y2, x2, y2);
-         }
-
-         // Draw message?
-         if (messageText != null)
-         {
-            int w = canvasGraphics.getFontMetrics().stringWidth(messageText);
-            canvasGraphics.setColor(Color.WHITE);
-            canvasGraphics.fillRect(0, 5, w, 20);
-            canvasGraphics.setColor(Color.BLACK);
-            canvasGraphics.drawString(messageText, 0, 20);
-            canvasGraphics.setColor(Color.BLACK);
-         }
-
-         // Refresh display.
-         graphics.drawImage(canvasImage, 0, 0, this);
-      }
-
-
       // Initialize graphics.
-      void initGraphics()
+      if (graphics == null)
       {
-         // Load source images.
-         BufferedImage beeImage = null;
-         String        protocol = this.getClass().getResource("").getProtocol();
-
-         if (Objects.equals(protocol, "jar"))
-         {
-            try
-            {
-               beeImage    = ImageIO.read(getClass().getResource(MALE_IMAGE_FILENAME));
-               flowerImage = ImageIO.read(getClass().getResource(FEMALE_IMAGE_FILENAME));
-               nectarImage = ImageIO.read(getClass().getResource(NECTAR_IMAGE_FILENAME));
-            }
-            catch (Exception e)
-            {
-               System.err.println("Cannot load images: " + e.getMessage());
-               System.exit(1);
-            }
-         }
-         else
-         {
-            try
-            {
-               if (beeImage == null)
-               {
-                  beeImage = ImageIO.read(new File("res/images/" + BEE_IMAGE_FILENAME));
-               }
-               if (flowerImage == null)
-               {
-                  flowerImage = ImageIO.read(new File("res/images/" + FLOWER_IMAGE_FILENAME));
-               }
-               if (nectarImage == null)
-               {
-                  nectarImage = ImageIO.read(new File("res/images/" + NECTAR_IMAGE_FILENAME));
-               }
-            }
-            catch (Exception e)
-            {
-               System.err.println("Cannot load images: " + e.getMessage());
-               System.exit(1);
-            }
-         }
-
-         // Set font.
-         font = new Font("Ariel", Font.BOLD, 12);
-         canvasGraphics.setFont(font);
-
-         // Create oriented bee images.
-         beeOrientedImages = new BufferedImage[Orientation.NUM_ORIENTATIONS];
-         beeOrientedImages[Orientation.NORTH] = beeImage;
-         for (int i = 1; i < Orientation.NUM_ORIENTATIONS; i++)
-         {
-            double angle = 0.0;
-            switch (i)
-            {
-            case Orientation.NORTHEAST:
-               angle = 45.0;
-               break;
-
-            case Orientation.EAST:
-               angle = 90.0;
-               break;
-
-            case Orientation.SOUTHEAST:
-               angle = 135.0;
-               break;
-
-            case Orientation.SOUTH:
-               angle = 180.0;
-               break;
-
-            case Orientation.SOUTHWEST:
-               angle = 225.0;
-               break;
-
-            case Orientation.WEST:
-               angle = 270.0;
-               break;
-
-            case Orientation.NORTHWEST:
-               angle = 315.0;
-               break;
-            }
-            beeOrientedImages[i] = createRotatedImage(beeImage, angle);
-         }
+    	  if (!initGraphics()) return;
       }
+      
+      // Clear.
+      worldImageGraphics.setColor(Color.white);
+      worldImageGraphics.fillRect(0, 0, worldImageSize.width, worldImageSize.height);
 
-
-      // Create rotated image.
-      public BufferedImage createRotatedImage(BufferedImage bimg, double angle)
+      // Draw world.
+      worldImageGraphics.setColor(Color.black);
+      y2 = worldImageSize.height;
+      int h = STATUS_PANEL_SIZE.height;
+      for (x = x2 = 0; x < Environment.width; x++, x2 += CELL_SIZE.width)
       {
-         int w = bimg.getWidth();
-         int h = bimg.getHeight();
-
-         BufferedImage rotated = new BufferedImage(w, h, bimg.getType());
-         Graphics2D    graphic = rotated.createGraphics();
-
-         graphic.rotate(Math.toRadians(angle), w / 2, h / 2);
-         graphic.drawImage(bimg, null, 0, 0);
-         graphic.dispose();
-         return(rotated);
+         worldImageGraphics.drawLine(x2, h, x2, y2);
       }
-
-
-      // Initialize sounds.
-      void initSounds()
+      worldImageGraphics.drawLine(x2, h, x2, y2);
+      x2 = Environment.width * CELL_SIZE.width;
+      for (y = 0, y2 = h; y < Environment.width; y++, y2 += CELL_SIZE.height)
       {
-         String protocol = this.getClass().getResource("").getProtocol();
+         worldImageGraphics.drawLine(0, y2, x2, y2);
+      }
+      worldImageGraphics.drawLine(0, y2, x2, y2);
+      for (x = x2 = 0; x < Environment.width; x++, x2 += CELL_SIZE.width)
+      {
+         for (y = 0, y2 = h; y < Environment.height; y++, y2 += CELL_SIZE.height)
+         {
+            switch (environment.world[x][y].locale)
+            {
+            case Environment.LOCALE.DESERT:
+               worldImageGraphics.drawImage(cactusImage, x2 + localeImageOffset.x,
+                                            y2 + localeImageOffset.y, this);
+               break;
 
-         if (Objects.equals(protocol, "jar"))
-         {
-            // Running from jar.
-            try
-            {
-               AudioInputStream inputStream = AudioSystem.getAudioInputStream(getClass().getResource(BEE_SOUND_FILENAME));
-               DataLine.Info    info        = new DataLine.Info(Clip.class, inputStream.getFormat());
-               beeSound = (Clip)AudioSystem.getLine(info);
-               beeSound.open(inputStream);
+            case Environment.LOCALE.FOREST:
+               worldImageGraphics.drawImage(treeImage, x2 + localeImageOffset.x,
+                                            y2 + localeImageOffset.y, this);
+               break;
+
+            case Environment.LOCALE.PLAIN:
+               break;
             }
-            catch (LineUnavailableException | IOException | UnsupportedAudioFileException e)
+
+            switch (environment.world[x][y].object)
             {
-               System.err.println("Cannot load sound file " + BEE_SOUND_FILENAME + ": " + e.getMessage());
-               System.exit(1);
-            }
-         }
-         else
-         {
-            try
-            {
-               AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("res/sounds/" + BEE_SOUND_FILENAME));
-               DataLine.Info    info        = new DataLine.Info(Clip.class, inputStream.getFormat());
-               beeSound = (Clip)AudioSystem.getLine(info);
-               beeSound.open(inputStream);
-            }
-            catch (LineUnavailableException | IOException | UnsupportedAudioFileException e)
-            {
-               System.err.println("Cannot load sound file " + BEE_SOUND_FILENAME + ": " + e.getMessage());
-               System.exit(1);
+            case Environment.OBJECT.NO_OBJECT:
+               break;
+
+            case Environment.OBJECT.EGG:
+               worldImageGraphics.drawImage(eggImage, x2 + objectImageOffset.x,
+                                            y2 + objectImageOffset.y, this);
+               break;
+
+            case Environment.OBJECT.MOUSE:
+               worldImageGraphics.drawImage(mouseImage, x2 + objectImageOffset.x,
+                                            y2 + objectImageOffset.y, this);
+               break;
+
+            case Environment.OBJECT.STONE:
+               worldImageGraphics.drawImage(stoneImage, x2 + objectImageOffset.x,
+                                            y2 + objectImageOffset.y, this);
+               break;
             }
          }
       }
 
-
-      // Canvas mouse listener.
-      class CanvasMouseListener extends MouseAdapter
+      // Female status.
+      worldImageGraphics.drawImage(femaleImage, femaleImageLocation.x,
+                                   femaleImageLocation.y, this);
+      s = "Female";
+      x = femaleImageLocation.x + ((BIRD_SIZE.width - fontMetrics.stringWidth(s)) / 2);
+      y = femaleImageLocation.y + BIRD_SIZE.height + fontAscent;
+      worldImageGraphics.drawString(s, x, y);
+      if (environment.female.hasObject == Environment.OBJECT.MOUSE)
       {
-         // Mouse pressed.
-         public void mousePressed(MouseEvent evt)
-         {
-            setMessage(null);
-            int x = (int)((double)evt.getX() / cellWidth);
-            int y = height - (int)((double)evt.getY() / cellHeight) - 1;
-
-            if ((x >= 0) && (x < width) &&
-                (y >= 0) && (y < height))
-            {
-               if (world.cells[x][y].bee != null)
-               {
-                  if (beeDashboard == null)
-                  {
-                     beeDashboard = new HoneyBeeDashboard(world.cells[x][y].bee, worldDisplay);
-                     beeDashboard.open();
-                  }
-                  else
-                  {
-                     beeDashboard.close();
-                     if (beeDashboard.bee == world.cells[x][y].bee)
-                     {
-                        beeDashboard = null;
-                     }
-                     else
-                     {
-                        beeDashboard = new HoneyBeeDashboard(world.cells[x][y].bee, worldDisplay);
-                        beeDashboard.open();
-                     }
-                  }
-               }
-               else
-               {
-                  if (beeDashboard != null)
-                  {
-                     beeDashboard.close();
-                     beeDashboard = null;
-                  }
-               }
-            }
-         }
+         worldImageGraphics.drawImage(mouseImage, femaleObjectLocation.x,
+                                      femaleObjectLocation.y, this);
       }
+      else if (environment.female.hasObject == Environment.OBJECT.STONE)
+      {
+         worldImageGraphics.drawImage(stoneImage, femaleObjectLocation.x,
+                                      femaleObjectLocation.y, this);
+      }      
+      s = "Sensors: [" + environment.female.sensorsToString() + "]";
+      x = femaleStatusLocation.x + statusInfoOffset.x;
+      y = femaleStatusLocation.y + statusInfoOffset.y;
+      worldImageGraphics.drawString(s, x, y);
+      s = "Orientation: " + Bird.orientationToString(environment.female.orientation);
+      y += fontAscent + 2;
+      worldImageGraphics.drawString(s, x, y);      
+      s = "Response (#" + environment.female.response + "): " +
+          responseToString(environment.female.response);
+      y += fontAscent + 2;
+      worldImageGraphics.drawString(s, x, y);
+      s = "Food: " + environment.female.food;
+      y += fontAscent + 2;
+      worldImageGraphics.drawString(s, x, y);
+      x2 = environment.female.x * CELL_SIZE.width;
+      y2 = (environment.female.y * CELL_SIZE.height) + h;
+      worldImageGraphics.drawImage(femaleSmallImage, x2 + femaleImageOffset.x,
+                                   y2 + femaleImageOffset.y, this);
+
+      // Male status.
+      worldImageGraphics.drawImage(maleImage, maleImageLocation.x,
+                                   maleImageLocation.y, this);
+      s = "Male";
+      x = maleImageLocation.x + ((BIRD_SIZE.width - fontMetrics.stringWidth(s)) / 2);
+      y = maleImageLocation.y + BIRD_SIZE.height + fontAscent;
+      worldImageGraphics.drawString(s, x, y);
+      if (environment.male.hasObject == Environment.OBJECT.MOUSE)
+      {
+         worldImageGraphics.drawImage(mouseImage, maleObjectLocation.x,
+                                      maleObjectLocation.y, this);
+      }
+      else if (environment.male.hasObject == Environment.OBJECT.STONE)
+      {
+         worldImageGraphics.drawImage(stoneImage, maleObjectLocation.x,
+                                      maleObjectLocation.y, this);
+      }
+      s = "Sensors: [" + environment.male.sensorsToString() + "]";
+      x = maleStatusLocation.x + statusInfoOffset.x;
+      y = maleStatusLocation.y + statusInfoOffset.y;
+      worldImageGraphics.drawString(s, x, y);
+      s = "Orientation: " + Bird.orientationToString(environment.male.orientation);
+      y += fontAscent + 2;
+      worldImageGraphics.drawString(s, x, y);       
+      s = "Response (#" + environment.male.response + "): " +
+          responseToString(environment.male.response);
+      y += fontAscent + 2;
+      worldImageGraphics.drawString(s, x, y);
+      s = "Food: " + environment.male.food;
+      y += fontAscent + 2;
+      worldImageGraphics.drawString(s, x, y);
+      x2 = environment.male.x * CELL_SIZE.width;
+      y2 = (environment.male.y * CELL_SIZE.height) + h;
+      worldImageGraphics.drawImage(maleSmallImage, x2 + maleImageOffset.x,
+                                   y2 + maleImageOffset.y, this);
+
+      // Copy to display.
+      canvasGraphics.drawImage(worldImage, 0, 0, this);
+   }
+   
+   // Initialize graphics.
+   boolean initGraphics()
+   {
+	  int x,y;
+	  
+	  if (graphics != null) return true;
+      graphics = getGraphics();
+      if (graphics == null) return false;
+      
+      // Initialize font.
+      graphics.setFont(font);
+      fontMetrics = graphics.getFontMetrics();
+      fontAscent  = fontMetrics.getMaxAscent();
+      fontWidth   = fontMetrics.getMaxAdvance();
+      fontHeight  = fontMetrics.getHeight();	   
+      
+       // Initialize graphics.
+       if ((x = Environment.width * CELL_SIZE.width) < STATUS_PANEL_SIZE.width)
+       {
+          x = STATUS_PANEL_SIZE.width;
+       }
+       x++;
+       y = (Environment.height * CELL_SIZE.height) + STATUS_PANEL_SIZE.height;
+       worldImageSize     = new Dimension(x, y);
+       worldImage         = createImage(x, y);
+       worldImageGraphics = worldImage.getGraphics();
+       y = 1;
+       femaleStatusLocation = new Point(0, y);
+       x = (int)((STATUS_PANEL_SIZE.width - (2.5 * BIRD_SIZE.width)) / 2);
+       femaleImageLocation = new Point(x, y);
+       x = femaleImageLocation.x + ((BIRD_SIZE.width * 7) / 8);
+       y = femaleImageLocation.y + (BIRD_SIZE.height / 8);
+       femaleObjectLocation = new Point(x, y);
+       x = 1;
+       y = CELL_SIZE.height - SMALL_BIRD_SIZE.height;
+       femaleImageOffset = new Point(x, y);
+       x = (int)(femaleImageLocation.x + (1.5 * BIRD_SIZE.width));
+       y = 1;
+       maleImageLocation = new Point(x, y);
+       x = maleImageLocation.x + BIRD_SIZE.width;
+       maleStatusLocation = new Point(x, y);
+       x = maleImageLocation.x - (BIRD_SIZE.width / 8) - 1;
+       y = maleImageLocation.y + (BIRD_SIZE.height / 8);
+       maleObjectLocation = new Point(x, y);
+       x = CELL_SIZE.width - SMALL_BIRD_SIZE.width;
+       y = CELL_SIZE.height - SMALL_BIRD_SIZE.height;
+       maleImageOffset = new Point(x, y);
+       x = 2;
+       y = 2 + fontAscent;
+       statusInfoOffset  = new Point(x, y);
+       localeImageOffset = new Point(1, 1);
+       x = (CELL_SIZE.width - OBJECT_SIZE.width) / 2;
+       y = (CELL_SIZE.height - OBJECT_SIZE.height) / 2;
+       objectImageOffset = new Point(x, y);	
+       canvasGraphics = canvas.getGraphics();       
+	   return true;
    }
 
-   // Canvas mouse motion listener.
-   class CanvasMouseMotionListener extends MouseMotionAdapter
+
+   // Response to string.
+   public String responseToString(int response)
    {
-      // Mouse dragged.
-      public void mouseDragged(MouseEvent evt)
-      {
-      }
+	  String s = MaleBird.responseToString(response);
+	  if (s == null)
+	  {
+		  s = FemaleBird.responseToString(response);
+	  }
+	  return s;
    }
 
-   // Control panel.
-   class Controls extends JPanel implements ActionListener, ChangeListener, ItemListener
+
+   // View choice listener.
+   class viewChoiceItemListener implements ItemListener
    {
-      private static final long serialVersionUID = 0L;
-
-      // Components.
-      JButton   resetButton;
-      JLabel    stepCounter;
-      JSlider   speedSlider;
-      JButton   stepButton;
-      Choice    driverChoice;
-      JCheckBox muteCheck;
-      JLabel    nectarCounter;
-      JButton   clearMetamorphsButton;
-      JButton   writeMetamorphDatasetButton;
-      JCheckBox trainNNcheck;
-      JCheckBox trainGoalSeekingNNcheck;
-
-      // Constructor.
-      Controls()
-      {
-         setLayout(new BorderLayout());
-         setBorder(BorderFactory.createRaisedBevelBorder());
-
-         JPanel controlsPanel = new JPanel();
-         controlsPanel.setLayout(new BorderLayout());
-         controlsPanel.setBorder(BorderFactory.createTitledBorder(
-                                    BorderFactory.createLineBorder(Color.black), "Controls"));
-         JPanel panel = new JPanel();
-         panel.add(new JLabel("Speed:   Fast", Label.RIGHT));
-         speedSlider = new JSlider(JSlider.HORIZONTAL, MIN_STEP_DELAY,
-                                   MAX_STEP_DELAY, MAX_STEP_DELAY);
-         speedSlider.addChangeListener(this);
-         panel.add(speedSlider);
-         panel.add(new JLabel("Stop", Label.LEFT));
-         stepButton = new JButton("Step");
-         stepButton.addActionListener(this);
-         panel.add(stepButton);
-         stepCounter = new JLabel("");
-         panel.add(stepCounter);
-         controlsPanel.add(panel, BorderLayout.NORTH);
-         panel = new JPanel();
-         panel.add(new JLabel("Driver:"));
-         driverChoice = new Choice();
-         panel.add(driverChoice);
-         driverChoice.add("autopilot");
-         driverChoice.add("metamorphDB");
-         driverChoice.add("metamorphNN");
-         driverChoice.add("autopilotGoalSeeking");
-         driverChoice.add("metamorphGoalSeekingDB");
-         driverChoice.add("metamorphGoalSeekingNN");
-         driverChoice.add("local override");
-         driverChoice.select(world.driver);
-         driverChoice.addItemListener(this);
-         resetButton = new JButton("Reset");
-         resetButton.addActionListener(this);
-         panel.add(resetButton);
-         muteCheck = new JCheckBox("Mute", true);
-         panel.add(muteCheck);
-         muteCheck.addItemListener(this);
-         nectarCounter = new JLabel("Collected nectar: 0");
-         panel.add(nectarCounter);
-         controlsPanel.add(panel, BorderLayout.SOUTH);
-         add(controlsPanel, BorderLayout.NORTH);
-         panel = new JPanel();
-         panel.setLayout(new BorderLayout());
-         panel.setBorder(BorderFactory.createTitledBorder(
-                            BorderFactory.createLineBorder(Color.black), "Metamorph operations"));
-         JPanel subPanel = new JPanel();
-         subPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         panel.add(subPanel, BorderLayout.NORTH);
-         clearMetamorphsButton = new JButton("Clear");
-         clearMetamorphsButton.addActionListener(this);
-         subPanel.add(clearMetamorphsButton);
-         writeMetamorphDatasetButton = new JButton("Write to " + World.METAMORPH_DATASET_FILE_BASENAME + ".csv");
-         writeMetamorphDatasetButton.addActionListener(this);
-         subPanel.add(writeMetamorphDatasetButton);
-         subPanel = new JPanel();
-         subPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         panel.add(subPanel, BorderLayout.SOUTH);
-         subPanel.add(new JLabel("Train:"));
-         trainNNcheck = new JCheckBox("Neural network", false);
-         trainNNcheck.addItemListener(this);
-         subPanel.add(trainNNcheck);
-         trainGoalSeekingNNcheck = new JCheckBox("Goal-seeking neural network", false);
-         trainGoalSeekingNNcheck.addItemListener(this);
-         subPanel.add(trainGoalSeekingNNcheck);
-         add(panel, BorderLayout.SOUTH);
-      }
-
-
-      // Update step counter display.
-      void updateStepCounter(int step)
-      {
-         stepCounter.setText("Step: " + step);
-      }
-
-
-      void updateStepCounter(int step, int steps)
-      {
-         stepCounter.setText("Step: " + step + "/" + steps);
-      }
-
-
-      // Update collected nectar counter display.
-      void updateNectarCounter(int count)
-      {
-         nectarCounter.setText("Collected nectar: " + count);
-      }
-
-
-      // Update driver.
-      void updateDriver(int count)
-      {
-         driverChoice.select(world.driver);
-      }
-
-
-      // Speed slider listener.
-      public void stateChanged(ChangeEvent evt)
-      {
-         setMessage(null);
-         setStepDelay(speedSlider.getValue());
-      }
-
-
-      // Button listener.
-      public void actionPerformed(ActionEvent evt)
-      {
-         setMessage(null);
-
-         // Reset?
-         if (evt.getSource() == (Object)resetButton)
-         {
-            world.reset();
-            updateNectarCounter(world.collectedNectar);
-            if (beeDashboard != null)
-            {
-               beeDashboard.update();
-            }
-            return;
-         }
-
-         // Step?
-         if (evt.getSource() == (Object)stepButton)
-         {
-            step();
-
-            return;
-         }
-
-         // Clear metamorphs?
-         if ((JButton)evt.getSource() == clearMetamorphsButton)
-         {
-            world.clearMetamorphs();
-            return;
-         }
-
-         // Write metamorph dataset?
-         if ((JButton)evt.getSource() == writeMetamorphDatasetButton)
-         {
-            String filename = World.METAMORPH_DATASET_FILE_BASENAME + ".csv";
-            try
-            {
-               world.writeMetamorphDataset(filename);
-            }
-            catch (Exception e)
-            {
-               setMessage("Cannot write metamorph dataset to file " + filename + ": " + e.getMessage());
-            }
-            return;
-         }
-      }
-
-
-      // Choice listener.
       public void itemStateChanged(ItemEvent evt)
       {
-         Object source = evt.getSource();
-
-         if (source instanceof Choice && ((Choice)source == driverChoice))
-         {
-            int driver = driverChoice.getSelectedIndex();
-            world.setDriver(driver);
-            if (beeDashboard != null)
-            {
-               if (driver != Driver.LOCAL_OVERRIDE)
-               {
-                  beeDashboard.setDriverChoice(driver);
-               }
-            }
-            return;
-         }
-
-         if (source instanceof JCheckBox && ((JCheckBox)source == muteCheck))
-         {
-            if (evt.getStateChange() == 1)
-            {
-               display.beeSound.stop();
-            }
-            else
-            {
-               display.beeSound.start();
-               display.beeSound.loop(Clip.LOOP_CONTINUOUSLY);
-            }
-            return;
-         }
-
-         if (source instanceof JCheckBox)
-         {
-            if ((JCheckBox)source == trainNNcheck)
-            {
-               if (trainNNcheck.isSelected())
-               {
-                  try
-                  {
-                     setMessage("Training metamorph neural network...");
-                     paint(getGraphics());
-                     world.trainMetamorphNN();
-                     setMessage(null);
-                  }
-                  catch (Exception e)
-                  {
-                     setMessage("Cannot train metamorph neural network: " + e.getMessage());
-                  }
-                  trainNNcheck.setSelected(false);
-               }
-               return;
-            }
-
-            if ((JCheckBox)source == trainGoalSeekingNNcheck)
-            {
-               if (trainGoalSeekingNNcheck.isSelected())
-               {
-                  try
-                  {
-                     setMessage("Training goal-seeking metamorph neural network...");
-                     paint(getGraphics());
-                     //world.trainMetamorphNN();
-                     setMessage(null);
-                  }
-                  catch (Exception e)
-                  {
-                     setMessage("Cannot train goal-seeking metamorph neural network: " + e.getMessage());
-                  }
-                  trainGoalSeekingNNcheck.setSelected(false);
-               }
-               return;
-            }
-         }
+         // Clear canvas for new image.
+         canvasGraphics.setColor(Color.white);
+         canvasGraphics.fillRect(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
       }
+   }
+
+   // Response slider listener.
+   class responseSliderListener implements ChangeListener
+   {
+      public void stateChanged(ChangeEvent evt)
+      {
+         response = responseSlider.getValue();
+      }
+   }
+
+   // Load image from file.
+   Image loadImage(String name)
+   {
+      String filename = "res/images/" + name;
+      Image image = null;
+      try 
+      {
+         image = ImageIO.read(new File(filename));
+      }
+      catch (IOException e) 
+      {
+         status("Cannot load image " + name);    	  
+      }
+      return(image);
+   }
+   
+   // Status message.
+   void status(String message)
+   {
+	   System.out.println(message);
+   }
+
+   // Main.
+   public static void main(String[] args)
+   {	   
+	  // Create environment.
+	  Environment environment = new Environment();
+	  
+      // Create environment display.
+      EnvironmentDisplay environmentDisplay = new EnvironmentDisplay(environment);
+
+      // Start.
+      environmentDisplay.start();
    }
 }

@@ -4,9 +4,6 @@
 
 package morphognosis.nestingbirds;
 
-import morphognosis.nestingbirds.Environment.LOCALE;
-import morphognosis.nestingbirds.Environment.OBJECT;
-
 public class FemaleBird extends Bird
 {
    // Sensors.
@@ -30,6 +27,35 @@ public class FemaleBird extends Bird
    // Print bird.
    public void print()
    {
-	  print(FEMALE);
+      System.out.print("Sensors: [");
+      printSensors();
+      System.out.print("], ");
+      printState();
+      System.out.print(", Response: ");
+      printResponse(response);
+      System.out.println();	   
    }
+   
+   // Print response.
+   public void printResponse(int response)
+   {
+	   System.out.print(responseToString(response));
+   } 
+   
+   // Get response name.
+   public static String responseToString(int response)
+   {
+      switch (response)
+      {
+      case RESPONSE.WANT_FOOD:
+    	  return("WANT_FOOD");
+
+      case RESPONSE.WANT_STONE:
+    	  return("WANT_STONE");
+
+      case RESPONSE.LAY_EGG:
+    	  return("LAY_EGG");
+      }
+      return Bird.responseToString(response);
+   }   
 }

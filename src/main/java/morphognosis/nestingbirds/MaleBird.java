@@ -4,6 +4,10 @@
 
 package morphognosis.nestingbirds;
 
+import morphognosis.nestingbirds.Bird.ORIENTATION;
+import morphognosis.nestingbirds.Environment.LOCALE;
+import morphognosis.nestingbirds.Environment.OBJECT;
+
 public class MaleBird extends Bird
 {
    // Sensors.
@@ -32,10 +36,66 @@ public class MaleBird extends Bird
       if (food > 0) { food--; }
    }
 
-
    // Print bird.
    public void print()
    {
-	  print(MALE);
+      System.out.print("Sensors: [");
+      printSensors();
+      System.out.print("], ");
+      printState();
+      System.out.print(", Response: ");
+      printResponse(response);
+      System.out.println();	   
    }
+   
+   // Print sensors.
+   public void printSensors()
+   {
+      System.out.print(super.sensorsToString());
+      System.out.print("," + sensorsToString());
+   }
+   
+   // Sensors to string.
+   public String sensorsToString()
+   {
+	  String s = "";
+      if (sensors[WANT_FOOD_SENSOR] == 0)
+      {
+         s += "!WANT_FOOD";
+      }
+      else
+      {
+    	  s += "WANT_FOOD";
+      }
+      s += ",";
+      if (sensors[WANT_STONE_SENSOR] == 0)
+      {
+    	  s += "!WANT_STONE";
+      }
+      else
+      {
+    	  s += "WANT_STONE";
+      }
+      return s;
+   }
+      
+   // Print response.
+   public void printResponse(int response)
+   {
+	   System.out.print(responseToString(response));
+   } 
+   
+   // Get response name.
+   public static String responseToString(int response)
+   {
+      switch (response)
+      {
+      case RESPONSE.GIVE_FOOD:
+    	  return("GIVE_FOOD");
+
+      case RESPONSE.GIVE_STONE:
+    	  return("GIVE_STONE");
+      }
+      return Bird.responseToString(response);
+   }   
 }

@@ -40,7 +40,7 @@ public class Environment
    {
       public static final int DESERT    = 0;
       public static final int FOREST    = 1;
-      public static final int GRASSLAND = 2;
+      public static final int PLAIN = 2;
    };
 
    // Object types.
@@ -87,7 +87,7 @@ public class Environment
             switch (locale[x][y])
             {
             case 0:
-               world[x][y].locale = LOCALE.GRASSLAND;
+               world[x][y].locale = LOCALE.PLAIN;
                world[x][y].object = OBJECT.NO_OBJECT;
                break;
 
@@ -272,7 +272,7 @@ public class Environment
          }
          break;
 
-      case Bird.RESPONSE.WANT_FOOD:
+      case FemaleBird.RESPONSE.WANT_FOOD:
          if (bird == female)
          {
             if ((bird.x == male.x) && (bird.y == male.y))
@@ -282,7 +282,7 @@ public class Environment
          }
          break;
 
-      case Bird.RESPONSE.GIVE_FOOD:
+      case MaleBird.RESPONSE.GIVE_FOOD:
          if (bird == male)
          {
             if ((bird.hasObject == OBJECT.MOUSE) && (female.hasObject == OBJECT.NO_OBJECT))
@@ -296,7 +296,7 @@ public class Environment
          }
          break;
 
-      case Bird.RESPONSE.WANT_STONE:
+      case FemaleBird.RESPONSE.WANT_STONE:
          if (bird == female)
          {
             if ((bird.x == male.x) && (bird.y == male.y))
@@ -306,7 +306,7 @@ public class Environment
          }
          break;
 
-      case Bird.RESPONSE.GIVE_STONE:
+      case MaleBird.RESPONSE.GIVE_STONE:
          if (bird == male)
          {
             if ((bird.hasObject == OBJECT.STONE) && (female.hasObject == OBJECT.NO_OBJECT))
@@ -320,7 +320,7 @@ public class Environment
          }
          break;
 
-      case Bird.RESPONSE.LAY_EGG:
+      case FemaleBird.RESPONSE.LAY_EGG:
          if (bird == female)
          {
             if (cell.object == OBJECT.NO_OBJECT)
@@ -350,7 +350,44 @@ public class Environment
 
       return(Math.sqrt((xd * xd) + (yd * yd)));
    }
+   
+   // Locale to string.
+   public static String localeToString(int locale)
+   {
+      switch (locale)
+      {
+      case LOCALE.DESERT:
+         return "DESERT";
 
+      case LOCALE.FOREST:
+    	 return "FOREST";
+
+      case LOCALE.PLAIN:
+    	 return "PLAIN";
+      }
+      return "Unknown locale";
+   }
+      
+   // Object to string.
+   public static String objectToString(int object)
+   {
+      switch (object)
+      {
+      case OBJECT.NO_OBJECT:
+          return "NO_OBJECT";
+      
+      case OBJECT.EGG:
+         return "EGG";
+
+      case OBJECT.MOUSE:
+         return "MOUSE";
+
+      case OBJECT.STONE:
+         return "STONE";
+      }
+      return "Unknown object";
+   }
+   
 
    // Main.
    public static void main(String[] args)
@@ -358,7 +395,7 @@ public class Environment
       Environment environment = new Environment();
       environment.male.response = Bird.RESPONSE.STEP;
       environment.run(Bird.MALE);
-      environment.female.response = Bird.RESPONSE.LAY_EGG;
+      environment.female.response = FemaleBird.RESPONSE.LAY_EGG;
       environment.run(Bird.FEMALE);
    }
 }
