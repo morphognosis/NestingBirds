@@ -17,5 +17,5 @@ https://github.com/portegys/Mona
 Build with Eclipse project and export to bin/nestingbirds.jar to run with scripts in the work directory.
 
 Nesting birds environment:
-To build: build_nestingbirds.bat, build_nestingbirds.sh
-To run: run_nestingbirds.bat, run_nestingbirds.sh
+<br>To build: build_nestingbirds.bat, build_nestingbirds.sh
+<br>To run: run_nestingbirds.bat, run_nestingbirds.sh
