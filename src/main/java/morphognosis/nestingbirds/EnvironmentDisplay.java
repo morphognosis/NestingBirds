@@ -33,7 +33,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
 
    // Environment.
    public Environment environment;
-	
+
    // Milliseconds between responses.
    static final int MIN_RESPONSE_DELAY = 100;
    static final int MAX_RESPONSE_DELAY = 1000;
@@ -55,7 +55,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    Dimension screenSize;
 
    // Display.
-   Graphics graphics;   
+   Graphics   graphics;
    ScrollPane canvasScroll;
    Dimension  canvasScrollSize;
    Canvas     canvas;
@@ -74,14 +74,14 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    Point      objectImageOffset;
    Point      femaleImageOffset;
    Point      maleImageOffset;
-   Thread displayThread;
+   Thread     displayThread;
 
    // Control panel.
-   JPanel     controlPanel;
-   Dimension controlPanelSize;
+   JPanel            controlPanel;
+   Dimension         controlPanelSize;
    JComboBox<String> femaleResponseChoice;
    JComboBox<String> maleResponseChoice;
-   JButton  stepButton;
+   JButton           stepButton;
 
    // Images
    Image maleImage;
@@ -106,7 +106,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    // Constructor.
    public EnvironmentDisplay(Environment environment)
    {
-      this.environment   = environment;
+      this.environment = environment;
 
       // Set up display.
       setTitle("Nesting birds");
@@ -114,7 +114,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       screenSize = SCREEN_SIZE;
       setSize(screenSize);
       setLayout(new BorderLayout());
-      
+
       // Create control panel.
       controlPanel     = new JPanel();
       controlPanelSize = new Dimension(screenSize.width,
@@ -148,7 +148,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       controlPanel.add(maleResponseChoice);
       stepButton = new JButton("Step");
       controlPanel.add(stepButton);
-      
+
       // Create world display.
       canvasScroll     = new ScrollPane();
       canvasScrollSize = new Dimension(screenSize.width, (int)((double)screenSize.height * .95));
@@ -160,7 +160,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
 
       // Get images.
       MediaTracker tracker = new MediaTracker(this);
-      Image image   = loadImage("male.gif");
+      Image        image   = loadImage("male.gif");
       tracker.addImage(image, 0);
       maleImage = image.getScaledInstance(BIRD_SIZE.width,
                                           BIRD_SIZE.height, Image.SCALE_DEFAULT);
@@ -213,8 +213,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       // Make display visible.
       pack();
       setLocation();
-      setVisible(true);      
+      setVisible(true);
    }
+
 
    public void setLocation()
    {
@@ -226,6 +227,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
 
       setLocation(x, y);
    }
+
 
    // Start.
    public void start()
@@ -268,18 +270,19 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       }
    }
 
+
    // Update display.
    public void updateDisplay()
    {
       int    x, y, x2, y2;
       String s;
-      
+
       // Initialize graphics.
       if (graphics == null)
       {
-    	  if (!initGraphics()) return;
+         if (!initGraphics()) { return; }
       }
-      
+
       // Clear.
       worldImageGraphics.setColor(Color.white);
       worldImageGraphics.fillRect(0, 0, worldImageSize.width, worldImageSize.height);
@@ -358,12 +361,12 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       {
          worldImageGraphics.drawImage(stoneImage, femaleObjectLocation.x,
                                       femaleObjectLocation.y, this);
-      }              
-      s = "Orientation: " + Bird.orientationToString(environment.female.orientation);
+      }
+      s = "Orientation: " + Bird.ORIENTATION.toString(environment.female.orientation);
       x = femaleStatusLocation.x + statusInfoOffset.x;
       y = femaleStatusLocation.y + statusInfoOffset.y;
-      worldImageGraphics.drawString(s, x, y);      
-      s = "Food: " + environment.female.food;
+      worldImageGraphics.drawString(s, x, y);
+      s  = "Food: " + environment.female.food;
       y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
       x2 = environment.female.x * CELL_SIZE.width;
@@ -387,12 +390,12 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       {
          worldImageGraphics.drawImage(stoneImage, maleObjectLocation.x,
                                       maleObjectLocation.y, this);
-      }        
-      s = "Orientation: " + Bird.orientationToString(environment.male.orientation);
+      }
+      s = "Orientation: " + Bird.ORIENTATION.toString(environment.male.orientation);
       x = maleStatusLocation.x + statusInfoOffset.x;
       y = maleStatusLocation.y + statusInfoOffset.y;
-      worldImageGraphics.drawString(s, x, y);       
-      s = "Food: " + environment.male.food;
+      worldImageGraphics.drawString(s, x, y);
+      s  = "Food: " + environment.male.food;
       y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
       x2 = environment.male.x * CELL_SIZE.width;
@@ -403,67 +406,69 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       // Copy to display.
       canvasGraphics.drawImage(worldImage, 0, 0, this);
    }
-   
+
+
    // Initialize graphics.
    boolean initGraphics()
    {
-	  int x,y;
-	  
-	  if (graphics != null) return true;
+      int x, y;
+
+      if (graphics != null) { return(true); }
       graphics = getGraphics();
-      if (graphics == null) return false;
-      
+      if (graphics == null) { return(false); }
+
       // Initialize font.
-      font = new Font("Helvetica", Font.BOLD, 12);
+      font        = new Font("Helvetica", Font.BOLD, 12);
       fontMetrics = graphics.getFontMetrics();
       fontAscent  = fontMetrics.getMaxAscent();
       fontWidth   = fontMetrics.getMaxAdvance();
-      fontHeight  = fontMetrics.getHeight();	   
+      fontHeight  = fontMetrics.getHeight();
       graphics.setFont(font);
-      
-       // Initialize graphics.
-       if ((x = Environment.width * CELL_SIZE.width) < STATUS_PANEL_SIZE.width)
-       {
-          x = STATUS_PANEL_SIZE.width;
-       }
-       x++;
-       y = (Environment.height * CELL_SIZE.height) + STATUS_PANEL_SIZE.height;
-       worldImageSize     = new Dimension(x, y);
-       worldImage         = createImage(x, y);
-       worldImageGraphics = worldImage.getGraphics();
-       worldImageGraphics.setFont(font);
-       y = 1;
-       femaleStatusLocation = new Point(0, y);
-       x = (int)((STATUS_PANEL_SIZE.width - (2.5 * BIRD_SIZE.width)) / 2);
-       femaleImageLocation = new Point(x, y);
-       x = femaleImageLocation.x + ((BIRD_SIZE.width * 7) / 8);
-       y = femaleImageLocation.y + (BIRD_SIZE.height / 8);
-       femaleObjectLocation = new Point(x, y);
-       x = 1;
-       y = CELL_SIZE.height - SMALL_BIRD_SIZE.height;
-       femaleImageOffset = new Point(x, y);
-       x = (int)(femaleImageLocation.x + (1.5 * BIRD_SIZE.width));
-       y = 1;
-       maleImageLocation = new Point(x, y);
-       x = maleImageLocation.x + BIRD_SIZE.width;
-       maleStatusLocation = new Point(x, y);
-       x = maleImageLocation.x - (BIRD_SIZE.width / 8) - 1;
-       y = maleImageLocation.y + (BIRD_SIZE.height / 8);
-       maleObjectLocation = new Point(x, y);
-       x = CELL_SIZE.width - SMALL_BIRD_SIZE.width;
-       y = CELL_SIZE.height - SMALL_BIRD_SIZE.height;
-       maleImageOffset = new Point(x, y);
-       x = 2;
-       y = 2 + fontAscent;
-       statusInfoOffset  = new Point(x, y);
-       localeImageOffset = new Point(1, 1);
-       x = (CELL_SIZE.width - OBJECT_SIZE.width) / 2;
-       y = (CELL_SIZE.height - OBJECT_SIZE.height) / 2;
-       objectImageOffset = new Point(x, y);	
-       canvasGraphics = canvas.getGraphics();
-       canvasGraphics.setFont(font);
-	   return true;
+
+      // Initialize graphics.
+      if ((x = Environment.width * CELL_SIZE.width) < STATUS_PANEL_SIZE.width)
+      {
+         x = STATUS_PANEL_SIZE.width;
+      }
+      x++;
+      y = (Environment.height * CELL_SIZE.height) + STATUS_PANEL_SIZE.height;
+      worldImageSize     = new Dimension(x, y);
+      worldImage         = createImage(x, y);
+      worldImageGraphics = worldImage.getGraphics();
+      worldImageGraphics.setFont(font);
+      y = 1;
+      femaleStatusLocation = new Point(0, y);
+      x = (int)((STATUS_PANEL_SIZE.width - (2.5 * BIRD_SIZE.width)) / 2);
+      femaleImageLocation = new Point(x, y);
+      x = femaleImageLocation.x + ((BIRD_SIZE.width * 7) / 8);
+      y = femaleImageLocation.y + (BIRD_SIZE.height / 8);
+      femaleObjectLocation = new Point(x, y);
+      x = 1;
+      y = CELL_SIZE.height - SMALL_BIRD_SIZE.height;
+      femaleImageOffset = new Point(x, y);
+      x = (int)(femaleImageLocation.x + (1.5 * BIRD_SIZE.width));
+      y = 1;
+      maleImageLocation = new Point(x, y);
+      x = maleImageLocation.x + BIRD_SIZE.width;
+      maleStatusLocation = new Point(x, y);
+      x = maleImageLocation.x - (BIRD_SIZE.width / 8) - 1;
+      y = maleImageLocation.y + (BIRD_SIZE.height / 8);
+      maleObjectLocation = new Point(x, y);
+      x = CELL_SIZE.width - SMALL_BIRD_SIZE.width;
+      y = CELL_SIZE.height - SMALL_BIRD_SIZE.height;
+      maleImageOffset = new Point(x, y);
+      x = 2;
+      y = 2 + fontAscent;
+      statusInfoOffset  = new Point(x, y);
+      localeImageOffset = new Point(1, 1);
+      x = (CELL_SIZE.width - OBJECT_SIZE.width) / 2;
+      y = (CELL_SIZE.height - OBJECT_SIZE.height) / 2;
+      objectImageOffset = new Point(x, y);
+      canvasGraphics    = canvas.getGraphics();
+      canvasGraphics.setFont(font);
+      return(true);
    }
+
 
    // View choice listener.
    class viewChoiceItemListener implements ItemListener
@@ -480,30 +485,33 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    Image loadImage(String name)
    {
       String filename = "res/images/" + name;
-      Image image = null;
-      try 
+      Image  image    = null;
+
+      try
       {
          image = ImageIO.read(new File(filename));
       }
-      catch (IOException e) 
+      catch (IOException e)
       {
-         status("Cannot load image " + name);    	  
+         status("Cannot load image " + name);
       }
       return(image);
    }
-   
+
+
    // Status message.
    void status(String message)
    {
-	   System.out.println(message);
+      System.out.println(message);
    }
+
 
    // Main.
    public static void main(String[] args)
-   {	   
-	  // Create environment.
-	  Environment environment = new Environment();
-	  
+   {
+      // Create environment.
+      Environment environment = new Environment();
+
       // Create environment display.
       EnvironmentDisplay environmentDisplay = new EnvironmentDisplay(environment);
 

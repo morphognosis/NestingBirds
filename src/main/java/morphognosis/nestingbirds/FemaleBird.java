@@ -7,22 +7,40 @@ package morphognosis.nestingbirds;
 public class FemaleBird extends Bird
 {
    // Sensors.
-   public static final int NUM_SENSORS       = 2;
-   
+   public static final int NUM_SENSORS = 2;
+
    // Responses.
    public static class RESPONSE
    {
       public static final int WANT_FOOD  = 7;
       public static final int WANT_STONE = 9;
       public static final int LAY_EGG    = 11;
+
+      // Response to string.
+      public static String toString(int response)
+      {
+         switch (response)
+         {
+         case RESPONSE.WANT_FOOD:
+            return("WANT_FOOD");
+
+         case RESPONSE.WANT_STONE:
+            return("WANT_STONE");
+
+         case RESPONSE.LAY_EGG:
+            return("LAY_EGG");
+         }
+         return(Bird.RESPONSE.toString(response));
+      }
    };
 
    // Constructor.
    public FemaleBird()
    {
-		  super(FEMALE);
-	      sensors     = new int[NUM_SENSORS];
+      super(FEMALE);
+      sensors = new int[NUM_SENSORS];
    }
+
 
    // Print bird.
    public void print()
@@ -33,29 +51,13 @@ public class FemaleBird extends Bird
       printState();
       System.out.print(", Response: ");
       printResponse(response);
-      System.out.println();	   
+      System.out.println();
    }
-   
+
+
    // Print response.
    public void printResponse(int response)
    {
-	   System.out.print(responseToString(response));
-   } 
-   
-   // Get response name.
-   public static String responseToString(int response)
-   {
-      switch (response)
-      {
-      case RESPONSE.WANT_FOOD:
-    	  return("WANT_FOOD");
-
-      case RESPONSE.WANT_STONE:
-    	  return("WANT_STONE");
-
-      case RESPONSE.LAY_EGG:
-    	  return("LAY_EGG");
-      }
-      return Bird.responseToString(response);
-   }   
+      System.out.print(RESPONSE.toString(response));
+   }
 }

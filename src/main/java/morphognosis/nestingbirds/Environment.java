@@ -38,9 +38,26 @@ public class Environment
    // Locale types.
    public static class LOCALE
    {
-      public static final int DESERT    = 0;
-      public static final int FOREST    = 1;
-      public static final int PLAIN = 2;
+      public static final int DESERT = 0;
+      public static final int FOREST = 1;
+      public static final int PLAIN  = 2;
+
+      // Locale to string.
+      public static String toString(int locale)
+      {
+         switch (locale)
+         {
+         case LOCALE.DESERT:
+            return("DESERT");
+
+         case LOCALE.FOREST:
+            return("FOREST");
+
+         case LOCALE.PLAIN:
+            return("PLAIN");
+         }
+         return("Unknown locale");
+      }
    };
 
    // Object types.
@@ -50,6 +67,26 @@ public class Environment
       public static final int EGG       = 1;
       public static final int MOUSE     = 2;
       public static final int STONE     = 3;
+
+      // Object to string.
+      public static String toString(int object)
+      {
+         switch (object)
+         {
+         case OBJECT.NO_OBJECT:
+            return("NO_OBJECT");
+
+         case OBJECT.EGG:
+            return("EGG");
+
+         case OBJECT.MOUSE:
+            return("MOUSE");
+
+         case OBJECT.STONE:
+            return("STONE");
+         }
+         return("Unknown object");
+      }
    };
 
    // Cell.
@@ -115,7 +152,7 @@ public class Environment
       }
 
       // Create birds.
-      male = new MaleBird();
+      male      = new MaleBird();
       male.x    = width / 2;
       male.y    = height / 2;
       male.food = Bird.FOOD_DURATION;
@@ -129,28 +166,31 @@ public class Environment
       female.sensors[Bird.OBJECT_SENSOR] = world[female.x][female.y].object;
    }
 
+
    // Step environment.
    public void step()
    {
-	   cycle(Bird.FEMALE);
-	   cycle(Bird.MALE);
+      cycle(Bird.FEMALE);
+      cycle(Bird.MALE);
    }
-   
+
+
    // Bird sensory-response cycle.
    public void cycle(int gender)
    {
-	  Bird bird = male;
-	  if (gender == Bird.FEMALE) 
-	  {
-		  bird = female;
-	  }
-      Cell cell   = world[bird.x][bird.y];
+      Bird bird = male;
+
+      if (gender == Bird.FEMALE)
+      {
+         bird = female;
+      }
+      Cell cell = world[bird.x][bird.y];
 
       // Clear sensors.
-      if (bird.gender == Bird.MALE) 
+      if (bird.gender == Bird.MALE)
       {
-	      bird.sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
-	      bird.sensors[MaleBird.WANT_STONE_SENSOR] = 0;
+         bird.sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
+         bird.sensors[MaleBird.WANT_STONE_SENSOR] = 0;
       }
 
       // Disrupt nest to motivate female to fix it.
@@ -356,51 +396,17 @@ public class Environment
 
       return(Math.sqrt((xd * xd) + (yd * yd)));
    }
-   
-   // Locale to string.
-   public static String localeToString(int locale)
-   {
-      switch (locale)
-      {
-      case LOCALE.DESERT:
-         return "DESERT";
 
-      case LOCALE.FOREST:
-    	 return "FOREST";
-
-      case LOCALE.PLAIN:
-    	 return "PLAIN";
-      }
-      return "Unknown locale";
-   }
-      
-   // Object to string.
-   public static String objectToString(int object)
-   {
-      switch (object)
-      {
-      case OBJECT.NO_OBJECT:
-          return "NO_OBJECT";
-      
-      case OBJECT.EGG:
-         return "EGG";
-
-      case OBJECT.MOUSE:
-         return "MOUSE";
-
-      case OBJECT.STONE:
-         return "STONE";
-      }
-      return "Unknown object";
-   }
-   
 
    // Main.
    public static void main(String[] args)
    {
       Environment environment = new Environment();
-      environment.male.response = Bird.RESPONSE.MOVE;
+
+      environment.male.response   = Bird.RESPONSE.MOVE;
       environment.female.response = FemaleBird.RESPONSE.LAY_EGG;
       environment.step();
+      environment.male.print();
+      environment.female.print();
    }
 }
