@@ -14,8 +14,8 @@ public class MaleBird extends Bird
    // Responses.
    public static class RESPONSE
    {
-      public static final int GIVE_FOOD  = 8;
-      public static final int GIVE_STONE = 10;
+      public static final int GIVE_FOOD  = 9;
+      public static final int GIVE_STONE = 11;
 
       // Response to string.
       public static String toString(int response)

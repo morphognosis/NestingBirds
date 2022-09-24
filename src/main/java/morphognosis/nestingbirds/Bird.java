@@ -56,7 +56,8 @@ public class Bird
       public static final int PUT        = 3;
       public static final int TOSS       = 4;
       public static final int MOVE       = 5;
-      public static final int TURN       = 6;
+      public static final int TURN_RIGHT = 6;
+      public static final int TURN_LEFT  = 7;
 
       // Response to string.
       public static String toString(int response)
@@ -81,8 +82,11 @@ public class Bird
          case RESPONSE.MOVE:
             return("MOVE");
 
-         case RESPONSE.TURN:
-            return("TURN");
+         case RESPONSE.TURN_RIGHT:
+            return("TURN_RIGHT");
+
+         case RESPONSE.TURN_LEFT:
+            return("TURN_LEFT");
          }
          return("Unknown response");
       }

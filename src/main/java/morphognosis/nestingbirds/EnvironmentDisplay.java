@@ -16,8 +16,8 @@ import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.ScrollPane;
 import java.awt.Toolkit;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -27,7 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class EnvironmentDisplay extends JFrame implements Runnable
+public class EnvironmentDisplay extends JFrame implements Runnable, ActionListener
 {
    private static final long serialVersionUID = 0L;
 
@@ -76,12 +76,32 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    Point      maleImageOffset;
    Thread     displayThread;
 
+   // JComboBox item.
+   public class Item
+   {
+      public int     id;
+      private String description;
+
+      public Item(int id, String description)
+      {
+         this.id          = id;
+         this.description = description;
+      }
+
+
+      @Override
+      public String toString()
+      {
+         return(description);
+      }
+   };
+
    // Control panel.
-   JPanel            controlPanel;
-   Dimension         controlPanelSize;
-   JComboBox<String> femaleResponseChoice;
-   JComboBox<String> maleResponseChoice;
-   JButton           stepButton;
+   JPanel          controlPanel;
+   Dimension       controlPanelSize;
+   JComboBox<Item> femaleResponseChoice;
+   JComboBox<Item> maleResponseChoice;
+   JButton         stepButton;
 
    // Images
    Image maleImage;
@@ -122,31 +142,34 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       controlPanel.setBounds(0, 0, controlPanelSize.width, controlPanelSize.height);
       add(controlPanel, BorderLayout.NORTH);
       controlPanel.add(new JLabel("Female response:"));
-      femaleResponseChoice = new JComboBox<String>();
-      femaleResponseChoice.addItem("DO_NOTHING");
-      femaleResponseChoice.addItem("EAT");
-      femaleResponseChoice.addItem("GET");
-      femaleResponseChoice.addItem("PUT");
-      femaleResponseChoice.addItem("TOSS");
-      femaleResponseChoice.addItem("STEP");
-      femaleResponseChoice.addItem("TURN");
-      femaleResponseChoice.addItem("WANT_FOOD");
-      femaleResponseChoice.addItem("WANT_STONE");
-      femaleResponseChoice.addItem("LAY_EGG");
+      femaleResponseChoice = new JComboBox<Item>();
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.EAT, Bird.RESPONSE.toString(Bird.RESPONSE.EAT)));
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.GET, Bird.RESPONSE.toString(Bird.RESPONSE.GET)));
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.PUT, Bird.RESPONSE.toString(Bird.RESPONSE.PUT)));
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.TOSS, Bird.RESPONSE.toString(Bird.RESPONSE.TOSS)));
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.MOVE, Bird.RESPONSE.toString(Bird.RESPONSE.MOVE)));
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.TURN_RIGHT, Bird.RESPONSE.toString(Bird.RESPONSE.TURN_RIGHT)));
+      femaleResponseChoice.addItem(new Item(Bird.RESPONSE.TURN_LEFT, Bird.RESPONSE.toString(Bird.RESPONSE.TURN_LEFT)));
+      femaleResponseChoice.addItem(new Item(FemaleBird.RESPONSE.WANT_FOOD, FemaleBird.RESPONSE.toString(FemaleBird.RESPONSE.WANT_FOOD)));
+      femaleResponseChoice.addItem(new Item(FemaleBird.RESPONSE.WANT_STONE, FemaleBird.RESPONSE.toString(FemaleBird.RESPONSE.WANT_STONE)));
+      femaleResponseChoice.addItem(new Item(FemaleBird.RESPONSE.LAY_EGG, FemaleBird.RESPONSE.toString(FemaleBird.RESPONSE.LAY_EGG)));
       controlPanel.add(femaleResponseChoice);
       controlPanel.add(new JLabel("Male response:"));
-      maleResponseChoice = new JComboBox<String>();
-      maleResponseChoice.addItem("DO_NOTHING");
-      maleResponseChoice.addItem("EAT");
-      maleResponseChoice.addItem("GET");
-      maleResponseChoice.addItem("PUT");
-      maleResponseChoice.addItem("TOSS");
-      maleResponseChoice.addItem("STEP");
-      maleResponseChoice.addItem("TURN");
-      maleResponseChoice.addItem("GIVE_FOOD");
-      maleResponseChoice.addItem("GIVE_STONE");
+      maleResponseChoice = new JComboBox<Item>();
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.EAT, Bird.RESPONSE.toString(Bird.RESPONSE.EAT)));
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.GET, Bird.RESPONSE.toString(Bird.RESPONSE.GET)));
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.PUT, Bird.RESPONSE.toString(Bird.RESPONSE.PUT)));
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.TOSS, Bird.RESPONSE.toString(Bird.RESPONSE.TOSS)));
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.MOVE, Bird.RESPONSE.toString(Bird.RESPONSE.MOVE)));
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.TURN_RIGHT, Bird.RESPONSE.toString(Bird.RESPONSE.TURN_RIGHT)));
+      maleResponseChoice.addItem(new Item(Bird.RESPONSE.TURN_LEFT, Bird.RESPONSE.toString(Bird.RESPONSE.TURN_LEFT)));
+      maleResponseChoice.addItem(new Item(MaleBird.RESPONSE.GIVE_FOOD, MaleBird.RESPONSE.toString(MaleBird.RESPONSE.GIVE_FOOD)));
+      maleResponseChoice.addItem(new Item(MaleBird.RESPONSE.GIVE_STONE, MaleBird.RESPONSE.toString(MaleBird.RESPONSE.GIVE_STONE)));
       controlPanel.add(maleResponseChoice);
       stepButton = new JButton("Step");
+      stepButton.addActionListener(this);
       controlPanel.add(stepButton);
 
       // Create world display.
@@ -470,16 +493,22 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    }
 
 
-   // View choice listener.
-   class viewChoiceItemListener implements ItemListener
+   // Action listener.
+   @Override
+   public void actionPerformed(ActionEvent e)
    {
-      public void itemStateChanged(ItemEvent evt)
+      // Step button.
+      if (e.getSource() == stepButton)
       {
-         // Clear canvas for new image.
-         canvasGraphics.setColor(Color.white);
-         canvasGraphics.fillRect(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
+         Item item = (Item)femaleResponseChoice.getSelectedItem();
+         environment.female.response = item.id;
+         item = (Item)maleResponseChoice.getSelectedItem();
+         environment.male.response = item.id;
+         environment.step();
+         return;
       }
    }
+
 
    // Load image from file.
    Image loadImage(String name)

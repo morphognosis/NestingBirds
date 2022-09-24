@@ -89,6 +89,9 @@ public class Environment
       }
    };
 
+   // Probability of mouse movement.
+   public static double MOUSE_MOVE_PROBABILITY = 0.1;
+
    // Cell.
    public class Cell
    {
@@ -111,9 +114,15 @@ public class Environment
    // Disrupt nest.
    private int disruptNest = 0;
 
+   // Random numbers.
+   public static int RANDOM_NUMBER_SEED = 4517;
+   public Random     randomizer;
+
    // Construct environment.
    Environment()
    {
+      randomizer = new Random(RANDOM_NUMBER_SEED);
+
       // Initialize world.
       world = new Cell[width][height];
       for (int x = 0; x < width; x++)
@@ -172,6 +181,7 @@ public class Environment
    {
       cycle(Bird.FEMALE);
       cycle(Bird.MALE);
+      stepMice();
    }
 
 
@@ -260,7 +270,8 @@ public class Environment
          }
          if (bird.hasObject != OBJECT.NO_OBJECT)
          {
-            bird.hasObject = OBJECT.NO_OBJECT;                      // vaporize
+            // Vaporize object.
+            bird.hasObject = OBJECT.NO_OBJECT;
          }
          break;
 
@@ -268,18 +279,19 @@ public class Environment
          switch (bird.orientation)
          {
          case Bird.ORIENTATION.NORTH:
+            if (bird.y > 0)
+            {
+               bird.y--;
+            }
+            break;
+
+         case Bird.ORIENTATION.SOUTH:
             if (bird.y < height - 1)
             {
                bird.y++;
             }
             break;
 
-         case Bird.ORIENTATION.SOUTH:
-            if (bird.y > 0)
-            {
-               bird.y--;
-            }
-            break;
 
          case Bird.ORIENTATION.EAST:
             if (bird.x < width - 1)
@@ -297,7 +309,7 @@ public class Environment
          }
          break;
 
-      case Bird.RESPONSE.TURN:
+      case Bird.RESPONSE.TURN_RIGHT:
          switch (bird.orientation)
          {
          case Bird.ORIENTATION.NORTH:
@@ -314,6 +326,27 @@ public class Environment
 
          case Bird.ORIENTATION.WEST:
             bird.orientation = Bird.ORIENTATION.NORTH;
+            break;
+         }
+         break;
+
+      case Bird.RESPONSE.TURN_LEFT:
+         switch (bird.orientation)
+         {
+         case Bird.ORIENTATION.NORTH:
+            bird.orientation = Bird.ORIENTATION.WEST;
+            break;
+
+         case Bird.ORIENTATION.SOUTH:
+            bird.orientation = Bird.ORIENTATION.EAST;
+            break;
+
+         case Bird.ORIENTATION.EAST:
+            bird.orientation = Bird.ORIENTATION.NORTH;
+            break;
+
+         case Bird.ORIENTATION.WEST:
+            bird.orientation = Bird.ORIENTATION.SOUTH;
             break;
          }
          break;
@@ -395,6 +428,77 @@ public class Environment
       double yd = y1 - y2;
 
       return(Math.sqrt((xd * xd) + (yd * yd)));
+   }
+
+
+   // Move mice in forest.
+   public void stepMice()
+   {
+      for (int x = randomizer.nextInt(width), x2 = 0; x2 < width; x = (x + 1) % width, x2++)
+      {
+         for (int y = randomizer.nextInt(height), y2 = 0; y2 < height; y = (y + 1) % height, y2++)
+         {
+            if ((world[x][y].object == OBJECT.MOUSE) && (randomizer.nextDouble() < MOUSE_MOVE_PROBABILITY))
+            {
+               boolean move = false;
+               for (int i = randomizer.nextInt(4), i2 = 0; i2 < 4 && !move; i = (i + 1) % 4, i2++)
+               {
+                  switch (i)
+                  {
+                  case 0:
+                     if ((y > 0) && (world[x][y - 1].locale == LOCALE.FOREST) &&
+                         (world[x][y - 1].object == OBJECT.NO_OBJECT))
+                     {
+                        world[x][y].object     = OBJECT.NO_OBJECT;
+                        world[x][y - 1].object = -OBJECT.MOUSE;
+                        move = true;
+                     }
+                     break;
+
+                  case 1:
+                     if ((y < height - 1) && (world[x][y + 1].locale == LOCALE.FOREST) &&
+                         (world[x][y + 1].object == OBJECT.NO_OBJECT))
+                     {
+                        world[x][y].object     = OBJECT.NO_OBJECT;
+                        world[x][y + 1].object = -OBJECT.MOUSE;
+                        move = true;
+                     }
+                     break;
+
+                  case 2:
+                     if ((x > 0) && (world[x - 1][y].locale == LOCALE.FOREST) &&
+                         (world[x - 1][y].object == OBJECT.NO_OBJECT))
+                     {
+                        world[x][y].object     = OBJECT.NO_OBJECT;
+                        world[x - 1][y].object = -OBJECT.MOUSE;
+                        move = true;
+                     }
+                     break;
+
+                  case 3:
+                     if ((x < width - 1) && (world[x + 1][y].locale == LOCALE.FOREST) &&
+                         (world[x + 1][y].object == OBJECT.NO_OBJECT))
+                     {
+                        world[x][y].object     = OBJECT.NO_OBJECT;
+                        world[x + 1][y].object = -OBJECT.MOUSE;
+                        move = true;
+                     }
+                     break;
+                  }
+               }
+            }
+         }
+      }
+      for (int x = 0; x < width; x++)
+      {
+         for (int y = 0; y < height; y++)
+         {
+            if (world[x][y].object == -OBJECT.MOUSE)
+            {
+               world[x][y].object = OBJECT.MOUSE;
+            }
+         }
+      }
    }
 
 

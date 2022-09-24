@@ -12,9 +12,9 @@ public class FemaleBird extends Bird
    // Responses.
    public static class RESPONSE
    {
-      public static final int WANT_FOOD  = 7;
-      public static final int WANT_STONE = 9;
-      public static final int LAY_EGG    = 11;
+      public static final int WANT_FOOD  = 8;
+      public static final int WANT_STONE = 10;
+      public static final int LAY_EGG    = 12;
 
       // Response to string.
       public static String toString(int response)
