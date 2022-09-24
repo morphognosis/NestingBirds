@@ -129,9 +129,15 @@ public class Environment
       female.sensors[Bird.OBJECT_SENSOR] = world[female.x][female.y].object;
    }
 
-
-   // Run bird response.
-   public void run(int gender)
+   // Step environment.
+   public void step()
+   {
+	   cycle(Bird.FEMALE);
+	   cycle(Bird.MALE);
+   }
+   
+   // Bird sensory-response cycle.
+   public void cycle(int gender)
    {
 	  Bird bird = male;
 	  if (gender == Bird.FEMALE) 
@@ -218,7 +224,7 @@ public class Environment
          }
          break;
 
-      case Bird.RESPONSE.STEP:
+      case Bird.RESPONSE.MOVE:
          switch (bird.orientation)
          {
          case Bird.ORIENTATION.NORTH:
@@ -393,9 +399,8 @@ public class Environment
    public static void main(String[] args)
    {
       Environment environment = new Environment();
-      environment.male.response = Bird.RESPONSE.STEP;
-      environment.run(Bird.MALE);
+      environment.male.response = Bird.RESPONSE.MOVE;
       environment.female.response = FemaleBird.RESPONSE.LAY_EGG;
-      environment.run(Bird.FEMALE);
+      environment.step();
    }
 }

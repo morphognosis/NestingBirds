@@ -6,32 +6,26 @@ package morphognosis.nestingbirds;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.Label;
 import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.ScrollPane;
-import java.awt.Scrollbar;
 import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class EnvironmentDisplay extends JFrame implements Runnable
 {
@@ -47,9 +41,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    // Milliseconds between display updates.
    static final int DISPLAY_UPDATE_DELAY = 50;
 
-   // World image dimensions.
-   static final Dimension SCREEN_SIZE       = new Dimension(652, 600);
-   static final Dimension CANVAS_SIZE       = new Dimension(850, 1100);
+   // Dimensions.
+   static final Dimension SCREEN_SIZE       = new Dimension(652, 550);
+   static final Dimension CANVAS_SIZE       = new Dimension(630, 703);
    static final Dimension STATUS_PANEL_SIZE = new Dimension(652, 100);
    static final Dimension CELL_SIZE         = new Dimension(30, 30);
    static final Dimension LOCALE_SIZE       = new Dimension(15, 15);
@@ -85,9 +79,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    // Control panel.
    JPanel     controlPanel;
    Dimension controlPanelSize;
-   Checkbox  stepButton;
-   JSlider   responseSlider;
-   int       response = MAX_RESPONSE_DELAY;
+   JComboBox<String> femaleResponseChoice;
+   JComboBox<String> maleResponseChoice;
+   JButton  stepButton;
 
    // Images
    Image maleImage;
@@ -103,7 +97,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    Image femaleNetImage;
 
    // Font.
-   Font        font = new Font("Helvetica", Font.BOLD, 12);
+   Font        font;
    FontMetrics fontMetrics;
    int         fontAscent;
    int         fontWidth;
@@ -117,36 +111,52 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       // Set up display.
       setTitle("Nesting birds");
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      setBounds(0, 0, 667, 655);
-      setLayout(new GridLayout(1, 1));
-      
-      // Create display.
       screenSize = SCREEN_SIZE;
       setSize(screenSize);
       setLayout(new BorderLayout());
-      canvasScroll     = new ScrollPane();
-      canvasScrollSize = new Dimension(screenSize.width, (int)((double)screenSize.height * .95));
-      canvasScroll.setBounds(0, 0, canvasScrollSize.width, canvasScrollSize.height);
-      canvas = new Canvas();
-      canvas.setBounds(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
-      add(canvasScroll, BorderLayout.NORTH);
-      canvasScroll.add(canvas, null);
-
+      
       // Create control panel.
       controlPanel     = new JPanel();
       controlPanelSize = new Dimension(screenSize.width,
                                        (int)((double)screenSize.height * .05));
-      controlPanel.setBounds(0, canvasScrollSize.height,
-                             controlPanelSize.width, controlPanelSize.height);
-      add(controlPanel);
-      stepButton = new Checkbox("Step");
+      controlPanel.setBounds(0, 0, controlPanelSize.width, controlPanelSize.height);
+      add(controlPanel, BorderLayout.NORTH);
+      controlPanel.add(new JLabel("Female response:"));
+      femaleResponseChoice = new JComboBox<String>();
+      femaleResponseChoice.addItem("DO_NOTHING");
+      femaleResponseChoice.addItem("EAT");
+      femaleResponseChoice.addItem("GET");
+      femaleResponseChoice.addItem("PUT");
+      femaleResponseChoice.addItem("TOSS");
+      femaleResponseChoice.addItem("STEP");
+      femaleResponseChoice.addItem("TURN");
+      femaleResponseChoice.addItem("WANT_FOOD");
+      femaleResponseChoice.addItem("WANT_STONE");
+      femaleResponseChoice.addItem("LAY_EGG");
+      controlPanel.add(femaleResponseChoice);
+      controlPanel.add(new JLabel("Male response:"));
+      maleResponseChoice = new JComboBox<String>();
+      maleResponseChoice.addItem("DO_NOTHING");
+      maleResponseChoice.addItem("EAT");
+      maleResponseChoice.addItem("GET");
+      maleResponseChoice.addItem("PUT");
+      maleResponseChoice.addItem("TOSS");
+      maleResponseChoice.addItem("STEP");
+      maleResponseChoice.addItem("TURN");
+      maleResponseChoice.addItem("GIVE_FOOD");
+      maleResponseChoice.addItem("GIVE_STONE");
+      controlPanel.add(maleResponseChoice);
+      stepButton = new JButton("Step");
       controlPanel.add(stepButton);
-      controlPanel.add(new Label("Fast", Label.RIGHT));
-      responseSlider = new JSlider(Scrollbar.HORIZONTAL, MIN_RESPONSE_DELAY,
-                                   MAX_RESPONSE_DELAY, MAX_RESPONSE_DELAY);
-      responseSlider.addChangeListener(new responseSliderListener());
-      controlPanel.add(responseSlider);
-      controlPanel.add(new Label("Stop", Label.LEFT));
+      
+      // Create world display.
+      canvasScroll     = new ScrollPane();
+      canvasScrollSize = new Dimension(screenSize.width, (int)((double)screenSize.height * .95));
+      canvasScroll.setBounds(0, 0, canvasScrollSize.width, canvasScrollSize.height);
+      canvas = new Canvas();
+      canvas.setBounds(0, controlPanelSize.height, CANVAS_SIZE.width, CANVAS_SIZE.height + controlPanelSize.height);
+      add(canvasScroll, BorderLayout.SOUTH);
+      canvasScroll.add(canvas, null);
 
       // Get images.
       MediaTracker tracker = new MediaTracker(this);
@@ -261,7 +271,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
    // Update display.
    public void updateDisplay()
    {
-      int    x, y, x2, y2, i;
+      int    x, y, x2, y2;
       String s;
       
       // Initialize graphics.
@@ -284,11 +294,11 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       }
       worldImageGraphics.drawLine(x2, h, x2, y2);
       x2 = Environment.width * CELL_SIZE.width;
-      for (y = 0, y2 = h; y < Environment.width; y++, y2 += CELL_SIZE.height)
+      for (y = 0, y2 = h; y < Environment.height; y++, y2 += CELL_SIZE.height)
       {
          worldImageGraphics.drawLine(0, y2, x2, y2);
       }
-      worldImageGraphics.drawLine(0, y2, x2, y2);
+      worldImageGraphics.drawLine(0, y2 - 1, x2, y2 - 1);
       for (x = x2 = 0; x < Environment.width; x++, x2 += CELL_SIZE.width)
       {
          for (y = 0, y2 = h; y < Environment.height; y++, y2 += CELL_SIZE.height)
@@ -348,18 +358,11 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       {
          worldImageGraphics.drawImage(stoneImage, femaleObjectLocation.x,
                                       femaleObjectLocation.y, this);
-      }      
-      s = "Sensors: [" + environment.female.sensorsToString() + "]";
+      }              
+      s = "Orientation: " + Bird.orientationToString(environment.female.orientation);
       x = femaleStatusLocation.x + statusInfoOffset.x;
       y = femaleStatusLocation.y + statusInfoOffset.y;
-      worldImageGraphics.drawString(s, x, y);
-      s = "Orientation: " + Bird.orientationToString(environment.female.orientation);
-      y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);      
-      s = "Response (#" + environment.female.response + "): " +
-          responseToString(environment.female.response);
-      y += fontAscent + 2;
-      worldImageGraphics.drawString(s, x, y);
       s = "Food: " + environment.female.food;
       y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
@@ -384,18 +387,11 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       {
          worldImageGraphics.drawImage(stoneImage, maleObjectLocation.x,
                                       maleObjectLocation.y, this);
-      }
-      s = "Sensors: [" + environment.male.sensorsToString() + "]";
+      }        
+      s = "Orientation: " + Bird.orientationToString(environment.male.orientation);
       x = maleStatusLocation.x + statusInfoOffset.x;
       y = maleStatusLocation.y + statusInfoOffset.y;
-      worldImageGraphics.drawString(s, x, y);
-      s = "Orientation: " + Bird.orientationToString(environment.male.orientation);
-      y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);       
-      s = "Response (#" + environment.male.response + "): " +
-          responseToString(environment.male.response);
-      y += fontAscent + 2;
-      worldImageGraphics.drawString(s, x, y);
       s = "Food: " + environment.male.food;
       y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
@@ -418,11 +414,12 @@ public class EnvironmentDisplay extends JFrame implements Runnable
       if (graphics == null) return false;
       
       // Initialize font.
-      graphics.setFont(font);
+      font = new Font("Helvetica", Font.BOLD, 12);
       fontMetrics = graphics.getFontMetrics();
       fontAscent  = fontMetrics.getMaxAscent();
       fontWidth   = fontMetrics.getMaxAdvance();
       fontHeight  = fontMetrics.getHeight();	   
+      graphics.setFont(font);
       
        // Initialize graphics.
        if ((x = Environment.width * CELL_SIZE.width) < STATUS_PANEL_SIZE.width)
@@ -434,6 +431,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable
        worldImageSize     = new Dimension(x, y);
        worldImage         = createImage(x, y);
        worldImageGraphics = worldImage.getGraphics();
+       worldImageGraphics.setFont(font);
        y = 1;
        femaleStatusLocation = new Point(0, y);
        x = (int)((STATUS_PANEL_SIZE.width - (2.5 * BIRD_SIZE.width)) / 2);
@@ -462,22 +460,10 @@ public class EnvironmentDisplay extends JFrame implements Runnable
        x = (CELL_SIZE.width - OBJECT_SIZE.width) / 2;
        y = (CELL_SIZE.height - OBJECT_SIZE.height) / 2;
        objectImageOffset = new Point(x, y);	
-       canvasGraphics = canvas.getGraphics();       
+       canvasGraphics = canvas.getGraphics();
+       canvasGraphics.setFont(font);
 	   return true;
    }
-
-
-   // Response to string.
-   public String responseToString(int response)
-   {
-	  String s = MaleBird.responseToString(response);
-	  if (s == null)
-	  {
-		  s = FemaleBird.responseToString(response);
-	  }
-	  return s;
-   }
-
 
    // View choice listener.
    class viewChoiceItemListener implements ItemListener
@@ -487,15 +473,6 @@ public class EnvironmentDisplay extends JFrame implements Runnable
          // Clear canvas for new image.
          canvasGraphics.setColor(Color.white);
          canvasGraphics.fillRect(0, 0, CANVAS_SIZE.width, CANVAS_SIZE.height);
-      }
-   }
-
-   // Response slider listener.
-   class responseSliderListener implements ChangeListener
-   {
-      public void stateChanged(ChangeEvent evt)
-      {
-         response = responseSlider.getValue();
       }
    }
 

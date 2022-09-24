@@ -4,10 +4,6 @@
 
 package morphognosis.nestingbirds;
 
-import morphognosis.nestingbirds.Bird.ORIENTATION;
-import morphognosis.nestingbirds.Environment.LOCALE;
-import morphognosis.nestingbirds.Environment.OBJECT;
-
 public class MaleBird extends Bird
 {
    // Sensors.
@@ -51,14 +47,14 @@ public class MaleBird extends Bird
    // Print sensors.
    public void printSensors()
    {
-      System.out.print(super.sensorsToString());
-      System.out.print("," + sensorsToString());
+      System.out.print(sensorsToString());
    }
    
    // Sensors to string.
    public String sensorsToString()
    {
-	  String s = "";
+	  String s = super.sensorsToString();
+	  s += ",";
       if (sensors[WANT_FOOD_SENSOR] == 0)
       {
          s += "!WANT_FOOD";

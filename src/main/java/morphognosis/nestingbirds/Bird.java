@@ -4,7 +4,6 @@
 
 package morphognosis.nestingbirds;
 
-import morphognosis.nestingbirds.Environment.LOCALE;
 import morphognosis.nestingbirds.Environment.OBJECT;
 
 public class Bird
@@ -36,7 +35,7 @@ public class Bird
       public static final int GET        = 2;
       public static final int PUT        = 3;
       public static final int TOSS       = 4;
-      public static final int STEP       = 5;
+      public static final int MOVE       = 5;
       public static final int TURN       = 6;
    };
    public int response;
@@ -154,8 +153,8 @@ public class Bird
       case RESPONSE.TOSS:
     	  return("TOSS");
 
-      case RESPONSE.STEP:
-    	  return("STEP");
+      case RESPONSE.MOVE:
+    	  return("MOVE");
 
       case RESPONSE.TURN:
     	  return("TURN");
