@@ -18,8 +18,9 @@ import java.awt.ScrollPane;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -510,19 +511,35 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    }
 
 
-   // Load image from file.
+   // Load image.
    Image loadImage(String name)
    {
-      String filename = "res/images/" + name;
-      Image  image    = null;
+      BufferedImage image    = null;
+      String        protocol = this.getClass().getResource("").getProtocol();
 
-      try
+      if (Objects.equals(protocol, "jar"))
       {
-         image = ImageIO.read(new File(filename));
+         try
+         {
+            image = ImageIO.read(getClass().getResource(name));
+         }
+         catch (Exception e)
+         {
+            System.err.println("Cannot load image for " + name + ": " + e.getMessage());
+            System.exit(1);
+         }
       }
-      catch (IOException e)
+      else
       {
-         status("Cannot load image " + name);
+         try
+         {
+            image = ImageIO.read(new File("res/images/" + name));
+         }
+         catch (Exception e)
+         {
+            System.err.println("Cannot load image for " + name + ": " + e.getMessage());
+            System.exit(1);
+         }
       }
       return(image);
    }

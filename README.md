@@ -14,6 +14,8 @@ Goal-directed behavior using contextual causation learning
 Mona:
 https://github.com/portegys/Mona
 
-Build with Eclipse project and export to bin/nestingbirds.jar to run with scripts. 
+Build with Eclipse project and export to bin/nestingbirds.jar to run with scripts in the work directory.
 
-To run nesting birds environment: nestingbirds.bat, nestingbirds.sh
+Nesting birds environment:
+To build: build_nestingbirds.bat, build_nestingbirds.sh
+To run: run_nestingbirds.bat, run_nestingbirds.sh
