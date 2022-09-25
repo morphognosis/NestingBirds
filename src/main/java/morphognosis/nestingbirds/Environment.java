@@ -6,6 +6,8 @@ package morphognosis.nestingbirds;
 
 import java.util.Random;
 
+import morphognosis.nestingbirds.Bird.RESPONSE;
+
 public class Environment
 {
    // Locale map: grassland=0, forest=1, food=2, desert=3, stone=4
@@ -108,8 +110,35 @@ public class Environment
    public Cell[][] world;
 
    // Birds.
-   public Bird male;
-   public Bird female;
+   public MaleBird   male;
+   public FemaleBird female;
+
+   // Response drivers.
+   public static class RESPONSE_DRIVER
+   {
+      public static final int MANUAL    = 0;
+      public static final int BIRD      = 1;
+      public static final int AUTOPILOT = 2;
+
+      // To string.
+      public static String toString(int driver)
+      {
+         switch (driver)
+         {
+         case MANUAL:
+            return("manual");
+
+         case BIRD:
+            return("bird");
+
+         case AUTOPILOT:
+            return("autopilot");
+         }
+         return("Unknown driver");
+      }
+   };
+   public int responseDriver = RESPONSE_DRIVER.MANUAL;
+   public void setResponseDriver(int driver) { responseDriver = driver; }
 
    // Disrupt nest.
    private int disruptNest = 0;
@@ -161,26 +190,85 @@ public class Environment
       }
 
       // Create birds.
-      male      = new MaleBird();
-      male.x    = width / 2;
-      male.y    = height / 2;
-      male.food = Bird.FOOD_DURATION;
-      male.sensors[Bird.LOCALE_SENSOR] = world[male.x][male.y].locale;
-      male.sensors[Bird.OBJECT_SENSOR] = world[male.x][male.y].object;
-      female      = new FemaleBird();
-      female.x    = width / 2;
-      female.y    = height / 2;
-      female.food = 0;
-      female.sensors[Bird.LOCALE_SENSOR] = world[female.x][female.y].locale;
-      female.sensors[Bird.OBJECT_SENSOR] = world[female.x][female.y].object;
+      female        = new FemaleBird();
+      female.x      = width / 2;
+      female.y      = height / 2;
+      female.food   = 0;
+      int[] sensors = new int[FemaleBird.NUM_SENSORS];
+      sensors[Bird.LOCALE_SENSOR] = world[female.x][female.y].locale;
+      sensors[Bird.OBJECT_SENSOR] = world[female.x][female.y].object;
+      female.setSensors(sensors);
+      female.response                     = RESPONSE.DO_NOTHING;
+      male                                = new MaleBird();
+      male.x                              = width / 2;
+      male.y                              = height / 2;
+      male.food                           = Bird.FOOD_DURATION;
+      sensors                             = new int[MaleBird.NUM_SENSORS];
+      sensors[Bird.LOCALE_SENSOR]         = world[male.x][male.y].locale;
+      sensors[Bird.OBJECT_SENSOR]         = world[male.x][male.y].object;
+      sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
+      sensors[MaleBird.WANT_STONE_SENSOR] = 0;
+      male.setSensors(sensors);
+      male.response = RESPONSE.DO_NOTHING;
    }
 
 
    // Step environment.
    public void step()
    {
+      // Cycle female.
+      Cell cell = world[female.x][female.y];
+
+      int[] sensors = new int[FemaleBird.NUM_SENSORS];
+      sensors[Bird.LOCALE_SENSOR] = cell.locale;
+      sensors[Bird.OBJECT_SENSOR] = cell.object;
+      female.setSensors(sensors);
+      switch (responseDriver)
+      {
+      case RESPONSE_DRIVER.BIRD:
+         female.cycle();
+         break;
+
+      case RESPONSE_DRIVER.AUTOPILOT:
+         female.cycleAutopilot();
+         break;
+      }
       cycle(Bird.FEMALE);
+
+      // Cycle male.
+      cell    = world[male.x][male.y];
+      sensors = new int[MaleBird.NUM_SENSORS];
+      sensors[Bird.LOCALE_SENSOR]         = cell.locale;
+      sensors[Bird.OBJECT_SENSOR]         = cell.object;
+      sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
+      sensors[MaleBird.WANT_STONE_SENSOR] = 0;
+      if ((male.x == female.x) && (male.y == female.y))
+      {
+         switch (female.response)
+         {
+         case FemaleBird.RESPONSE.WANT_FOOD:
+            sensors[MaleBird.WANT_FOOD_SENSOR] = 1;
+            break;
+
+         case FemaleBird.RESPONSE.WANT_STONE:
+            sensors[MaleBird.WANT_STONE_SENSOR] = 1;
+            break;
+         }
+      }
+      male.setSensors(sensors);
+      switch (responseDriver)
+      {
+      case RESPONSE_DRIVER.BIRD:
+         male.cycle();
+         break;
+
+      case RESPONSE_DRIVER.AUTOPILOT:
+         male.cycleAutopilot();
+         break;
+      }
       cycle(Bird.MALE);
+
+      // Step mice.
       stepMice();
    }
 
@@ -204,14 +292,17 @@ public class Environment
       }
 
       // Disrupt nest to motivate female to fix it.
-      if ((disruptNest == 1) && (bird.gender == Bird.FEMALE)) { disruptNest++; }
-      if ((disruptNest == 2) && (bird.gender == Bird.FEMALE))
+      if ((disruptNest == 1) && (bird.gender == Bird.FEMALE))
       {
          disruptNest++;
 
-         // Remove stone from nest and drop on egg.
-         world[bird.x][bird.y - 1].object = OBJECT.NO_OBJECT;
-         cell.object = OBJECT.STONE;
+         // Blow stone from nest onto egg.
+         if ((world[width / 2][height / 2].object == OBJECT.EGG) &&
+             (world[width / 2][(height / 2) - 1].object == OBJECT.STONE))
+         {
+            world[width / 2][(height / 2) - 1].object = OBJECT.NO_OBJECT;
+            world[width / 2][height / 2].object       = OBJECT.STONE;
+         }
       }
 
       switch (bird.response)

@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class EnvironmentDisplay extends JFrame implements Runnable, ActionListener
@@ -100,6 +101,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    // Control panel.
    JPanel          controlPanel;
    Dimension       controlPanelSize;
+   JComboBox<Item> responseDriverChoice;
    JComboBox<Item> femaleResponseChoice;
    JComboBox<Item> maleResponseChoice;
    JButton         stepButton;
@@ -142,8 +144,19 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
                                        (int)((double)screenSize.height * .05));
       controlPanel.setBounds(0, 0, controlPanelSize.width, controlPanelSize.height);
       add(controlPanel, BorderLayout.NORTH);
+      controlPanel.add(new JLabel("Response driver:"));
+      responseDriverChoice = new JComboBox<Item>();
+      responseDriverChoice.setOpaque(true);
+      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.MANUAL,
+                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.MANUAL)));
+      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.BIRD,
+                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.BIRD)));
+      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.AUTOPILOT,
+                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.AUTOPILOT)));
+      controlPanel.add(responseDriverChoice);
       controlPanel.add(new JLabel("Female response:"));
       femaleResponseChoice = new JComboBox<Item>();
+      femaleResponseChoice.setOpaque(true);
       femaleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
       femaleResponseChoice.addItem(new Item(Bird.RESPONSE.EAT, Bird.RESPONSE.toString(Bird.RESPONSE.EAT)));
       femaleResponseChoice.addItem(new Item(Bird.RESPONSE.GET, Bird.RESPONSE.toString(Bird.RESPONSE.GET)));
@@ -158,6 +171,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       controlPanel.add(femaleResponseChoice);
       controlPanel.add(new JLabel("Male response:"));
       maleResponseChoice = new JComboBox<Item>();
+      maleResponseChoice.setOpaque(true);
       maleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
       maleResponseChoice.addItem(new Item(Bird.RESPONSE.EAT, Bird.RESPONSE.toString(Bird.RESPONSE.EAT)));
       maleResponseChoice.addItem(new Item(Bird.RESPONSE.GET, Bird.RESPONSE.toString(Bird.RESPONSE.GET)));
@@ -229,8 +243,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       {
          tracker.waitForAll();
       }
-      catch (InterruptedException e) {
-         status("Image loading interrupted");
+      catch (InterruptedException e)
+      {
+         JOptionPane.showMessageDialog(this, "Image loading interrupted: " + e.getMessage());
          System.exit(1);
       }
 
@@ -505,6 +520,8 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          environment.female.response = item.id;
          item = (Item)maleResponseChoice.getSelectedItem();
          environment.male.response = item.id;
+         item = (Item)responseDriverChoice.getSelectedItem();
+         environment.setResponseDriver(item.id);
          environment.step();
          return;
       }
@@ -525,7 +542,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          }
          catch (Exception e)
          {
-            System.err.println("Cannot load image for " + name + ": " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Cannot load image for " + name + ": " + e.getMessage());
             System.exit(1);
          }
       }
@@ -537,18 +554,11 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          }
          catch (Exception e)
          {
-            System.err.println("Cannot load image for " + name + ": " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Cannot load image for " + name + ": " + e.getMessage());
             System.exit(1);
          }
       }
       return(image);
-   }
-
-
-   // Status message.
-   void status(String message)
-   {
-      System.out.println(message);
    }
 
 

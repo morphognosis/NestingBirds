@@ -14,8 +14,9 @@ public class MaleBird extends Bird
    // Responses.
    public static class RESPONSE
    {
-      public static final int GIVE_FOOD  = 9;
-      public static final int GIVE_STONE = 11;
+      public static final int GIVE_FOOD          = 9;
+      public static final int GIVE_STONE         = 11;
+      public static final int NUM_MALE_RESPONSES = 2;
 
       // Response to string.
       public static String toString(int response)
@@ -36,14 +37,20 @@ public class MaleBird extends Bird
    public MaleBird()
    {
       super(MALE);
-      sensors = new int[NUM_SENSORS];
    }
 
 
-   // Digest food.
-   public void digest()
+   // Set sensors.
+   public void setSensors(int[] sensors)
    {
-      if (food > 0) { food--; }
+      this.sensors = sensors;
+   }
+
+
+   // Cycle on autopilot.
+   public int cycleAutopilot()
+   {
+      return(Bird.RESPONSE.DO_NOTHING);
    }
 
 

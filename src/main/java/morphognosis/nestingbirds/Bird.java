@@ -42,22 +42,23 @@ public class Bird
    public static final int FEMALE = 1;
 
    // Sensors.
-   public static final int LOCALE_SENSOR = 0;
-   public static final int OBJECT_SENSOR = 1;
-   public static final int NUM_SENSORS   = 2;
+   public static final int LOCALE_SENSOR     = 0;
+   public static final int OBJECT_SENSOR     = 1;
+   public static final int NUM_WORLD_SENSORS = 2;
    public int[]            sensors;
 
    // Responses.
    public static class RESPONSE
    {
-      public static final int DO_NOTHING = 0;
-      public static final int EAT        = 1;
-      public static final int GET        = 2;
-      public static final int PUT        = 3;
-      public static final int TOSS       = 4;
-      public static final int MOVE       = 5;
-      public static final int TURN_RIGHT = 6;
-      public static final int TURN_LEFT  = 7;
+      public static final int DO_NOTHING    = 0;
+      public static final int EAT           = 1;
+      public static final int GET           = 2;
+      public static final int PUT           = 3;
+      public static final int TOSS          = 4;
+      public static final int MOVE          = 5;
+      public static final int TURN_RIGHT    = 6;
+      public static final int TURN_LEFT     = 7;
+      public static final int NUM_RESPONSES = 8;
 
       // Response to string.
       public static String toString(int response)
@@ -103,6 +104,9 @@ public class Bird
    public int food;
    public int hasObject;
 
+   // Brain.
+   public BirdBrain brain;
+
    // Constructor.
    public Bird(int gender)
    {
@@ -111,8 +115,31 @@ public class Bird
       orientation = ORIENTATION.NORTH;
       food        = 0;
       hasObject   = OBJECT.NO_OBJECT;
-      sensors     = new int[NUM_SENSORS];
       response    = RESPONSE.DO_NOTHING;
+      if (gender == MALE)
+      {
+         brain = new BirdBrain(MaleBird.NUM_SENSORS, Bird.RESPONSE.NUM_RESPONSES +
+                               MaleBird.RESPONSE.NUM_MALE_RESPONSES + FemaleBird.RESPONSE.NUM_FEMALE_RESPONSES);
+      }
+      else
+      {
+         brain = new BirdBrain(FemaleBird.NUM_SENSORS, Bird.RESPONSE.NUM_RESPONSES +
+                               MaleBird.RESPONSE.NUM_MALE_RESPONSES + FemaleBird.RESPONSE.NUM_FEMALE_RESPONSES);
+      }
+   }
+
+
+   // Cycle bird.
+   public int cycle()
+   {
+      float[] brainSensors = new float[sensors.length + 2];
+      for (int i = 0; i < sensors.length; i++)
+      {
+         brainSensors[i] = (float)sensors[i];
+      }
+      brainSensors[sensors.length]     = (float)hasObject;
+      brainSensors[sensors.length + 1] = (float)food;
+      return(brain.cycle(brainSensors));
    }
 
 
