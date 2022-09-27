@@ -89,13 +89,13 @@ public class Bird
          case RESPONSE.TURN_LEFT:
             return("TURN_LEFT");
          }
-         return("Unknown response");
+         return(null);
       }
    };
    public int response;
 
    // Food duration.
-   public static final int FOOD_DURATION = 60;
+   public static final int FOOD_DURATION = 200;
 
    // State.
    public int gender;

@@ -143,6 +143,11 @@ public class Environment
    // Disrupt nest.
    private int disruptNest = 0;
 
+   // Autopilot controls.
+   public boolean femaleWantFood;
+   public boolean femaleWantStone;
+   public int     femaleNestSequence;
+
    // Random numbers.
    public static int RANDOM_NUMBER_SEED = 4517;
    public Random     randomizer;
@@ -209,7 +214,10 @@ public class Environment
       sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
       sensors[MaleBird.WANT_STONE_SENSOR] = 0;
       male.setSensors(sensors);
-      male.response = RESPONSE.DO_NOTHING;
+      male.response      = RESPONSE.DO_NOTHING;
+      femaleWantFood     = false;
+      femaleWantStone    = false;
+      femaleNestSequence = 0;
    }
 
 
@@ -230,7 +238,7 @@ public class Environment
          break;
 
       case RESPONSE_DRIVER.AUTOPILOT:
-         female.cycleAutopilot();
+         cycleAutopilot(Bird.FEMALE);
          break;
       }
       cycle(Bird.FEMALE);
@@ -263,13 +271,564 @@ public class Environment
          break;
 
       case RESPONSE_DRIVER.AUTOPILOT:
-         male.cycleAutopilot();
+         cycleAutopilot(Bird.MALE);
          break;
       }
       cycle(Bird.MALE);
 
       // Step mice.
       stepMice();
+   }
+
+
+   // Cycle on autopilot.
+   public void cycleAutopilot(int gender)
+   {
+      if (gender == Bird.MALE)
+      {
+         maleAutopilot();
+      }
+      else
+      {
+         femaleAutopilot();
+      }
+   }
+
+
+   // Male autopilot.
+   public void maleAutopilot()
+   {
+      if (!getFood() && !getStone())
+      {
+         returnToFemale();
+      }
+   }
+
+
+   // Get food.
+   public boolean getFood()
+   {
+      if ((male.x == female.x) && (male.y == female.y))
+      {
+         if (female.response == FemaleBird.RESPONSE.WANT_FOOD)
+         {
+            femaleWantFood = true;
+         }
+      }
+      if ((male.food > 0) && !femaleWantFood)
+      {
+         return(false);
+      }
+      if (male.hasObject == OBJECT.MOUSE)
+      {
+         if (male.food == 0)
+         {
+            male.response = Bird.RESPONSE.EAT;
+            return(true);
+         }
+         if ((male.x == female.x) && (male.y == female.y))
+         {
+            male.response  = MaleBird.RESPONSE.GIVE_FOOD;
+            femaleWantFood = false;
+            return(true);
+         }
+         else
+         {
+            return(false);
+         }
+      }
+      if (male.hasObject != OBJECT.NO_OBJECT)
+      {
+         male.response = Bird.RESPONSE.TOSS;
+         return(true);
+      }
+      if (world[male.x][male.y].object == OBJECT.MOUSE)
+      {
+         male.response = Bird.RESPONSE.GET;
+         return(true);
+      }
+      if ((male.x <= 7) && (male.y <= 8))
+      {
+         if (randomizer.nextBoolean())
+         {
+            if (randomizer.nextBoolean())
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+         }
+         else
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         return(true);
+      }
+      if (male.x > 7)
+      {
+         if (male.orientation == Bird.ORIENTATION.WEST)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         return(true);
+      }
+      if (male.orientation == Bird.ORIENTATION.NORTH)
+      {
+         male.response = Bird.RESPONSE.MOVE;
+      }
+      else
+      {
+         if (male.orientation == Bird.ORIENTATION.EAST)
+         {
+            male.response = Bird.RESPONSE.TURN_LEFT;
+         }
+         else
+         {
+            male.response = Bird.RESPONSE.TURN_RIGHT;
+         }
+      }
+      return(true);
+   }
+
+
+   // Get stone.
+   public boolean getStone()
+   {
+      if ((male.x == female.x) && (male.y == female.y))
+      {
+         if (female.response == FemaleBird.RESPONSE.WANT_STONE)
+         {
+            femaleWantStone = true;
+         }
+      }
+      if (!femaleWantStone)
+      {
+         return(false);
+      }
+      if (male.hasObject == OBJECT.STONE)
+      {
+         if ((male.x == female.x) && (male.y == female.y))
+         {
+            male.response   = MaleBird.RESPONSE.GIVE_STONE;
+            femaleWantStone = false;
+            return(true);
+         }
+         else
+         {
+            return(false);
+         }
+      }
+      if (male.hasObject != OBJECT.NO_OBJECT)
+      {
+         male.response = Bird.RESPONSE.TOSS;
+         return(true);
+      }
+      if ((world[male.x][male.y].object == OBJECT.STONE) &&
+          (world[male.x][male.y].locale == LOCALE.DESERT))
+      {
+         male.response = Bird.RESPONSE.GET;
+         return(true);
+      }
+      if ((male.x >= 8) && (male.y >= 14))
+      {
+         if (randomizer.nextBoolean())
+         {
+            if (randomizer.nextBoolean())
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+         }
+         else
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         return(true);
+      }
+      if (male.x < 8)
+      {
+         if (male.orientation == Bird.ORIENTATION.EAST)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+         }
+         return(true);
+      }
+      if (male.orientation == Bird.ORIENTATION.SOUTH)
+      {
+         male.response = Bird.RESPONSE.MOVE;
+      }
+      else
+      {
+         if (male.orientation == Bird.ORIENTATION.EAST)
+         {
+            male.response = Bird.RESPONSE.TURN_RIGHT;
+         }
+         else
+         {
+            male.response = Bird.RESPONSE.TURN_LEFT;
+         }
+      }
+      return(true);
+   }
+
+
+   // Male returns to female.
+   public boolean returnToFemale()
+   {
+      if ((male.x == female.x) && (male.y == female.y))
+      {
+         male.response = Bird.RESPONSE.DO_NOTHING;
+         return(true);
+      }
+      if (male.x < female.x)
+      {
+         if (male.orientation == Bird.ORIENTATION.EAST)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+         }
+      }
+      if (male.x > female.x)
+      {
+         if (male.orientation == Bird.ORIENTATION.WEST)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+      }
+      if (male.y < female.y)
+      {
+         if (male.orientation == Bird.ORIENTATION.SOUTH)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.EAST)
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+      }
+      if (male.y > female.y)
+      {
+         if (male.orientation == Bird.ORIENTATION.NORTH)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.WEST)
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+      }
+      return(false);
+   }
+
+
+   // Female autopilot.
+   public void femaleAutopilot()
+   {
+      if (female.food == 0)
+      {
+         if (female.hasObject == OBJECT.MOUSE)
+         {
+            female.response = Bird.RESPONSE.EAT;
+         }
+         else
+         {
+            if (female.hasObject == OBJECT.NO_OBJECT)
+            {
+               female.response = FemaleBird.RESPONSE.WANT_FOOD;
+            }
+            else
+            {
+               female.response = Bird.RESPONSE.TOSS;
+            }
+         }
+         return;
+      }
+      switch (femaleNestSequence)
+      {
+      case 0:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.GET;
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.TOSS;
+         }
+         else if (female.orientation == Bird.ORIENTATION.NORTH)
+         {
+            female.response = Bird.RESPONSE.MOVE;
+            femaleNestSequence++;
+         }
+         else
+         {
+            female.response = Bird.RESPONSE.TURN_RIGHT;
+         }
+         break;
+
+      case 1:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            if (female.orientation == Bird.ORIENTATION.WEST)
+            {
+               female.response = Bird.RESPONSE.MOVE;
+               femaleNestSequence++;
+            }
+            else
+            {
+               female.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 2:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            if (female.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               female.response = Bird.RESPONSE.MOVE;
+               femaleNestSequence++;
+            }
+            else
+            {
+               female.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 3:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.MOVE;
+            femaleNestSequence++;
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 4:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            if (female.orientation == Bird.ORIENTATION.EAST)
+            {
+               female.response = Bird.RESPONSE.MOVE;
+               femaleNestSequence++;
+            }
+            else
+            {
+               female.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 5:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.MOVE;
+            femaleNestSequence++;
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 6:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            if (female.orientation == Bird.ORIENTATION.NORTH)
+            {
+               female.response = Bird.RESPONSE.MOVE;
+               femaleNestSequence++;
+            }
+            else
+            {
+               female.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 7:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.MOVE;
+            femaleNestSequence++;
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 8:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            if (female.orientation == Bird.ORIENTATION.WEST)
+            {
+               female.response = Bird.RESPONSE.MOVE;
+               femaleNestSequence++;
+            }
+            else
+            {
+               female.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 9:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            if (female.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               female.response = Bird.RESPONSE.MOVE;
+               femaleNestSequence++;
+            }
+            else
+            {
+               female.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.PUT;
+         }
+         else
+         {
+            female.response = FemaleBird.RESPONSE.WANT_STONE;
+         }
+         break;
+
+      case 10:
+         if (world[female.x][female.y].object == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.GET;
+         }
+         else if (female.hasObject == OBJECT.STONE)
+         {
+            female.response = Bird.RESPONSE.TOSS;
+         }
+         else if (world[female.x][female.y].object == OBJECT.NO_OBJECT)
+         {
+            female.response    = FemaleBird.RESPONSE.LAY_EGG;
+            femaleNestSequence = 0;
+         }
+         break;
+      }
    }
 
 

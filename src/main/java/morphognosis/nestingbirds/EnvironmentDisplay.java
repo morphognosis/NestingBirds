@@ -523,6 +523,24 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          item = (Item)responseDriverChoice.getSelectedItem();
          environment.setResponseDriver(item.id);
          environment.step();
+         for (int i = 0; i < femaleResponseChoice.getItemCount(); i++)
+         {
+            item = femaleResponseChoice.getItemAt(i);
+            if (item.id == environment.female.response)
+            {
+               femaleResponseChoice.setSelectedIndex(i);
+               break;
+            }
+         }
+         for (int i = 0; i < maleResponseChoice.getItemCount(); i++)
+         {
+            item = maleResponseChoice.getItemAt(i);
+            if (item.id == environment.male.response)
+            {
+               maleResponseChoice.setSelectedIndex(i);
+               break;
+            }
+         }
          return;
       }
    }

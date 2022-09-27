@@ -49,13 +49,6 @@ public class FemaleBird extends Bird
    }
 
 
-   // Cycle on autopilot.
-   public int cycleAutopilot()
-   {
-      return(Bird.RESPONSE.DO_NOTHING);
-   }
-
-
    // Print bird.
    public void print()
    {
