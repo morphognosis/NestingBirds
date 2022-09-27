@@ -105,6 +105,8 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    JComboBox<Item> femaleResponseChoice;
    JComboBox<Item> maleResponseChoice;
    JButton         stepButton;
+   JLabel          stepCounterLabel;
+   int             stepCounter;
 
    // Images
    Image maleImage;
@@ -144,7 +146,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
                                        (int)((double)screenSize.height * .05));
       controlPanel.setBounds(0, 0, controlPanelSize.width, controlPanelSize.height);
       add(controlPanel, BorderLayout.NORTH);
-      controlPanel.add(new JLabel("Response driver:"));
+      controlPanel.add(new JLabel("Response: driver ="));
       responseDriverChoice = new JComboBox<Item>();
       responseDriverChoice.setOpaque(true);
       responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.MANUAL,
@@ -154,7 +156,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.AUTOPILOT,
                                             Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.AUTOPILOT)));
       controlPanel.add(responseDriverChoice);
-      controlPanel.add(new JLabel("Female response:"));
+      controlPanel.add(new JLabel("female ="));
       femaleResponseChoice = new JComboBox<Item>();
       femaleResponseChoice.setOpaque(true);
       femaleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
@@ -169,7 +171,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       femaleResponseChoice.addItem(new Item(FemaleBird.RESPONSE.WANT_STONE, FemaleBird.RESPONSE.toString(FemaleBird.RESPONSE.WANT_STONE)));
       femaleResponseChoice.addItem(new Item(FemaleBird.RESPONSE.LAY_EGG, FemaleBird.RESPONSE.toString(FemaleBird.RESPONSE.LAY_EGG)));
       controlPanel.add(femaleResponseChoice);
-      controlPanel.add(new JLabel("Male response:"));
+      controlPanel.add(new JLabel("male ="));
       maleResponseChoice = new JComboBox<Item>();
       maleResponseChoice.setOpaque(true);
       maleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
@@ -186,6 +188,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       stepButton = new JButton("Step");
       stepButton.addActionListener(this);
       controlPanel.add(stepButton);
+      stepCounterLabel = new JLabel("= 0");
+      controlPanel.add(stepCounterLabel);
+      stepCounter = 0;
 
       // Create world display.
       canvasScroll     = new ScrollPane();
@@ -457,12 +462,11 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       if (graphics == null) { return(false); }
 
       // Initialize font.
-      font        = new Font("Helvetica", Font.BOLD, 12);
+      font        = graphics.getFont();
       fontMetrics = graphics.getFontMetrics();
       fontAscent  = fontMetrics.getMaxAscent();
       fontWidth   = fontMetrics.getMaxAdvance();
       fontHeight  = fontMetrics.getHeight();
-      graphics.setFont(font);
 
       // Initialize graphics.
       if ((x = Environment.width * CELL_SIZE.width) < STATUS_PANEL_SIZE.width)
@@ -541,6 +545,8 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
                break;
             }
          }
+         stepCounter++;
+         stepCounterLabel.setText("= " + stepCounter + "");
          return;
       }
    }
