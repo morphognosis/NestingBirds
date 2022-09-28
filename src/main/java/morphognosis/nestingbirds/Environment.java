@@ -1244,6 +1244,33 @@ public class Environment
    // Main.
    public static void main(String[] args)
    {
+      // Get options.
+      if (args.length == 2)
+      {
+         if (args[0].equals("-foodDuration"))
+         {
+            try
+            {
+               Bird.FOOD_DURATION = Integer.parseInt(args[1]);
+            }
+            catch (Exception e)
+            {
+               System.err.println("Invalid food duration: " + args[1]);
+               System.exit(1);
+            }
+         }
+         else
+         {
+            System.err.println("Usage: morphognosis.nestingbirds.Environment [-foodDuration <steps>]");
+            System.exit(1);
+         }
+      }
+      else if (args.length != 0)
+      {
+         System.err.println("Usage: morphognosis.nestingbirds.Environment [-foodDuration <steps>]");
+         System.exit(1);
+      }
+
       Environment environment = new Environment();
 
       environment.male.response   = Bird.RESPONSE.MOVE;

@@ -585,6 +585,33 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    // Main.
    public static void main(String[] args)
    {
+      // Get options.
+      if (args.length == 2)
+      {
+         if (args[0].equals("-foodDuration"))
+         {
+            try
+            {
+               Bird.FOOD_DURATION = Integer.parseInt(args[1]);
+            }
+            catch (Exception e)
+            {
+               System.err.println("Invalid food duration: " + args[1]);
+               System.exit(1);
+            }
+         }
+         else
+         {
+            System.err.println("Usage: morphognosis.nestingbirds.EnvironmentDisplay [-foodDuration <steps>]");
+            System.exit(1);
+         }
+      }
+      else if (args.length != 0)
+      {
+         System.err.println("Usage: morphognosis.nestingbirds.EnvironmentDisplay [-foodDuration <steps>]");
+         System.exit(1);
+      }
+
       // Create environment.
       Environment environment = new Environment();
 
