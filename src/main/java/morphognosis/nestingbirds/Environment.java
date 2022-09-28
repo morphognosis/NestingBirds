@@ -347,26 +347,31 @@ public class Environment
          male.response = Bird.RESPONSE.GET;
          return(true);
       }
-      if ((male.x <= 7) && (male.y <= 8))
+      int    mousex = -1;
+      int    mousey = -1;
+      double dist   = 0.0;
+      for (int x = 0; x < width; x++)
       {
-         if (randomizer.nextBoolean())
+         for (int y = 0; y < height; y++)
          {
-            if (randomizer.nextBoolean())
+            if ((world[x][y].locale == LOCALE.FOREST) && (world[x][y].object == OBJECT.MOUSE))
             {
-               male.response = Bird.RESPONSE.TURN_LEFT;
-            }
-            else
-            {
-               male.response = Bird.RESPONSE.TURN_RIGHT;
+               double d = distance((double)male.x, (double)male.y, (double)x, (double)y);
+               if ((mousex == -1) || (d < dist))
+               {
+                  mousex = x;
+                  mousey = y;
+                  dist   = d;
+               }
             }
          }
-         else
-         {
-            male.response = Bird.RESPONSE.MOVE;
-         }
+      }
+      if (mousex == -1)
+      {
+         male.response = Bird.RESPONSE.DO_NOTHING;
          return(true);
       }
-      if (male.x > 7)
+      if (male.x > mousex)
       {
          if (male.orientation == Bird.ORIENTATION.WEST)
          {
@@ -385,83 +390,7 @@ public class Environment
          }
          return(true);
       }
-      if (male.orientation == Bird.ORIENTATION.NORTH)
-      {
-         male.response = Bird.RESPONSE.MOVE;
-      }
-      else
-      {
-         if (male.orientation == Bird.ORIENTATION.EAST)
-         {
-            male.response = Bird.RESPONSE.TURN_LEFT;
-         }
-         else
-         {
-            male.response = Bird.RESPONSE.TURN_RIGHT;
-         }
-      }
-      return(true);
-   }
-
-
-   // Get stone.
-   public boolean getStone()
-   {
-      if ((male.x == female.x) && (male.y == female.y))
-      {
-         if (female.response == FemaleBird.RESPONSE.WANT_STONE)
-         {
-            femaleWantStone = true;
-         }
-      }
-      if (!femaleWantStone)
-      {
-         return(false);
-      }
-      if (male.hasObject == OBJECT.STONE)
-      {
-         if ((male.x == female.x) && (male.y == female.y))
-         {
-            male.response   = MaleBird.RESPONSE.GIVE_STONE;
-            femaleWantStone = false;
-            return(true);
-         }
-         else
-         {
-            return(false);
-         }
-      }
-      if (male.hasObject != OBJECT.NO_OBJECT)
-      {
-         male.response = Bird.RESPONSE.TOSS;
-         return(true);
-      }
-      if ((world[male.x][male.y].object == OBJECT.STONE) &&
-          (world[male.x][male.y].locale == LOCALE.DESERT))
-      {
-         male.response = Bird.RESPONSE.GET;
-         return(true);
-      }
-      if ((male.x >= 8) && (male.y >= 14))
-      {
-         if (randomizer.nextBoolean())
-         {
-            if (randomizer.nextBoolean())
-            {
-               male.response = Bird.RESPONSE.TURN_LEFT;
-            }
-            else
-            {
-               male.response = Bird.RESPONSE.TURN_RIGHT;
-            }
-         }
-         else
-         {
-            male.response = Bird.RESPONSE.MOVE;
-         }
-         return(true);
-      }
-      if (male.x < 8)
+      if (male.x < mousex)
       {
          if (male.orientation == Bird.ORIENTATION.EAST)
          {
@@ -480,19 +409,177 @@ public class Environment
          }
          return(true);
       }
-      if (male.orientation == Bird.ORIENTATION.SOUTH)
+      if (male.y > mousey)
       {
-         male.response = Bird.RESPONSE.MOVE;
-      }
-      else
-      {
-         if (male.orientation == Bird.ORIENTATION.EAST)
+         if (male.orientation == Bird.ORIENTATION.NORTH)
          {
-            male.response = Bird.RESPONSE.TURN_RIGHT;
+            male.response = Bird.RESPONSE.MOVE;
          }
          else
          {
-            male.response = Bird.RESPONSE.TURN_LEFT;
+            if (male.orientation == Bird.ORIENTATION.EAST)
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+         }
+         return(true);
+      }
+      if (male.y < mousey)
+      {
+         if (male.orientation == Bird.ORIENTATION.SOUTH)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.EAST)
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+      }
+      return(true);
+   }
+
+
+   // Get stone.
+   public boolean getStone()
+   {
+      if ((male.x == female.x) && (male.y == female.y))
+      {
+         if (female.response == FemaleBird.RESPONSE.WANT_STONE)
+         {
+            femaleWantStone = true;
+         }
+      }
+      if (femaleWantFood || !femaleWantStone)
+      {
+         return(false);
+      }
+      if (male.hasObject == OBJECT.STONE)
+      {
+         if ((male.x == female.x) && (male.y == female.y))
+         {
+            male.response   = MaleBird.RESPONSE.GIVE_STONE;
+            femaleWantStone = false;
+            return(true);
+         }
+         else
+         {
+            return(false);
+         }
+      }
+      if ((world[male.x][male.y].object == OBJECT.STONE) &&
+          (world[male.x][male.y].locale == LOCALE.DESERT))
+      {
+         male.response = Bird.RESPONSE.GET;
+         return(true);
+      }
+      int    stonex = -1;
+      int    stoney = -1;
+      double dist   = 0.0;
+      for (int x = 0; x < width; x++)
+      {
+         for (int y = 0; y < height; y++)
+         {
+            if ((world[x][y].locale == LOCALE.DESERT) && (world[x][y].object == OBJECT.STONE))
+            {
+               double d = distance((double)male.x, (double)male.y, (double)x, (double)y);
+               if ((stonex == -1) || (d < dist))
+               {
+                  stonex = x;
+                  stoney = y;
+                  dist   = d;
+               }
+            }
+         }
+      }
+      if (stonex == -1)
+      {
+         male.response = Bird.RESPONSE.DO_NOTHING;
+         return(true);
+      }
+      if (male.x > stonex)
+      {
+         if (male.orientation == Bird.ORIENTATION.WEST)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+         }
+         return(true);
+      }
+      if (male.x < stonex)
+      {
+         if (male.orientation == Bird.ORIENTATION.EAST)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+         }
+         return(true);
+      }
+      if (male.y > stoney)
+      {
+         if (male.orientation == Bird.ORIENTATION.NORTH)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.EAST)
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+         }
+         return(true);
+      }
+      if (male.y < stoney)
+      {
+         if (male.orientation == Bird.ORIENTATION.SOUTH)
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         else
+         {
+            if (male.orientation == Bird.ORIENTATION.EAST)
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               male.response = Bird.RESPONSE.TURN_LEFT;
+            }
          }
       }
       return(true);
