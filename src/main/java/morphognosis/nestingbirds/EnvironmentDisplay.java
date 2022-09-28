@@ -40,10 +40,10 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    static final int DISPLAY_UPDATE_DELAY = 50;
 
    // Dimensions.
-   static final Dimension SCREEN_SIZE       = new Dimension(652, 703);   // 652, 550
+   static final Dimension SCREEN_SIZE       = new Dimension(652, 550);
    static final Dimension CANVAS_SIZE       = new Dimension(630, 703);
    static final Dimension STATUS_PANEL_SIZE = new Dimension(652, 100);
-   static final Dimension CELL_SIZE         = new Dimension(30, 27);    // 30, 30
+   static final Dimension CELL_SIZE         = new Dimension(30, 30);
    static final Dimension LOCALE_SIZE       = new Dimension(15, 15);
    static final Dimension OBJECT_SIZE       = new Dimension(20, 20);
    static final Dimension SMALL_BIRD_SIZE   = new Dimension(15, 15);
