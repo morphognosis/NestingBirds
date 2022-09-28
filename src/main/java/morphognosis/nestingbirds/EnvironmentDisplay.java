@@ -36,10 +36,6 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    // Environment.
    public Environment environment;
 
-   // Milliseconds between responses.
-   static final int MIN_RESPONSE_DELAY = 100;
-   static final int MAX_RESPONSE_DELAY = 1000;
-
    // Milliseconds between display updates.
    static final int DISPLAY_UPDATE_DELAY = 50;
 

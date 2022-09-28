@@ -1088,7 +1088,9 @@ public class Environment
       {
          for (int y = randomizer.nextInt(height), y2 = 0; y2 < height; y = (y + 1) % height, y2++)
          {
-            if ((world[x][y].object == OBJECT.MOUSE) && (randomizer.nextDouble() < MOUSE_MOVE_PROBABILITY))
+            if ((world[x][y].object == OBJECT.MOUSE) &&
+                ((male.x != x) || (male.y != y) || (male.response != Bird.RESPONSE.GET)) &&
+                (randomizer.nextDouble() < MOUSE_MOVE_PROBABILITY))
             {
                boolean move = false;
                for (int i = randomizer.nextInt(4), i2 = 0; i2 < 4 && !move; i = (i + 1) % 4, i2++)
