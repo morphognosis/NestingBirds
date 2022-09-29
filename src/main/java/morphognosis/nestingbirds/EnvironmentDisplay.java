@@ -49,9 +49,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    static final int DISPLAY_UPDATE_DELAY = 50;
 
    // Dimensions.
-   static final Dimension SCREEN_SIZE       = new Dimension(652, 550);
-   static final Dimension CANVAS_SIZE       = new Dimension(630, 703);
-   static final Dimension STATUS_PANEL_SIZE = new Dimension(652, 100);
+   static final Dimension SCREEN_SIZE       = new Dimension(650, 550);
+   static final Dimension CANVAS_SIZE       = new Dimension(630, 630);
+   static final Dimension CONTROL_PANEL_SIZE = new Dimension(650, 100);
    static final Dimension CELL_SIZE         = new Dimension(30, 30);
    static final Dimension LOCALE_SIZE       = new Dimension(15, 15);
    static final Dimension OBJECT_SIZE       = new Dimension(20, 20);
@@ -128,12 +128,12 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    Image femaleNetImage;
 
    // Font.
-   Font        font;
+   Font        font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
    FontMetrics fontMetrics;
    int         fontAscent;
    int         fontWidth;
    int         fontHeight;
-
+ 
    // Dashboards.
    BirdDashboard maleDashboard;
    BirdDashboard femaleDashboard;
@@ -152,12 +152,11 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
 
       // Create control panel.
       controlPanel     = new JPanel();
-      controlPanelSize = new Dimension(screenSize.width,
-                                       (int)((double)screenSize.height * .05));
+      controlPanelSize = CONTROL_PANEL_SIZE;
       controlPanel.setBounds(0, 0, controlPanelSize.width, controlPanelSize.height);
       add(controlPanel, BorderLayout.NORTH);
-      controlPanel.add(new JLabel("Response: driver ="));
-      responseDriverChoice = new JComboBox<Item>();
+      controlPanel.add(newLabel("Response: driver ="));
+      responseDriverChoice = newComboBox();
       responseDriverChoice.setOpaque(true);
       responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.AUTOPILOT,
                                             Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.AUTOPILOT)));
@@ -166,8 +165,8 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.MANUAL,
                                             Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.MANUAL)));
       controlPanel.add(responseDriverChoice);
-      controlPanel.add(new JLabel("female ="));
-      femaleResponseChoice = new JComboBox<Item>();
+      controlPanel.add(newLabel("female ="));
+      femaleResponseChoice = newComboBox();
       femaleResponseChoice.setOpaque(true);
       femaleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
       femaleResponseChoice.addItem(new Item(Bird.RESPONSE.EAT, Bird.RESPONSE.toString(Bird.RESPONSE.EAT)));
@@ -181,8 +180,8 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       femaleResponseChoice.addItem(new Item(FemaleBird.RESPONSE.WANT_STONE, FemaleBird.RESPONSE.toString(FemaleBird.RESPONSE.WANT_STONE)));
       femaleResponseChoice.addItem(new Item(FemaleBird.RESPONSE.LAY_EGG, FemaleBird.RESPONSE.toString(FemaleBird.RESPONSE.LAY_EGG)));
       controlPanel.add(femaleResponseChoice);
-      controlPanel.add(new JLabel("male ="));
-      maleResponseChoice = new JComboBox<Item>();
+      controlPanel.add(newLabel("male ="));
+      maleResponseChoice = newComboBox();
       maleResponseChoice.setOpaque(true);
       maleResponseChoice.addItem(new Item(Bird.RESPONSE.DO_NOTHING, Bird.RESPONSE.toString(Bird.RESPONSE.DO_NOTHING)));
       maleResponseChoice.addItem(new Item(Bird.RESPONSE.EAT, Bird.RESPONSE.toString(Bird.RESPONSE.EAT)));
@@ -195,10 +194,10 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       maleResponseChoice.addItem(new Item(MaleBird.RESPONSE.GIVE_FOOD, MaleBird.RESPONSE.toString(MaleBird.RESPONSE.GIVE_FOOD)));
       maleResponseChoice.addItem(new Item(MaleBird.RESPONSE.GIVE_STONE, MaleBird.RESPONSE.toString(MaleBird.RESPONSE.GIVE_STONE)));
       controlPanel.add(maleResponseChoice);
-      stepButton = new JButton("Step");
+      stepButton = newButton("Step");
       stepButton.addActionListener(this);
       controlPanel.add(stepButton);
-      stepCounterLabel = new JLabel("= 0");
+      stepCounterLabel = newLabel("= 0");
       controlPanel.add(stepCounterLabel);
       stepCounter     = 0;
       maleDashboard   = null;
@@ -273,7 +272,33 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       setVisible(true);
    }
 
+   // Make label with font.
+   private JLabel newLabel(String text)
+   {
+      JLabel label = new JLabel(text);
 
+      label.setFont(font);
+      return(label);
+   }
+
+   // Make button with font.
+   private JButton newButton(String text)
+   {
+      JButton button = new JButton(text);
+
+      button.setFont(font);
+      return(button);
+   }
+
+
+   // Make combo box with font.
+   private JComboBox<Item> newComboBox()
+   {
+      JComboBox<Item> box = new JComboBox<Item>();
+      box.setFont(font);
+      return(box);
+   }
+   
    public void setLocation()
    {
       Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -347,7 +372,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       // Draw world.
       worldImageGraphics.setColor(Color.black);
       y2 = worldImageSize.height;
-      int h = STATUS_PANEL_SIZE.height;
+      int h = CONTROL_PANEL_SIZE.height;
       for (x = x2 = 0; x < Environment.width; x++, x2 += CELL_SIZE.width)
       {
          worldImageGraphics.drawLine(x2, h, x2, y2);
@@ -487,26 +512,26 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       if (graphics == null) { return(false); }
 
       // Initialize font.
-      font        = graphics.getFont();
+      graphics.setFont(font);
       fontMetrics = graphics.getFontMetrics();
       fontAscent  = fontMetrics.getMaxAscent();
       fontWidth   = fontMetrics.getMaxAdvance();
       fontHeight  = fontMetrics.getHeight();
 
       // Initialize graphics.
-      if ((x = Environment.width * CELL_SIZE.width) < STATUS_PANEL_SIZE.width)
+      if ((x = Environment.width * CELL_SIZE.width) < CONTROL_PANEL_SIZE.width)
       {
-         x = STATUS_PANEL_SIZE.width;
+         x = CONTROL_PANEL_SIZE.width;
       }
       x++;
-      y = (Environment.height * CELL_SIZE.height) + STATUS_PANEL_SIZE.height;
+      y = (Environment.height * CELL_SIZE.height) + CONTROL_PANEL_SIZE.height;
       worldImageSize     = new Dimension(x, y);
       worldImage         = createImage(x, y);
       worldImageGraphics = worldImage.getGraphics();
       worldImageGraphics.setFont(font);
       y = 1;
       femaleStatusLocation = new Point(0, y);
-      x = (int)((STATUS_PANEL_SIZE.width - (2.5 * BIRD_SIZE.width)) / 2);
+      x = (int)((CONTROL_PANEL_SIZE.width - (2.5 * BIRD_SIZE.width)) / 2);
       femaleImageLocation = new Point(x, y);
       x = femaleImageLocation.x + ((BIRD_SIZE.width * 7) / 8);
       y = femaleImageLocation.y + (BIRD_SIZE.height / 8);
