@@ -94,9 +94,6 @@ public class Bird
    };
    public int response;
 
-   // Food duration.
-   public static int FOOD_DURATION = 100;
-
    // State.
    public int gender;
    public int x, y;

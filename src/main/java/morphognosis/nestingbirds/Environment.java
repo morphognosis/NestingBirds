@@ -10,6 +10,23 @@ import morphognosis.nestingbirds.Bird.RESPONSE;
 
 public class Environment
 {
+   // Version.
+   public static final String VERSION = "1.0";
+
+   // Usage.
+   public static final String Usage =
+      "Usage:\n" +
+      "    java morphognosis.nestingbirds.Environment\n" +
+      "      -steps <steps>\n" +
+      "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
+      "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
+      "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
+      "      [-verbose <true | false> (default=true)]\n" +
+      "      [-version\n" +
+      "Exit codes:\n" +
+      "  0=success\n" +
+      "  1=error";
+
    // Locale map: grassland=0, forest=1, food=2, desert=3, stone=4
    public static final int  width      = 21, height = 21;
    public static final char locale[][] =
@@ -116,29 +133,30 @@ public class Environment
    // Response drivers.
    public static class RESPONSE_DRIVER
    {
-      public static final int MANUAL    = 0;
-      public static final int BIRD      = 1;
-      public static final int AUTOPILOT = 2;
+      public static final int AUTOPILOT = 0;
+      public static final int MANUAL    = 1;
+      public static final int BIRD      = 2;
+
 
       // To string.
       public static String toString(int driver)
       {
          switch (driver)
          {
+         case AUTOPILOT:
+            return("autopilot");
+
          case MANUAL:
             return("manual");
 
          case BIRD:
             return("bird");
-
-         case AUTOPILOT:
-            return("autopilot");
          }
          return("Unknown driver");
       }
    };
-   public int responseDriver = RESPONSE_DRIVER.MANUAL;
-   public void setResponseDriver(int driver) { responseDriver = driver; }
+   public static int ResponseDriver = RESPONSE_DRIVER.AUTOPILOT;
+   public void setResponseDriver(int driver) { ResponseDriver = driver; }
 
    // Disrupt nest.
    private int disruptNest = 0;
@@ -151,6 +169,9 @@ public class Environment
    // Random numbers.
    public static int RANDOM_NUMBER_SEED = 4517;
    public Random     randomizer;
+
+   // Verbosity.
+   public static boolean Verbose = true;
 
    // Construct environment.
    Environment()
@@ -207,7 +228,7 @@ public class Environment
       male                                = new MaleBird();
       male.x                              = width / 2;
       male.y                              = height / 2;
-      male.food                           = Bird.FOOD_DURATION;
+      male.food                           = MaleBird.FOOD_DURATION;
       sensors                             = new int[MaleBird.NUM_SENSORS];
       sensors[Bird.LOCALE_SENSOR]         = world[male.x][male.y].locale;
       sensors[Bird.OBJECT_SENSOR]         = world[male.x][male.y].object;
@@ -225,13 +246,13 @@ public class Environment
    public void step()
    {
       // Cycle female.
+      cycle(Bird.FEMALE);
       Cell cell = world[female.x][female.y];
-
       int[] sensors = new int[FemaleBird.NUM_SENSORS];
       sensors[Bird.LOCALE_SENSOR] = cell.locale;
       sensors[Bird.OBJECT_SENSOR] = cell.object;
       female.setSensors(sensors);
-      switch (responseDriver)
+      switch (ResponseDriver)
       {
       case RESPONSE_DRIVER.BIRD:
          female.cycle();
@@ -241,9 +262,14 @@ public class Environment
          cycleAutopilot(Bird.FEMALE);
          break;
       }
-      cycle(Bird.FEMALE);
+      if (Verbose)
+      {
+         System.out.print("Female (" + female.x + "," + female.y + "): ");
+         female.print();
+      }
 
       // Cycle male.
+      cycle(Bird.MALE);
       cell    = world[male.x][male.y];
       sensors = new int[MaleBird.NUM_SENSORS];
       sensors[Bird.LOCALE_SENSOR]         = cell.locale;
@@ -264,7 +290,7 @@ public class Environment
          }
       }
       male.setSensors(sensors);
-      switch (responseDriver)
+      switch (ResponseDriver)
       {
       case RESPONSE_DRIVER.BIRD:
          male.cycle();
@@ -274,7 +300,11 @@ public class Environment
          cycleAutopilot(Bird.MALE);
          break;
       }
-      cycle(Bird.MALE);
+      if (Verbose)
+      {
+         System.out.print("Male (" + male.x + "," + male.y + "): ");
+         male.print();
+      }
 
       // Step mice.
       stepMice();
@@ -959,7 +989,14 @@ public class Environment
       case Bird.RESPONSE.EAT:
          if (bird.hasObject == OBJECT.MOUSE)
          {
-            bird.food      = Bird.FOOD_DURATION;
+            if (bird.gender == Bird.MALE)
+            {
+               bird.food = MaleBird.FOOD_DURATION;
+            }
+            else
+            {
+               bird.food = FemaleBird.FOOD_DURATION;
+            }
             bird.hasObject = OBJECT.NO_OBJECT;
          }
          break;
@@ -1244,39 +1281,162 @@ public class Environment
    // Main.
    public static void main(String[] args)
    {
-      // Get options.
-      if (args.length == 2)
+      int steps = -1;
+
+      for (int i = 0; i < args.length; i++)
       {
-         if (args[0].equals("-foodDuration"))
+         if (args[i].equals("-steps"))
          {
-            try
+            i++;
+            if (i >= args.length)
             {
-               Bird.FOOD_DURATION = Integer.parseInt(args[1]);
-            }
-            catch (Exception e)
-            {
-               System.err.println("Invalid food duration: " + args[1]);
+               System.err.println("Invalid steps option");
+               System.err.println(Usage);
                System.exit(1);
             }
+            try
+            {
+               steps = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid steps option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (steps < 0)
+            {
+               System.err.println("Invalid steps option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
          }
-         else
+         if (args[i].equals("-responseDriver"))
          {
-            System.err.println("Usage: morphognosis.nestingbirds.Environment [-foodDuration <steps>]");
-            System.exit(1);
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid driver option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (args[i].equals("autopilot"))
+            {
+               ResponseDriver = RESPONSE_DRIVER.AUTOPILOT;
+            }
+            else if (args[i].equals("bird"))
+            {
+               ResponseDriver = RESPONSE_DRIVER.BIRD;
+            }
+            else
+            {
+               System.err.println("Invalid responseDriver option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
          }
+         if (args[i].equals("-maleFoodDuration"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid maleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               MaleBird.FOOD_DURATION = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid maleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (MaleBird.FOOD_DURATION < 0)
+            {
+               System.err.println("Invalid maleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-femaleFoodDuration"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid femaleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               FemaleBird.FOOD_DURATION = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid femaleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (FemaleBird.FOOD_DURATION < 0)
+            {
+               System.err.println("Invalid femaleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-verbose"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid verbose option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (args[i].equals("true"))
+            {
+               Verbose = true;
+            }
+            else if (args[i].equals("false"))
+            {
+               Verbose = false;
+            }
+            else
+            {
+               System.err.println("Invalid verbose option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-version"))
+         {
+            System.out.println("Nesting birds version = " + VERSION);
+            System.exit(0);
+         }
+         if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
+         {
+            System.out.println(Usage);
+            System.exit(0);
+         }
+         System.err.println(Usage);
+         System.exit(1);
       }
-      else if (args.length != 0)
+      if (steps == -1)
       {
-         System.err.println("Usage: morphognosis.nestingbirds.Environment [-foodDuration <steps>]");
+         System.err.println(Usage);
          System.exit(1);
       }
 
       Environment environment = new Environment();
-
-      environment.male.response   = Bird.RESPONSE.MOVE;
-      environment.female.response = FemaleBird.RESPONSE.LAY_EGG;
-      environment.step();
-      environment.male.print();
-      environment.female.print();
+      for (int i = 0; i < steps; i++)
+      {
+         System.out.println("Step=" + i);
+         environment.step();
+      }
    }
 }

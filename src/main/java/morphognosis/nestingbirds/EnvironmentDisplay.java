@@ -18,6 +18,8 @@ import java.awt.ScrollPane;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Objects;
@@ -29,9 +31,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class EnvironmentDisplay extends JFrame implements Runnable, ActionListener
+public class EnvironmentDisplay extends JFrame implements Runnable, ActionListener, MouseListener
 {
    private static final long serialVersionUID = 0L;
+
+   // Usage.
+   public static final String Usage =
+      "Usage:\n" +
+      "    java morphognosis.nestingbirds.EnvironmentDisplay\n" +
+      "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
+      "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]";
 
    // Environment.
    public Environment environment;
@@ -73,6 +82,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    Point      femaleImageOffset;
    Point      maleImageOffset;
    Thread     displayThread;
+   String     message = "Click bird for dashboard";
 
    // JComboBox item.
    public class Item
@@ -124,6 +134,10 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    int         fontWidth;
    int         fontHeight;
 
+   // Dashboards.
+   BirdDashboard maleDashboard;
+   BirdDashboard femaleDashboard;
+
    // Constructor.
    public EnvironmentDisplay(Environment environment)
    {
@@ -145,12 +159,12 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       controlPanel.add(new JLabel("Response: driver ="));
       responseDriverChoice = new JComboBox<Item>();
       responseDriverChoice.setOpaque(true);
-      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.MANUAL,
-                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.MANUAL)));
-      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.BIRD,
-                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.BIRD)));
       responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.AUTOPILOT,
                                             Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.AUTOPILOT)));
+      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.BIRD,
+                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.BIRD)));
+      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.MANUAL,
+                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.MANUAL)));
       controlPanel.add(responseDriverChoice);
       controlPanel.add(new JLabel("female ="));
       femaleResponseChoice = new JComboBox<Item>();
@@ -186,7 +200,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       controlPanel.add(stepButton);
       stepCounterLabel = new JLabel("= 0");
       controlPanel.add(stepCounterLabel);
-      stepCounter = 0;
+      stepCounter     = 0;
+      maleDashboard   = null;
+      femaleDashboard = null;
 
       // Create world display.
       canvasScroll     = new ScrollPane();
@@ -194,6 +210,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       canvasScroll.setBounds(0, 0, canvasScrollSize.width, canvasScrollSize.height);
       canvas = new Canvas();
       canvas.setBounds(0, controlPanelSize.height, CANVAS_SIZE.width, CANVAS_SIZE.height + controlPanelSize.height);
+      canvas.addMouseListener(this);
       add(canvasScroll, BorderLayout.SOUTH);
       canvasScroll.add(canvas, null);
 
@@ -443,6 +460,18 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       worldImageGraphics.drawImage(maleSmallImage, x2 + maleImageOffset.x,
                                    y2 + maleImageOffset.y, this);
 
+      // Show message?
+      if (message != null)
+      {
+         worldImageGraphics.setColor(Color.white);
+         int w = fontMetrics.stringWidth(message);
+         h = fontMetrics.getAscent() + fontMetrics.getDescent();
+         worldImageGraphics.fillRect((worldImageSize.width - w) / 2, (worldImageSize.height / 6) - h, w, h);
+         worldImageGraphics.setColor(Color.black);
+         worldImageGraphics.drawString(message,
+                                       (worldImageSize.width - w) / 2, worldImageSize.height / 6);
+      }
+
       // Copy to display.
       canvasGraphics.drawImage(worldImage, 0, 0, this);
    }
@@ -523,6 +552,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          item = (Item)responseDriverChoice.getSelectedItem();
          environment.setResponseDriver(item.id);
          environment.step();
+         message = null;
          for (int i = 0; i < femaleResponseChoice.getItemCount(); i++)
          {
             item = femaleResponseChoice.getItemAt(i);
@@ -543,10 +573,71 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          }
          stepCounter++;
          stepCounterLabel.setText("= " + stepCounter + "");
+         if (femaleDashboard != null)
+         {
+            femaleDashboard.update();
+         }
+         if (maleDashboard != null)
+         {
+            maleDashboard.update();
+         }
          return;
       }
    }
 
+
+   // Canvas mouse listener.
+   @Override
+   public void mouseClicked(MouseEvent e)
+   {
+      int x = e.getX();
+      int y = e.getY();
+
+      if ((x >= femaleImageLocation.x) && (x <= femaleImageLocation.x + BIRD_SIZE.width))
+      {
+         if ((y >= femaleImageLocation.y) && (y <= femaleImageLocation.y + BIRD_SIZE.height))
+         {
+            if (femaleDashboard == null)
+            {
+               femaleDashboard = new BirdDashboard(environment.female, this);
+            }
+            else
+            {
+               femaleDashboard.open();
+            }
+         }
+      }
+      if ((x >= maleImageLocation.x) && (x <= maleImageLocation.x + BIRD_SIZE.width))
+      {
+         if ((y >= maleImageLocation.y) && (y <= maleImageLocation.y + BIRD_SIZE.height))
+         {
+            if (maleDashboard == null)
+            {
+               maleDashboard = new BirdDashboard(environment.male, this);
+            }
+            else
+            {
+               maleDashboard.open();
+            }
+         }
+      }
+   }
+
+
+   @Override
+   public void mousePressed(MouseEvent e) {}
+
+
+   @Override
+   public void mouseReleased(MouseEvent e) {}
+
+
+   @Override
+   public void mouseEntered(MouseEvent e) {}
+
+
+   @Override
+   public void mouseExited(MouseEvent e) {}
 
    // Load image.
    Image loadImage(String name)
@@ -585,35 +676,78 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    // Main.
    public static void main(String[] args)
    {
-      // Get options.
-      if (args.length == 2)
+      for (int i = 0; i < args.length; i++)
       {
-         if (args[0].equals("-foodDuration"))
+         if (args[i].equals("-maleFoodDuration"))
          {
-            try
+            i++;
+            if (i >= args.length)
             {
-               Bird.FOOD_DURATION = Integer.parseInt(args[1]);
-            }
-            catch (Exception e)
-            {
-               System.err.println("Invalid food duration: " + args[1]);
+               System.err.println("Invalid maleFoodDuration option");
+               System.err.println(Usage);
                System.exit(1);
             }
+            try
+            {
+               MaleBird.FOOD_DURATION = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid maleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (MaleBird.FOOD_DURATION < 0)
+            {
+               System.err.println("Invalid maleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
          }
-         else
+         if (args[i].equals("-femaleFoodDuration"))
          {
-            System.err.println("Usage: morphognosis.nestingbirds.EnvironmentDisplay [-foodDuration <steps>]");
-            System.exit(1);
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid femaleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               FemaleBird.FOOD_DURATION = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid femaleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (FemaleBird.FOOD_DURATION < 0)
+            {
+               System.err.println("Invalid femaleFoodDuration option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
          }
-      }
-      else if (args.length != 0)
-      {
-         System.err.println("Usage: morphognosis.nestingbirds.EnvironmentDisplay [-foodDuration <steps>]");
+         if (args[i].equals("-version"))
+         {
+            System.out.println("Nesting birds version = " + Environment.VERSION);
+            System.exit(0);
+         }
+         if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
+         {
+            System.out.println(Usage);
+            System.exit(0);
+         }
+         System.err.println(Usage);
          System.exit(1);
       }
 
       // Create environment.
+      Environment.Verbose = false;
       Environment environment = new Environment();
+
 
       // Create environment display.
       EnvironmentDisplay environmentDisplay = new EnvironmentDisplay(environment);

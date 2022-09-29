@@ -9,12 +9,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -25,8 +29,8 @@ public class BirdDashboard extends JFrame
    private static final long serialVersionUID = 0L;
 
    // Components.
-   StatusPanel status;
-   DriverPanel driver;
+   StatusPanel     status;
+   PropertiesPanel properties;
 
    // Target bird.
    Bird bird;
@@ -57,11 +61,11 @@ public class BirdDashboard extends JFrame
       basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
       status = new StatusPanel();
       basePanel.add(status);
-      driver = new DriverPanel();
-      basePanel.add(driver);
+      properties = new PropertiesPanel();
+      basePanel.add(properties);
       pack();
       setLocation();
-      setVisible(false);
+      setVisible(true);
       update();
    }
 
@@ -285,14 +289,76 @@ public class BirdDashboard extends JFrame
       }
    }
 
-   // Driver panel.
-   class DriverPanel extends JPanel
+   // Properties panel.
+   class PropertiesPanel extends JPanel implements ActionListener
    {
       private static final long serialVersionUID = 0L;
 
+      JTextField foodDurationText;
+      JButton    foodDurationButton;
+
       // Constructor.
-      public DriverPanel()
+      public PropertiesPanel()
       {
+         setBorder(BorderFactory.createTitledBorder(
+                      BorderFactory.createLineBorder(Color.black),
+                      "Properties"));
+         setLayout(new FlowLayout(FlowLayout.LEFT));
+         JLabel foodDurationLabel = new JLabel("Food duration: ");
+         add(foodDurationLabel);
+         foodDurationText = new JTextField(10);
+         if (bird.gender == Bird.MALE)
+         {
+            foodDurationText.setText(MaleBird.FOOD_DURATION + "");
+         }
+         else
+         {
+            foodDurationText.setText(FemaleBird.FOOD_DURATION + "");
+         }
+         add(foodDurationText);
+         foodDurationButton = new JButton("Set");
+         foodDurationButton.addActionListener(this);
+         add(foodDurationButton);
+      }
+
+
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+         String text = foodDurationText.getText();
+
+         if ((text != null) && !text.isEmpty())
+         {
+            try
+            {
+               int duration = Integer.parseInt(text);
+               if (duration < 0)
+               {
+                  JOptionPane.showMessageDialog(this, "Invalid food duration value");
+                  return;
+               }
+               if (bird.gender == Bird.MALE)
+               {
+                  MaleBird.FOOD_DURATION = duration;
+                  if (bird.food > duration)
+                  {
+                     bird.food = duration;
+                  }
+               }
+               else
+               {
+                  FemaleBird.FOOD_DURATION = duration;
+                  if (bird.food > duration)
+                  {
+                     bird.food = duration;
+                  }
+               }
+            }
+            catch (Exception ex)
+            {
+               JOptionPane.showMessageDialog(this, "Invalid food duration value");
+            }
+         }
       }
    }
 }
