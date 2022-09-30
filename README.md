@@ -2,10 +2,11 @@
 
 Abstract:
 
-An animal behavior problem is proposed involving two birds, a male and female. The female builds a nest
+An animal behavior problem in the form of a game is proposed that involves two cooperating birds, a male and female. 
+The female builds a nest
 in to which she lays an egg. The male's job is to forage in a forest for food for both himself and the 
 female. In addition, the male must fetch stones from a nearby desert for the female to use as nesting material. 
-The game is complete when the nest is built and an egg is laid in it. The game can be run in three modes: manual 
+The game is complete when the nest is built and an egg is laid in it. The game can be run in three modes: manual
 (user-supplied responses), "auto pilot" (self-playing), and using the bird's brain (supplied by a player).
 
 See: 
