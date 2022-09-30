@@ -1,7 +1,9 @@
 # Nesting birds.
 
-A pair of cooperating nest-building and foraging birds are used as a platform to demonstrate
-learning models. See: http://tom.portegys.com/research.html#nestingbirds
+A pair of cooperating nest-building and foraging birds are used as an environment to demonstrate
+learning models. 
+
+See: http://tom.portegys.com/research.html#nestingbirds
 
 Build with Eclipse project and export to bin/nestingbirds.jar to run with scripts in the work directory.
 
