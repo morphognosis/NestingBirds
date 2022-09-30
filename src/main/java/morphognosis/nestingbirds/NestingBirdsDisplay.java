@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in Morphognosis.java
 
-// The nesting birds environment display.
+// The nesting birds display.
 
 package morphognosis.nestingbirds;
 
@@ -31,25 +31,25 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class EnvironmentDisplay extends JFrame implements Runnable, ActionListener, MouseListener
+public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListener, MouseListener
 {
    private static final long serialVersionUID = 0L;
 
    // Usage.
    public static final String Usage =
       "Usage:\n" +
-      "    java morphognosis.nestingbirds.EnvironmentDisplay\n" +
+      "    java morphognosis.nestingbirds.NestingBirdsDisplay\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]";
 
-   // Environment.
-   public Environment environment;
+   // Nesting birds.
+   public NestingBirds nestingbirds;
 
    // Milliseconds between display updates.
    static final int DISPLAY_UPDATE_DELAY = 50;
 
    // Dimensions.
-   static final Dimension SCREEN_SIZE        = new Dimension(652, 550);
+   static final Dimension SCREEN_SIZE        = new Dimension(652, 680);
    static final Dimension CANVAS_SIZE        = new Dimension(630, 630);
    static final Dimension CONTROL_PANEL_SIZE = new Dimension(652, 100);
    static final Dimension CELL_SIZE          = new Dimension(30, 30);
@@ -139,9 +139,9 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    BirdDashboard femaleDashboard;
 
    // Constructor.
-   public EnvironmentDisplay(Environment environment)
+   public NestingBirdsDisplay(NestingBirds nestingbirds)
    {
-      this.environment = environment;
+      this.nestingbirds = nestingbirds;
 
       // Set up display.
       setTitle("Nesting birds");
@@ -158,12 +158,12 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       controlPanel.add(newLabel("Response: driver ="));
       responseDriverChoice = newComboBox();
       responseDriverChoice.setOpaque(true);
-      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.AUTOPILOT,
-                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.AUTOPILOT)));
-      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.BIRD,
-                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.BIRD)));
-      responseDriverChoice.addItem(new Item(Environment.RESPONSE_DRIVER.MANUAL,
-                                            Environment.RESPONSE_DRIVER.toString(Environment.RESPONSE_DRIVER.MANUAL)));
+      responseDriverChoice.addItem(new Item(NestingBirds.RESPONSE_DRIVER.AUTOPILOT,
+    		  NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.AUTOPILOT)));
+      responseDriverChoice.addItem(new Item(NestingBirds.RESPONSE_DRIVER.BIRD,
+    		  NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.BIRD)));
+      responseDriverChoice.addItem(new Item(NestingBirds.RESPONSE_DRIVER.MANUAL,
+    		  NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.MANUAL)));
       controlPanel.add(responseDriverChoice);
       controlPanel.add(newLabel("female ="));
       femaleResponseChoice = newComboBox();
@@ -376,53 +376,53 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       worldImageGraphics.setColor(Color.black);
       y2 = worldImageSize.height;
       int h = CONTROL_PANEL_SIZE.height;
-      for (x = x2 = 0; x < Environment.width; x++, x2 += CELL_SIZE.width)
+      for (x = x2 = 0; x < NestingBirds.width; x++, x2 += CELL_SIZE.width)
       {
          worldImageGraphics.drawLine(x2, h, x2, y2);
       }
       worldImageGraphics.drawLine(x2, h, x2, y2);
-      x2 = Environment.width * CELL_SIZE.width;
-      for (y = 0, y2 = h; y < Environment.height; y++, y2 += CELL_SIZE.height)
+      x2 = NestingBirds.width * CELL_SIZE.width;
+      for (y = 0, y2 = h; y < NestingBirds.height; y++, y2 += CELL_SIZE.height)
       {
          worldImageGraphics.drawLine(0, y2, x2, y2);
       }
       worldImageGraphics.drawLine(0, y2 - 1, x2, y2 - 1);
-      for (x = x2 = 0; x < Environment.width; x++, x2 += CELL_SIZE.width)
+      for (x = x2 = 0; x < NestingBirds.width; x++, x2 += CELL_SIZE.width)
       {
-         for (y = 0, y2 = h; y < Environment.height; y++, y2 += CELL_SIZE.height)
+         for (y = 0, y2 = h; y < NestingBirds.height; y++, y2 += CELL_SIZE.height)
          {
-            switch (environment.world[x][y].locale)
+            switch (nestingbirds.world[x][y].locale)
             {
-            case Environment.LOCALE.DESERT:
+            case NestingBirds.LOCALE.DESERT:
                worldImageGraphics.drawImage(cactusImage, x2 + localeImageOffset.x,
                                             y2 + localeImageOffset.y, this);
                break;
 
-            case Environment.LOCALE.FOREST:
+            case NestingBirds.LOCALE.FOREST:
                worldImageGraphics.drawImage(treeImage, x2 + localeImageOffset.x,
                                             y2 + localeImageOffset.y, this);
                break;
 
-            case Environment.LOCALE.PLAIN:
+            case NestingBirds.LOCALE.PLAIN:
                break;
             }
 
-            switch (environment.world[x][y].object)
+            switch (nestingbirds.world[x][y].object)
             {
-            case Environment.OBJECT.NO_OBJECT:
+            case NestingBirds.OBJECT.NO_OBJECT:
                break;
 
-            case Environment.OBJECT.EGG:
+            case NestingBirds.OBJECT.EGG:
                worldImageGraphics.drawImage(eggImage, x2 + objectImageOffset.x,
                                             y2 + objectImageOffset.y, this);
                break;
 
-            case Environment.OBJECT.MOUSE:
+            case NestingBirds.OBJECT.MOUSE:
                worldImageGraphics.drawImage(mouseImage, x2 + objectImageOffset.x,
                                             y2 + objectImageOffset.y, this);
                break;
 
-            case Environment.OBJECT.STONE:
+            case NestingBirds.OBJECT.STONE:
                worldImageGraphics.drawImage(stoneImage, x2 + objectImageOffset.x,
                                             y2 + objectImageOffset.y, this);
                break;
@@ -437,25 +437,25 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       x = femaleImageLocation.x + ((BIRD_SIZE.width - fontMetrics.stringWidth(s)) / 2);
       y = femaleImageLocation.y + BIRD_SIZE.height + fontAscent;
       worldImageGraphics.drawString(s, x, y);
-      if (environment.female.hasObject == Environment.OBJECT.MOUSE)
+      if (nestingbirds.female.hasObject == NestingBirds.OBJECT.MOUSE)
       {
          worldImageGraphics.drawImage(mouseImage, femaleObjectLocation.x,
                                       femaleObjectLocation.y, this);
       }
-      else if (environment.female.hasObject == Environment.OBJECT.STONE)
+      else if (nestingbirds.female.hasObject == NestingBirds.OBJECT.STONE)
       {
          worldImageGraphics.drawImage(stoneImage, femaleObjectLocation.x,
                                       femaleObjectLocation.y, this);
       }
-      s = "Orientation: " + Bird.ORIENTATION.toString(environment.female.orientation);
+      s = "Orientation: " + Bird.ORIENTATION.toString(nestingbirds.female.orientation);
       x = femaleStatusLocation.x + statusInfoOffset.x;
       y = femaleStatusLocation.y + statusInfoOffset.y;
       worldImageGraphics.drawString(s, x, y);
-      s  = "Food: " + environment.female.food;
+      s  = "Food: " + nestingbirds.female.food;
       y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
-      x2 = environment.female.x * CELL_SIZE.width;
-      y2 = (environment.female.y * CELL_SIZE.height) + h;
+      x2 = nestingbirds.female.x * CELL_SIZE.width;
+      y2 = (nestingbirds.female.y * CELL_SIZE.height) + h;
       worldImageGraphics.drawImage(femaleSmallImage, x2 + femaleImageOffset.x,
                                    y2 + femaleImageOffset.y, this);
 
@@ -466,25 +466,25 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       x = maleImageLocation.x + ((BIRD_SIZE.width - fontMetrics.stringWidth(s)) / 2);
       y = maleImageLocation.y + BIRD_SIZE.height + fontAscent;
       worldImageGraphics.drawString(s, x, y);
-      if (environment.male.hasObject == Environment.OBJECT.MOUSE)
+      if (nestingbirds.male.hasObject == NestingBirds.OBJECT.MOUSE)
       {
          worldImageGraphics.drawImage(mouseImage, maleObjectLocation.x,
                                       maleObjectLocation.y, this);
       }
-      else if (environment.male.hasObject == Environment.OBJECT.STONE)
+      else if (nestingbirds.male.hasObject == NestingBirds.OBJECT.STONE)
       {
          worldImageGraphics.drawImage(stoneImage, maleObjectLocation.x,
                                       maleObjectLocation.y, this);
       }
-      s = "Orientation: " + Bird.ORIENTATION.toString(environment.male.orientation);
+      s = "Orientation: " + Bird.ORIENTATION.toString(nestingbirds.male.orientation);
       x = maleStatusLocation.x + statusInfoOffset.x;
       y = maleStatusLocation.y + statusInfoOffset.y;
       worldImageGraphics.drawString(s, x, y);
-      s  = "Food: " + environment.male.food;
+      s  = "Food: " + nestingbirds.male.food;
       y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
-      x2 = environment.male.x * CELL_SIZE.width;
-      y2 = (environment.male.y * CELL_SIZE.height) + h;
+      x2 = nestingbirds.male.x * CELL_SIZE.width;
+      y2 = (nestingbirds.male.y * CELL_SIZE.height) + h;
       worldImageGraphics.drawImage(maleSmallImage, x2 + maleImageOffset.x,
                                    y2 + maleImageOffset.y, this);
 
@@ -522,12 +522,12 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       fontHeight  = fontMetrics.getHeight();
 
       // Initialize graphics.
-      if ((x = Environment.width * CELL_SIZE.width) < CONTROL_PANEL_SIZE.width)
+      if ((x = NestingBirds.width * CELL_SIZE.width) < CONTROL_PANEL_SIZE.width)
       {
          x = CONTROL_PANEL_SIZE.width;
       }
       x++;
-      y = (Environment.height * CELL_SIZE.height) + CONTROL_PANEL_SIZE.height;
+      y = (NestingBirds.height * CELL_SIZE.height) + CONTROL_PANEL_SIZE.height;
       worldImageSize     = new Dimension(x, y);
       worldImage         = createImage(x, y);
       worldImageGraphics = worldImage.getGraphics();
@@ -574,17 +574,17 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       if (e.getSource() == stepButton)
       {
          Item item = (Item)femaleResponseChoice.getSelectedItem();
-         environment.female.response = item.id;
+         nestingbirds.female.response = item.id;
          item = (Item)maleResponseChoice.getSelectedItem();
-         environment.male.response = item.id;
+         nestingbirds.male.response = item.id;
          item = (Item)responseDriverChoice.getSelectedItem();
-         environment.setResponseDriver(item.id);
-         environment.step();
+         nestingbirds.setResponseDriver(item.id);
+         nestingbirds.step();
          message = null;
          for (int i = 0; i < femaleResponseChoice.getItemCount(); i++)
          {
             item = femaleResponseChoice.getItemAt(i);
-            if (item.id == environment.female.response)
+            if (item.id == nestingbirds.female.response)
             {
                femaleResponseChoice.setSelectedIndex(i);
                break;
@@ -593,7 +593,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          for (int i = 0; i < maleResponseChoice.getItemCount(); i++)
          {
             item = maleResponseChoice.getItemAt(i);
-            if (item.id == environment.male.response)
+            if (item.id == nestingbirds.male.response)
             {
                maleResponseChoice.setSelectedIndex(i);
                break;
@@ -627,7 +627,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          {
             if (femaleDashboard == null)
             {
-               femaleDashboard = new BirdDashboard(environment.female, this);
+               femaleDashboard = new BirdDashboard(nestingbirds.female, this);
             }
             else
             {
@@ -641,7 +641,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          {
             if (maleDashboard == null)
             {
-               maleDashboard = new BirdDashboard(environment.male, this);
+               maleDashboard = new BirdDashboard(nestingbirds.male, this);
             }
             else
             {
@@ -760,7 +760,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          }
          if (args[i].equals("-version"))
          {
-            System.out.println("Nesting birds version = " + Environment.VERSION);
+            System.out.println("Nesting birds version = " + NestingBirds.VERSION);
             System.exit(0);
          }
          if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
@@ -772,15 +772,15 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
          System.exit(1);
       }
 
-      // Create environment.
-      Environment.Verbose = false;
-      Environment environment = new Environment();
+      // Create nesting birds.
+      NestingBirds.Verbose = false;
+      NestingBirds nestingbirds = new NestingBirds();
 
 
-      // Create environment display.
-      EnvironmentDisplay environmentDisplay = new EnvironmentDisplay(environment);
+      // Create display.
+      NestingBirdsDisplay nestingbirdsDisplay = new NestingBirdsDisplay(nestingbirds);
 
       // Start.
-      environmentDisplay.start();
+      nestingbirdsDisplay.start();
    }
 }

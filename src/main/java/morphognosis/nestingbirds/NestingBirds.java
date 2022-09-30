@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in Morphognosis.java
 
-// The nesting birds environment.
+// The nesting birds.
 
 package morphognosis.nestingbirds;
 
@@ -8,7 +8,7 @@ import java.util.Random;
 
 import morphognosis.nestingbirds.Bird.RESPONSE;
 
-public class Environment
+public class NestingBirds
 {
    // Version.
    public static final String VERSION = "1.0";
@@ -16,7 +16,7 @@ public class Environment
    // Usage.
    public static final String Usage =
       "Usage:\n" +
-      "    java morphognosis.nestingbirds.Environment\n" +
+      "    java morphognosis.nestingbirds.NestingBirds\n" +
       "      -steps <steps>\n" +
       "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
@@ -173,8 +173,8 @@ public class Environment
    // Verbosity.
    public static boolean Verbose = true;
 
-   // Construct environment.
-   Environment()
+   // Construct.
+   public NestingBirds()
    {
       randomizer = new Random(RANDOM_NUMBER_SEED);
 
@@ -242,7 +242,7 @@ public class Environment
    }
 
 
-   // Step environment.
+   // Step.
    public void step()
    {
       // Cycle female.
@@ -1432,11 +1432,11 @@ public class Environment
          System.exit(1);
       }
 
-      Environment environment = new Environment();
+      NestingBirds nestingbirds = new NestingBirds();
       for (int i = 0; i < steps; i++)
       {
          System.out.println("Step=" + i);
-         environment.step();
+         nestingbirds.step();
       }
    }
 }

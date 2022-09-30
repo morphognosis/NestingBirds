@@ -35,14 +35,14 @@ public class BirdDashboard extends JFrame
    // Target bird.
    Bird bird;
 
-   // Environment display.
-   EnvironmentDisplay environmentDisplay;
+   // Nesting birds display.
+   NestingBirdsDisplay nestingbirdsDisplay;
 
    // Constructor.
-   public BirdDashboard(Bird bird, EnvironmentDisplay environmentDisplay)
+   public BirdDashboard(Bird bird, NestingBirdsDisplay nestingbirdsDisplay)
    {
       this.bird = bird;
-      this.environmentDisplay = environmentDisplay;
+      this.nestingbirdsDisplay = nestingbirdsDisplay;
 
       if (bird.gender == Bird.MALE)
       {
@@ -188,33 +188,33 @@ public class BirdDashboard extends JFrame
          // Get sensor values.
          switch (bird.sensors[Bird.LOCALE_SENSOR])
          {
-         case Environment.LOCALE.DESERT:
+         case NestingBirds.LOCALE.DESERT:
             localeText.setText("desert");
             break;
 
-         case Environment.LOCALE.FOREST:
+         case NestingBirds.LOCALE.FOREST:
             localeText.setText("forest");
             break;
 
-         case Environment.LOCALE.PLAIN:
+         case NestingBirds.LOCALE.PLAIN:
             localeText.setText("plain");
             break;
          }
          switch (bird.sensors[Bird.OBJECT_SENSOR])
          {
-         case Environment.OBJECT.NO_OBJECT:
+         case NestingBirds.OBJECT.NO_OBJECT:
             objectText.setText("none");
             break;
 
-         case Environment.OBJECT.MOUSE:
+         case NestingBirds.OBJECT.MOUSE:
             objectText.setText("mouse");
             break;
 
-         case Environment.OBJECT.STONE:
+         case NestingBirds.OBJECT.STONE:
             objectText.setText("stone");
             break;
 
-         case Environment.OBJECT.EGG:
+         case NestingBirds.OBJECT.EGG:
             objectText.setText("egg");
             break;
          }
@@ -260,19 +260,19 @@ public class BirdDashboard extends JFrame
          foodText.setText(bird.food + "");
          switch (bird.hasObject)
          {
-         case Environment.OBJECT.NO_OBJECT:
+         case NestingBirds.OBJECT.NO_OBJECT:
             hasObjectText.setText("none");
             break;
 
-         case Environment.OBJECT.MOUSE:
+         case NestingBirds.OBJECT.MOUSE:
             hasObjectText.setText("mouse");
             break;
 
-         case Environment.OBJECT.STONE:
+         case NestingBirds.OBJECT.STONE:
             hasObjectText.setText("stone");
             break;
 
-         case Environment.OBJECT.EGG:
+         case NestingBirds.OBJECT.EGG:
             hasObjectText.setText("egg");
             break;
          }

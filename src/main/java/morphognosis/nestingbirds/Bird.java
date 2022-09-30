@@ -4,7 +4,7 @@
 
 package morphognosis.nestingbirds;
 
-import morphognosis.nestingbirds.Environment.OBJECT;
+import morphognosis.nestingbirds.NestingBirds.OBJECT;
 
 public class Bird
 {
@@ -170,10 +170,10 @@ public class Bird
    // Sensors to string.
    public String sensorsToString()
    {
-      String s = Environment.LOCALE.toString(sensors[Bird.LOCALE_SENSOR]);
+      String s = NestingBirds.LOCALE.toString(sensors[Bird.LOCALE_SENSOR]);
 
       s += ",";
-      s += Environment.OBJECT.toString(sensors[Bird.OBJECT_SENSOR]);
+      s += NestingBirds.OBJECT.toString(sensors[Bird.OBJECT_SENSOR]);
       return(s);
    }
 
@@ -185,7 +185,7 @@ public class Bird
       System.out.print(ORIENTATION.toString(orientation));
       System.out.print(", Food: " + food);
       System.out.print(", Has_object: ");
-      System.out.print(Environment.OBJECT.toString(hasObject));
+      System.out.print(NestingBirds.OBJECT.toString(hasObject));
    }
 
 

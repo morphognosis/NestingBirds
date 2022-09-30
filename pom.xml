@@ -19,22 +19,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native-platform</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-core</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -55,16 +39,6 @@
         <profile>
             <id>gpu</id>
             <dependencies>
-                <dependency>
-                    <groupId>org.nd4j</groupId>
-                    <artifactId>nd4j-cuda-10.0-platform</artifactId>
-                    <version>${dl4j.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.deeplearning4j</groupId>
-                    <artifactId>deeplearning4j-cuda-10.0</artifactId>
-                    <version>${dl4j.version}</version>
-                </dependency>
             </dependencies>
         </profile>
     </profiles>
