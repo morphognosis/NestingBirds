@@ -49,14 +49,14 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    static final int DISPLAY_UPDATE_DELAY = 50;
 
    // Dimensions.
-   static final Dimension SCREEN_SIZE       = new Dimension(650, 550);
-   static final Dimension CANVAS_SIZE       = new Dimension(630, 630);
-   static final Dimension CONTROL_PANEL_SIZE = new Dimension(650, 100);
-   static final Dimension CELL_SIZE         = new Dimension(30, 30);
-   static final Dimension LOCALE_SIZE       = new Dimension(15, 15);
-   static final Dimension OBJECT_SIZE       = new Dimension(20, 20);
-   static final Dimension SMALL_BIRD_SIZE   = new Dimension(15, 15);
-   static final Dimension BIRD_SIZE         = new Dimension(80, 80);
+   static final Dimension SCREEN_SIZE        = new Dimension(652, 550);
+   static final Dimension CANVAS_SIZE        = new Dimension(630, 630);
+   static final Dimension CONTROL_PANEL_SIZE = new Dimension(652, 100);
+   static final Dimension CELL_SIZE          = new Dimension(30, 30);
+   static final Dimension LOCALE_SIZE        = new Dimension(15, 15);
+   static final Dimension OBJECT_SIZE        = new Dimension(20, 20);
+   static final Dimension SMALL_BIRD_SIZE    = new Dimension(15, 15);
+   static final Dimension BIRD_SIZE          = new Dimension(80, 80);
 
    // Screen size.
    Dimension screenSize;
@@ -133,7 +133,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
    int         fontAscent;
    int         fontWidth;
    int         fontHeight;
- 
+
    // Dashboards.
    BirdDashboard maleDashboard;
    BirdDashboard femaleDashboard;
@@ -272,6 +272,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       setVisible(true);
    }
 
+
    // Make label with font.
    private JLabel newLabel(String text)
    {
@@ -280,6 +281,7 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       label.setFont(font);
       return(label);
    }
+
 
    // Make button with font.
    private JButton newButton(String text)
@@ -298,7 +300,8 @@ public class EnvironmentDisplay extends JFrame implements Runnable, ActionListen
       box.setFont(font);
       return(box);
    }
-   
+
+
    public void setLocation()
    {
       Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
