@@ -40,7 +40,8 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       "Usage:\n" +
       "    java morphognosis.nestingbirds.NestingBirdsDisplay\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
-      "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]";
+      "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
+      "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]";   
 
    // Nesting birds.
    public NestingBirds nestingbirds;
@@ -758,6 +759,32 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
             }
             continue;
          }
+         if (args[i].equals("-randomSeed"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               NestingBirds.RANDOM_NUMBER_SEED = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (NestingBirds.RANDOM_NUMBER_SEED <= 0)
+            {
+               System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }                  
          if (args[i].equals("-version"))
          {
             System.out.println("Nesting birds version = " + NestingBirds.VERSION);

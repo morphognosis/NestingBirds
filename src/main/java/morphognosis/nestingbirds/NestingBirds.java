@@ -13,6 +13,10 @@ public class NestingBirds
    // Version.
    public static final String VERSION = "1.0";
 
+   // Random numbers.
+   public static int RANDOM_NUMBER_SEED = 4517;
+   public Random     randomizer;
+
    // Usage.
    public static final String Usage =
       "Usage:\n" +
@@ -21,6 +25,7 @@ public class NestingBirds
       "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
+      "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +      
       "      [-verbose <true | false> (default=true)]\n" +
       "      [-version\n" +
       "Exit codes:\n" +
@@ -165,10 +170,6 @@ public class NestingBirds
    public boolean femaleWantFood;
    public boolean femaleWantStone;
    public int     femaleNestSequence;
-
-   // Random numbers.
-   public static int RANDOM_NUMBER_SEED = 4517;
-   public Random     randomizer;
 
    // Verbosity.
    public static boolean Verbose = true;
@@ -1388,6 +1389,32 @@ public class NestingBirds
             }
             continue;
          }
+         if (args[i].equals("-randomSeed"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               RANDOM_NUMBER_SEED = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (RANDOM_NUMBER_SEED <= 0)
+            {
+               System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }         
          if (args[i].equals("-verbose"))
          {
             i++;
