@@ -41,7 +41,9 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       "    java morphognosis.nestingbirds.NestingBirdsDisplay\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-      "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]";   
+      "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]\n" +      
+      "      [-verbose <true | false> (default=false)]\n" +
+      "      [-version]"; 
 
    // Nesting birds.
    public NestingBirds nestingbirds;
@@ -705,6 +707,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
    // Main.
    public static void main(String[] args)
    {
+      NestingBirds.Verbose = false;	   
       for (int i = 0; i < args.length; i++)
       {
          if (args[i].equals("-maleFoodDuration"))
@@ -784,7 +787,32 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
                System.exit(1);
             }
             continue;
-         }                  
+         }
+         if (args[i].equals("-verbose"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid verbose option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (args[i].equals("true"))
+            {
+               NestingBirds.Verbose = true;
+            }
+            else if (args[i].equals("false"))
+            {
+               NestingBirds.Verbose = false;
+            }
+            else
+            {
+               System.err.println("Invalid verbose option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
          if (args[i].equals("-version"))
          {
             System.out.println("Nesting birds version = " + NestingBirds.VERSION);
@@ -800,9 +828,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       }
 
       // Create nesting birds.
-      NestingBirds.Verbose = false;
       NestingBirds nestingbirds = new NestingBirds();
-
 
       // Create display.
       NestingBirdsDisplay nestingbirdsDisplay = new NestingBirdsDisplay(nestingbirds);

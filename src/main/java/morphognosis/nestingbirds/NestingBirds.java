@@ -27,7 +27,7 @@ public class NestingBirds
       "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
       "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +      
       "      [-verbose <true | false> (default=true)]\n" +
-      "      [-version\n" +
+      "      [-version]\n" +
       "Exit codes:\n" +
       "  0=success\n" +
       "  1=error";
