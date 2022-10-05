@@ -23,6 +23,8 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -30,6 +32,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import morphognosis.nestingbirds.NestingBirds.RESPONSE_DRIVER;
 
 public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListener, MouseListener
 {
@@ -39,11 +43,13 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
    public static final String Usage =
       "Usage:\n" +
       "    java morphognosis.nestingbirds.NestingBirdsDisplay\n" +
+      "      [-steps <steps> default=single step]\n" +
+      "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-      "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]\n" +      
+      "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]\n" +
       "      [-verbose <true | false> (default=false)]\n" +
-      "      [-version]"; 
+      "      [-version]";
 
    // Nesting birds.
    public NestingBirds nestingbirds;
@@ -162,11 +168,11 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       responseDriverChoice = newComboBox();
       responseDriverChoice.setOpaque(true);
       responseDriverChoice.addItem(new Item(NestingBirds.RESPONSE_DRIVER.AUTOPILOT,
-    		  NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.AUTOPILOT)));
+                                            NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.AUTOPILOT)));
       responseDriverChoice.addItem(new Item(NestingBirds.RESPONSE_DRIVER.BIRD,
-    		  NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.BIRD)));
+                                            NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.BIRD)));
       responseDriverChoice.addItem(new Item(NestingBirds.RESPONSE_DRIVER.MANUAL,
-    		  NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.MANUAL)));
+                                            NestingBirds.RESPONSE_DRIVER.toString(NestingBirds.RESPONSE_DRIVER.MANUAL)));
       controlPanel.add(responseDriverChoice);
       controlPanel.add(newLabel("female ="));
       femaleResponseChoice = newComboBox();
@@ -576,43 +582,53 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       // Step button.
       if (e.getSource() == stepButton)
       {
-         Item item = (Item)femaleResponseChoice.getSelectedItem();
-         nestingbirds.female.response = item.id;
-         item = (Item)maleResponseChoice.getSelectedItem();
-         nestingbirds.male.response = item.id;
-         item = (Item)responseDriverChoice.getSelectedItem();
-         nestingbirds.setResponseDriver(item.id);
-         nestingbirds.step();
-         message = null;
-         for (int i = 0; i < femaleResponseChoice.getItemCount(); i++)
+         step();
+      }
+   }
+
+
+   // Step.
+   public void step()
+   {
+      stepCounter++;
+      stepCounterLabel.setText("= " + stepCounter + "");
+      if (NestingBirds.Verbose)
+      {
+         System.out.println("Step=" + stepCounter);
+      }
+      Item item = (Item)femaleResponseChoice.getSelectedItem();
+      nestingbirds.female.response = item.id;
+      item = (Item)maleResponseChoice.getSelectedItem();
+      nestingbirds.male.response = item.id;
+      item = (Item)responseDriverChoice.getSelectedItem();
+      nestingbirds.setResponseDriver(item.id);
+      nestingbirds.step();
+      message = null;
+      for (int i = 0; i < femaleResponseChoice.getItemCount(); i++)
+      {
+         item = femaleResponseChoice.getItemAt(i);
+         if (item.id == nestingbirds.female.response)
          {
-            item = femaleResponseChoice.getItemAt(i);
-            if (item.id == nestingbirds.female.response)
-            {
-               femaleResponseChoice.setSelectedIndex(i);
-               break;
-            }
+            femaleResponseChoice.setSelectedIndex(i);
+            break;
          }
-         for (int i = 0; i < maleResponseChoice.getItemCount(); i++)
+      }
+      for (int i = 0; i < maleResponseChoice.getItemCount(); i++)
+      {
+         item = maleResponseChoice.getItemAt(i);
+         if (item.id == nestingbirds.male.response)
          {
-            item = maleResponseChoice.getItemAt(i);
-            if (item.id == nestingbirds.male.response)
-            {
-               maleResponseChoice.setSelectedIndex(i);
-               break;
-            }
+            maleResponseChoice.setSelectedIndex(i);
+            break;
          }
-         stepCounter++;
-         stepCounterLabel.setText("= " + stepCounter + "");
-         if (femaleDashboard != null)
-         {
-            femaleDashboard.update();
-         }
-         if (maleDashboard != null)
-         {
-            maleDashboard.update();
-         }
-         return;
+      }
+      if (femaleDashboard != null)
+      {
+         femaleDashboard.update();
+      }
+      if (maleDashboard != null)
+      {
+         maleDashboard.update();
       }
    }
 
@@ -707,9 +723,62 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
    // Main.
    public static void main(String[] args)
    {
-      NestingBirds.Verbose = false;	   
+      int steps = -1;
+
+      NestingBirds.Verbose = false;
       for (int i = 0; i < args.length; i++)
       {
+         if (args[i].equals("-steps"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid steps option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               steps = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid steps option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (steps < 0)
+            {
+               System.err.println("Invalid steps option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-responseDriver"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid driver option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (args[i].equals("autopilot"))
+            {
+               NestingBirds.ResponseDriver = RESPONSE_DRIVER.AUTOPILOT;
+            }
+            else if (args[i].equals("bird"))
+            {
+               NestingBirds.ResponseDriver = RESPONSE_DRIVER.BIRD;
+            }
+            else
+            {
+               System.err.println("Invalid responseDriver option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
          if (args[i].equals("-maleFoodDuration"))
          {
             i++;
@@ -832,8 +901,32 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
 
       // Create display.
       NestingBirdsDisplay nestingbirdsDisplay = new NestingBirdsDisplay(nestingbirds);
+      nestingbirdsDisplay.responseDriverChoice.setSelectedIndex(NestingBirds.ResponseDriver);
 
       // Start.
       nestingbirdsDisplay.start();
+
+      // Automatic steps?
+      if (steps > 0)
+      {
+         nestingbirdsDisplay.stepButton.setEnabled(false);
+         try
+         {
+            TimeUnit.SECONDS.sleep(3);
+         }
+         catch (InterruptedException e) {
+         }
+         for (int i = 0; i < steps; i++)
+         {
+            nestingbirdsDisplay.step();
+            try
+            {
+               TimeUnit.MILLISECONDS.sleep(100);
+            }
+            catch (InterruptedException e) {
+            }
+         }
+         nestingbirdsDisplay.stepButton.setEnabled(true);
+      }
    }
 }

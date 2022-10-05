@@ -25,7 +25,7 @@ public class NestingBirds
       "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-      "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +      
+      "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +
       "      [-verbose <true | false> (default=true)]\n" +
       "      [-version]\n" +
       "Exit codes:\n" +
@@ -163,9 +163,6 @@ public class NestingBirds
    public static int ResponseDriver = RESPONSE_DRIVER.AUTOPILOT;
    public void setResponseDriver(int driver) { ResponseDriver = driver; }
 
-   // Disrupt nest.
-   private int disruptNest = 0;
-
    // Autopilot controls.
    public boolean femaleWantFood;
    public boolean femaleWantStone;
@@ -246,8 +243,11 @@ public class NestingBirds
    // Step.
    public void step()
    {
-      // Cycle female.
+      // Cycle responses.
       cycle(Bird.FEMALE);
+      cycle(Bird.MALE);
+
+      // Female sensory-response cycle.
       Cell cell = world[female.x][female.y];
       int[] sensors = new int[FemaleBird.NUM_SENSORS];
       sensors[Bird.LOCALE_SENSOR] = cell.locale;
@@ -265,12 +265,11 @@ public class NestingBirds
       }
       if (Verbose)
       {
-         System.out.print("Female (" + female.x + "," + female.y + "): ");
+         System.out.print("Female: Location: [" + female.x + "," + female.y + "], ");
          female.print();
       }
 
-      // Cycle male.
-      cycle(Bird.MALE);
+      // Male sensory-response cycle.
       cell    = world[male.x][male.y];
       sensors = new int[MaleBird.NUM_SENSORS];
       sensors[Bird.LOCALE_SENSOR]         = cell.locale;
@@ -303,7 +302,7 @@ public class NestingBirds
       }
       if (Verbose)
       {
-         System.out.print("Male (" + male.x + "," + male.y + "): ");
+         System.out.print("Male: Location: [" + male.x + "," + male.y + "], ");
          male.print();
       }
 
@@ -945,6 +944,11 @@ public class NestingBirds
             female.response    = FemaleBird.RESPONSE.LAY_EGG;
             femaleNestSequence = 0;
          }
+         else
+         {
+            female.response    = Bird.RESPONSE.TURN_RIGHT;
+            femaleNestSequence = 0;
+         }
          break;
       }
    }
@@ -966,20 +970,6 @@ public class NestingBirds
       {
          bird.sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
          bird.sensors[MaleBird.WANT_STONE_SENSOR] = 0;
-      }
-
-      // Disrupt nest to motivate female to fix it.
-      if ((disruptNest == 1) && (bird.gender == Bird.FEMALE))
-      {
-         disruptNest++;
-
-         // Blow stone from nest onto egg.
-         if ((world[width / 2][height / 2].object == OBJECT.EGG) &&
-             (world[width / 2][(height / 2) - 1].object == OBJECT.STONE))
-         {
-            world[width / 2][(height / 2) - 1].object = OBJECT.NO_OBJECT;
-            world[width / 2][height / 2].object       = OBJECT.STONE;
-         }
       }
 
       switch (bird.response)
@@ -1180,7 +1170,6 @@ public class NestingBirds
             if (cell.object == OBJECT.NO_OBJECT)
             {
                cell.object = OBJECT.EGG;
-               if (disruptNest == 0) { disruptNest = 1; }
             }
          }
          break;
@@ -1414,7 +1403,7 @@ public class NestingBirds
                System.exit(1);
             }
             continue;
-         }         
+         }
          if (args[i].equals("-verbose"))
          {
             i++;
