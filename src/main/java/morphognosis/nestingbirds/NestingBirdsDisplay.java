@@ -147,6 +147,9 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
    BirdDashboard maleDashboard;
    BirdDashboard femaleDashboard;
 
+   // Steps.
+   static int steps = 0;
+
    // Constructor.
    public NestingBirdsDisplay(NestingBirds nestingbirds)
    {
@@ -582,13 +585,14 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       // Step button.
       if (e.getSource() == stepButton)
       {
+         steps = 0;
          step();
       }
    }
 
 
    // Step.
-   public void step()
+   public synchronized void step()
    {
       stepCounter++;
       stepCounterLabel.setText("= " + stepCounter + "");
@@ -723,8 +727,6 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
    // Main.
    public static void main(String[] args)
    {
-      int steps = -1;
-
       NestingBirds.Verbose = false;
       for (int i = 0; i < args.length; i++)
       {
@@ -909,7 +911,6 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       // Automatic steps?
       if (steps > 0)
       {
-         nestingbirdsDisplay.stepButton.setEnabled(false);
          try
          {
             TimeUnit.SECONDS.sleep(3);
@@ -926,7 +927,6 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
             catch (InterruptedException e) {
             }
          }
-         nestingbirdsDisplay.stepButton.setEnabled(true);
       }
    }
 }
