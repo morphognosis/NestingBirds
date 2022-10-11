@@ -43,7 +43,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
    public static final String Usage =
       "Usage:\n" +
       "    java morphognosis.nestingbirds.NestingBirdsDisplay\n" +
-      "      [-steps <steps> default=single step]\n" +
+      "      [-steps <steps> (default=single step)]\n" +
       "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
       "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
