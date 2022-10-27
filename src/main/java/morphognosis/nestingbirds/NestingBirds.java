@@ -214,45 +214,31 @@ public class NestingBirds
       }
 
       // Create birds.
-      female        = new FemaleBird();
-      female.x      = width / 2;
-      female.y      = height / 2;
-      female.food   = 0;
-      int[] sensors = new int[FemaleBird.NUM_SENSORS];
-      sensors[Bird.LOCALE_SENSOR] = world[female.x][female.y].locale;
-      sensors[Bird.OBJECT_SENSOR] = world[female.x][female.y].object;
-      female.setSensors(sensors);
-      female.response                     = RESPONSE.DO_NOTHING;
-      male                                = new MaleBird();
-      male.x                              = width / 2;
-      male.y                              = height / 2;
-      male.food                           = MaleBird.FOOD_DURATION;
-      sensors                             = new int[MaleBird.NUM_SENSORS];
-      sensors[Bird.LOCALE_SENSOR]         = world[male.x][male.y].locale;
-      sensors[Bird.OBJECT_SENSOR]         = world[male.x][male.y].object;
-      sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
-      sensors[MaleBird.WANT_STONE_SENSOR] = 0;
-      male.setSensors(sensors);
+      female             = new FemaleBird();
+      female.x           = width / 2;
+      female.y           = height / 2;
+      female.food        = 0;
+      female.response    = RESPONSE.DO_NOTHING;
+      male               = new MaleBird();
+      male.x             = width / 2;
+      male.y             = height / 2;
+      male.food          = MaleBird.FOOD_DURATION;
       male.response      = RESPONSE.DO_NOTHING;
       femaleWantFood     = false;
       femaleWantStone    = false;
       femaleNestSequence = 0;
+      setSensors(Bird.FEMALE);
+      setSensors(Bird.MALE);
    }
 
 
    // Step.
    public void step()
    {
-      // Cycle responses.
-      cycle(Bird.FEMALE);
-      cycle(Bird.MALE);
+      // Cycle world.
+      cycle();
 
       // Female sensory-response cycle.
-      Cell cell = world[female.x][female.y];
-      int[] sensors = new int[FemaleBird.NUM_SENSORS];
-      sensors[Bird.LOCALE_SENSOR] = cell.locale;
-      sensors[Bird.OBJECT_SENSOR] = cell.object;
-      female.setSensors(sensors);
       switch (ResponseDriver)
       {
       case RESPONSE_DRIVER.BIRD:
@@ -270,26 +256,6 @@ public class NestingBirds
       }
 
       // Male sensory-response cycle.
-      cell    = world[male.x][male.y];
-      sensors = new int[MaleBird.NUM_SENSORS];
-      sensors[Bird.LOCALE_SENSOR]         = cell.locale;
-      sensors[Bird.OBJECT_SENSOR]         = cell.object;
-      sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
-      sensors[MaleBird.WANT_STONE_SENSOR] = 0;
-      if ((male.x == female.x) && (male.y == female.y))
-      {
-         switch (female.response)
-         {
-         case FemaleBird.RESPONSE.WANT_FOOD:
-            sensors[MaleBird.WANT_FOOD_SENSOR] = 1;
-            break;
-
-         case FemaleBird.RESPONSE.WANT_STONE:
-            sensors[MaleBird.WANT_STONE_SENSOR] = 1;
-            break;
-         }
-      }
-      male.setSensors(sensors);
       switch (ResponseDriver)
       {
       case RESPONSE_DRIVER.BIRD:
@@ -941,8 +907,8 @@ public class NestingBirds
          }
          else if (world[female.x][female.y].object == OBJECT.NO_OBJECT)
          {
-            female.response    = FemaleBird.RESPONSE.LAY_EGG;
-            femaleNestSequence = 0;
+            female.response = FemaleBird.RESPONSE.LAY_EGG;
+            femaleNestSequence++;
          }
          else
          {
@@ -950,12 +916,28 @@ public class NestingBirds
             femaleNestSequence = 0;
          }
          break;
+
+      case 11:
+         break;
       }
    }
 
 
-   // Bird sensory-response cycle.
-   public void cycle(int gender)
+   // World cause-effect cycle.
+   public void cycle()
+   {
+      // Do responses.
+      doResponse(Bird.FEMALE);
+      doResponse(Bird.MALE);
+
+      // Set sensors.
+      setSensors(Bird.FEMALE);
+      setSensors(Bird.MALE);
+   }
+
+
+   // Do bird response.
+   public void doResponse(int gender)
    {
       Bird bird = male;
 
@@ -964,13 +946,6 @@ public class NestingBirds
          bird = female;
       }
       Cell cell = world[bird.x][bird.y];
-
-      // Clear sensors.
-      if (bird.gender == Bird.MALE)
-      {
-         bird.sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
-         bird.sensors[MaleBird.WANT_STONE_SENSOR] = 0;
-      }
 
       switch (bird.response)
       {
@@ -1117,13 +1092,6 @@ public class NestingBirds
          break;
 
       case FemaleBird.RESPONSE.WANT_FOOD:
-         if (bird == female)
-         {
-            if ((bird.x == male.x) && (bird.y == male.y))
-            {
-               male.sensors[MaleBird.WANT_FOOD_SENSOR] = 1;
-            }
-         }
          break;
 
       case MaleBird.RESPONSE.GIVE_FOOD:
@@ -1141,13 +1109,6 @@ public class NestingBirds
          break;
 
       case FemaleBird.RESPONSE.WANT_STONE:
-         if (bird == female)
-         {
-            if ((bird.x == male.x) && (bird.y == male.y))
-            {
-               male.sensors[MaleBird.WANT_STONE_SENSOR] = 1;
-            }
-         }
          break;
 
       case MaleBird.RESPONSE.GIVE_STONE:
@@ -1175,13 +1136,187 @@ public class NestingBirds
          break;
       }
 
-      // Set sensors.
-      cell = world[bird.x][bird.y];
-      bird.sensors[Bird.LOCALE_SENSOR] = cell.locale;
-      bird.sensors[Bird.OBJECT_SENSOR] = cell.object;
-
       // Digest food.
       bird.digest();
+   }
+
+
+   // Set bird sensors.
+   public void setSensors(int gender)
+   {
+      Bird bird = null;
+
+      int[] sensors = null;
+
+      if (gender == Bird.FEMALE)
+      {
+         bird    = female;
+         sensors = new int[FemaleBird.NUM_SENSORS];
+         female.setSensors(sensors);
+      }
+      else
+      {
+         bird    = male;
+         sensors = new int[MaleBird.NUM_SENSORS];
+         male.setSensors(sensors);
+      }
+
+      // Mate present?
+      if ((male.x == female.x) && (male.y == female.y))
+      {
+         sensors[Bird.MATE_PRESENT_SENSOR] = 1;
+      }
+      else
+      {
+         sensors[Bird.MATE_PRESENT_SENSOR] = 0;
+      }
+
+      // Set locale and object sensors.
+      for (int i = 0; i < Bird.NUM_CELL_SENSORS; i++)
+      {
+         switch (i)
+         {
+         // Current.
+         case 0:
+            sensors[0] = world[bird.x][bird.y].locale;
+            sensors[1] = world[bird.x][bird.y].object;
+            break;
+
+         // Left.
+         case 1:
+            switch (bird.orientation)
+            {
+            case Bird.ORIENTATION.NORTH:
+               if (bird.x > 0)
+               {
+                  sensors[2] = world[bird.x - 1][bird.y].locale;
+                  sensors[3] = world[bird.x - 1][bird.y].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.SOUTH:
+               if (bird.x < width - 1)
+               {
+                  sensors[2] = world[bird.x + 1][bird.y].locale;
+                  sensors[3] = world[bird.x + 1][bird.y].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.EAST:
+               if (bird.y > 0)
+               {
+                  sensors[2] = world[bird.x][bird.y - 1].locale;
+                  sensors[3] = world[bird.x][bird.y - 1].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.WEST:
+               if (bird.y < height - 1)
+               {
+                  sensors[2] = world[bird.x][bird.y + 1].locale;
+                  sensors[3] = world[bird.x][bird.y + 1].object;
+               }
+               break;
+            }
+            break;
+
+         // Forward.
+         case 2:
+            switch (bird.orientation)
+            {
+            case Bird.ORIENTATION.NORTH:
+               if (bird.y > 0)
+               {
+                  sensors[4] = world[bird.x][bird.y - 1].locale;
+                  sensors[5] = world[bird.x][bird.y - 1].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.SOUTH:
+               if (bird.y < height - 1)
+               {
+                  sensors[4] = world[bird.x][bird.y + 1].locale;
+                  sensors[5] = world[bird.x][bird.y + 1].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.EAST:
+               if (bird.x < width - 1)
+               {
+                  sensors[4] = world[bird.x + 1][bird.y].locale;
+                  sensors[5] = world[bird.x + 1][bird.y].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.WEST:
+               if (bird.x > 0)
+               {
+                  sensors[4] = world[bird.x - 1][bird.y].locale;
+                  sensors[5] = world[bird.x - 1][bird.y].object;
+               }
+               break;
+            }
+            break;
+
+         // Right.
+         case 3:
+            switch (bird.orientation)
+            {
+            case Bird.ORIENTATION.NORTH:
+               if (bird.x < width - 1)
+               {
+                  sensors[6] = world[bird.x + 1][bird.y].locale;
+                  sensors[7] = world[bird.x + 1][bird.y].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.SOUTH:
+               if (bird.x > 0)
+               {
+                  sensors[6] = world[bird.x - 1][bird.y].locale;
+                  sensors[7] = world[bird.x - 1][bird.y].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.EAST:
+               if (bird.y < height - 1)
+               {
+                  sensors[6] = world[bird.x][bird.y + 1].locale;
+                  sensors[7] = world[bird.x][bird.y + 1].object;
+               }
+               break;
+
+            case Bird.ORIENTATION.WEST:
+               if (bird.y > 0)
+               {
+                  sensors[6] = world[bird.x][bird.y - 1].locale;
+                  sensors[7] = world[bird.x][bird.y - 1].object;
+               }
+               break;
+            }
+            break;
+         }
+      }
+
+      // Male senses female want?
+      if (gender == Bird.MALE)
+      {
+         sensors[MaleBird.WANT_FOOD_SENSOR]  = 0;
+         sensors[MaleBird.WANT_STONE_SENSOR] = 0;
+         if ((bird.x == female.x) && (bird.y == female.y))
+         {
+            switch (female.response)
+            {
+            case FemaleBird.RESPONSE.WANT_FOOD:
+               sensors[MaleBird.WANT_FOOD_SENSOR] = 1;
+               break;
+
+            case FemaleBird.RESPONSE.WANT_STONE:
+               sensors[MaleBird.WANT_STONE_SENSOR] = 1;
+               break;
+            }
+         }
+      }
    }
 
 

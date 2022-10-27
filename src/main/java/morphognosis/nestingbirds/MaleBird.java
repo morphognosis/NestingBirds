@@ -7,9 +7,9 @@ package morphognosis.nestingbirds;
 public class MaleBird extends Bird
 {
    // Sensors.
-   public static final int WANT_FOOD_SENSOR  = 2;
-   public static final int WANT_STONE_SENSOR = 3;
-   public static final int NUM_SENSORS       = 4;
+   public static final int WANT_FOOD_SENSOR  = Bird.NUM_SENSORS;
+   public static final int WANT_STONE_SENSOR = Bird.NUM_SENSORS + 1;
+   public static final int NUM_SENSORS       = Bird.NUM_SENSORS + 2;
 
    // Responses.
    public static class RESPONSE
@@ -78,20 +78,20 @@ public class MaleBird extends Bird
       s += ",";
       if (sensors[WANT_FOOD_SENSOR] == 0)
       {
-         s += "!WANT_FOOD";
+         s += " !WANT_FOOD";
       }
       else
       {
-         s += "WANT_FOOD";
+         s += " WANT_FOOD";
       }
       s += ",";
       if (sensors[WANT_STONE_SENSOR] == 0)
       {
-         s += "!WANT_STONE";
+         s += " !WANT_STONE";
       }
       else
       {
-         s += "WANT_STONE";
+         s += " WANT_STONE";
       }
       return(s);
    }

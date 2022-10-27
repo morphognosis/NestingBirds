@@ -7,7 +7,7 @@ package morphognosis.nestingbirds;
 public class FemaleBird extends Bird
 {
    // Sensors.
-   public static final int NUM_SENSORS = 2;
+   public static final int NUM_SENSORS = Bird.NUM_SENSORS;
 
    // Responses.
    public static class RESPONSE

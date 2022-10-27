@@ -42,9 +42,18 @@ public class Bird
    public static final int FEMALE = 1;
 
    // Sensors.
-   public static final int LOCALE_SENSOR     = 0;
-   public static final int OBJECT_SENSOR     = 1;
-   public static final int NUM_WORLD_SENSORS = 2;
+   public class CELL_SENSOR
+   {
+      public static final int NUM_SENSORS = 2;
+      public int              locale;
+      public int              object;
+   };
+
+   // Bird senses current, left, forward, and right cells.
+   public static final int NUM_CELL_SENSORS = 4;
+
+   public static final int MATE_PRESENT_SENSOR = NUM_CELL_SENSORS * CELL_SENSOR.NUM_SENSORS;
+   public static final int NUM_SENSORS         = MATE_PRESENT_SENSOR + 1;
    public int[]            sensors;
 
    // Responses.
@@ -170,10 +179,47 @@ public class Bird
    // Sensors to string.
    public String sensorsToString()
    {
-      String s = NestingBirds.LOCALE.toString(sensors[Bird.LOCALE_SENSOR]);
+      String s = "[Cell sensors: ";
 
-      s += ",";
-      s += NestingBirds.OBJECT.toString(sensors[Bird.OBJECT_SENSOR]);
+      for (int i = 0; i < NUM_CELL_SENSORS; i++)
+      {
+         s += "[";
+         switch (i)
+         {
+         case 0:
+            s += "Current: ";
+            break;
+
+         case 1:
+            s += "Left: ";
+            break;
+
+         case 2:
+            s += "Forward: ";
+            break;
+
+         case 3:
+            s += "Right: ";
+            break;
+         }
+         s += NestingBirds.LOCALE.toString(sensors[i * CELL_SENSOR.NUM_SENSORS]);
+         s += ",";
+         s += NestingBirds.OBJECT.toString(sensors[(i * CELL_SENSOR.NUM_SENSORS) + 1]);
+         s += "]";
+         if (i < NUM_CELL_SENSORS - 1)
+         {
+            s += ",";
+         }
+      }
+      s += "], Mate present: ";
+      if (sensors[Bird.MATE_PRESENT_SENSOR] == 1)
+      {
+         s += "true";
+      }
+      else
+      {
+         s += "false";
+      }
       return(s);
    }
 

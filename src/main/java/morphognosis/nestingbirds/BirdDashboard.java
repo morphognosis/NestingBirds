@@ -110,8 +110,15 @@ public class BirdDashboard extends JFrame
       private static final long serialVersionUID = 0L;
 
       // Components.
-      JTextField localeText;
-      JTextField objectText;
+      JTextField currentLocaleText;
+      JTextField currentObjectText;
+      JTextField leftLocaleText;
+      JTextField leftObjectText;
+      JTextField forwardLocaleText;
+      JTextField forwardObjectText;
+      JTextField rightLocaleText;
+      JTextField rightObjectText;
+      JTextField matePresentText;
       JTextField wantFoodText;
       JTextField wantStoneText;
       JTextField orientationText;
@@ -127,29 +134,84 @@ public class BirdDashboard extends JFrame
                       BorderFactory.createLineBorder(Color.black),
                       "State"));
          JPanel sensorsPanel = new JPanel();
-         sensorsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         sensorsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
          sensorsPanel.setBorder(BorderFactory.createTitledBorder(
                                    BorderFactory.createLineBorder(Color.black),
                                    "Sensors"));
          add(sensorsPanel, BorderLayout.NORTH);
-         sensorsPanel.add(new JLabel("Locale:"));
-         localeText = new JTextField(10);
-         localeText.setEditable(false);
-         sensorsPanel.add(localeText);
-         sensorsPanel.add(new JLabel("Object:"));
-         objectText = new JTextField(10);
-         objectText.setEditable(false);
-         sensorsPanel.add(objectText);
+         JPanel currentCellPanel = new JPanel();
+         currentCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         currentCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                       BorderFactory.createLineBorder(Color.black),
+                                       "Current cell"));
+         sensorsPanel.add(currentCellPanel);
+         currentCellPanel.add(new JLabel("Locale:"));
+         currentLocaleText = new JTextField(10);
+         currentLocaleText.setEditable(false);
+         currentCellPanel.add(currentLocaleText);
+         currentCellPanel.add(new JLabel("Object:"));
+         currentObjectText = new JTextField(10);
+         currentObjectText.setEditable(false);
+         currentCellPanel.add(currentObjectText);
+         JPanel leftCellPanel = new JPanel();
+         leftCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         leftCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Left cell"));
+         sensorsPanel.add(leftCellPanel);
+         leftCellPanel.add(new JLabel("Locale:"));
+         leftLocaleText = new JTextField(10);
+         leftLocaleText.setEditable(false);
+         leftCellPanel.add(leftLocaleText);
+         leftCellPanel.add(new JLabel("Object:"));
+         leftObjectText = new JTextField(10);
+         leftObjectText.setEditable(false);
+         leftCellPanel.add(leftObjectText);
+         JPanel forwardCellPanel = new JPanel();
+         forwardCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         forwardCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                       BorderFactory.createLineBorder(Color.black),
+                                       "Forward cell"));
+         sensorsPanel.add(forwardCellPanel);
+         forwardCellPanel.add(new JLabel("Locale:"));
+         forwardLocaleText = new JTextField(10);
+         forwardLocaleText.setEditable(false);
+         forwardCellPanel.add(forwardLocaleText);
+         forwardCellPanel.add(new JLabel("Object:"));
+         forwardObjectText = new JTextField(10);
+         forwardObjectText.setEditable(false);
+         forwardCellPanel.add(forwardObjectText);
+         JPanel rightCellPanel = new JPanel();
+         rightCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         rightCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                     BorderFactory.createLineBorder(Color.black),
+                                     "Right cell"));
+         sensorsPanel.add(rightCellPanel);
+         rightCellPanel.add(new JLabel("Locale:"));
+         rightLocaleText = new JTextField(10);
+         rightLocaleText.setEditable(false);
+         rightCellPanel.add(rightLocaleText);
+         rightCellPanel.add(new JLabel("Object:"));
+         rightObjectText = new JTextField(10);
+         rightObjectText.setEditable(false);
+         rightCellPanel.add(rightObjectText);
+         JPanel mateSensorPanel = new JPanel();
+         mateSensorPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         sensorsPanel.add(mateSensorPanel);
+         mateSensorPanel.add(new JLabel("Mate present:"));
+         matePresentText = new JTextField(5);
+         matePresentText.setEditable(false);
+         mateSensorPanel.add(matePresentText);
          if (bird.gender == Bird.MALE)
          {
-            sensorsPanel.add(new JLabel("Want food:"));
+            mateSensorPanel.add(new JLabel("Want food:"));
             wantFoodText = new JTextField(5);
             wantFoodText.setEditable(false);
-            sensorsPanel.add(wantFoodText);
-            sensorsPanel.add(new JLabel("Want stone:"));
+            mateSensorPanel.add(wantFoodText);
+            mateSensorPanel.add(new JLabel("Want stone:"));
             wantStoneText = new JTextField(5);
             wantStoneText.setEditable(false);
-            sensorsPanel.add(wantStoneText);
+            mateSensorPanel.add(wantStoneText);
          }
          JPanel responsePanel = new JPanel();
          responsePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -186,37 +248,141 @@ public class BirdDashboard extends JFrame
       public void update()
       {
          // Get sensor values.
-         switch (bird.sensors[Bird.LOCALE_SENSOR])
+         switch (bird.sensors[0])
          {
          case NestingBirds.LOCALE.DESERT:
-            localeText.setText("desert");
+            currentLocaleText.setText("desert");
             break;
 
          case NestingBirds.LOCALE.FOREST:
-            localeText.setText("forest");
+            currentLocaleText.setText("forest");
             break;
 
          case NestingBirds.LOCALE.PLAIN:
-            localeText.setText("plain");
+            currentLocaleText.setText("plain");
             break;
          }
-         switch (bird.sensors[Bird.OBJECT_SENSOR])
+         switch (bird.sensors[1])
          {
          case NestingBirds.OBJECT.NO_OBJECT:
-            objectText.setText("none");
+            currentObjectText.setText("none");
             break;
 
          case NestingBirds.OBJECT.MOUSE:
-            objectText.setText("mouse");
+            currentObjectText.setText("mouse");
             break;
 
          case NestingBirds.OBJECT.STONE:
-            objectText.setText("stone");
+            currentObjectText.setText("stone");
             break;
 
          case NestingBirds.OBJECT.EGG:
-            objectText.setText("egg");
+            currentObjectText.setText("egg");
             break;
+         }
+         switch (bird.sensors[2])
+         {
+         case NestingBirds.LOCALE.DESERT:
+            leftLocaleText.setText("desert");
+            break;
+
+         case NestingBirds.LOCALE.FOREST:
+            leftLocaleText.setText("forest");
+            break;
+
+         case NestingBirds.LOCALE.PLAIN:
+            leftLocaleText.setText("plain");
+            break;
+         }
+         switch (bird.sensors[3])
+         {
+         case NestingBirds.OBJECT.NO_OBJECT:
+            leftObjectText.setText("none");
+            break;
+
+         case NestingBirds.OBJECT.MOUSE:
+            leftObjectText.setText("mouse");
+            break;
+
+         case NestingBirds.OBJECT.STONE:
+            leftObjectText.setText("stone");
+            break;
+
+         case NestingBirds.OBJECT.EGG:
+            leftObjectText.setText("egg");
+            break;
+         }
+         switch (bird.sensors[4])
+         {
+         case NestingBirds.LOCALE.DESERT:
+            forwardLocaleText.setText("desert");
+            break;
+
+         case NestingBirds.LOCALE.FOREST:
+            forwardLocaleText.setText("forest");
+            break;
+
+         case NestingBirds.LOCALE.PLAIN:
+            forwardLocaleText.setText("plain");
+            break;
+         }
+         switch (bird.sensors[5])
+         {
+         case NestingBirds.OBJECT.NO_OBJECT:
+            forwardObjectText.setText("none");
+            break;
+
+         case NestingBirds.OBJECT.MOUSE:
+            forwardObjectText.setText("mouse");
+            break;
+
+         case NestingBirds.OBJECT.STONE:
+            forwardObjectText.setText("stone");
+            break;
+
+         case NestingBirds.OBJECT.EGG:
+            forwardObjectText.setText("egg");
+            break;
+         }
+         switch (bird.sensors[6])
+         {
+         case NestingBirds.LOCALE.DESERT:
+            rightLocaleText.setText("desert");
+            break;
+
+         case NestingBirds.LOCALE.FOREST:
+            rightLocaleText.setText("forest");
+            break;
+
+         case NestingBirds.LOCALE.PLAIN:
+            rightLocaleText.setText("plain");
+            break;
+         }
+         switch (bird.sensors[7])
+         {
+         case NestingBirds.OBJECT.NO_OBJECT:
+            rightObjectText.setText("none");
+            break;
+
+         case NestingBirds.OBJECT.MOUSE:
+            rightObjectText.setText("mouse");
+            break;
+
+         case NestingBirds.OBJECT.STONE:
+            rightObjectText.setText("stone");
+            break;
+
+         case NestingBirds.OBJECT.EGG:
+            rightObjectText.setText("egg");
+            break;
+         }
+         if (bird.sensors[Bird.MATE_PRESENT_SENSOR] == 1)
+         {
+            matePresentText.setText("true");
+         }
+         else
+         {
+            matePresentText.setText("false");
          }
          if (bird.gender == Bird.MALE)
          {
