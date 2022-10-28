@@ -4,6 +4,7 @@
 
 package morphognosis.nestingbirds;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import morphognosis.nestingbirds.Bird.RESPONSE;
@@ -340,30 +341,75 @@ public class NestingBirds
          male.response = Bird.RESPONSE.GET;
          return(true);
       }
-      int    mousex = -1;
-      int    mousey = -1;
-      double dist   = 0.0;
-      for (int x = 0; x < width; x++)
+      if (male.sensors[Bird.LEFT_OBJECT_SENSOR] == OBJECT.MOUSE)
       {
-         for (int y = 0; y < height; y++)
-         {
-            if ((world[x][y].locale == LOCALE.FOREST) && (world[x][y].object == OBJECT.MOUSE))
-            {
-               double d = distance((double)male.x, (double)male.y, (double)x, (double)y);
-               if ((mousex == -1) || (d < dist))
-               {
-                  mousex = x;
-                  mousey = y;
-                  dist   = d;
-               }
-            }
-         }
-      }
-      if (mousex == -1)
-      {
-         male.response = Bird.RESPONSE.DO_NOTHING;
+         male.response = Bird.RESPONSE.TURN_LEFT;
          return(true);
       }
+      if (male.sensors[Bird.FORWARD_OBJECT_SENSOR] == OBJECT.MOUSE)
+      {
+         male.response = Bird.RESPONSE.MOVE;
+         return(true);
+      }
+      if (male.sensors[Bird.RIGHT_OBJECT_SENSOR] == OBJECT.MOUSE)
+      {
+         male.response = Bird.RESPONSE.TURN_RIGHT;
+         return(true);
+      }
+      if ((male.sensors[Bird.CURRENT_LOCALE_SENSOR] == LOCALE.FOREST) ||
+          (male.sensors[Bird.LEFT_LOCALE_SENSOR] == LOCALE.FOREST) ||
+          (male.sensors[Bird.FORWARD_LOCALE_SENSOR] == LOCALE.FOREST) ||
+          (male.sensors[Bird.RIGHT_LOCALE_SENSOR] == LOCALE.FOREST))
+      {
+         if (male.sensors[Bird.CURRENT_LOCALE_SENSOR] == LOCALE.FOREST)
+         {
+            if ((male.sensors[Bird.LEFT_LOCALE_SENSOR] != LOCALE.FOREST) &&
+                (male.sensors[Bird.FORWARD_LOCALE_SENSOR] != LOCALE.FOREST) &&
+                (male.sensors[Bird.RIGHT_LOCALE_SENSOR] != LOCALE.FOREST))
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               ArrayList<Integer> responses = new ArrayList<Integer>();
+               if (male.sensors[Bird.FORWARD_LOCALE_SENSOR] == LOCALE.FOREST)
+               {
+                  responses.add(Bird.RESPONSE.MOVE);
+                  responses.add(Bird.RESPONSE.MOVE);
+               }
+               if (male.sensors[Bird.LEFT_LOCALE_SENSOR] == LOCALE.FOREST)
+               {
+                  responses.add(Bird.RESPONSE.TURN_LEFT);
+               }
+               if (male.sensors[Bird.RIGHT_LOCALE_SENSOR] == LOCALE.FOREST)
+               {
+                  responses.add(Bird.RESPONSE.TURN_RIGHT);
+               }
+               male.response = responses.get(randomizer.nextInt(responses.size()));
+            }
+         }
+         else
+         {
+            ArrayList<Integer> responses = new ArrayList<Integer>();
+            if (male.sensors[Bird.FORWARD_LOCALE_SENSOR] == LOCALE.FOREST)
+            {
+               responses.add(Bird.RESPONSE.MOVE);
+               responses.add(Bird.RESPONSE.MOVE);
+            }
+            if (male.sensors[Bird.LEFT_LOCALE_SENSOR] == LOCALE.FOREST)
+            {
+               responses.add(Bird.RESPONSE.TURN_LEFT);
+            }
+            if (male.sensors[Bird.RIGHT_LOCALE_SENSOR] == LOCALE.FOREST)
+            {
+               responses.add(Bird.RESPONSE.TURN_RIGHT);
+            }
+            male.response = responses.get(randomizer.nextInt(responses.size()));
+         }
+         return(true);
+      }
+      int mousex = 3;
+      int mousey = 5;
       if (male.x > mousex)
       {
          if (male.orientation == Bird.ORIENTATION.WEST)
@@ -476,30 +522,78 @@ public class NestingBirds
          male.response = Bird.RESPONSE.GET;
          return(true);
       }
-      int    stonex = -1;
-      int    stoney = -1;
-      double dist   = 0.0;
-      for (int x = 0; x < width; x++)
+      if ((male.sensors[Bird.LEFT_OBJECT_SENSOR] == OBJECT.STONE) &&
+          (male.sensors[Bird.LEFT_LOCALE_SENSOR] == LOCALE.DESERT))
       {
-         for (int y = 0; y < height; y++)
-         {
-            if ((world[x][y].locale == LOCALE.DESERT) && (world[x][y].object == OBJECT.STONE))
-            {
-               double d = distance((double)male.x, (double)male.y, (double)x, (double)y);
-               if ((stonex == -1) || (d < dist))
-               {
-                  stonex = x;
-                  stoney = y;
-                  dist   = d;
-               }
-            }
-         }
-      }
-      if (stonex == -1)
-      {
-         male.response = Bird.RESPONSE.DO_NOTHING;
+         male.response = Bird.RESPONSE.TURN_LEFT;
          return(true);
       }
+      if ((male.sensors[Bird.FORWARD_OBJECT_SENSOR] == OBJECT.STONE) &&
+          (male.sensors[Bird.FORWARD_LOCALE_SENSOR] == LOCALE.DESERT))
+      {
+         male.response = Bird.RESPONSE.MOVE;
+         return(true);
+      }
+      if ((male.sensors[Bird.RIGHT_OBJECT_SENSOR] == OBJECT.STONE) &&
+          (male.sensors[Bird.RIGHT_LOCALE_SENSOR] == LOCALE.DESERT))
+      {
+         male.response = Bird.RESPONSE.TURN_RIGHT;
+         return(true);
+      }
+      if ((male.sensors[Bird.CURRENT_LOCALE_SENSOR] == LOCALE.DESERT) ||
+          (male.sensors[Bird.LEFT_LOCALE_SENSOR] == LOCALE.DESERT) ||
+          (male.sensors[Bird.FORWARD_LOCALE_SENSOR] == LOCALE.DESERT) ||
+          (male.sensors[Bird.RIGHT_LOCALE_SENSOR] == LOCALE.DESERT))
+      {
+         if (male.sensors[Bird.CURRENT_LOCALE_SENSOR] == LOCALE.DESERT)
+         {
+            if ((male.sensors[Bird.LEFT_LOCALE_SENSOR] != LOCALE.DESERT) &&
+                (male.sensors[Bird.FORWARD_LOCALE_SENSOR] != LOCALE.DESERT) &&
+                (male.sensors[Bird.RIGHT_LOCALE_SENSOR] != LOCALE.DESERT))
+            {
+               male.response = Bird.RESPONSE.TURN_RIGHT;
+            }
+            else
+            {
+               ArrayList<Integer> responses = new ArrayList<Integer>();
+               if (male.sensors[Bird.FORWARD_LOCALE_SENSOR] == LOCALE.DESERT)
+               {
+                  responses.add(Bird.RESPONSE.MOVE);
+                  responses.add(Bird.RESPONSE.MOVE);
+               }
+               if (male.sensors[Bird.LEFT_LOCALE_SENSOR] == LOCALE.DESERT)
+               {
+                  responses.add(Bird.RESPONSE.TURN_LEFT);
+               }
+               if (male.sensors[Bird.RIGHT_LOCALE_SENSOR] == LOCALE.DESERT)
+               {
+                  responses.add(Bird.RESPONSE.TURN_RIGHT);
+               }
+               male.response = responses.get(randomizer.nextInt(responses.size()));
+            }
+         }
+         else
+         {
+            ArrayList<Integer> responses = new ArrayList<Integer>();
+            if (male.sensors[Bird.FORWARD_LOCALE_SENSOR] == LOCALE.DESERT)
+            {
+               responses.add(Bird.RESPONSE.MOVE);
+               responses.add(Bird.RESPONSE.MOVE);
+            }
+            if (male.sensors[Bird.LEFT_LOCALE_SENSOR] == LOCALE.DESERT)
+            {
+               responses.add(Bird.RESPONSE.TURN_LEFT);
+            }
+            if (male.sensors[Bird.RIGHT_LOCALE_SENSOR] == LOCALE.DESERT)
+            {
+               responses.add(Bird.RESPONSE.TURN_RIGHT);
+            }
+            male.response = responses.get(randomizer.nextInt(responses.size()));
+         }
+         return(true);
+      }
+      int stonex = 14;
+      int stoney = 16;
       if (male.x > stonex)
       {
          if (male.orientation == Bird.ORIENTATION.WEST)
