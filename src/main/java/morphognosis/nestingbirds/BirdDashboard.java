@@ -248,7 +248,7 @@ public class BirdDashboard extends JFrame
       public void update()
       {
          // Get sensor values.
-         switch (bird.sensors[0])
+         switch (bird.sensors[Bird.CURRENT_LOCALE_SENSOR])
          {
          case NestingBirds.LOCALE.DESERT:
             currentLocaleText.setText("desert");
@@ -262,7 +262,7 @@ public class BirdDashboard extends JFrame
             currentLocaleText.setText("plain");
             break;
          }
-         switch (bird.sensors[1])
+         switch (bird.sensors[Bird.CURRENT_OBJECT_SENSOR])
          {
          case NestingBirds.OBJECT.NO_OBJECT:
             currentObjectText.setText("none");
@@ -280,7 +280,7 @@ public class BirdDashboard extends JFrame
             currentObjectText.setText("egg");
             break;
          }
-         switch (bird.sensors[2])
+         switch (bird.sensors[Bird.LEFT_LOCALE_SENSOR])
          {
          case NestingBirds.LOCALE.DESERT:
             leftLocaleText.setText("desert");
@@ -294,7 +294,7 @@ public class BirdDashboard extends JFrame
             leftLocaleText.setText("plain");
             break;
          }
-         switch (bird.sensors[3])
+         switch (bird.sensors[Bird.LEFT_OBJECT_SENSOR])
          {
          case NestingBirds.OBJECT.NO_OBJECT:
             leftObjectText.setText("none");
@@ -312,7 +312,7 @@ public class BirdDashboard extends JFrame
             leftObjectText.setText("egg");
             break;
          }
-         switch (bird.sensors[4])
+         switch (bird.sensors[Bird.FORWARD_LOCALE_SENSOR])
          {
          case NestingBirds.LOCALE.DESERT:
             forwardLocaleText.setText("desert");
@@ -326,7 +326,7 @@ public class BirdDashboard extends JFrame
             forwardLocaleText.setText("plain");
             break;
          }
-         switch (bird.sensors[5])
+         switch (bird.sensors[Bird.FORWARD_OBJECT_SENSOR])
          {
          case NestingBirds.OBJECT.NO_OBJECT:
             forwardObjectText.setText("none");
@@ -344,7 +344,7 @@ public class BirdDashboard extends JFrame
             forwardObjectText.setText("egg");
             break;
          }
-         switch (bird.sensors[6])
+         switch (bird.sensors[Bird.RIGHT_LOCALE_SENSOR])
          {
          case NestingBirds.LOCALE.DESERT:
             rightLocaleText.setText("desert");
@@ -358,7 +358,7 @@ public class BirdDashboard extends JFrame
             rightLocaleText.setText("plain");
             break;
          }
-         switch (bird.sensors[7])
+         switch (bird.sensors[Bird.RIGHT_OBJECT_SENSOR])
          {
          case NestingBirds.OBJECT.NO_OBJECT:
             rightObjectText.setText("none");

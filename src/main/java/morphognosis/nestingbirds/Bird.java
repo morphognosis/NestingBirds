@@ -50,7 +50,15 @@ public class Bird
    };
 
    // Bird senses current, left, forward, and right cells.
-   public static final int NUM_CELL_SENSORS = 4;
+   public static final int NUM_CELL_SENSORS      = 4;
+   public static final int CURRENT_LOCALE_SENSOR = 0;
+   public static final int CURRENT_OBJECT_SENSOR = 1;
+   public static final int LEFT_LOCALE_SENSOR    = 2;
+   public static final int LEFT_OBJECT_SENSOR    = 3;
+   public static final int FORWARD_LOCALE_SENSOR = 4;
+   public static final int FORWARD_OBJECT_SENSOR = 5;
+   public static final int RIGHT_LOCALE_SENSOR   = 6;
+   public static final int RIGHT_OBJECT_SENSOR   = 7;
 
    public static final int MATE_PRESENT_SENSOR = NUM_CELL_SENSORS * CELL_SENSOR.NUM_SENSORS;
    public static final int NUM_SENSORS         = MATE_PRESENT_SENSOR + 1;

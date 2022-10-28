@@ -271,9 +271,6 @@ public class NestingBirds
          System.out.print("Male: Location: [" + male.x + "," + male.y + "], ");
          male.print();
       }
-
-      // Step mice.
-      stepMice();
    }
 
 
@@ -930,6 +927,9 @@ public class NestingBirds
       doResponse(Bird.FEMALE);
       doResponse(Bird.MALE);
 
+      // Step mice.
+      stepMice();
+
       // Set sensors.
       setSensors(Bird.FEMALE);
       setSensors(Bird.MALE);
@@ -1178,8 +1178,8 @@ public class NestingBirds
          {
          // Current.
          case 0:
-            sensors[0] = world[bird.x][bird.y].locale;
-            sensors[1] = world[bird.x][bird.y].object;
+            sensors[Bird.CURRENT_LOCALE_SENSOR] = world[bird.x][bird.y].locale;
+            sensors[Bird.CURRENT_OBJECT_SENSOR] = world[bird.x][bird.y].object;
             break;
 
          // Left.
@@ -1189,32 +1189,32 @@ public class NestingBirds
             case Bird.ORIENTATION.NORTH:
                if (bird.x > 0)
                {
-                  sensors[2] = world[bird.x - 1][bird.y].locale;
-                  sensors[3] = world[bird.x - 1][bird.y].object;
+                  sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x - 1][bird.y].locale;
+                  sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x - 1][bird.y].object;
                }
                break;
 
             case Bird.ORIENTATION.SOUTH:
                if (bird.x < width - 1)
                {
-                  sensors[2] = world[bird.x + 1][bird.y].locale;
-                  sensors[3] = world[bird.x + 1][bird.y].object;
+                  sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x + 1][bird.y].locale;
+                  sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x + 1][bird.y].object;
                }
                break;
 
             case Bird.ORIENTATION.EAST:
                if (bird.y > 0)
                {
-                  sensors[2] = world[bird.x][bird.y - 1].locale;
-                  sensors[3] = world[bird.x][bird.y - 1].object;
+                  sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x][bird.y - 1].locale;
+                  sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x][bird.y - 1].object;
                }
                break;
 
             case Bird.ORIENTATION.WEST:
                if (bird.y < height - 1)
                {
-                  sensors[2] = world[bird.x][bird.y + 1].locale;
-                  sensors[3] = world[bird.x][bird.y + 1].object;
+                  sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x][bird.y + 1].locale;
+                  sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x][bird.y + 1].object;
                }
                break;
             }
@@ -1227,32 +1227,32 @@ public class NestingBirds
             case Bird.ORIENTATION.NORTH:
                if (bird.y > 0)
                {
-                  sensors[4] = world[bird.x][bird.y - 1].locale;
-                  sensors[5] = world[bird.x][bird.y - 1].object;
+                  sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x][bird.y - 1].locale;
+                  sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x][bird.y - 1].object;
                }
                break;
 
             case Bird.ORIENTATION.SOUTH:
                if (bird.y < height - 1)
                {
-                  sensors[4] = world[bird.x][bird.y + 1].locale;
-                  sensors[5] = world[bird.x][bird.y + 1].object;
+                  sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x][bird.y + 1].locale;
+                  sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x][bird.y + 1].object;
                }
                break;
 
             case Bird.ORIENTATION.EAST:
                if (bird.x < width - 1)
                {
-                  sensors[4] = world[bird.x + 1][bird.y].locale;
-                  sensors[5] = world[bird.x + 1][bird.y].object;
+                  sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x + 1][bird.y].locale;
+                  sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x + 1][bird.y].object;
                }
                break;
 
             case Bird.ORIENTATION.WEST:
                if (bird.x > 0)
                {
-                  sensors[4] = world[bird.x - 1][bird.y].locale;
-                  sensors[5] = world[bird.x - 1][bird.y].object;
+                  sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x - 1][bird.y].locale;
+                  sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x - 1][bird.y].object;
                }
                break;
             }
@@ -1265,32 +1265,32 @@ public class NestingBirds
             case Bird.ORIENTATION.NORTH:
                if (bird.x < width - 1)
                {
-                  sensors[6] = world[bird.x + 1][bird.y].locale;
-                  sensors[7] = world[bird.x + 1][bird.y].object;
+                  sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x + 1][bird.y].locale;
+                  sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x + 1][bird.y].object;
                }
                break;
 
             case Bird.ORIENTATION.SOUTH:
                if (bird.x > 0)
                {
-                  sensors[6] = world[bird.x - 1][bird.y].locale;
-                  sensors[7] = world[bird.x - 1][bird.y].object;
+                  sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x - 1][bird.y].locale;
+                  sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x - 1][bird.y].object;
                }
                break;
 
             case Bird.ORIENTATION.EAST:
                if (bird.y < height - 1)
                {
-                  sensors[6] = world[bird.x][bird.y + 1].locale;
-                  sensors[7] = world[bird.x][bird.y + 1].object;
+                  sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x][bird.y + 1].locale;
+                  sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x][bird.y + 1].object;
                }
                break;
 
             case Bird.ORIENTATION.WEST:
                if (bird.y > 0)
                {
-                  sensors[6] = world[bird.x][bird.y - 1].locale;
-                  sensors[7] = world[bird.x][bird.y - 1].object;
+                  sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x][bird.y - 1].locale;
+                  sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x][bird.y - 1].object;
                }
                break;
             }
