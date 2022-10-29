@@ -35,8 +35,9 @@ public class FemaleBird extends Bird
       }
    };
 
-   // Food duration.
-   public static int FOOD_DURATION = 100;
+   // Food.
+   public static int FOOD_DURATION = 200;
+   public static int INITIAL_FOOD  = 0;
 
    // Constructor.
    public FemaleBird()

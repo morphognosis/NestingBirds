@@ -45,8 +45,10 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       "    java morphognosis.nestingbirds.NestingBirdsDisplay\n" +
       "      [-steps <steps> (default=single step)]\n" +
       "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
-      "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
-      "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
+      "      [-maleInitialFood <amount> (default=" + MaleBird.INITIAL_FOOD + ")]\n" +
+      "      [-femaleInitialFood <amount> (default=" + FemaleBird.INITIAL_FOOD + ")]\n" +
+      "      [-maleFoodDuration <amount> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
+      "      [-femaleFoodDuration <amount> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
       "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]\n" +
       "      [-verbose <true | false> (default=false)]\n" +
       "      [-version]";
@@ -781,6 +783,58 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
             }
             continue;
          }
+         if (args[i].equals("-maleInitialFood"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid maleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               MaleBird.INITIAL_FOOD = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid maleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (MaleBird.INITIAL_FOOD < 0)
+            {
+               System.err.println("Invalid maleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-femaleInitialFood"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid femaleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               FemaleBird.INITIAL_FOOD = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid femaleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (FemaleBird.INITIAL_FOOD < 0)
+            {
+               System.err.println("Invalid femaleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
          if (args[i].equals("-maleFoodDuration"))
          {
             i++;
@@ -894,6 +948,18 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
             System.out.println(Usage);
             System.exit(0);
          }
+         System.err.println(Usage);
+         System.exit(1);
+      }
+      if (MaleBird.INITIAL_FOOD > MaleBird.FOOD_DURATION)
+      {
+         System.err.println("Male initial food cannot be greater than food duration");
+         System.err.println(Usage);
+         System.exit(1);
+      }
+      if (FemaleBird.INITIAL_FOOD > FemaleBird.FOOD_DURATION)
+      {
+         System.err.println("Female initial food cannot be greater than food duration");
          System.err.println(Usage);
          System.exit(1);
       }

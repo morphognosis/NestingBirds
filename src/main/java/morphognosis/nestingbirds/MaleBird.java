@@ -33,8 +33,9 @@ public class MaleBird extends Bird
       }
    };
 
-   // Food duration.
-   public static int FOOD_DURATION = 100;
+   // Food.
+   public static int FOOD_DURATION = 200;
+   public static int INITIAL_FOOD  = FOOD_DURATION;
 
    // Constructor.
    public MaleBird()

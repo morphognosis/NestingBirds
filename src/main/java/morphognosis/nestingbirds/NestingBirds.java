@@ -24,8 +24,10 @@ public class NestingBirds
       "    java morphognosis.nestingbirds.NestingBirds\n" +
       "      -steps <steps>\n" +
       "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
-      "      [-maleFoodDuration <steps> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
-      "      [-femaleFoodDuration <steps> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
+      "      [-maleInitialFood <amount> (default=" + MaleBird.INITIAL_FOOD + ")]\n" +
+      "      [-femaleInitialFood <amount> (default=" + FemaleBird.INITIAL_FOOD + ")]\n" +
+      "      [-maleFoodDuration <amount> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
+      "      [-femaleFoodDuration <amount> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
       "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +
       "      [-verbose <true | false> (default=true)]\n" +
       "      [-version]\n" +
@@ -33,7 +35,7 @@ public class NestingBirds
       "  0=success\n" +
       "  1=error";
 
-   // Locale map: grassland=0, forest=1, food=2, desert=3, stone=4
+   // Locale map: plain=0, forest=1, food=2, desert=3, stone=4
    public static final int  width      = 21, height = 21;
    public static final char locale[][] =
    {
@@ -218,12 +220,12 @@ public class NestingBirds
       female             = new FemaleBird();
       female.x           = width / 2;
       female.y           = height / 2;
-      female.food        = 0;
+      female.food        = FemaleBird.INITIAL_FOOD;
       female.response    = RESPONSE.DO_NOTHING;
       male               = new MaleBird();
       male.x             = width / 2;
       male.y             = height / 2;
-      male.food          = MaleBird.FOOD_DURATION;
+      male.food          = MaleBird.INITIAL_FOOD;
       male.response      = RESPONSE.DO_NOTHING;
       femaleWantFood     = false;
       femaleWantStone    = false;
@@ -315,6 +317,7 @@ public class NestingBirds
       }
       if (male.hasObject == OBJECT.MOUSE)
       {
+         if (male.food < 0) { male.food = 0; }
          if (male.food == 0)
          {
             male.response = Bird.RESPONSE.EAT;
@@ -676,82 +679,104 @@ public class NestingBirds
    // Male returns to female.
    public boolean returnToFemale()
    {
-      if ((male.x == female.x) && (male.y == female.y))
+      switch (male.sensors[Bird.MATE_PROXIMITY_SENSOR])
       {
+      case Bird.MATE_PROXIMITY_PRESENT:
          male.response = Bird.RESPONSE.DO_NOTHING;
          return(true);
-      }
-      if (male.x < female.x)
-      {
-         if (male.orientation == Bird.ORIENTATION.EAST)
-         {
-            male.response = Bird.RESPONSE.MOVE;
-         }
-         else
-         {
-            if (male.orientation == Bird.ORIENTATION.SOUTH)
-            {
-               male.response = Bird.RESPONSE.TURN_LEFT;
-            }
-            else
-            {
-               male.response = Bird.RESPONSE.TURN_RIGHT;
-            }
-         }
-      }
-      if (male.x > female.x)
-      {
-         if (male.orientation == Bird.ORIENTATION.WEST)
-         {
-            male.response = Bird.RESPONSE.MOVE;
-         }
-         else
-         {
-            if (male.orientation == Bird.ORIENTATION.SOUTH)
-            {
-               male.response = Bird.RESPONSE.TURN_RIGHT;
-            }
-            else
-            {
-               male.response = Bird.RESPONSE.TURN_LEFT;
-            }
-         }
-      }
-      if (male.y < female.y)
-      {
-         if (male.orientation == Bird.ORIENTATION.SOUTH)
-         {
-            male.response = Bird.RESPONSE.MOVE;
-         }
-         else
+
+      case Bird.MATE_PROXIMITY_LEFT:
+         male.response = Bird.RESPONSE.TURN_LEFT;
+         break;
+
+      case Bird.MATE_PROXIMITY_FORWARD:
+         male.response = Bird.RESPONSE.MOVE;
+         break;
+
+      case Bird.MATE_PROXIMITY_RIGHT:
+         male.response = Bird.RESPONSE.TURN_RIGHT;
+         break;
+
+      case Bird.MATE_PROXIMITY_UNKNOWN:
+         int centerx = width / 2;
+         int centery = height / 2;
+         if (male.x < centerx)
          {
             if (male.orientation == Bird.ORIENTATION.EAST)
             {
-               male.response = Bird.RESPONSE.TURN_RIGHT;
+               male.response = Bird.RESPONSE.MOVE;
             }
             else
             {
-               male.response = Bird.RESPONSE.TURN_LEFT;
+               if (male.orientation == Bird.ORIENTATION.SOUTH)
+               {
+                  male.response = Bird.RESPONSE.TURN_LEFT;
+               }
+               else
+               {
+                  male.response = Bird.RESPONSE.TURN_RIGHT;
+               }
             }
          }
-      }
-      if (male.y > female.y)
-      {
-         if (male.orientation == Bird.ORIENTATION.NORTH)
-         {
-            male.response = Bird.RESPONSE.MOVE;
-         }
-         else
+         else if (male.x > centerx)
          {
             if (male.orientation == Bird.ORIENTATION.WEST)
             {
-               male.response = Bird.RESPONSE.TURN_RIGHT;
+               male.response = Bird.RESPONSE.MOVE;
             }
             else
             {
-               male.response = Bird.RESPONSE.TURN_LEFT;
+               if (male.orientation == Bird.ORIENTATION.SOUTH)
+               {
+                  male.response = Bird.RESPONSE.TURN_RIGHT;
+               }
+               else
+               {
+                  male.response = Bird.RESPONSE.TURN_LEFT;
+               }
             }
          }
+         else if (male.y < centery)
+         {
+            if (male.orientation == Bird.ORIENTATION.SOUTH)
+            {
+               male.response = Bird.RESPONSE.MOVE;
+            }
+            else
+            {
+               if (male.orientation == Bird.ORIENTATION.EAST)
+               {
+                  male.response = Bird.RESPONSE.TURN_RIGHT;
+               }
+               else
+               {
+                  male.response = Bird.RESPONSE.TURN_LEFT;
+               }
+            }
+         }
+         else if (male.y > centery)
+         {
+            if (male.orientation == Bird.ORIENTATION.NORTH)
+            {
+               male.response = Bird.RESPONSE.MOVE;
+            }
+            else
+            {
+               if (male.orientation == Bird.ORIENTATION.WEST)
+               {
+                  male.response = Bird.RESPONSE.TURN_RIGHT;
+               }
+               else
+               {
+                  male.response = Bird.RESPONSE.TURN_LEFT;
+               }
+            }
+         }
+         else
+         {
+            male.response = Bird.RESPONSE.MOVE;
+         }
+         break;
       }
       return(false);
    }
@@ -760,6 +785,7 @@ public class NestingBirds
    // Female autopilot.
    public void femaleAutopilot()
    {
+      if (female.food < 0) { female.food = 0; }
       if (female.food == 0)
       {
          if (female.hasObject == OBJECT.MOUSE)
@@ -1255,17 +1281,10 @@ public class NestingBirds
          male.setSensors(sensors);
       }
 
-      // Mate present?
-      if ((male.x == female.x) && (male.y == female.y))
-      {
-         sensors[Bird.MATE_PRESENT_SENSOR] = 1;
-      }
-      else
-      {
-         sensors[Bird.MATE_PRESENT_SENSOR] = 0;
-      }
-
-      // Set locale and object sensors.
+      // Set locale, object, and mate proximity sensors.
+      sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_UNKNOWN;
+      int x = -1;
+      int y = -1;
       for (int i = 0; i < Bird.NUM_CELL_SENSORS; i++)
       {
          switch (i)
@@ -1274,10 +1293,16 @@ public class NestingBirds
          case 0:
             sensors[Bird.CURRENT_LOCALE_SENSOR] = world[bird.x][bird.y].locale;
             sensors[Bird.CURRENT_OBJECT_SENSOR] = world[bird.x][bird.y].object;
+            if ((male.x == female.x) && (male.y == female.y))
+            {
+               sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_PRESENT;
+            }
             break;
 
          // Left.
          case 1:
+            x = -1;
+            y = -1;
             switch (bird.orientation)
             {
             case Bird.ORIENTATION.NORTH:
@@ -1285,6 +1310,8 @@ public class NestingBirds
                {
                   sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x - 1][bird.y].locale;
                   sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x - 1][bird.y].object;
+                  x = bird.x - 1;
+                  y = bird.y;
                }
                break;
 
@@ -1293,6 +1320,8 @@ public class NestingBirds
                {
                   sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x + 1][bird.y].locale;
                   sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x + 1][bird.y].object;
+                  x = bird.x + 1;
+                  y = bird.y;
                }
                break;
 
@@ -1301,6 +1330,8 @@ public class NestingBirds
                {
                   sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x][bird.y - 1].locale;
                   sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x][bird.y - 1].object;
+                  x = bird.x;
+                  y = bird.y - 1;
                }
                break;
 
@@ -1309,13 +1340,34 @@ public class NestingBirds
                {
                   sensors[Bird.LEFT_LOCALE_SENSOR] = world[bird.x][bird.y + 1].locale;
                   sensors[Bird.LEFT_OBJECT_SENSOR] = world[bird.x][bird.y + 1].object;
+                  x = bird.x;
+                  y = bird.y + 1;
                }
                break;
+            }
+            if (x >= 0)
+            {
+               if (bird == male)
+               {
+                  if ((female.x == x) && (female.y == y))
+                  {
+                     sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_LEFT;
+                  }
+               }
+               else
+               {
+                  if ((male.x == x) && (male.y == y))
+                  {
+                     sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_LEFT;
+                  }
+               }
             }
             break;
 
          // Forward.
          case 2:
+            x = -1;
+            y = -1;
             switch (bird.orientation)
             {
             case Bird.ORIENTATION.NORTH:
@@ -1323,6 +1375,8 @@ public class NestingBirds
                {
                   sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x][bird.y - 1].locale;
                   sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x][bird.y - 1].object;
+                  x = bird.x;
+                  y = bird.y - 1;
                }
                break;
 
@@ -1331,6 +1385,8 @@ public class NestingBirds
                {
                   sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x][bird.y + 1].locale;
                   sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x][bird.y + 1].object;
+                  x = bird.x;
+                  y = bird.y + 1;
                }
                break;
 
@@ -1339,6 +1395,8 @@ public class NestingBirds
                {
                   sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x + 1][bird.y].locale;
                   sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x + 1][bird.y].object;
+                  x = bird.x + 1;
+                  y = bird.y;
                }
                break;
 
@@ -1347,13 +1405,34 @@ public class NestingBirds
                {
                   sensors[Bird.FORWARD_LOCALE_SENSOR] = world[bird.x - 1][bird.y].locale;
                   sensors[Bird.FORWARD_OBJECT_SENSOR] = world[bird.x - 1][bird.y].object;
+                  x = bird.x - 1;
+                  y = bird.y;
                }
                break;
+            }
+            if (x >= 0)
+            {
+               if (bird == male)
+               {
+                  if ((female.x == x) && (female.y == y))
+                  {
+                     sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_FORWARD;
+                  }
+               }
+               else
+               {
+                  if ((male.x == x) && (male.y == y))
+                  {
+                     sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_FORWARD;
+                  }
+               }
             }
             break;
 
          // Right.
          case 3:
+            x = -1;
+            y = -1;
             switch (bird.orientation)
             {
             case Bird.ORIENTATION.NORTH:
@@ -1361,6 +1440,8 @@ public class NestingBirds
                {
                   sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x + 1][bird.y].locale;
                   sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x + 1][bird.y].object;
+                  x = bird.x + 1;
+                  y = bird.y;
                }
                break;
 
@@ -1369,6 +1450,8 @@ public class NestingBirds
                {
                   sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x - 1][bird.y].locale;
                   sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x - 1][bird.y].object;
+                  x = bird.x - 1;
+                  y = bird.y;
                }
                break;
 
@@ -1377,6 +1460,8 @@ public class NestingBirds
                {
                   sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x][bird.y + 1].locale;
                   sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x][bird.y + 1].object;
+                  x = bird.x;
+                  y = bird.y + 1;
                }
                break;
 
@@ -1385,8 +1470,27 @@ public class NestingBirds
                {
                   sensors[Bird.RIGHT_LOCALE_SENSOR] = world[bird.x][bird.y - 1].locale;
                   sensors[Bird.RIGHT_OBJECT_SENSOR] = world[bird.x][bird.y - 1].object;
+                  x = bird.x;
+                  y = bird.y - 1;
                }
                break;
+            }
+            if (x >= 0)
+            {
+               if (bird == male)
+               {
+                  if ((female.x == x) && (female.y == y))
+                  {
+                     sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_RIGHT;
+                  }
+               }
+               else
+               {
+                  if ((male.x == x) && (male.y == y))
+                  {
+                     sensors[Bird.MATE_PROXIMITY_SENSOR] = Bird.MATE_PROXIMITY_RIGHT;
+                  }
+               }
             }
             break;
          }
@@ -1555,6 +1659,58 @@ public class NestingBirds
             }
             continue;
          }
+         if (args[i].equals("-maleInitialFood"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid maleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               MaleBird.INITIAL_FOOD = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid maleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (MaleBird.INITIAL_FOOD < 0)
+            {
+               System.err.println("Invalid maleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-femaleInitialFood"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid femaleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               FemaleBird.INITIAL_FOOD = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid femaleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (FemaleBird.INITIAL_FOOD < 0)
+            {
+               System.err.println("Invalid femaleInitialFood option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
          if (args[i].equals("-maleFoodDuration"))
          {
             i++;
@@ -1673,6 +1829,18 @@ public class NestingBirds
       }
       if (steps == -1)
       {
+         System.err.println(Usage);
+         System.exit(1);
+      }
+      if (MaleBird.INITIAL_FOOD > MaleBird.FOOD_DURATION)
+      {
+         System.err.println("Male initial food cannot be greater than food duration");
+         System.err.println(Usage);
+         System.exit(1);
+      }
+      if (FemaleBird.INITIAL_FOOD > FemaleBird.FOOD_DURATION)
+      {
+         System.err.println("Female initial food cannot be greater than food duration");
          System.err.println(Usage);
          System.exit(1);
       }

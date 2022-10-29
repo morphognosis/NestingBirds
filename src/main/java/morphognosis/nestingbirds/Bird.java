@@ -60,8 +60,14 @@ public class Bird
    public static final int RIGHT_LOCALE_SENSOR   = 6;
    public static final int RIGHT_OBJECT_SENSOR   = 7;
 
-   public static final int MATE_PRESENT_SENSOR = NUM_CELL_SENSORS * CELL_SENSOR.NUM_SENSORS;
-   public static final int NUM_SENSORS         = MATE_PRESENT_SENSOR + 1;
+   public static final int MATE_PROXIMITY_SENSOR  = NUM_CELL_SENSORS * CELL_SENSOR.NUM_SENSORS;
+   public static final int MATE_PROXIMITY_UNKNOWN = -1;
+   public static final int MATE_PROXIMITY_PRESENT = 0;
+   public static final int MATE_PROXIMITY_LEFT    = 1;
+   public static final int MATE_PROXIMITY_FORWARD = 2;
+   public static final int MATE_PROXIMITY_RIGHT   = 3;
+
+   public static final int NUM_SENSORS = MATE_PROXIMITY_SENSOR + 1;
    public int[]            sensors;
 
    // Responses.
@@ -160,7 +166,7 @@ public class Bird
    // Digest food.
    public void digest()
    {
-      if (food > 0) { food--; }
+      if (food > 0) { food--; } else{ food = 0; }
    }
 
 
@@ -219,14 +225,28 @@ public class Bird
             s += ",";
          }
       }
-      s += "], Mate present: ";
-      if (sensors[Bird.MATE_PRESENT_SENSOR] == 1)
+      s += "], Mate proximity: ";
+      switch (sensors[MATE_PROXIMITY_SENSOR])
       {
-         s += "true";
-      }
-      else
-      {
-         s += "false";
+      case MATE_PROXIMITY_UNKNOWN:
+         s += "UNKNOWN";
+         break;
+
+      case MATE_PROXIMITY_PRESENT:
+         s += "PRESENT";
+         break;
+
+      case MATE_PROXIMITY_LEFT:
+         s += "LEFT";
+         break;
+
+      case MATE_PROXIMITY_FORWARD:
+         s += "FORWARD";
+         break;
+
+      case MATE_PROXIMITY_RIGHT:
+         s += "RIGHT";
+         break;
       }
       return(s);
    }

@@ -29,8 +29,8 @@ public class BirdDashboard extends JFrame
    private static final long serialVersionUID = 0L;
 
    // Components.
-   StatusPanel     status;
-   PropertiesPanel properties;
+   StatusPanel statusPanel;
+   FoodPanel   foodPanel;
 
    // Target bird.
    Bird bird;
@@ -59,10 +59,10 @@ public class BirdDashboard extends JFrame
                         );
       JPanel basePanel = (JPanel)getContentPane();
       basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
-      status = new StatusPanel();
-      basePanel.add(status);
-      properties = new PropertiesPanel();
-      basePanel.add(properties);
+      statusPanel = new StatusPanel();
+      basePanel.add(statusPanel);
+      foodPanel = new FoodPanel();
+      basePanel.add(foodPanel);
       pack();
       setLocation();
       setVisible(true);
@@ -86,7 +86,7 @@ public class BirdDashboard extends JFrame
    void update()
    {
       // Update status.
-      status.update();
+      statusPanel.update();
    }
 
 
@@ -199,7 +199,7 @@ public class BirdDashboard extends JFrame
          mateSensorPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          sensorsPanel.add(mateSensorPanel);
          mateSensorPanel.add(new JLabel("Mate present:"));
-         matePresentText = new JTextField(5);
+         matePresentText = new JTextField(10);
          matePresentText.setEditable(false);
          mateSensorPanel.add(matePresentText);
          if (bird.gender == Bird.MALE)
@@ -376,13 +376,27 @@ public class BirdDashboard extends JFrame
             rightObjectText.setText("egg");
             break;
          }
-         if (bird.sensors[Bird.MATE_PRESENT_SENSOR] == 1)
+         switch (bird.sensors[Bird.MATE_PROXIMITY_SENSOR])
          {
-            matePresentText.setText("true");
-         }
-         else
-         {
-            matePresentText.setText("false");
+         case Bird.MATE_PROXIMITY_UNKNOWN:
+            matePresentText.setText("unknown");
+            break;
+
+         case Bird.MATE_PROXIMITY_PRESENT:
+            matePresentText.setText("present");
+            break;
+
+         case Bird.MATE_PROXIMITY_LEFT:
+            matePresentText.setText("left");
+            break;
+
+         case Bird.MATE_PROXIMITY_FORWARD:
+            matePresentText.setText("forward");
+            break;
+
+         case Bird.MATE_PROXIMITY_RIGHT:
+            matePresentText.setText("right");
+            break;
          }
          if (bird.gender == Bird.MALE)
          {
@@ -455,24 +469,41 @@ public class BirdDashboard extends JFrame
       }
    }
 
-   // Properties panel.
-   class PropertiesPanel extends JPanel implements ActionListener
+   // Food panel.
+   class FoodPanel extends JPanel implements ActionListener
    {
       private static final long serialVersionUID = 0L;
 
+      JTextField foodText;
+      JButton    foodButton;
       JTextField foodDurationText;
       JButton    foodDurationButton;
 
       // Constructor.
-      public PropertiesPanel()
+      public FoodPanel()
       {
          setBorder(BorderFactory.createTitledBorder(
                       BorderFactory.createLineBorder(Color.black),
-                      "Properties"));
+                      "Food"));
          setLayout(new FlowLayout(FlowLayout.LEFT));
+         JLabel initialFoodLabel = new JLabel("Food: ");
+         add(initialFoodLabel);
+         foodText = new JTextField(5);
+         if (bird.gender == Bird.MALE)
+         {
+            foodText.setText(MaleBird.INITIAL_FOOD + "");
+         }
+         else
+         {
+            foodText.setText(FemaleBird.INITIAL_FOOD + "");
+         }
+         add(foodText);
+         foodButton = new JButton("Set");
+         foodButton.addActionListener(this);
+         add(foodButton);
          JLabel foodDurationLabel = new JLabel("Food duration: ");
          add(foodDurationLabel);
-         foodDurationText = new JTextField(10);
+         foodDurationText = new JTextField(5);
          if (bird.gender == Bird.MALE)
          {
             foodDurationText.setText(MaleBird.FOOD_DURATION + "");
@@ -491,39 +522,86 @@ public class BirdDashboard extends JFrame
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         String text = foodDurationText.getText();
-
-         if ((text != null) && !text.isEmpty())
+         if (e.getSource() == foodButton)
          {
-            try
+            String text = foodText.getText();
+
+            if ((text != null) && !text.isEmpty())
             {
-               int duration = Integer.parseInt(text);
-               if (duration < 0)
+               try
+               {
+                  int amount = Integer.parseInt(text);
+                  if (amount < 0)
+                  {
+                     JOptionPane.showMessageDialog(this, "Invalid food value");
+                     return;
+                  }
+                  if (bird.gender == Bird.MALE)
+                  {
+                     if (amount > MaleBird.FOOD_DURATION)
+                     {
+                        JOptionPane.showMessageDialog(this, "Food cannot be greater than food duration");
+                        return;
+                     }
+                     bird.food = amount;
+                  }
+                  else
+                  {
+                     if (amount > FemaleBird.FOOD_DURATION)
+                     {
+                        JOptionPane.showMessageDialog(this, "Food cannot be greater than food duration");
+                        return;
+                     }
+                     bird.food = amount;
+                  }
+               }
+               catch (Exception ex)
+               {
+                  JOptionPane.showMessageDialog(this, "Invalid food value");
+               }
+            }
+            return;
+         }
+
+         if (e.getSource() == foodDurationButton)
+         {
+            String text = foodDurationText.getText();
+
+            if ((text != null) && !text.isEmpty())
+            {
+               try
+               {
+                  int duration = Integer.parseInt(text);
+                  if (duration < 0)
+                  {
+                     JOptionPane.showMessageDialog(this, "Invalid food duration value");
+                     return;
+                  }
+                  if (bird.gender == Bird.MALE)
+                  {
+                     MaleBird.FOOD_DURATION = duration;
+                     if (bird.food > duration)
+                     {
+                        bird.food = duration;
+                        foodText.setText(duration + "");
+                     }
+                  }
+                  else
+                  {
+                     FemaleBird.FOOD_DURATION = duration;
+                     if (bird.food > duration)
+                     {
+                        bird.food = duration;
+                        foodText.setText(duration + "");
+                     }
+                  }
+               }
+               catch (Exception ex)
                {
                   JOptionPane.showMessageDialog(this, "Invalid food duration value");
-                  return;
-               }
-               if (bird.gender == Bird.MALE)
-               {
-                  MaleBird.FOOD_DURATION = duration;
-                  if (bird.food > duration)
-                  {
-                     bird.food = duration;
-                  }
-               }
-               else
-               {
-                  FemaleBird.FOOD_DURATION = duration;
-                  if (bird.food > duration)
-                  {
-                     bird.food = duration;
-                  }
                }
             }
-            catch (Exception ex)
-            {
-               JOptionPane.showMessageDialog(this, "Invalid food duration value");
-            }
+            return;
          }
       }
    }
