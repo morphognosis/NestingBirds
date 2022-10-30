@@ -4,6 +4,9 @@
 
 package morphognosis.nestingbirds;
 
+import java.io.PrintWriter;
+
+import morphognosis.nestingbirds.NestingBirds.LOCALE;
 import morphognosis.nestingbirds.NestingBirds.OBJECT;
 
 public class Bird
@@ -167,6 +170,155 @@ public class Bird
    public void digest()
    {
       if (food > 0) { food--; } else{ food = 0; }
+   }
+
+
+   // Write dataset.
+   public void writeDataset(PrintWriter writer)
+   {
+      // Write locale and object sensors.
+      for (int i = 0, j = NUM_CELL_SENSORS * CELL_SENSOR.NUM_SENSORS; i < j; i++)
+      {
+         if ((i % 2) == 0)
+         {
+            // Locale.
+            switch (sensors[i])
+            {
+            case LOCALE.DESERT:
+               writer.print("1,0,0");
+               break;
+
+            case LOCALE.FOREST:
+               writer.print("0,1,0");
+               break;
+
+            case LOCALE.PLAIN:
+               writer.print("0,0,1");
+               break;
+            }
+         }
+         else
+         {
+            // Object.
+            switch (sensors[i])
+            {
+            case OBJECT.NO_OBJECT:
+               writer.print("1,0,0,0");
+               break;
+
+            case OBJECT.EGG:
+               writer.print("0,1,0,0");
+               break;
+
+            case OBJECT.MOUSE:
+               writer.print("0,0,1,0");
+               break;
+
+            case OBJECT.STONE:
+               writer.print("0,0,0,1");
+               break;
+            }
+         }
+         writer.print(",");
+      }
+
+      // Write mate proximity sensor.
+      switch (sensors[MATE_PROXIMITY_SENSOR])
+      {
+      case Bird.MATE_PROXIMITY_UNKNOWN:
+         writer.print("1,0,0,0,0");
+         break;
+
+      case Bird.MATE_PROXIMITY_PRESENT:
+         writer.print("0,1,0,0,0");
+         break;
+
+      case Bird.MATE_PROXIMITY_LEFT:
+         writer.print("0,0,1,0,0");
+         break;
+
+      case Bird.MATE_PROXIMITY_FORWARD:
+         writer.print("0,0,0,1,0");
+         break;
+
+      case Bird.MATE_PROXIMITY_RIGHT:
+         writer.print("0,0,0,0,1");
+         break;
+      }
+      writer.print(",");
+      if (gender == Bird.MALE)
+      {
+         if (sensors[MaleBird.WANT_FOOD_SENSOR] == 0)
+         {
+            writer.print("0");
+         }
+         else
+         {
+            writer.print("0");
+         }
+         writer.print(",");
+         if (sensors[MaleBird.WANT_STONE_SENSOR] == 0)
+         {
+            writer.print("0");
+         }
+         else
+         {
+            writer.print("0");
+         }
+         writer.print(",");
+      }
+
+      // Write properties.
+      switch (orientation)
+      {
+      case ORIENTATION.NORTH:
+         writer.print("1,0,0,0");
+         break;
+
+      case ORIENTATION.SOUTH:
+         writer.print("0,1,0,0");
+         break;
+
+      case ORIENTATION.EAST:
+         writer.print("0,0,1,0");
+         break;
+
+      case ORIENTATION.WEST:
+         writer.print("0,0,0,1");
+         break;
+      }
+      writer.print(",");
+      if (food > 0)
+      {
+         writer.print("1");
+      }
+      else
+      {
+         writer.print("0");
+      }
+      writer.print(",");
+      switch (hasObject)
+      {
+      case OBJECT.NO_OBJECT:
+         writer.print("1,0,0,0");
+         break;
+
+      case OBJECT.EGG:
+         writer.print("0,1,0,0");
+         break;
+
+      case OBJECT.MOUSE:
+         writer.print("0,0,1,0");
+         break;
+
+      case OBJECT.STONE:
+         writer.print("0,0,0,1");
+         break;
+      }
+      writer.print(",");
+
+      // Write response.
+      writer.println(response);
    }
 
 

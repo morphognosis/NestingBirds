@@ -22,6 +22,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -49,8 +52,10 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       "      [-femaleInitialFood <amount> (default=" + FemaleBird.INITIAL_FOOD + ")]\n" +
       "      [-maleFoodDuration <amount> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <amount> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-      "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]\n" +
+      "      [-writeMaleDataset [<file name>] (write training/testing dataset csv file, default=" + NestingBirds.MALE_DATASET_FILE_NAME + ")]\n" +
+      "      [-writeFemaleDataset [<file name>] (write training/testing dataset csv file, default=" + NestingBirds.FEMALE_DATASET_FILE_NAME + ")]\n" +
       "      [-verbose <true | false> (default=false)]\n" +
+      "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]\n" +
       "      [-version]";
 
    // Nesting birds.
@@ -908,6 +913,62 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
             if (NestingBirds.RANDOM_NUMBER_SEED <= 0)
             {
                System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-writeMaleDataset"))
+         {
+            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
+            {
+               i++;
+               if ((args[i] != null) && !args[i].isEmpty())
+               {
+                  NestingBirds.MALE_DATASET_FILE_NAME = args[i];
+               }
+               else
+               {
+                  System.err.println("Invalid writeMaleDataset file name");
+                  System.err.println(Usage);
+                  System.exit(1);
+               }
+            }
+            try
+            {
+               NestingBirds.MaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(NestingBirds.MALE_DATASET_FILE_NAME)));
+            }
+            catch (IOException e)
+            {
+               System.err.println("Cannot open writeMaleDataset file: " + e.getMessage());
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-writeFemaleDataset"))
+         {
+            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
+            {
+               i++;
+               if ((args[i] != null) && !args[i].isEmpty())
+               {
+                  NestingBirds.FEMALE_DATASET_FILE_NAME = args[i];
+               }
+               else
+               {
+                  System.err.println("Invalid writeFemaleDataset file name");
+                  System.err.println(Usage);
+                  System.exit(1);
+               }
+            }
+            try
+            {
+               NestingBirds.FemaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(NestingBirds.FEMALE_DATASET_FILE_NAME)));
+            }
+            catch (IOException e)
+            {
+               System.err.println("Cannot open writeFemaleDataset file: " + e.getMessage());
                System.err.println(Usage);
                System.exit(1);
             }

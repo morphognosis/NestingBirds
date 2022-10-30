@@ -4,6 +4,10 @@
 
 package morphognosis.nestingbirds;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,6 +17,10 @@ public class NestingBirds
 {
    // Version.
    public static final String VERSION = "2.0";
+
+   // Dataset file names.
+   public static String MALE_DATASET_FILE_NAME   = "male_dataset.csv";
+   public static String FEMALE_DATASET_FILE_NAME = "female_dataset.csv";
 
    // Random numbers.
    public static int RANDOM_NUMBER_SEED = 4517;
@@ -28,8 +36,10 @@ public class NestingBirds
       "      [-femaleInitialFood <amount> (default=" + FemaleBird.INITIAL_FOOD + ")]\n" +
       "      [-maleFoodDuration <amount> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <amount> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-      "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +
+      "      [-writeMaleDataset [<file name>] (write training/testing dataset csv file, default=" + MALE_DATASET_FILE_NAME + ")]\n" +
+      "      [-writeFemaleDataset [<file name>] (write training/testing dataset csv file, default=" + FEMALE_DATASET_FILE_NAME + ")]\n" +
       "      [-verbose <true | false> (default=true)]\n" +
+      "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +
       "      [-version]\n" +
       "Exit codes:\n" +
       "  0=success\n" +
@@ -171,6 +181,10 @@ public class NestingBirds
    public boolean femaleWantStone;
    public int     femaleNestSequence;
 
+   // Dataset writers.
+   public static PrintWriter MaleDatasetWriter   = null;
+   public static PrintWriter FemaleDatasetWriter = null;
+
    // Verbosity.
    public static boolean Verbose = true;
 
@@ -232,6 +246,7 @@ public class NestingBirds
       femaleNestSequence = 0;
       setSensors(Bird.FEMALE);
       setSensors(Bird.MALE);
+      writeDatasets();
    }
 
 
@@ -274,6 +289,9 @@ public class NestingBirds
          System.out.print("Male: Location: [" + male.x + "," + male.y + "], ");
          male.print();
       }
+
+      // Write stimulus-response to datasets.
+      writeDatasets();
    }
 
 
@@ -1518,6 +1536,28 @@ public class NestingBirds
    }
 
 
+   // Write datasets.
+   public void writeDatasets()
+   {
+      // Truncate when egg is laid.
+      if (world[width / 2][height / 2].object == OBJECT.EGG) { return; }
+
+      // Write female dataset?
+      if (FemaleDatasetWriter != null)
+      {
+         female.writeDataset(FemaleDatasetWriter);
+         FemaleDatasetWriter.flush();
+      }
+
+      // Write male dataset?
+      if (MaleDatasetWriter != null)
+      {
+         male.writeDataset(MaleDatasetWriter);
+         MaleDatasetWriter.flush();
+      }
+   }
+
+
    // Euclidean distance.
    public static double distance(double x1, double y1, double x2, double y2)
    {
@@ -1784,6 +1824,62 @@ public class NestingBirds
             if (RANDOM_NUMBER_SEED <= 0)
             {
                System.err.println("Invalid randomSeed option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-writeMaleDataset"))
+         {
+            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
+            {
+               i++;
+               if ((args[i] != null) && !args[i].isEmpty())
+               {
+                  MALE_DATASET_FILE_NAME = args[i];
+               }
+               else
+               {
+                  System.err.println("Invalid writeMaleDataset file name");
+                  System.err.println(Usage);
+                  System.exit(1);
+               }
+            }
+            try
+            {
+               MaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(MALE_DATASET_FILE_NAME)));
+            }
+            catch (IOException e)
+            {
+               System.err.println("Cannot open writeMaleDataset file: " + e.getMessage());
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-writeFemaleDataset"))
+         {
+            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
+            {
+               i++;
+               if ((args[i] != null) && !args[i].isEmpty())
+               {
+                  FEMALE_DATASET_FILE_NAME = args[i];
+               }
+               else
+               {
+                  System.err.println("Invalid writeFemaleDataset file name");
+                  System.err.println(Usage);
+                  System.exit(1);
+               }
+            }
+            try
+            {
+               FemaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(FEMALE_DATASET_FILE_NAME)));
+            }
+            catch (IOException e)
+            {
+               System.err.println("Cannot open writeFemaleDataset file: " + e.getMessage());
                System.err.println(Usage);
                System.exit(1);
             }
