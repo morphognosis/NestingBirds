@@ -944,6 +944,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
                System.err.println(Usage);
                System.exit(1);
             }
+            Bird.writeDatasetHeader(NestingBirds.MaleDatasetWriter, Bird.MALE);
             continue;
          }
          if (args[i].equals("-writeFemaleDataset"))
@@ -972,6 +973,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
                System.err.println(Usage);
                System.exit(1);
             }
+            Bird.writeDatasetHeader(NestingBirds.FemaleDatasetWriter, Bird.FEMALE);
             continue;
          }
          if (args[i].equals("-verbose"))

@@ -173,6 +173,43 @@ public class Bird
    }
 
 
+   // Write dataset header.
+   public static void writeDatasetHeader(PrintWriter writer, int gender)
+   {
+      writer.print("current_desert,current_forest,current_plain");
+      writer.print(",");
+      writer.print("current_no_object,current_egg,current_mouse,current_stone");
+      writer.print(",");
+      writer.print("left_desert,left_forest,left_plain");
+      writer.print(",");
+      writer.print("left_no_object,left_egg,left_mouse,left_stone");
+      writer.print(",");
+      writer.print("forward_desert,forward_forest,forward_plain");
+      writer.print(",");
+      writer.print("forward_no_object,forward_egg,forward_mouse,forward_stone");
+      writer.print(",");
+      writer.print("right_desert,right_forest,right_plain");
+      writer.print(",");
+      writer.print("right_no_object,right_egg,right_mouse,right_stone");
+      writer.print(",");
+      writer.print("mate_proximity_unknown,mate_proximity_present,mate_proximity_left,mate_proximity_forward,mate_proximity_right");
+      writer.print(",");
+      if (gender == MALE)
+      {
+         writer.print("female_want_food,female_want_stone");
+         writer.print(",");
+      }
+      writer.print("orientation_north,orientation_south,orientation_east,orientation_west");
+      writer.print(",");
+      writer.print("food");
+      writer.print(",");
+      writer.print("has_object_no_object,has_object_mouse,has_object_stone");
+      writer.print(",");
+      writer.println("response");
+      writer.flush();
+   }
+
+
    // Write dataset.
    public void writeDataset(PrintWriter writer)
    {
@@ -248,23 +285,9 @@ public class Bird
       writer.print(",");
       if (gender == Bird.MALE)
       {
-         if (sensors[MaleBird.WANT_FOOD_SENSOR] == 0)
-         {
-            writer.print("0");
-         }
-         else
-         {
-            writer.print("0");
-         }
+         writer.print(sensors[MaleBird.WANT_FOOD_SENSOR] + "");
          writer.print(",");
-         if (sensors[MaleBird.WANT_STONE_SENSOR] == 0)
-         {
-            writer.print("0");
-         }
-         else
-         {
-            writer.print("0");
-         }
+         writer.print(sensors[MaleBird.WANT_STONE_SENSOR] + "");
          writer.print(",");
       }
 
@@ -300,25 +323,23 @@ public class Bird
       switch (hasObject)
       {
       case OBJECT.NO_OBJECT:
-         writer.print("1,0,0,0");
-         break;
-
-      case OBJECT.EGG:
-         writer.print("0,1,0,0");
+         writer.print("1,0,0");
          break;
 
       case OBJECT.MOUSE:
-         writer.print("0,0,1,0");
+         writer.print("0,1,0");
          break;
 
       case OBJECT.STONE:
-         writer.print("0,0,0,1");
+         writer.print("0,0,1");
          break;
       }
       writer.print(",");
 
       // Write response.
       writer.println(response);
+
+      writer.flush();
    }
 
 

@@ -246,17 +246,23 @@ public class NestingBirds
       femaleNestSequence = 0;
       setSensors(Bird.FEMALE);
       setSensors(Bird.MALE);
-      writeDatasets();
    }
 
 
    // Step.
    public void step()
    {
-      // Cycle world.
-      cycle();
+      // Do responses in world.
+      doResponse(Bird.FEMALE);
+      doResponse(Bird.MALE);
 
-      // Female sensory-response cycle.
+      // Step mice.
+      stepMice();
+
+      // Set female sensors.
+      setSensors(Bird.FEMALE);
+
+      // Produce female response.
       switch (ResponseDriver)
       {
       case RESPONSE_DRIVER.BIRD:
@@ -273,7 +279,10 @@ public class NestingBirds
          female.print();
       }
 
-      // Male sensory-response cycle.
+      // Set male sensors.
+      setSensors(Bird.MALE);
+
+      // Produce male response.
       switch (ResponseDriver)
       {
       case RESPONSE_DRIVER.BIRD:
@@ -1058,22 +1067,6 @@ public class NestingBirds
    }
 
 
-   // World cause-effect cycle.
-   public void cycle()
-   {
-      // Do responses.
-      doResponse(Bird.FEMALE);
-      doResponse(Bird.MALE);
-
-      // Step mice.
-      stepMice();
-
-      // Set sensors.
-      setSensors(Bird.FEMALE);
-      setSensors(Bird.MALE);
-   }
-
-
    // Do bird response.
    public void doResponse(int gender)
    {
@@ -1546,14 +1539,12 @@ public class NestingBirds
       if (FemaleDatasetWriter != null)
       {
          female.writeDataset(FemaleDatasetWriter);
-         FemaleDatasetWriter.flush();
       }
 
       // Write male dataset?
       if (MaleDatasetWriter != null)
       {
          male.writeDataset(MaleDatasetWriter);
-         MaleDatasetWriter.flush();
       }
    }
 
@@ -1851,10 +1842,11 @@ public class NestingBirds
             }
             catch (IOException e)
             {
-               System.err.println("Cannot open writeMaleDataset file: " + e.getMessage());
+               System.err.println("Cannot open male dataset file: " + e.getMessage());
                System.err.println(Usage);
                System.exit(1);
             }
+            Bird.writeDatasetHeader(MaleDatasetWriter, Bird.MALE);
             continue;
          }
          if (args[i].equals("-writeFemaleDataset"))
@@ -1879,10 +1871,11 @@ public class NestingBirds
             }
             catch (IOException e)
             {
-               System.err.println("Cannot open writeFemaleDataset file: " + e.getMessage());
+               System.err.println("Cannot open female dataset file: " + e.getMessage());
                System.err.println(Usage);
                System.exit(1);
             }
+            Bird.writeDatasetHeader(FemaleDatasetWriter, Bird.FEMALE);
             continue;
          }
          if (args[i].equals("-verbose"))
