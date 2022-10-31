@@ -5,8 +5,6 @@
 package morphognosis.nestingbirds;
 
 import java.io.PrintWriter;
-import java.util.Random;
-
 import morphognosis.nestingbirds.NestingBirds.LOCALE;
 import morphognosis.nestingbirds.NestingBirds.OBJECT;
 
@@ -177,45 +175,46 @@ public class Bird
    // Write dataset header.
    public static void writeDatasetHeader(PrintWriter writer, int gender)
    {
-      writer.print("current_desert,current_forest,current_plain");
-      writer.print(",");
-      writer.print("current_no_object,current_egg,current_mouse,current_stone");
-      writer.print(",");
-      writer.print("left_desert,left_forest,left_plain");
-      writer.print(",");
-      writer.print("left_no_object,left_egg,left_mouse,left_stone");
-      writer.print(",");
-      writer.print("forward_desert,forward_forest,forward_plain");
-      writer.print(",");
-      writer.print("forward_no_object,forward_egg,forward_mouse,forward_stone");
-      writer.print(",");
-      writer.print("right_desert,right_forest,right_plain");
-      writer.print(",");
-      writer.print("right_no_object,right_egg,right_mouse,right_stone");
-      writer.print(",");
-      writer.print("mate_proximity_unknown,mate_proximity_present,mate_proximity_left,mate_proximity_forward,mate_proximity_right");
-      writer.print(",");
+      writer.write("current_desert,current_forest,current_plain");
+      writer.write(",");
+      writer.write("current_no_object,current_egg,current_mouse,current_stone");
+      writer.write(",");
+      writer.write("left_desert,left_forest,left_plain");
+      writer.write(",");
+      writer.write("left_no_object,left_egg,left_mouse,left_stone");
+      writer.write(",");
+      writer.write("forward_desert,forward_forest,forward_plain");
+      writer.write(",");
+      writer.write("forward_no_object,forward_egg,forward_mouse,forward_stone");
+      writer.write(",");
+      writer.write("right_desert,right_forest,right_plain");
+      writer.write(",");
+      writer.write("right_no_object,right_egg,right_mouse,right_stone");
+      writer.write(",");
+      writer.write("mate_proximity_unknown,mate_proximity_present,mate_proximity_left,mate_proximity_forward,mate_proximity_right");
+      writer.write(",");
       if (gender == MALE)
       {
-         writer.print("female_want_food,female_want_stone");
-         writer.print(",");
+         writer.write("female_want_food,female_want_stone");
+         writer.write(",");
       }
-      writer.print("orientation_north,orientation_south,orientation_east,orientation_west");
-      writer.print(",");
-      writer.print("food");
-      writer.print(",");
-      writer.print("has_object_no_object,has_object_mouse,has_object_stone");
-      writer.print(",");
-      writer.print("do_nothing,eat,get,put,toss,move,turn_right,turn_left");
-      writer.print(",");
+      writer.write("orientation_north,orientation_south,orientation_east,orientation_west");
+      writer.write(",");
+      writer.write("food");
+      writer.write(",");
+      writer.write("has_object_no_object,has_object_mouse,has_object_stone");
+      writer.write(",");
+      writer.write("do_nothing,eat,get,put,toss,move,turn_right,turn_left");
+      writer.write(",");
       if (gender == MALE)
       {
-         writer.println("give_food,give_stone");
+         writer.write("give_food,give_stone");
       }
       else
       {
-         writer.println("want_food,want_stone,lay_egg");
+         writer.write("want_food,want_stone,lay_egg");
       }
+      writer.write("\n");
       writer.flush();
    }
 
@@ -232,15 +231,15 @@ public class Bird
             switch (sensors[i])
             {
             case LOCALE.DESERT:
-               writer.print("1,0,0");
+               writer.write("1,0,0");
                break;
 
             case LOCALE.FOREST:
-               writer.print("0,1,0");
+               writer.write("0,1,0");
                break;
 
             case LOCALE.PLAIN:
-               writer.print("0,0,1");
+               writer.write("0,0,1");
                break;
             }
          }
@@ -250,101 +249,101 @@ public class Bird
             switch (sensors[i])
             {
             case OBJECT.NO_OBJECT:
-               writer.print("1,0,0,0");
+               writer.write("1,0,0,0");
                break;
 
             case OBJECT.EGG:
-               writer.print("0,1,0,0");
+               writer.write("0,1,0,0");
                break;
 
             case OBJECT.MOUSE:
-               writer.print("0,0,1,0");
+               writer.write("0,0,1,0");
                break;
 
             case OBJECT.STONE:
-               writer.print("0,0,0,1");
+               writer.write("0,0,0,1");
                break;
             }
          }
-         writer.print(",");
+         writer.write(",");
       }
 
       // Write mate proximity sensor.
       switch (sensors[MATE_PROXIMITY_SENSOR])
       {
       case Bird.MATE_PROXIMITY_UNKNOWN:
-         writer.print("1,0,0,0,0");
+         writer.write("1,0,0,0,0");
          break;
 
       case Bird.MATE_PROXIMITY_PRESENT:
-         writer.print("0,1,0,0,0");
+         writer.write("0,1,0,0,0");
          break;
 
       case Bird.MATE_PROXIMITY_LEFT:
-         writer.print("0,0,1,0,0");
+         writer.write("0,0,1,0,0");
          break;
 
       case Bird.MATE_PROXIMITY_FORWARD:
-         writer.print("0,0,0,1,0");
+         writer.write("0,0,0,1,0");
          break;
 
       case Bird.MATE_PROXIMITY_RIGHT:
-         writer.print("0,0,0,0,1");
+         writer.write("0,0,0,0,1");
          break;
       }
-      writer.print(",");
+      writer.write(",");
       if (gender == Bird.MALE)
       {
-         writer.print(sensors[MaleBird.WANT_FOOD_SENSOR] + "");
-         writer.print(",");
-         writer.print(sensors[MaleBird.WANT_STONE_SENSOR] + "");
-         writer.print(",");
+         writer.write(sensors[MaleBird.WANT_FOOD_SENSOR] + "");
+         writer.write(",");
+         writer.write(sensors[MaleBird.WANT_STONE_SENSOR] + "");
+         writer.write(",");
       }
 
       // Write properties.
       switch (orientation)
       {
       case ORIENTATION.NORTH:
-         writer.print("1,0,0,0");
+         writer.write("1,0,0,0");
          break;
 
       case ORIENTATION.SOUTH:
-         writer.print("0,1,0,0");
+         writer.write("0,1,0,0");
          break;
 
       case ORIENTATION.EAST:
-         writer.print("0,0,1,0");
+         writer.write("0,0,1,0");
          break;
 
       case ORIENTATION.WEST:
-         writer.print("0,0,0,1");
+         writer.write("0,0,0,1");
          break;
       }
-      writer.print(",");
+      writer.write(",");
       if (food > 0)
       {
-         writer.print("1");
+         writer.write("1");
       }
       else
       {
-         writer.print("0");
+         writer.write("0");
       }
-      writer.print(",");
+      writer.write(",");
       switch (hasObject)
       {
       case OBJECT.NO_OBJECT:
-         writer.print("1,0,0");
+         writer.write("1,0,0");
          break;
 
       case OBJECT.MOUSE:
-         writer.print("0,1,0");
+         writer.write("0,1,0");
          break;
 
       case OBJECT.STONE:
-         writer.print("0,0,1");
+         writer.write("0,0,1");
          break;
       }
-      writer.print(",");
+      writer.write(",");
 
       // Write response.
       if (response < Bird.RESPONSE.NUM_RESPONSES)
@@ -354,88 +353,88 @@ public class Bird
          case Bird.RESPONSE.DO_NOTHING:
             if (gender == Bird.MALE)
             {
-               writer.println("1,0,0,0,0,0,0,0,0,0");
+               writer.write("1,0,0,0,0,0,0,0,0,0");
             }
             else
             {
-               writer.println("1,0,0,0,0,0,0,0,0,0,0");
+               writer.write("1,0,0,0,0,0,0,0,0,0,0");
             }
             break;
 
          case Bird.RESPONSE.EAT:
             if (gender == Bird.MALE)
             {
-               writer.println("0,1,0,0,0,0,0,0,0,0");
+               writer.write("0,1,0,0,0,0,0,0,0,0");
             }
             else
             {
-               writer.println("0,1,0,0,0,0,0,0,0,0,0");
+               writer.write("0,1,0,0,0,0,0,0,0,0,0");
             }
             break;
 
          case Bird.RESPONSE.GET:
             if (gender == Bird.MALE)
             {
-               writer.println("0,0,1,0,0,0,0,0,0,0");
+               writer.write("0,0,1,0,0,0,0,0,0,0");
             }
             else
             {
-               writer.println("0,0,1,0,0,0,0,0,0,0,0");
+               writer.write("0,0,1,0,0,0,0,0,0,0,0");
             }
             break;
 
          case Bird.RESPONSE.PUT:
             if (gender == Bird.MALE)
             {
-               writer.println("0,0,0,1,0,0,0,0,0,0");
+               writer.write("0,0,0,1,0,0,0,0,0,0");
             }
             else
             {
-               writer.println("0,0,0,1,0,0,0,0,0,0,0");
+               writer.write("0,0,0,1,0,0,0,0,0,0,0");
             }
             break;
 
          case Bird.RESPONSE.TOSS:
             if (gender == Bird.MALE)
             {
-               writer.println("0,0,0,0,1,0,0,0,0,0");
+               writer.write("0,0,0,0,1,0,0,0,0,0");
             }
             else
             {
-               writer.println("0,0,0,0,1,0,0,0,0,0,0");
+               writer.write("0,0,0,0,1,0,0,0,0,0,0");
             }
             break;
 
          case Bird.RESPONSE.MOVE:
             if (gender == Bird.MALE)
             {
-               writer.println("0,0,0,0,0,1,0,0,0,0");
+               writer.write("0,0,0,0,0,1,0,0,0,0");
             }
             else
             {
-               writer.println("0,0,0,0,0,1,0,0,0,0,0");
+               writer.write("0,0,0,0,0,1,0,0,0,0,0");
             }
             break;
 
          case Bird.RESPONSE.TURN_RIGHT:
             if (gender == Bird.MALE)
             {
-               writer.println("0,0,0,0,0,0,1,0,0,0");
+               writer.write("0,0,0,0,0,0,1,0,0,0");
             }
             else
             {
-               writer.println("0,0,0,0,0,0,1,0,0,0,0");
+               writer.write("0,0,0,0,0,0,1,0,0,0,0");
             }
             break;
 
          case Bird.RESPONSE.TURN_LEFT:
             if (gender == Bird.MALE)
             {
-               writer.println("0,0,0,0,0,0,0,1,0,0");
+               writer.write("0,0,0,0,0,0,0,1,0,0");
             }
             else
             {
-               writer.println("0,0,0,0,0,0,0,1,0,0,0");
+               writer.write("0,0,0,0,0,0,0,1,0,0,0");
             }
             break;
          }
@@ -448,11 +447,11 @@ public class Bird
             switch (response)
             {
             case MaleBird.RESPONSE.GIVE_FOOD:
-               writer.println("0,0,0,0,0,0,0,0,1,0");
+               writer.write("0,0,0,0,0,0,0,0,1,0");
                break;
 
             case MaleBird.RESPONSE.GIVE_STONE:
-               writer.println("0,0,0,0,0,0,0,0,0,1");
+               writer.write("0,0,0,0,0,0,0,0,0,1");
                break;
             }
          }
@@ -462,19 +461,20 @@ public class Bird
             switch (response)
             {
             case FemaleBird.RESPONSE.WANT_FOOD:
-               writer.println("0,0,0,0,0,0,0,0,1,0,0");
+               writer.write("0,0,0,0,0,0,0,0,1,0,0");
                break;
 
             case FemaleBird.RESPONSE.WANT_STONE:
-               writer.println("0,0,0,0,0,0,0,0,0,1,0");
+               writer.write("0,0,0,0,0,0,0,0,0,1,0");
                break;
 
             case FemaleBird.RESPONSE.LAY_EGG:
-               writer.println("0,0,0,0,0,0,0,0,0,0,1");
+               writer.write("0,0,0,0,0,0,0,0,0,0,1");
                break;
             }
          }
       }
+      writer.write("\n");
       writer.flush();
    }
 
