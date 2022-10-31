@@ -13,8 +13,8 @@ public class FemaleBird extends Bird
    public static class RESPONSE
    {
       public static final int WANT_FOOD            = 8;
-      public static final int WANT_STONE           = 10;
-      public static final int LAY_EGG              = 12;
+      public static final int WANT_STONE           = 9;
+      public static final int LAY_EGG              = 10;
       public static final int NUM_FEMALE_RESPONSES = 3;
 
       // Response to string.

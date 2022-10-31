@@ -1078,193 +1078,211 @@ public class NestingBirds
       }
       Cell cell = world[bird.x][bird.y];
 
-      switch (bird.response)
+      if (bird.response < Bird.RESPONSE.NUM_RESPONSES)
       {
-      case Bird.RESPONSE.DO_NOTHING:
-         break;
-
-      case Bird.RESPONSE.EAT:
-         if (bird.hasObject == OBJECT.MOUSE)
+         switch (bird.response)
          {
-            if (bird.gender == Bird.MALE)
+         case Bird.RESPONSE.DO_NOTHING:
+            break;
+
+         case Bird.RESPONSE.EAT:
+            if (bird.hasObject == OBJECT.MOUSE)
             {
-               bird.food = MaleBird.FOOD_DURATION;
+               if (bird.gender == Bird.MALE)
+               {
+                  bird.food = MaleBird.FOOD_DURATION;
+               }
+               else
+               {
+                  bird.food = FemaleBird.FOOD_DURATION;
+               }
+               bird.hasObject = OBJECT.NO_OBJECT;
             }
-            else
+            break;
+
+         case Bird.RESPONSE.GET:
+            if (bird.hasObject == OBJECT.NO_OBJECT)
             {
-               bird.food = FemaleBird.FOOD_DURATION;
+               bird.hasObject = cell.object;
+               cell.object    = OBJECT.NO_OBJECT;
             }
-            bird.hasObject = OBJECT.NO_OBJECT;
-         }
-         break;
+            break;
 
-      case Bird.RESPONSE.GET:
-         if (bird.hasObject == OBJECT.NO_OBJECT)
-         {
-            bird.hasObject = cell.object;
-            cell.object    = OBJECT.NO_OBJECT;
-         }
-         break;
-
-      case Bird.RESPONSE.PUT:
-         if (cell.object == OBJECT.NO_OBJECT)
-         {
-            cell.object    = bird.hasObject;
-            bird.hasObject = OBJECT.NO_OBJECT;
-         }
-         break;
-
-      case Bird.RESPONSE.TOSS:
-         if (bird.hasObject == OBJECT.NO_OBJECT) { break; }
-
-         // Object lands randomly nearby.
-         int i = height / 2;
-         if (i > width / 2) { i = width / 2; }
-         Random rand = new Random();
-         for (int j = 5; j < i; j++)
-         {
-            int x = (int)(rand.nextInt() % (long)j);
-            int y = (int)(rand.nextInt() % (long)j);
-            if ((x == 0) && (y == 0)) { continue; }
-            if ((rand.nextInt() % 2) == 0) { x = -x; }
-            if ((rand.nextInt() % 2) == 0) { y = -y; }
-            x += bird.x;
-            if ((x < 0) || (x >= width)) { continue; }
-            y += bird.y;
-            if ((y < 0) || (y >= height)) { continue; }
-            if (world[x][y].object == OBJECT.NO_OBJECT)
+         case Bird.RESPONSE.PUT:
+            if (cell.object == OBJECT.NO_OBJECT)
             {
-               world[x][y].object = bird.hasObject;
-               bird.hasObject     = OBJECT.NO_OBJECT;
+               cell.object    = bird.hasObject;
+               bird.hasObject = OBJECT.NO_OBJECT;
+            }
+            break;
+
+         case Bird.RESPONSE.TOSS:
+            if (bird.hasObject == OBJECT.NO_OBJECT) { break; }
+
+            // Object lands randomly nearby.
+            int i = height / 2;
+            if (i > width / 2) { i = width / 2; }
+            Random rand = new Random();
+            for (int j = 5; j < i; j++)
+            {
+               int x = (int)(rand.nextInt() % (long)j);
+               int y = (int)(rand.nextInt() % (long)j);
+               if ((x == 0) && (y == 0)) { continue; }
+               if ((rand.nextInt() % 2) == 0) { x = -x; }
+               if ((rand.nextInt() % 2) == 0) { y = -y; }
+               x += bird.x;
+               if ((x < 0) || (x >= width)) { continue; }
+               y += bird.y;
+               if ((y < 0) || (y >= height)) { continue; }
+               if (world[x][y].object == OBJECT.NO_OBJECT)
+               {
+                  world[x][y].object = bird.hasObject;
+                  bird.hasObject     = OBJECT.NO_OBJECT;
+                  break;
+               }
+            }
+            if (bird.hasObject != OBJECT.NO_OBJECT)
+            {
+               // Vaporize object.
+               bird.hasObject = OBJECT.NO_OBJECT;
+            }
+            break;
+
+         case Bird.RESPONSE.MOVE:
+            switch (bird.orientation)
+            {
+            case Bird.ORIENTATION.NORTH:
+               if (bird.y > 0)
+               {
+                  bird.y--;
+               }
+               break;
+
+            case Bird.ORIENTATION.SOUTH:
+               if (bird.y < height - 1)
+               {
+                  bird.y++;
+               }
+               break;
+
+
+            case Bird.ORIENTATION.EAST:
+               if (bird.x < width - 1)
+               {
+                  bird.x++;
+               }
+               break;
+
+            case Bird.ORIENTATION.WEST:
+               if (bird.x > 0)
+               {
+                  bird.x--;
+               }
+               break;
+            }
+            break;
+
+         case Bird.RESPONSE.TURN_RIGHT:
+            switch (bird.orientation)
+            {
+            case Bird.ORIENTATION.NORTH:
+               bird.orientation = Bird.ORIENTATION.EAST;
+               break;
+
+            case Bird.ORIENTATION.SOUTH:
+               bird.orientation = Bird.ORIENTATION.WEST;
+               break;
+
+            case Bird.ORIENTATION.EAST:
+               bird.orientation = Bird.ORIENTATION.SOUTH;
+               break;
+
+            case Bird.ORIENTATION.WEST:
+               bird.orientation = Bird.ORIENTATION.NORTH;
+               break;
+            }
+            break;
+
+         case Bird.RESPONSE.TURN_LEFT:
+            switch (bird.orientation)
+            {
+            case Bird.ORIENTATION.NORTH:
+               bird.orientation = Bird.ORIENTATION.WEST;
+               break;
+
+            case Bird.ORIENTATION.SOUTH:
+               bird.orientation = Bird.ORIENTATION.EAST;
+               break;
+
+            case Bird.ORIENTATION.EAST:
+               bird.orientation = Bird.ORIENTATION.NORTH;
+               break;
+
+            case Bird.ORIENTATION.WEST:
+               bird.orientation = Bird.ORIENTATION.SOUTH;
+               break;
+            }
+            break;
+         }
+      }
+      else
+      {
+         // Gender-specific response.
+         if (gender == Bird.MALE)
+         {
+            switch (bird.response)
+            {
+            case MaleBird.RESPONSE.GIVE_FOOD:
+               if (bird == male)
+               {
+                  if ((bird.hasObject == OBJECT.MOUSE) && (female.hasObject == OBJECT.NO_OBJECT))
+                  {
+                     if ((bird.x == female.x) && (bird.y == female.y))
+                     {
+                        female.hasObject = bird.hasObject;
+                        bird.hasObject   = OBJECT.NO_OBJECT;
+                     }
+                  }
+               }
+               break;
+
+            case MaleBird.RESPONSE.GIVE_STONE:
+               if (bird == male)
+               {
+                  if ((bird.hasObject == OBJECT.STONE) && (female.hasObject == OBJECT.NO_OBJECT))
+                  {
+                     if ((bird.x == female.x) && (bird.y == female.y))
+                     {
+                        female.hasObject = bird.hasObject;
+                        bird.hasObject   = OBJECT.NO_OBJECT;
+                     }
+                  }
+               }
                break;
             }
          }
-         if (bird.hasObject != OBJECT.NO_OBJECT)
+         else
          {
-            // Vaporize object.
-            bird.hasObject = OBJECT.NO_OBJECT;
-         }
-         break;
-
-      case Bird.RESPONSE.MOVE:
-         switch (bird.orientation)
-         {
-         case Bird.ORIENTATION.NORTH:
-            if (bird.y > 0)
+            // Female response.
+            switch (bird.response)
             {
-               bird.y--;
-            }
-            break;
+            case FemaleBird.RESPONSE.WANT_FOOD:
+               break;
 
-         case Bird.ORIENTATION.SOUTH:
-            if (bird.y < height - 1)
-            {
-               bird.y++;
-            }
-            break;
+            case FemaleBird.RESPONSE.WANT_STONE:
+               break;
 
-
-         case Bird.ORIENTATION.EAST:
-            if (bird.x < width - 1)
-            {
-               bird.x++;
-            }
-            break;
-
-         case Bird.ORIENTATION.WEST:
-            if (bird.x > 0)
-            {
-               bird.x--;
-            }
-            break;
-         }
-         break;
-
-      case Bird.RESPONSE.TURN_RIGHT:
-         switch (bird.orientation)
-         {
-         case Bird.ORIENTATION.NORTH:
-            bird.orientation = Bird.ORIENTATION.EAST;
-            break;
-
-         case Bird.ORIENTATION.SOUTH:
-            bird.orientation = Bird.ORIENTATION.WEST;
-            break;
-
-         case Bird.ORIENTATION.EAST:
-            bird.orientation = Bird.ORIENTATION.SOUTH;
-            break;
-
-         case Bird.ORIENTATION.WEST:
-            bird.orientation = Bird.ORIENTATION.NORTH;
-            break;
-         }
-         break;
-
-      case Bird.RESPONSE.TURN_LEFT:
-         switch (bird.orientation)
-         {
-         case Bird.ORIENTATION.NORTH:
-            bird.orientation = Bird.ORIENTATION.WEST;
-            break;
-
-         case Bird.ORIENTATION.SOUTH:
-            bird.orientation = Bird.ORIENTATION.EAST;
-            break;
-
-         case Bird.ORIENTATION.EAST:
-            bird.orientation = Bird.ORIENTATION.NORTH;
-            break;
-
-         case Bird.ORIENTATION.WEST:
-            bird.orientation = Bird.ORIENTATION.SOUTH;
-            break;
-         }
-         break;
-
-      case FemaleBird.RESPONSE.WANT_FOOD:
-         break;
-
-      case MaleBird.RESPONSE.GIVE_FOOD:
-         if (bird == male)
-         {
-            if ((bird.hasObject == OBJECT.MOUSE) && (female.hasObject == OBJECT.NO_OBJECT))
-            {
-               if ((bird.x == female.x) && (bird.y == female.y))
+            case FemaleBird.RESPONSE.LAY_EGG:
+               if (bird == female)
                {
-                  female.hasObject = bird.hasObject;
-                  bird.hasObject   = OBJECT.NO_OBJECT;
+                  if (cell.object == OBJECT.NO_OBJECT)
+                  {
+                     cell.object = OBJECT.EGG;
+                  }
                }
+               break;
             }
          }
-         break;
-
-      case FemaleBird.RESPONSE.WANT_STONE:
-         break;
-
-      case MaleBird.RESPONSE.GIVE_STONE:
-         if (bird == male)
-         {
-            if ((bird.hasObject == OBJECT.STONE) && (female.hasObject == OBJECT.NO_OBJECT))
-            {
-               if ((bird.x == female.x) && (bird.y == female.y))
-               {
-                  female.hasObject = bird.hasObject;
-                  bird.hasObject   = OBJECT.NO_OBJECT;
-               }
-            }
-         }
-         break;
-
-      case FemaleBird.RESPONSE.LAY_EGG:
-         if (bird == female)
-         {
-            if (cell.object == OBJECT.NO_OBJECT)
-            {
-               cell.object = OBJECT.EGG;
-            }
-         }
-         break;
       }
 
       // Digest food.

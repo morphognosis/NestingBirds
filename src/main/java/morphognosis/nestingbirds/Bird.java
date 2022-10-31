@@ -5,6 +5,7 @@
 package morphognosis.nestingbirds;
 
 import java.io.PrintWriter;
+import java.util.Random;
 
 import morphognosis.nestingbirds.NestingBirds.LOCALE;
 import morphognosis.nestingbirds.NestingBirds.OBJECT;
@@ -205,7 +206,16 @@ public class Bird
       writer.print(",");
       writer.print("has_object_no_object,has_object_mouse,has_object_stone");
       writer.print(",");
-      writer.println("response");
+      writer.print("do_nothing,eat,get,put,toss,move,turn_right,turn_left");
+      writer.print(",");
+      if (gender == MALE)
+      {
+         writer.println("give_food,give_stone");
+      }
+      else
+      {
+         writer.println("want_food,want_stone,lay_egg");
+      }
       writer.flush();
    }
 
@@ -337,8 +347,134 @@ public class Bird
       writer.print(",");
 
       // Write response.
-      writer.println(response);
+      if (response < Bird.RESPONSE.NUM_RESPONSES)
+      {
+         switch (response)
+         {
+         case Bird.RESPONSE.DO_NOTHING:
+            if (gender == Bird.MALE)
+            {
+               writer.println("1,0,0,0,0,0,0,0,0,0");
+            }
+            else
+            {
+               writer.println("1,0,0,0,0,0,0,0,0,0,0");
+            }
+            break;
 
+         case Bird.RESPONSE.EAT:
+            if (gender == Bird.MALE)
+            {
+               writer.println("0,1,0,0,0,0,0,0,0,0");
+            }
+            else
+            {
+               writer.println("0,1,0,0,0,0,0,0,0,0,0");
+            }
+            break;
+
+         case Bird.RESPONSE.GET:
+            if (gender == Bird.MALE)
+            {
+               writer.println("0,0,1,0,0,0,0,0,0,0");
+            }
+            else
+            {
+               writer.println("0,0,1,0,0,0,0,0,0,0,0");
+            }
+            break;
+
+         case Bird.RESPONSE.PUT:
+            if (gender == Bird.MALE)
+            {
+               writer.println("0,0,0,1,0,0,0,0,0,0");
+            }
+            else
+            {
+               writer.println("0,0,0,1,0,0,0,0,0,0,0");
+            }
+            break;
+
+         case Bird.RESPONSE.TOSS:
+            if (gender == Bird.MALE)
+            {
+               writer.println("0,0,0,0,1,0,0,0,0,0");
+            }
+            else
+            {
+               writer.println("0,0,0,0,1,0,0,0,0,0,0");
+            }
+            break;
+
+         case Bird.RESPONSE.MOVE:
+            if (gender == Bird.MALE)
+            {
+               writer.println("0,0,0,0,0,1,0,0,0,0");
+            }
+            else
+            {
+               writer.println("0,0,0,0,0,1,0,0,0,0,0");
+            }
+            break;
+
+         case Bird.RESPONSE.TURN_RIGHT:
+            if (gender == Bird.MALE)
+            {
+               writer.println("0,0,0,0,0,0,1,0,0,0");
+            }
+            else
+            {
+               writer.println("0,0,0,0,0,0,1,0,0,0,0");
+            }
+            break;
+
+         case Bird.RESPONSE.TURN_LEFT:
+            if (gender == Bird.MALE)
+            {
+               writer.println("0,0,0,0,0,0,0,1,0,0");
+            }
+            else
+            {
+               writer.println("0,0,0,0,0,0,0,1,0,0,0");
+            }
+            break;
+         }
+      }
+      else
+      {
+         // Gender-specific response.
+         if (gender == Bird.MALE)
+         {
+            switch (response)
+            {
+            case MaleBird.RESPONSE.GIVE_FOOD:
+               writer.println("0,0,0,0,0,0,0,0,1,0");
+               break;
+
+            case MaleBird.RESPONSE.GIVE_STONE:
+               writer.println("0,0,0,0,0,0,0,0,0,1");
+               break;
+            }
+         }
+         else
+         {
+            // Female response.
+            switch (response)
+            {
+            case FemaleBird.RESPONSE.WANT_FOOD:
+               writer.println("0,0,0,0,0,0,0,0,1,0,0");
+               break;
+
+            case FemaleBird.RESPONSE.WANT_STONE:
+               writer.println("0,0,0,0,0,0,0,0,0,1,0");
+               break;
+
+            case FemaleBird.RESPONSE.LAY_EGG:
+               writer.println("0,0,0,0,0,0,0,0,0,0,1");
+               break;
+            }
+         }
+      }
       writer.flush();
    }
 
