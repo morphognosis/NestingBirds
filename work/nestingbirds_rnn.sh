@@ -1,85 +1,102 @@
-# Train RNN with dataset.
-if [ $# -lt 1 ] || [ $# -gt 2 ]
+#!/bin/bash
+# Train RNN with datasets.
+usage="Usage: nestingbirds_rnn.sh -gender \"male or female\" [-num_datasets <number>] [-num_test_datasets <number>]"
+gender=""
+num_datasets=1
+num_test_datasets=0
+while [ "$#" -ne 0 ] ; do 
+    if [ "$1" = "-gender" ] ; then
+      shift
+      gender=$1
+    elif [ "$1" = "-num_datasets" ]
+    then
+      shift
+      num_datasets=$1
+    elif [ "$1" = "-num_test_datasets" ]
+    then
+      shift
+      num_test_datasets=$1
+    elif [ "$1" = "-help" ] || [ "$1" = "-h" ] || [ "$1" = "-?" ]
+    then
+      echo $usage
+      exit 0
+    fi
+    shift
+done
+if [ "$gender" = "" ]
 then
-   echo "Usage: nestingbirds_rnn.sh \"male or female\" [<runs>]"
+   echo $usage
    exit 1
 fi
-doruns=0
-runs=1
-if [ $# -eq 2 ]
+if [ "$gender" != "male" ] && [ "$gender" != "female" ]
 then
-  runs=$2
-  doruns=1
+   echo $usage
+   exit 1
 fi
-for run in $(seq $runs)
+if [ $num_test_datasets -ge "$num_datasets" ]
+then
+   echo "number of datasets (${num_datasets}) must be greater than number of testing datasets (${num_test_datasets}) "
+   exit 1
+fi
+num_train_sequences=$((num_datasets - num_test_datasets))
+sequence_length=""
+X_num_features=""
+y_num_features=""
+> X_train.csv
+> y_train.csv
+first=1
+for dataset_num in $(seq $num_train_sequences)
 do
-  suffix=""
-  if [ $doruns -eq 1 ]
+  suffix=_$((dataset_num - 1))
+  if [ "$gender" = "male" ]
   then
-    suffix=_$((run - 1))
+    cat male_dataset${suffix}.csv | sed 1d | cut -d, -f1-43 >> X_train.csv
+    cat male_dataset${suffix}.csv | sed 1d | cut -d, -f44- >> y_train.csv
+  elif [ "$gender" = "female" ]
+  then
+    cat female_dataset${suffix}.csv | sed 1d | cut -d, -f1-41 >> X_train.csv
+    cat female_dataset${suffix}.csv | sed 1d | cut -d, -f42- >> y_train.csv
   fi
-  if [ "$1" = "male" ]
+  if [ $first = 1 ]
   then
-    cat male_dataset${suffix}.csv | cut -d, -f1-43 > X.csv
-    cat male_dataset${suffix}.csv | cut -d, -f44- > y.csv
-  elif [ "$1" = "female" ]
-  then
-    cat female_dataset${suffix}.csv | cut -d, -f1-41 > X.csv
-    cat female_dataset${suffix}.csv | cut -d, -f42- > y.csv
-  else
-    echo "Usage: nestingbirds_rnn.sh \"male or female\" [<runs>]"
-    exit 1
+    first=0
+    X_num_features=`head -1 X_train.csv | sed -e 's/,//g' | wc -c`
+    X_num_features=$((X_num_features - 1))
+    y_num_features=`head -1 y_train.csv | sed -e 's/,//g' | wc -c`
+    y_num_features=$((y_num_features - 1))
+    sequence_length=`cat X_train.csv | wc -l`
   fi
-  num_steps=`cat X.csv | wc -l`
-  num_steps=$((num_steps - 1))
-  num_features=`head -2 X.csv | tail -1 | sed -e 's/,//g' | wc -c`
-  num_features=$((num_features - 1))
-  echo "X_train_shape = [1,${num_steps},${num_features}]" > nestingbirds_dataset.py
-  echo "X_train_seq = [" >> nestingbirds_dataset.py
-  skip=1
-  count=0
-  while read -r line
-  do
-     if [ $skip -eq 1 ]
-     then
-        skip=0
-     else
-        echo -n $line >> nestingbirds_dataset.py
-        count=$((count + 1))
-        if [ $count -lt $num_steps ]
-        then
-           echo -n "," >> nestingbirds_dataset.py
-        fi
-        echo >> nestingbirds_dataset.py
-     fi
-  done < X.csv
-  echo "]" >> nestingbirds_dataset.py
-  num_steps=`cat y.csv | wc -l`
-  num_steps=$((num_steps - 1))
-  num_features=`head -2 y.csv | tail -1 | sed -e 's/,//g' | wc -c`
-  num_features=$((num_features - 1))
-  echo "y_train_shape = [1,${num_steps},${num_features}]" >> nestingbirds_dataset.py
-  echo "y_train_seq = [" >> nestingbirds_dataset.py
-  skip=1
-  count=0
-  while read -r line
-  do
-     if [ $skip -eq 1 ]
-     then
-        skip=0
-     else
-        echo -n $line >> nestingbirds_dataset.py
-        count=$((count + 1))
-        if [ $count -lt $num_steps ]
-        then
-           echo -n "," >> nestingbirds_dataset.py
-        fi
-        echo >> nestingbirds_dataset.py
-     fi
-  done < y.csv
-  echo "]" >> nestingbirds_dataset.py
-  rm X.csv y.csv
-  python nestingbirds_rnn.py
 done
+echo "X_train_shape = [${num_train_sequences},${sequence_length},${X_num_features}]" > nestingbirds_dataset.py
+echo "X_train_seq = [" >> nestingbirds_dataset.py
+count=0
+num_steps=`cat X_train.csv | wc -l`
+while read -r line
+do
+  echo -n $line >> nestingbirds_dataset.py
+  count=$((count + 1))
+  if [ $count -lt $num_steps ]
+  then
+     echo -n "," >> nestingbirds_dataset.py
+  fi
+  echo >> nestingbirds_dataset.py
+done < X_train.csv
+echo "]" >> nestingbirds_dataset.py
+echo "y_train_shape = [${num_train_sequences},${sequence_length},${y_num_features}]" >> nestingbirds_dataset.py
+echo "y_train_seq = [" >> nestingbirds_dataset.py
+count=0
+while read -r line
+do
+  echo -n $line >> nestingbirds_dataset.py
+  count=$((count + 1))
+  if [ $count -lt $num_steps ]
+  then
+     echo -n "," >> nestingbirds_dataset.py
+  fi
+  echo >> nestingbirds_dataset.py
+done < y_train.csv
+echo "]" >> nestingbirds_dataset.py
+rm X_train.csv y_train.csv
+python nestingbirds_rnn.py
 exit 0
 
