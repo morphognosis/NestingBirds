@@ -52,8 +52,10 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
       "      [-femaleInitialFood <amount> (default=" + FemaleBird.INITIAL_FOOD + ")]\n" +
       "      [-maleFoodDuration <amount> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <amount> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-      "      [-writeMaleDataset [<file name>] (write training/testing dataset csv file, default=" + NestingBirds.MALE_DATASET_FILE_NAME + ")]\n" +
-      "      [-writeFemaleDataset [<file name>] (write training/testing dataset csv file, default=" + NestingBirds.FEMALE_DATASET_FILE_NAME + ")]\n" +
+      "      [-randomizeMaleFoodLevel (food level probabilistically increases 0-" + MaleBird.FOOD_DURATION + " upon eating food)]\n" +
+      "      [-randomizeFemaleFoodLevel (food level probabilistically increases 0-" + FemaleBird.FOOD_DURATION + " upon eating food)]\n" +
+      "      [-writeMaleDataset (write dataset file: " + NestingBirds.MALE_DATASET_FILE_NAME + ".csv)]\n" +
+      "      [-writeFemaleDataset (write dataset file: " + NestingBirds.FEMALE_DATASET_FILE_NAME + ".csv)]\n" +
       "      [-verbose <true | false> (default=false)]\n" +
       "      [-randomSeed <seed> (default=" + NestingBirds.RANDOM_NUMBER_SEED + ")]\n" +
       "      [-version]";
@@ -892,6 +894,16 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
             }
             continue;
          }
+         if (args[i].equals("-randomizeMaleFoodLevel"))
+         {
+            MaleBird.RANDOMIZE_FOOD_LEVEL = true;
+            continue;
+         }
+         if (args[i].equals("-randomizeFemaleFoodLevel"))
+         {
+            FemaleBird.RANDOMIZE_FOOD_LEVEL = true;
+            continue;
+         }
          if (args[i].equals("-randomSeed"))
          {
             i++;
@@ -920,23 +932,9 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
          }
          if (args[i].equals("-writeMaleDataset"))
          {
-            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
-            {
-               i++;
-               if ((args[i] != null) && !args[i].isEmpty())
-               {
-                  NestingBirds.MALE_DATASET_FILE_NAME = args[i];
-               }
-               else
-               {
-                  System.err.println("Invalid writeMaleDataset file name");
-                  System.err.println(Usage);
-                  System.exit(1);
-               }
-            }
             try
             {
-               NestingBirds.MaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(NestingBirds.MALE_DATASET_FILE_NAME)));
+               NestingBirds.MaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(NestingBirds.MALE_DATASET_FILE_NAME + ".csv")));
             }
             catch (IOException e)
             {
@@ -965,7 +963,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
             }
             try
             {
-               NestingBirds.FemaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(NestingBirds.FEMALE_DATASET_FILE_NAME)));
+               NestingBirds.FemaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(NestingBirds.FEMALE_DATASET_FILE_NAME + ".csv")));
             }
             catch (IOException e)
             {

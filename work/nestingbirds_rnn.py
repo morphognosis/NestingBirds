@@ -83,3 +83,16 @@ trainErrorPct=0
 if trainTotal > 0:
     trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
     print(" (", str(round(trainErrorPct, 2)), "%)", sep='')
+original_stdout = sys.stdout
+with open('nestingbirds_rnn_results.txt', 'w') as f:
+    sys.stdout = f
+    print("Train correct paths/total = ", trainOK, "/", X_train_shape[0], sep='', end='')
+    if X_train_shape[0] > 0:
+        r = (float(trainOK) / float(X_train_shape[0])) * 100.0
+        print(" (", str(round(r, 2)), "%)", sep='', end='')
+    print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
+    trainErrorPct=0
+    if trainTotal > 0:
+        trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
+        print(" (", str(round(trainErrorPct, 2)), "%)", sep='')
+    sys.stdout = original_stdout

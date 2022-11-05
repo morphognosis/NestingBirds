@@ -11,11 +11,14 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -470,7 +473,7 @@ public class BirdDashboard extends JFrame
    }
 
    // Food panel.
-   class FoodPanel extends JPanel implements ActionListener
+   class FoodPanel extends JPanel implements ActionListener, ItemListener
    {
       private static final long serialVersionUID = 0L;
 
@@ -478,6 +481,7 @@ public class BirdDashboard extends JFrame
       JButton    foodButton;
       JTextField foodDurationText;
       JButton    foodDurationButton;
+      JCheckBox  randomizeFoodLevelCheckBox;
 
       // Constructor.
       public FoodPanel()
@@ -516,6 +520,9 @@ public class BirdDashboard extends JFrame
          foodDurationButton = new JButton("Set");
          foodDurationButton.addActionListener(this);
          add(foodDurationButton);
+         randomizeFoodLevelCheckBox = new JCheckBox("Randomize food level", false);
+         randomizeFoodLevelCheckBox.addItemListener(this);
+         add(randomizeFoodLevelCheckBox);
       }
 
 
@@ -602,6 +609,23 @@ public class BirdDashboard extends JFrame
                }
             }
             return;
+         }
+      }
+
+
+      @Override
+      public void itemStateChanged(ItemEvent e)
+      {
+         if (e.getSource() == randomizeFoodLevelCheckBox)
+         {
+            if (bird.gender == Bird.MALE)
+            {
+               MaleBird.RANDOMIZE_FOOD_LEVEL = randomizeFoodLevelCheckBox.isSelected();
+            }
+            else
+            {
+               FemaleBird.RANDOMIZE_FOOD_LEVEL = randomizeFoodLevelCheckBox.isSelected();
+            }
          }
       }
    }

@@ -19,25 +19,28 @@ public class NestingBirds
    public static final String VERSION = "2.0";
 
    // Dataset file names.
-   public static String MALE_DATASET_FILE_NAME   = "male_dataset.csv";
-   public static String FEMALE_DATASET_FILE_NAME = "female_dataset.csv";
+   public static String MALE_DATASET_FILE_NAME   = "male_dataset";
+   public static String FEMALE_DATASET_FILE_NAME = "female_dataset";
 
    // Random numbers.
-   public static int RANDOM_NUMBER_SEED = 4517;
-   public Random     randomizer;
+   public static int    RANDOM_NUMBER_SEED = 4517;
+   public static Random Randomizer         = null;
 
    // Usage.
    public static final String Usage =
       "Usage:\n" +
       "    java morphognosis.nestingbirds.NestingBirds\n" +
       "      -steps <steps>\n" +
+      "      [-runs <runs> (default=1)]\n" +
       "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
       "      [-maleInitialFood <amount> (default=" + MaleBird.INITIAL_FOOD + ")]\n" +
       "      [-femaleInitialFood <amount> (default=" + FemaleBird.INITIAL_FOOD + ")]\n" +
       "      [-maleFoodDuration <amount> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
       "      [-femaleFoodDuration <amount> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-      "      [-writeMaleDataset [<file name>] (write training/testing dataset csv file, default=" + MALE_DATASET_FILE_NAME + ")]\n" +
-      "      [-writeFemaleDataset [<file name>] (write training/testing dataset csv file, default=" + FEMALE_DATASET_FILE_NAME + ")]\n" +
+      "      [-randomizeMaleFoodLevel (food level probabilistically increases 0-" + MaleBird.FOOD_DURATION + " upon eating food)]\n" +
+      "      [-randomizeFemaleFoodLevel (food level probabilistically increases 0-" + FemaleBird.FOOD_DURATION + " upon eating food)]\n" +
+      "      [-writeMaleDataset (write dataset file: " + MALE_DATASET_FILE_NAME + "_<run>.csv)]\n" +
+      "      [-writeFemaleDataset (write dataset file: " + FEMALE_DATASET_FILE_NAME + "_<run>.csv)]\n" +
       "      [-verbose <true | false> (default=true)]\n" +
       "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +
       "      [-version]\n" +
@@ -191,7 +194,11 @@ public class NestingBirds
    // Construct.
    public NestingBirds()
    {
-      randomizer = new Random(RANDOM_NUMBER_SEED);
+      // Random numbers.
+      if (Randomizer == null)
+      {
+         Randomizer = new Random(RANDOM_NUMBER_SEED);
+      }
 
       // Initialize world.
       world = new Cell[width][height];
@@ -321,9 +328,16 @@ public class NestingBirds
    // Male autopilot.
    public void maleAutopilot()
    {
-      if (!getFood() && !getStone())
+      if (world[male.x][male.y].object == OBJECT.EGG)
       {
-         returnToFemale();
+         male.response = Bird.RESPONSE.DO_NOTHING;
+      }
+      else
+      {
+         if (!getFood() && !getStone())
+         {
+            returnToFemale();
+         }
       }
    }
 
@@ -415,7 +429,7 @@ public class NestingBirds
                {
                   responses.add(Bird.RESPONSE.TURN_RIGHT);
                }
-               male.response = responses.get(randomizer.nextInt(responses.size()));
+               male.response = responses.get(Randomizer.nextInt(responses.size()));
             }
          }
          else
@@ -434,7 +448,7 @@ public class NestingBirds
             {
                responses.add(Bird.RESPONSE.TURN_RIGHT);
             }
-            male.response = responses.get(randomizer.nextInt(responses.size()));
+            male.response = responses.get(Randomizer.nextInt(responses.size()));
          }
          return(true);
       }
@@ -599,7 +613,7 @@ public class NestingBirds
                {
                   responses.add(Bird.RESPONSE.TURN_RIGHT);
                }
-               male.response = responses.get(randomizer.nextInt(responses.size()));
+               male.response = responses.get(Randomizer.nextInt(responses.size()));
             }
          }
          else
@@ -618,7 +632,7 @@ public class NestingBirds
             {
                responses.add(Bird.RESPONSE.TURN_RIGHT);
             }
-            male.response = responses.get(randomizer.nextInt(responses.size()));
+            male.response = responses.get(Randomizer.nextInt(responses.size()));
          }
          return(true);
       }
@@ -812,6 +826,11 @@ public class NestingBirds
    // Female autopilot.
    public void femaleAutopilot()
    {
+      if (world[female.x][female.y].object == OBJECT.EGG)
+      {
+         female.response = Bird.RESPONSE.DO_NOTHING;
+         return;
+      }
       if (female.food < 0) { female.food = 0; }
       if (female.food == 0)
       {
@@ -1090,11 +1109,25 @@ public class NestingBirds
             {
                if (bird.gender == Bird.MALE)
                {
-                  bird.food = MaleBird.FOOD_DURATION;
+                  if (MaleBird.RANDOMIZE_FOOD_LEVEL && (MaleBird.FOOD_DURATION > 0))
+                  {
+                     bird.food = Randomizer.nextInt(MaleBird.FOOD_DURATION + 1);
+                  }
+                  else
+                  {
+                     bird.food = MaleBird.FOOD_DURATION;
+                  }
                }
                else
                {
-                  bird.food = FemaleBird.FOOD_DURATION;
+                  if (FemaleBird.RANDOMIZE_FOOD_LEVEL && (FemaleBird.FOOD_DURATION > 0))
+                  {
+                     bird.food = Randomizer.nextInt(FemaleBird.FOOD_DURATION + 1);
+                  }
+                  else
+                  {
+                     bird.food = FemaleBird.FOOD_DURATION;
+                  }
                }
                bird.hasObject = OBJECT.NO_OBJECT;
             }
@@ -1122,14 +1155,13 @@ public class NestingBirds
             // Object lands randomly nearby.
             int i = height / 2;
             if (i > width / 2) { i = width / 2; }
-            Random rand = new Random();
             for (int j = 5; j < i; j++)
             {
-               int x = (int)(rand.nextInt() % (long)j);
-               int y = (int)(rand.nextInt() % (long)j);
+               int x = (int)(Randomizer.nextInt() % (long)j);
+               int y = (int)(Randomizer.nextInt() % (long)j);
                if ((x == 0) && (y == 0)) { continue; }
-               if ((rand.nextInt() % 2) == 0) { x = -x; }
-               if ((rand.nextInt() % 2) == 0) { y = -y; }
+               if ((Randomizer.nextInt() % 2) == 0) { x = -x; }
+               if ((Randomizer.nextInt() % 2) == 0) { y = -y; }
                x += bird.x;
                if ((x < 0) || (x >= width)) { continue; }
                y += bird.y;
@@ -1550,9 +1582,6 @@ public class NestingBirds
    // Write datasets.
    public void writeDatasets()
    {
-      // Truncate when egg is laid.
-      if (world[width / 2][height / 2].object == OBJECT.EGG) { return; }
-
       // Write female dataset?
       if (FemaleDatasetWriter != null)
       {
@@ -1580,16 +1609,16 @@ public class NestingBirds
    // Move mice in forest.
    public void stepMice()
    {
-      for (int x = randomizer.nextInt(width), x2 = 0; x2 < width; x = (x + 1) % width, x2++)
+      for (int x = Randomizer.nextInt(width), x2 = 0; x2 < width; x = (x + 1) % width, x2++)
       {
-         for (int y = randomizer.nextInt(height), y2 = 0; y2 < height; y = (y + 1) % height, y2++)
+         for (int y = Randomizer.nextInt(height), y2 = 0; y2 < height; y = (y + 1) % height, y2++)
          {
             if ((world[x][y].object == OBJECT.MOUSE) &&
                 ((male.x != x) || (male.y != y) || (male.response != Bird.RESPONSE.GET)) &&
-                (randomizer.nextDouble() < MOUSE_MOVE_PROBABILITY))
+                (Randomizer.nextDouble() < MOUSE_MOVE_PROBABILITY))
             {
                boolean move = false;
-               for (int i = randomizer.nextInt(4), i2 = 0; i2 < 4 && !move; i = (i + 1) % 4, i2++)
+               for (int i = Randomizer.nextInt(4), i2 = 0; i2 < 4 && !move; i = (i + 1) % 4, i2++)
                {
                   switch (i)
                   {
@@ -1653,7 +1682,10 @@ public class NestingBirds
    // Main.
    public static void main(String[] args)
    {
-      int steps = -1;
+      int     steps              = -1;
+      int     runs               = 1;
+      boolean writeMaleDataset   = false;
+      boolean writeFemaleDataset = false;
 
       for (int i = 0; i < args.length; i++)
       {
@@ -1678,6 +1710,32 @@ public class NestingBirds
             if (steps < 0)
             {
                System.err.println("Invalid steps option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-runs"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid runs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               runs = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid runs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (runs < 0)
+            {
+               System.err.println("Invalid runs option");
                System.err.println(Usage);
                System.exit(1);
             }
@@ -1812,6 +1870,16 @@ public class NestingBirds
             }
             continue;
          }
+         if (args[i].equals("-randomizeMaleFoodLevel"))
+         {
+            MaleBird.RANDOMIZE_FOOD_LEVEL = true;
+            continue;
+         }
+         if (args[i].equals("-randomizeFemaleFoodLevel"))
+         {
+            FemaleBird.RANDOMIZE_FOOD_LEVEL = true;
+            continue;
+         }
          if (args[i].equals("-randomSeed"))
          {
             i++;
@@ -1840,60 +1908,12 @@ public class NestingBirds
          }
          if (args[i].equals("-writeMaleDataset"))
          {
-            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
-            {
-               i++;
-               if ((args[i] != null) && !args[i].isEmpty())
-               {
-                  MALE_DATASET_FILE_NAME = args[i];
-               }
-               else
-               {
-                  System.err.println("Invalid writeMaleDataset file name");
-                  System.err.println(Usage);
-                  System.exit(1);
-               }
-            }
-            try
-            {
-               MaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(MALE_DATASET_FILE_NAME)));
-            }
-            catch (IOException e)
-            {
-               System.err.println("Cannot open male dataset file: " + e.getMessage());
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            Bird.writeDatasetHeader(MaleDatasetWriter, Bird.MALE);
+            writeMaleDataset = true;
             continue;
          }
          if (args[i].equals("-writeFemaleDataset"))
          {
-            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
-            {
-               i++;
-               if ((args[i] != null) && !args[i].isEmpty())
-               {
-                  FEMALE_DATASET_FILE_NAME = args[i];
-               }
-               else
-               {
-                  System.err.println("Invalid writeFemaleDataset file name");
-                  System.err.println(Usage);
-                  System.exit(1);
-               }
-            }
-            try
-            {
-               FemaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(FEMALE_DATASET_FILE_NAME)));
-            }
-            catch (IOException e)
-            {
-               System.err.println("Cannot open female dataset file: " + e.getMessage());
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            Bird.writeDatasetHeader(FemaleDatasetWriter, Bird.FEMALE);
+            writeFemaleDataset = true;
             continue;
          }
          if (args[i].equals("-verbose"))
@@ -1952,11 +1972,93 @@ public class NestingBirds
          System.exit(1);
       }
 
-      NestingBirds nestingbirds = new NestingBirds();
-      for (int i = 0; i < steps; i++)
+      // Run birds.
+      for (int run = 0; run < runs; run++)
       {
-         System.out.println("Step=" + i);
-         nestingbirds.step();
+         if (writeMaleDataset)
+         {
+            try
+            {
+               MaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(MALE_DATASET_FILE_NAME + "_" + run + ".csv")));
+            }
+            catch (IOException e)
+            {
+               System.err.println("Cannot open male dataset file: " + e.getMessage());
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            Bird.writeDatasetHeader(MaleDatasetWriter, Bird.MALE);
+         }
+
+         if (writeFemaleDataset)
+         {
+            try
+            {
+               FemaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(FEMALE_DATASET_FILE_NAME + "_" + run + ".csv")));
+            }
+            catch (IOException e)
+            {
+               System.err.println("Cannot open female dataset file: " + e.getMessage());
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            Bird.writeDatasetHeader(FemaleDatasetWriter, Bird.FEMALE);
+         }
+
+         if (Verbose) { System.out.println("Run=" + run); }
+         NestingBirds nestingbirds = new NestingBirds();
+         int          eggLaidStep  = -1;
+         for (int step = 0; step < steps; step++)
+         {
+            if (Verbose) { System.out.println("Step=" + step); }
+            nestingbirds.step();
+            if ((eggLaidStep < 0) && (nestingbirds.world[width / 2][height / 2].object == OBJECT.EGG))
+            {
+               eggLaidStep = step;
+            }
+         }
+
+         if (Verbose)
+         {
+            System.out.print("Run results: ");
+            if (eggLaidStep >= 0)
+            {
+               System.out.print("egg laid at step " + eggLaidStep);
+            }
+            else
+            {
+               System.out.print("no egg");
+            }
+            int mouseCount = 0;
+            int stoneCount = 0;
+            for (int x = 0; x < width; x++)
+            {
+               for (int y = 0; y < height; y++)
+               {
+                  if ((nestingbirds.world[x][y].locale == LOCALE.FOREST) &&
+                      (nestingbirds.world[x][y].object == OBJECT.MOUSE))
+                  {
+                     mouseCount++;
+                  }
+                  if ((nestingbirds.world[x][y].locale == LOCALE.DESERT) &&
+                      (nestingbirds.world[x][y].object == OBJECT.STONE))
+                  {
+                     stoneCount++;
+                  }
+               }
+            }
+            System.out.println(", remaining mice=" + mouseCount + ", remaining stones=" + stoneCount);
+         }
+
+         if (writeMaleDataset)
+         {
+            MaleDatasetWriter.close();
+         }
+
+         if (writeFemaleDataset)
+         {
+            FemaleDatasetWriter.close();
+         }
       }
    }
 }

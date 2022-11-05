@@ -36,8 +36,9 @@ public class FemaleBird extends Bird
    };
 
    // Food.
-   public static int FOOD_DURATION = 200;
-   public static int INITIAL_FOOD  = 0;
+   public static int     FOOD_DURATION        = 200;
+   public static int     INITIAL_FOOD         = 200;
+   public static boolean RANDOMIZE_FOOD_LEVEL = false;
 
    // Constructor.
    public FemaleBird()
