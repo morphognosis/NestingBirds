@@ -1,5 +1,5 @@
 #!/bin/bash
-# Train RNN with datasets.
+# Train and test RNN with datasets.
 usage="Usage: nestingbirds_rnn.sh -gender <\"male or female\"> [-num_datasets <number>] [-num_test_datasets <number>]"
 gender=""
 num_datasets=1
