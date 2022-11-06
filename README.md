@@ -18,7 +18,7 @@ Build with Eclipse project and export to bin/nestingbirds.jar to run with script
 Nesting birds environment:
 <br>To build: build_nestingbirds.bat, build_nestingbirds.sh
 <br>To run: run_nestingbirds.bat, run_nestingbirds.sh
-<br>To create 3 dataset files (\<gender\>_dataset_\<run\>.csv) example:
+<br>To create 3 dataset files (\<gender\>\_dataset\_\<run\>.csv) example:
 <pre>run_nestingbirds_batch.sh -steps 1000 -runs 3 -writeMaleDataset -writeFemaleDataset</pre>
 <br>To train and test RNN with 3 datasets (2 training and 1 testing) example:
 <pre>nestingbirds_rnn.sh -gender male -num_datasets 3 -num_test_datasets 1</pre>
