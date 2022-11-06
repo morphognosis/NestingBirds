@@ -1,4 +1,5 @@
 # Nesting birds RNN.
+# results written to nestingbirds_rnn_results.txt
 from numpy import array, argmax
 from keras.models import Sequential
 from keras.layers import Dense
@@ -31,15 +32,13 @@ seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1], y_train_shape[2])
-print('X train:\n', X)
-print('y:\n', y)
 
 # create LSTM
 model = Sequential()
 model.add(LSTM(n_neurons, input_shape=(X_train_shape[1], X_train_shape[2]), return_sequences=True))
 model.add(TimeDistributed(Dense(y_train_shape[2])))
 model.compile(loss='mean_squared_error', optimizer='adam')
-print(model.summary())
+#print(model.summary())
 
 # train
 model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=2)
@@ -74,6 +73,38 @@ for path in range(X_train_shape[0]):
         trainErrors += errs
     trainTotal += len(p)
 
+# predict
+from nestingbirds_dataset import X_test_shape, X_test_seq, y_test_shape, y_test_seq
+seq = array(X_test_seq)
+X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
+seq = array(y_test_seq)
+y = seq.reshape(y_test_shape[0], y_test_shape[1], y_test_shape[2])
+predictions = model.predict(X, batch_size=X_test_shape[0], verbose=2)
+testOK = 0
+testErrors = 0
+testTotal = 0
+for path in range(X_test_shape[0]):
+    p = []
+    for step in range(X_test_shape[1]):
+        if not all([ v == 0 for v in y[path][step]]):
+            r = argmax(predictions[path][step])
+            p.append(r)
+    t = []
+    for step in range(X_test_shape[1]):
+        if not all([ v == 0 for v in y[path][step]]):
+            r = argmax(y[path][step])
+            t.append(r)
+    if p == t:
+        testOK += 1
+    else:
+        errs = 0
+        for i in range(len(p)):
+            if p[i] != t[i]:
+                errs += 1
+        testErrors += errs
+    testTotal += len(p)
+
+# results to nestingbirds_rnn_results.txt
 print("Train correct paths/total = ", trainOK, "/", X_train_shape[0], sep='', end='')
 if X_train_shape[0] > 0:
     r = (float(trainOK) / float(X_train_shape[0])) * 100.0
@@ -83,6 +114,19 @@ trainErrorPct=0
 if trainTotal > 0:
     trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
     print(" (", str(round(trainErrorPct, 2)), "%)", sep='')
+else:
+    print('')
+print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
+if X_test_shape[0] > 0:
+    r = (float(testOK) / float(X_test_shape[0])) * 100.0
+    print(" (", str(round(r, 2)), "%)", sep='', end='')
+print(", prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
+testErrorPct=0
+if testTotal > 0:
+    testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
+    print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
+else:
+    print('')
 original_stdout = sys.stdout
 with open('nestingbirds_rnn_results.txt', 'w') as f:
     sys.stdout = f
@@ -95,4 +139,17 @@ with open('nestingbirds_rnn_results.txt', 'w') as f:
     if trainTotal > 0:
         trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
         print(" (", str(round(trainErrorPct, 2)), "%)", sep='')
-    sys.stdout = original_stdout
+    else:
+        print('')
+    print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
+    if X_test_shape[0] > 0:
+        r = (float(testOK) / float(X_test_shape[0])) * 100.0
+        print(" (", str(round(r, 2)), "%)", sep='', end='')
+    print(", prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
+    testErrorPct=0
+    if testTotal > 0:
+        testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
+        print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
+    else:
+        print('')
+sys.stdout = original_stdout

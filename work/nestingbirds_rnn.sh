@@ -1,6 +1,6 @@
 #!/bin/bash
 # Train RNN with datasets.
-usage="Usage: nestingbirds_rnn.sh -gender \"male or female\" [-num_datasets <number>] [-num_test_datasets <number>]"
+usage="Usage: nestingbirds_rnn.sh -gender <\"male or female\"> [-num_datasets <number>] [-num_test_datasets <number>]"
 gender=""
 num_datasets=1
 num_test_datasets=0
@@ -38,6 +38,8 @@ then
    echo "number of datasets (${num_datasets}) must be greater than number of testing datasets (${num_test_datasets}) "
    exit 1
 fi
+
+# Prepare training set.
 num_train_sequences=$((num_datasets - num_test_datasets))
 sequence_length=""
 X_num_features=""
@@ -97,6 +99,61 @@ do
 done < y_train.csv
 echo "]" >> nestingbirds_dataset.py
 rm X_train.csv y_train.csv
+
+# Prepare test set.
+> X_test.csv
+> y_test.csv
+first=1
+for dataset_num in $(seq $num_test_datasets)
+do
+  suffix=_$((dataset_num + $num_train_sequences - 1))
+  if [ "$gender" = "male" ]
+  then
+    cat male_dataset${suffix}.csv | sed 1d | cut -d, -f1-43 >> X_test.csv
+    cat male_dataset${suffix}.csv | sed 1d | cut -d, -f44- >> y_test.csv
+  elif [ "$gender" = "female" ]
+  then
+    cat female_dataset${suffix}.csv | sed 1d | cut -d, -f1-41 >> X_test.csv
+    cat female_dataset${suffix}.csv | sed 1d | cut -d, -f42- >> y_test.csv
+  fi
+  if [ $first = 1 ]
+  then
+    first=0
+    sequence_length=`cat X_test.csv | wc -l`
+  fi
+done
+echo "X_test_shape = [${num_test_datasets},${sequence_length},${X_num_features}]" >> nestingbirds_dataset.py
+echo "X_test_seq = [" >> nestingbirds_dataset.py
+count=0
+num_steps=`cat X_test.csv | wc -l`
+while read -r line
+do
+  echo -n $line >> nestingbirds_dataset.py
+  count=$((count + 1))
+  if [ $count -lt $num_steps ]
+  then
+     echo -n "," >> nestingbirds_dataset.py
+  fi
+  echo >> nestingbirds_dataset.py
+done < X_test.csv
+echo "]" >> nestingbirds_dataset.py
+echo "y_test_shape = [${num_test_datasets},${sequence_length},${y_num_features}]" >> nestingbirds_dataset.py
+echo "y_test_seq = [" >> nestingbirds_dataset.py
+count=0
+while read -r line
+do
+  echo -n $line >> nestingbirds_dataset.py
+  count=$((count + 1))
+  if [ $count -lt $num_steps ]
+  then
+     echo -n "," >> nestingbirds_dataset.py
+  fi
+  echo >> nestingbirds_dataset.py
+done < y_test.csv
+echo "]" >> nestingbirds_dataset.py
+rm X_test.csv y_test.csv
+
+# Run RNN.
 python nestingbirds_rnn.py
 exit 0
 

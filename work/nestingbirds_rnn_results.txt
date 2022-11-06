@@ -1,1 +1,2 @@
-Train correct paths/total = 0/2 (0.0%), prediction errors/total = 4/1800 (0.22%)
+Train correct paths/total = 0/2 (0.0%), prediction errors/total = 5/1400 (0.36%)
+Test correct paths/total = 0/1 (0.0%), prediction errors/total = 142/700 (20.29%)
