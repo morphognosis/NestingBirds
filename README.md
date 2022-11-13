@@ -15,7 +15,7 @@ See:
 
 Import Eclipse project, build and run with scripts in the work directory.
 
-Build:
+Build nestingbirds.jar in bin directory:
 <pre>build_nestingbirds.bat, build_nestingbirds.sh</pre>
 
 Run graphical interface:
