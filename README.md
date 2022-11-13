@@ -16,11 +16,11 @@ See:
 Import Eclipse project, build and run with scripts in the work directory.
 
 Build nestingbirds.jar in bin directory:
-<pre>build_nestingbirds.bat, build_nestingbirds.sh</pre>
+<pre>build_nestingbirds.sh, build_nestingbirds.bat</pre>
 
 Run graphical interface:
 <pre>
-run_nestingbirds.bat, run_nestingbirds.sh
+run_nestingbirds.sh, run_nestingbirds.bat
 
 Usage:
     java morphognosis.nestingbirds.NestingBirdsDisplay
@@ -40,7 +40,7 @@ Usage:
 </pre>
 Run batch interface:
 <pre>
-run_nestingbirds_batch.bat, run_nestingbirds_batch.sh
+run_nestingbirds_batch.sh, run_nestingbirds_batch.bat
 
 Usage:
     java morphognosis.nestingbirds.NestingBirds
