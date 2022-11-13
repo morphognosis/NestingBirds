@@ -13,10 +13,15 @@ See:
 <br>http://tom.portegys.com/research.html#nestingbirds
 <br>http://tom.portegys.com/research.html#mona2
 
-Build with Eclipse project and export to bin/nestingbirds.jar to run with scripts in the work directory.
+Import Eclipse project, build and run with scripts in the work directory.
 
-Graphical interface:
+Build:
+<pre>build_nestingbirds.bat, build_nestingbirds.sh</pre>
+
+Run graphical interface:
 <pre>
+run_nestingbirds.bat, run_nestingbirds.sh
+
 Usage:
     java morphognosis.nestingbirds.NestingBirdsDisplay
       [-steps <steps> (default=single step)]
@@ -33,8 +38,10 @@ Usage:
       [-randomSeed <seed> (default=4517)]
       [-version]
 </pre>
-Batch interface:
+Run batch interface:
 <pre>
+run_nestingbirds_batch.bat, run_nestingbirds_batch.sh
+
 Usage:
     java morphognosis.nestingbirds.NestingBirds
       -steps <steps>
@@ -56,12 +63,8 @@ Exit codes:
   1=error
 </pre>
 
-Nesting birds environment:
-<br>To build: 
-<pre>build_nestingbirds.bat, build_nestingbirds.sh</pre>
-<br>To run: 
-<pre>run_nestingbirds.bat, run_nestingbirds.sh</pre>
-<br>To create 3 dataset files (\<gender\>\_dataset\_\<run\>.csv) example:
+To create 3 dataset files (\<gender\>\_dataset\_\<run\>.csv) example:
 <pre>run_nestingbirds_batch.sh -steps 1000 -runs 3 -writeMaleDataset -writeFemaleDataset</pre>
-<br>To train and test RNN with 3 datasets (2 training and 1 testing) example:
+
+To train and test RNN with 3 datasets (2 training and 1 testing) example:
 <pre>nestingbirds_rnn.sh -gender male -num_datasets 3 -num_test_datasets 1</pre>
