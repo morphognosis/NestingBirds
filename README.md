@@ -9,6 +9,8 @@ female. In addition, the male must fetch stones from a nearby desert for the fem
 The game is complete when the nest is built and an egg is laid in it. The game can be run in three modes: manual
 (user-supplied responses), "auto pilot" (self-playing), and using the bird's brain (supplied by a player).
 
+Some preliminary results are included using an LSTM (Long-short term memory) recurrent network.
+
 See: 
 <br>http://tom.portegys.com/research.html#nestingbirds
 <br>http://tom.portegys.com/research.html#mona2
