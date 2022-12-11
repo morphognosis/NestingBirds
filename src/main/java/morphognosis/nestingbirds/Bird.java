@@ -1,4 +1,4 @@
-// For conditions of distribution and use, see copyright notice in Morphognosis.java
+// For conditions of distribution and use, see copyright notice in LICENSE.txt
 
 // Nesting bird.
 
