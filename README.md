@@ -68,5 +68,8 @@ Exit codes:
 To create 3 dataset files (\<gender\>\_dataset\_\<run\>.csv) example:
 <pre>run_nestingbirds_batch.sh -steps 1000 -runs 3 -writeMaleDataset -writeFemaleDataset</pre>
 
+To train and test Morphognosis NN with 3 datasets (2 training and 1 testing) example:
+<pre>nestingbirds_nn.sh -gender male -num_datasets 3 -num_test_datasets 1</pre>
+
 To train and test RNN with 3 datasets (2 training and 1 testing) example:
 <pre>nestingbirds_rnn.sh -gender male -num_datasets 3 -num_test_datasets 1</pre>

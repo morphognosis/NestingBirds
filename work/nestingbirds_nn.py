@@ -11,7 +11,7 @@ n_neurons = 128
 n_epochs = 500
 
 # results file name
-results_filename = 'nestingbirds_nn_results.txt'
+results_filename = 'nestingbirds_nn_results.json'
 
 # get options
 try:
@@ -32,7 +32,7 @@ for opt, arg in opts:
      sys.exit(1)
 
 # import dataset
-from nestingbirds_dataset import X_train_shape, y_train_shape, X_train, y_train, X_test_shape, y_test_shape, X_test, y_test
+from nestingbirds_nn_dataset import X_train_shape, y_train_shape, X_train, y_train, X_test_shape, y_test_shape, X_test, y_test
 if X_train_shape[0] == 0:
     print('Empty train dataset')
     sys.exit(1)
@@ -81,16 +81,17 @@ seq = array(X_test)
 X = seq.reshape(X_test_shape[0], X_test_shape[1])
 seq = array(y_test)
 y = seq.reshape(y_test_shape[0], y_test_shape[1])
-predictions = model.predict(X, batch_size=X_test_shape[0], verbose=2)
 testErrors = 0
 testTotal = 0
-for response in range(y_test_shape[0]):
-    if not all([ v == 0 for v in y[response]]):
-        p = argmax(predictions[response])
-        t = argmax(y[response])
-        if p != t:
-            testErrors += 1
-        testTotal += 1
+if X_test_shape[0] > 0:
+    predictions = model.predict(X, batch_size=X_test_shape[0], verbose=2)
+    for response in range(y_test_shape[0]):
+        if not all([ v == 0 for v in y[response]]):
+            p = argmax(predictions[response])
+            t = argmax(y[response])
+            if p != t:
+                testErrors += 1
+            testTotal += 1
 
 # Print results.
 print("Train prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')

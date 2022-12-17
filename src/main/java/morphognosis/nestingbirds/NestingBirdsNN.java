@@ -4,17 +4,20 @@
 
 package morphognosis.nestingbirds;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class NestingBirdsNN
 {
@@ -25,6 +28,8 @@ public class NestingBirdsNN
    // Import: <gender>_dataset_<run number>.csv
    // Export:
    public static String NN_DATASET_FILENAME = "nestingbirds_nn_dataset.py";
+   public static String NN_FILENAME         = "nestingbirds_nn.py";
+   public static String NN_RESULTS_FILENAME = "nestingbirds_nn_results.json";
 
    // Number of datasets.
    public static int NUM_DATASETS      = 1;
@@ -38,12 +43,13 @@ public class NestingBirdsNN
    public int sensorSize   = -1;
    public int responseSize = -1;
 
-   // Event dilation.
-   public static final int NO_DILATION         = 0;
-   public static final int OVERLAY_DILATION    = 1;
-   public static final int ACCUMULATE_DILATION = 2;
-   public static final int NORMALIZE_DILATION  = 3;
-   public static int       DILATE_EVENTS       = NO_DILATION;
+   // Event aggregation.
+   public static final int NO_AGGREGATION         = 0;
+   public static final int MEAN_AGGREGATION       = 1;
+   public static final int ROUND_AGGREGATION      = 2;
+   public static final int ACCUMULATE_AGGREGATION = 3;
+   public static final int NORMALIZE_AGGREGATION  = 4;
+   public static int       AGGREGATE_EVENTS       = NO_AGGREGATION;
 
    // Context length of sensory-response events.
    // e.g. 10 means that the NN can sense and respond to a sequence of 10 events.
@@ -63,6 +69,10 @@ public class NestingBirdsNN
    public int   numIntervals;
    public int[] intervalMap;
 
+   // Network parameters.
+   public static int NUM_NEURONS = 128;
+   public static int NUM_EPOCHS  = 500;
+
    // Random numbers.
    public static int RANDOM_SEED = 4517;
    public Random     randomizer  = null;
@@ -75,9 +85,11 @@ public class NestingBirdsNN
       "        [-numDatasets <number> (default=" + NUM_DATASETS + ")]\n" +
       "        [-numTestDatasets <number> (default=" + NUM_TEST_DATASETS + ")]\n" +
       "        [-contextLength <length> (sensory-response event sequence length, default=" + CONTEXT_LENGTH + ")]\n" +
-      "        [-dilateEvents <\"overlay\" | \"accumulate\" | \"normalize\"> (stretch events over time)\n" +
+      "        [-aggregateEvents <\"mean\" | \"round\" | \"accumulate\" | \"normalize\"> (aggregate events over time, default=no aggregation)\n" +
       "            [-consolidateIntervals <multiplier> (consolidate time interval spans, default=" + INTERVAL_SPAN_MULTIPLIER + ")]\n" +
       "            [-skewIntervals <skew> (skew interval spans into past, larger intervals contain more events, default=" + INTERVAL_SPAN_SKEW + ")]]\n" +
+      "        [-numNeurons <number> (default=" + NUM_NEURONS + ")]\n" +
+      "        [-numEpochs <number> (default=" + NUM_EPOCHS + ")]\n" +
       "        [-randomSeed <seed> (default=" + RANDOM_SEED + ")]\n" +
       "Exit codes:\n" +
       "  0=success\n" +
@@ -86,7 +98,7 @@ public class NestingBirdsNN
    // Main.
    public static void main(String[] args)
    {
-      boolean gotDilate      = false;
+      boolean gotAggregate   = false;
       boolean gotConsolidate = false;
       boolean gotSkew        = false;
 
@@ -195,34 +207,38 @@ public class NestingBirdsNN
             }
             continue;
          }
-         if (args[i].equals("-dilateEvents"))
+         if (args[i].equals("-aggregateEvents"))
          {
             i++;
             if (i >= args.length)
             {
-               System.err.println("Invalid dilateEvents option");
+               System.err.println("Invalid aggregateEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (args[i].equals("overlay"))
+            if (args[i].equals("mean"))
             {
-               DILATE_EVENTS = OVERLAY_DILATION;
+               AGGREGATE_EVENTS = MEAN_AGGREGATION;
+            }
+            else if (args[i].equals("round"))
+            {
+               AGGREGATE_EVENTS = ROUND_AGGREGATION;
             }
             else if (args[i].equals("accumulate"))
             {
-               DILATE_EVENTS = ACCUMULATE_DILATION;
+               AGGREGATE_EVENTS = ACCUMULATE_AGGREGATION;
             }
             else if (args[i].equals("normalize"))
             {
-               DILATE_EVENTS = NORMALIZE_DILATION;
+               AGGREGATE_EVENTS = NORMALIZE_AGGREGATION;
             }
             else
             {
-               System.err.println("Invalid dilateEvents option");
+               System.err.println("Invalid aggregateEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
-            gotDilate = true;
+            gotAggregate = true;
             continue;
          }
          if (args[i].equals("-consolidateIntervals"))
@@ -279,6 +295,58 @@ public class NestingBirdsNN
             gotSkew = true;
             continue;
          }
+         if (args[i].equals("-numNeurons"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid numNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               NUM_NEURONS = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid numNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (NUM_NEURONS < 0)
+            {
+               System.err.println("Invalid numNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-numEpochs"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid numEpochs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               NUM_EPOCHS = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid numEpochs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (NUM_EPOCHS < 0)
+            {
+               System.err.println("Invalid numEpochs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
          if (args[i].equals("-randomSeed"))
          {
             i++;
@@ -321,15 +389,15 @@ public class NestingBirdsNN
          System.err.println(Usage);
          System.exit(1);
       }
-      if (gotConsolidate && (!gotDilate || (DILATE_EVENTS == NO_DILATION)))
+      if (gotConsolidate && (!gotAggregate || (AGGREGATE_EVENTS == NO_AGGREGATION)))
       {
-         System.err.println("Incompatible dilateEvents and consolidateIntervals options");
+         System.err.println("Incompatible aggregateEvents and consolidateIntervals options");
          System.err.println(Usage);
          System.exit(1);
       }
-      if (gotSkew && (!gotDilate || (DILATE_EVENTS == NO_DILATION)))
+      if (gotSkew && (!gotAggregate || (AGGREGATE_EVENTS == NO_AGGREGATION)))
       {
-         System.err.println("Incompatible dilateEvents and skewIntervals options");
+         System.err.println("Incompatible aggregateEvents and skewIntervals options");
          System.err.println(Usage);
          System.exit(1);
       }
@@ -428,8 +496,8 @@ public class NestingBirdsNN
                   }
                   else
                   {
-                     testSensors.get(i).add(sensors);
-                     testResponses.get(i).add(responses);
+                     testSensors.get(i - numTrain).add(sensors);
+                     testResponses.get(i - numTrain).add(responses);
                   }
                }
             }
@@ -456,10 +524,10 @@ public class NestingBirdsNN
          {
             numTrain += trainSensors.get(i).size();
          }
+         mapIntervals();
          printWriter.println("X_train_shape = [ " + numTrain + ", " + (numIntervals * sensorSize) + " ]");
          printWriter.print("X_train = [ ");
          String X_train = "";
-         mapIntervals();
          for (int i = 0; i < trainSensors.size(); i++)
          {
             ArrayList<int[]> sequence = trainSensors.get(i);
@@ -479,7 +547,7 @@ public class NestingBirdsNN
                {
                   intervalSequence.get(intervalMap[k]).add(reverseSequence.get(k));
                }
-               X_train += multiHot(intervalSequence);
+               X_train += encodeInterval(intervalSequence);
             }
          }
          if (X_train.endsWith(","))
@@ -507,6 +575,61 @@ public class NestingBirdsNN
             y_train = y_train.substring(0, y_train.length() - 1);
          }
          printWriter.println(y_train + " ]");
+         int numTest = 0;
+         for (int i = 0; i < testSensors.size(); i++)
+         {
+            numTest += testSensors.get(i).size();
+         }
+         printWriter.println("X_test_shape = [ " + numTest + ", " + (numIntervals * sensorSize) + " ]");
+         printWriter.print("X_test = [ ");
+         String X_test = "";
+         for (int i = 0; i < testSensors.size(); i++)
+         {
+            ArrayList<int[]> sequence = testSensors.get(i);
+            for (int j = 0; j < sequence.size(); j++)
+            {
+               ArrayList<int[]> reverseSequence = new ArrayList<int[]>();
+               for (int k = j; (j - k) < CONTEXT_LENGTH && k >= 0; k--)
+               {
+                  reverseSequence.add(sequence.get(k));
+               }
+               ArrayList < ArrayList < int[] >> intervalSequence = new ArrayList < ArrayList < int[] >> ();
+               for (int k = 0; k < numIntervals; k++)
+               {
+                  intervalSequence.add(new ArrayList<int[]>());
+               }
+               for (int k = 0; k < reverseSequence.size(); k++)
+               {
+                  intervalSequence.get(intervalMap[k]).add(reverseSequence.get(k));
+               }
+               X_test += encodeInterval(intervalSequence);
+            }
+         }
+         if (X_test.endsWith(","))
+         {
+            X_test = X_test.substring(0, X_test.length() - 1);
+         }
+         printWriter.println(X_test + " ]");
+         printWriter.println("y_test_shape = [ " + numTest + ", " + responseSize + " ]");
+         printWriter.print("y_test = [ ");
+         String y_test = "";
+         for (int i = 0; i < testResponses.size(); i++)
+         {
+            ArrayList<int[]> sequence = testResponses.get(i);
+            for (int j = 0; j < sequence.size(); j++)
+            {
+               int[] response = sequence.get(j);
+               for (int k = 0; k < responseSize; k++)
+               {
+                  y_test += response[k] + ",";
+               }
+            }
+         }
+         if (y_test.endsWith(","))
+         {
+            y_test = y_test.substring(0, y_test.length() - 1);
+         }
+         printWriter.println(y_test + " ]");
          printWriter.close();
       }
       catch (IOException e)
@@ -517,17 +640,19 @@ public class NestingBirdsNN
    }
 
 
-   // Multi-hot coding of sensors.
-   public String multiHot(ArrayList < ArrayList < int[] >> intervalSequence)
+   // Encode interval.
+   public String encodeInterval(ArrayList < ArrayList < int[] >> intervalSequence)
    {
       String code = "";
 
       for (int i = 0; i < numIntervals; i++)
       {
          float[] sensorValues = new float[sensorSize];
+         int[] counts         = new int[sensorSize];
          for (int j = 0; j < sensorSize; j++)
          {
             sensorValues[j] = 0.0f;
+            counts[j]       = 0;
          }
          ArrayList<int[]> sensorList = intervalSequence.get(i);
          for (int j = 0; j < sensorList.size(); j++)
@@ -536,24 +661,32 @@ public class NestingBirdsNN
             for (int k = 0; k < sensorSize; k++)
             {
                sensorValues[k] += (float)sensors[k];
+               counts[k]++;
             }
          }
          float accum = 0.0f;
          for (int j = 0; j < sensorSize; j++)
          {
-            if (DILATE_EVENTS == OVERLAY_DILATION)
+            if (AGGREGATE_EVENTS == MEAN_AGGREGATION)
             {
-               if (sensorValues[i] > 1.0f)
+               if (counts[j] > 0)
                {
-                  sensorValues[i] = 1.0f;
+                  sensorValues[j] /= (float)counts[j];
                }
             }
-            else if (DILATE_EVENTS == NORMALIZE_DILATION)
+            else if (AGGREGATE_EVENTS == ROUND_AGGREGATION)
+            {
+               if (sensorValues[j] > 1.0f)
+               {
+                  sensorValues[j] = 1.0f;
+               }
+            }
+            else if (AGGREGATE_EVENTS == NORMALIZE_AGGREGATION)
             {
                accum += sensorValues[j];
             }
          }
-         if ((DILATE_EVENTS == NORMALIZE_DILATION) && (accum > 0.0f))
+         if ((AGGREGATE_EVENTS == NORMALIZE_AGGREGATION) && (accum > 0.0f))
          {
             for (int j = 0; j < sensorSize; j++)
             {
@@ -572,6 +705,113 @@ public class NestingBirdsNN
    // Run NN.
    public void run()
    {
+      // Make prediction.
+      try
+      {
+         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(NN_FILENAME);
+         if (in == null)
+         {
+            System.err.println("Cannot access " + NN_FILENAME);
+            System.exit(1);
+         }
+         File             pythonScript = new File(NN_FILENAME);
+         FileOutputStream out          = new FileOutputStream(pythonScript);
+         byte[] buffer = new byte[1024];
+         int bytesRead;
+         while ((bytesRead = in.read(buffer)) != -1)
+         {
+            out.write(buffer, 0, bytesRead);
+         }
+         out.close();
+      }
+      catch (Exception e)
+      {
+         System.err.println("Cannot create " + NN_FILENAME);
+         System.exit(1);
+      }
+      new File(NN_RESULTS_FILENAME).delete();
+      ProcessBuilder processBuilder = new ProcessBuilder("python", NN_FILENAME,
+                                                         "--neurons", (NUM_NEURONS + ""),
+                                                         "--epochs", (NUM_EPOCHS + "")
+                                                         );
+      processBuilder.inheritIO();
+      Process process;
+      try
+      {
+         process = processBuilder.start();
+         process.waitFor();
+      }
+      catch (InterruptedException e) {}
+      catch (IOException e)
+      {
+         System.err.println("Cannot run " + NN_FILENAME + ":" + e.getMessage());
+         System.exit(1);
+      }
+
+      // Fetch the results.
+      try
+      {
+         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(NN_RESULTS_FILENAME)));
+         String         json;
+         if ((json = br.readLine()) != null)
+         {
+            JSONObject jObj = null;
+            try
+            {
+               jObj = new JSONObject(json);
+            }
+            catch (JSONException e)
+            {
+               System.err.println("Error parsing results file " + NN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            String train_prediction_errors = jObj.getString("train_prediction_errors");
+            if ((train_prediction_errors == null) || train_prediction_errors.isEmpty())
+            {
+               System.err.println("Error parsing results file " + NN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            String train_total_predictions = jObj.getString("train_total_predictions");
+            if ((train_total_predictions == null) || train_total_predictions.isEmpty())
+            {
+               System.err.println("Error parsing results file " + NN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            String train_error_pct = jObj.getString("train_error_pct");
+            if ((train_error_pct == null) || train_error_pct.isEmpty())
+            {
+               System.err.println("Error parsing results file " + NN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            String test_prediction_errors = jObj.getString("test_prediction_errors");
+            if ((test_prediction_errors == null) || test_prediction_errors.isEmpty())
+            {
+               System.err.println("Error parsing results file " + NN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            String test_total_predictions = jObj.getString("test_total_predictions");
+            if ((test_total_predictions == null) || test_total_predictions.isEmpty())
+            {
+               System.err.println("Error parsing results file " + NN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            String test_error_pct = jObj.getString("test_error_pct");
+            if ((test_error_pct == null) || test_error_pct.isEmpty())
+            {
+               System.err.println("Error parsing results file " + NN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+         }
+         else
+         {
+            System.err.println("Cannot read results file " + NN_RESULTS_FILENAME);
+         }
+         br.close();
+      }
+      catch (Exception e)
+      {
+         System.err.println("Cannot read results file " + NN_RESULTS_FILENAME + ":" + e.getMessage());
+      }
    }
 
 
@@ -671,6 +911,17 @@ public class NestingBirdsNN
          {
             skewedIntervalMap[j] = i;
          }
+      }
+   }
+
+
+   // Print interval map.
+   public void printInterMap()
+   {
+      System.out.println("interval map:");
+      for (int i = 0; i < intervalMap.length; i++)
+      {
+         System.out.println(i + "->" + intervalMap[i]);
       }
    }
 }

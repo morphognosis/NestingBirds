@@ -1,9 +1,11 @@
 #!/bin/bash
 # Train and test RNN with datasets.
-usage="Usage: nestingbirds_rnn.sh -gender <\"male or female\"> [-num_datasets <number>] [-num_test_datasets <number>]"
+usage="Usage: nestingbirds_rnn.sh -gender <\"male or female\"> [-num_datasets <number>] [-num_test_datasets <number>] [-num_neurons <neurons>] [-num_epochs <epochs>]"
 gender=""
 num_datasets=1
 num_test_datasets=0
+num_neurons=128
+num_epochs=500
 while [ "$#" -ne 0 ] ; do 
     if [ "$1" = "-gender" ] ; then
       shift
@@ -16,10 +18,21 @@ while [ "$#" -ne 0 ] ; do
     then
       shift
       num_test_datasets=$1
+    elif [ "$1" = "-num_neurons" ]
+    then
+      shift
+      num_neurons=$1
+    elif [ "$1" = "-num_epochs" ]
+    then
+      shift
+      num_epochs=$1
     elif [ "$1" = "-help" ] || [ "$1" = "-h" ] || [ "$1" = "-?" ]
     then
       echo $usage
       exit 0
+    else
+      echo $usage
+      exit 1
     fi
     shift
 done
@@ -69,35 +82,35 @@ do
     sequence_length=`cat X_train.csv | wc -l`
   fi
 done
-echo "X_train_shape = [${num_train_sequences},${sequence_length},${X_num_features}]" > nestingbirds_dataset.py
-echo "X_train_seq = [" >> nestingbirds_dataset.py
+echo "X_train_shape = [${num_train_sequences},${sequence_length},${X_num_features}]" > nestingbirds_rnn_dataset.py
+echo "X_train_seq = [" >> nestingbirds_rnn_dataset.py
 count=0
 num_steps=`cat X_train.csv | wc -l`
 while read -r line
 do
-  echo -n $line >> nestingbirds_dataset.py
+  echo -n $line >> nestingbirds_rnn_dataset.py
   count=$((count + 1))
   if [ $count -lt $num_steps ]
   then
-     echo -n "," >> nestingbirds_dataset.py
+     echo -n "," >> nestingbirds_rnn_dataset.py
   fi
-  echo >> nestingbirds_dataset.py
+  echo >> nestingbirds_rnn_dataset.py
 done < X_train.csv
-echo "]" >> nestingbirds_dataset.py
-echo "y_train_shape = [${num_train_sequences},${sequence_length},${y_num_features}]" >> nestingbirds_dataset.py
-echo "y_train_seq = [" >> nestingbirds_dataset.py
+echo "]" >> nestingbirds_rnn_dataset.py
+echo "y_train_shape = [${num_train_sequences},${sequence_length},${y_num_features}]" >> nestingbirds_rnn_dataset.py
+echo "y_train_seq = [" >> nestingbirds_rnn_dataset.py
 count=0
 while read -r line
 do
-  echo -n $line >> nestingbirds_dataset.py
+  echo -n $line >> nestingbirds_rnn_dataset.py
   count=$((count + 1))
   if [ $count -lt $num_steps ]
   then
-     echo -n "," >> nestingbirds_dataset.py
+     echo -n "," >> nestingbirds_rnn_dataset.py
   fi
-  echo >> nestingbirds_dataset.py
+  echo >> nestingbirds_rnn_dataset.py
 done < y_train.csv
-echo "]" >> nestingbirds_dataset.py
+echo "]" >> nestingbirds_rnn_dataset.py
 rm X_train.csv y_train.csv
 
 # Prepare test set.
@@ -122,38 +135,38 @@ do
     sequence_length=`cat X_test.csv | wc -l`
   fi
 done
-echo "X_test_shape = [${num_test_datasets},${sequence_length},${X_num_features}]" >> nestingbirds_dataset.py
-echo "X_test_seq = [" >> nestingbirds_dataset.py
+echo "X_test_shape = [${num_test_datasets},${sequence_length},${X_num_features}]" >> nestingbirds_rnn_dataset.py
+echo "X_test_seq = [" >> nestingbirds_rnn_dataset.py
 count=0
 num_steps=`cat X_test.csv | wc -l`
 while read -r line
 do
-  echo -n $line >> nestingbirds_dataset.py
+  echo -n $line >> nestingbirds_rnn_dataset.py
   count=$((count + 1))
   if [ $count -lt $num_steps ]
   then
-     echo -n "," >> nestingbirds_dataset.py
+     echo -n "," >> nestingbirds_rnn_dataset.py
   fi
-  echo >> nestingbirds_dataset.py
+  echo >> nestingbirds_rnn_dataset.py
 done < X_test.csv
-echo "]" >> nestingbirds_dataset.py
-echo "y_test_shape = [${num_test_datasets},${sequence_length},${y_num_features}]" >> nestingbirds_dataset.py
-echo "y_test_seq = [" >> nestingbirds_dataset.py
+echo "]" >> nestingbirds_rnn_dataset.py
+echo "y_test_shape = [${num_test_datasets},${sequence_length},${y_num_features}]" >> nestingbirds_rnn_dataset.py
+echo "y_test_seq = [" >> nestingbirds_rnn_dataset.py
 count=0
 while read -r line
 do
-  echo -n $line >> nestingbirds_dataset.py
+  echo -n $line >> nestingbirds_rnn_dataset.py
   count=$((count + 1))
   if [ $count -lt $num_steps ]
   then
-     echo -n "," >> nestingbirds_dataset.py
+     echo -n "," >> nestingbirds_rnn_dataset.py
   fi
-  echo >> nestingbirds_dataset.py
+  echo >> nestingbirds_rnn_dataset.py
 done < y_test.csv
-echo "]" >> nestingbirds_dataset.py
+echo "]" >> nestingbirds_rnn_dataset.py
 rm X_test.csv y_test.csv
 
 # Run RNN.
-python nestingbirds_rnn.py
+python nestingbirds_rnn.py --neurons $num_neurons --epochs $num_epochs
 exit 0
 
