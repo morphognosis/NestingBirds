@@ -13,7 +13,7 @@ class Male : public Bird
 public:
 
     // Sensors.
-    static const int WANT_FOOD_SENSOR = Bird::NUM_SENSORS;
+    static const int WANT_MOUSE_SENSOR = Bird::NUM_SENSORS;
     static const int WANT_STONE_SENSOR = Bird::NUM_SENSORS + 1;
     static const int NUM_SENSORS = Bird::NUM_SENSORS + 2;
     int sensors[NUM_SENSORS];
@@ -22,7 +22,7 @@ public:
     class RESPONSE
     {
     public:
-        static const int GIVE_FOOD = 8;
+        static const int GIVE_MOUSE = 8;
         static const int GIVE_STONE = 9;
         static const int NUM_RESPONSES = 2;
 
@@ -31,8 +31,8 @@ public:
         {
             switch (response)
             {
-            case GIVE_FOOD:
-                return("GIVE_FOOD");
+            case GIVE_MOUSE:
+                return("GIVE_MOUSE");
 
             case GIVE_STONE:
                 return("GIVE_STONE");
@@ -65,6 +65,9 @@ public:
 
 	// Constructor.
 	Male();
+
+    // Set sensors.
+    void setSensors(int* sensors);
 
     // Cycle.
     int cycle();

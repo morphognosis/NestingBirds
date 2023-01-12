@@ -20,7 +20,7 @@ public:
     class RESPONSE
     {
     public:
-        static const int WANT_FOOD = 8;
+        static const int WANT_MOUSE = 8;
         static const  int WANT_STONE = 9;
         static const  int LAY_EGG = 10;
         static const  int NUM_RESPONSES = 3;
@@ -30,8 +30,8 @@ public:
         {
             switch (response)
             {
-            case WANT_FOOD:
-                return("WANT_FOOD");
+            case WANT_MOUSE:
+                return("WANT_MOUSE");
 
             case WANT_STONE:
                 return("WANT_STONE");
@@ -63,6 +63,9 @@ public:
 
 	// Constructor.
 	Female();
+
+    // Set sensors.
+    void setSensors(int* sensors);
 
     // Cycle.
     int cycle();
