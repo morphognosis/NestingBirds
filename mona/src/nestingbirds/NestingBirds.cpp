@@ -8,38 +8,46 @@
 // Version.
 const char* VERSION = "2.0";
 
-// Dataset file names.
-const char* MALE_DATASET_FILE_NAME   = "male_dataset";
-const char* FEMALE_DATASET_FILE_NAME = "female_dataset";
+// Save/load file name.
+string FILE_NAME;
+
+// Training controls.
+bool femaleWantMouse;
+bool femaleWantStone;
+int     femaleNestSequence;
 
 // Random numbers.
 int    RANDOM_NUMBER_SEED = 4517;
 
 // Usage.
+#define STRING(X) #X
 const char* Usage =
-    "Usage:\n" \
-    "    nestingbirds\n" \
-    "      -steps <steps>\n" \
-    "      [-runs <runs> (default=1)]\n" +
-    "      [-responseDriver <autopilot | bird> (default=autopilot)]\n" +
-    "      [-maleInitialFood <amount> (default=" + Male::INITIAL_FOOD + ")]\n" +
-    "      [-femaleInitialFood <amount> (default=" + FemaleBird.INITIAL_FOOD + ")]\n" +
-    "      [-maleFoodDuration <amount> (default=" + MaleBird.FOOD_DURATION + ")]\n" +
-    "      [-femaleFoodDuration <amount> (default=" + FemaleBird.FOOD_DURATION + ")]\n" +
-    "      [-randomizeMaleFoodLevel (food level probabilistically increases 0-" + MaleBird.FOOD_DURATION + " upon eating food)]\n" +
-    "      [-randomizeFemaleFoodLevel (food level probabilistically increases 0-" + FemaleBird.FOOD_DURATION + " upon eating food)]\n" +
-    "      [-writeMaleDataset (write dataset file: " + MALE_DATASET_FILE_NAME + "_<run>.csv)]\n" +
-    "      [-writeFemaleDataset (write dataset file: " + FEMALE_DATASET_FILE_NAME + "_<run>.csv)]\n" +
-    "      [-verbose <true | false> (default=true)]\n" +
-    "      [-randomSeed <seed> (default=" + RANDOM_NUMBER_SEED + ")]\n" +
-    "      [-version]\n" +
-    "Exit codes:\n" +
-    "  0=success\n" +
-    "  1=error";
+"Usage:\n"
+"    nestingbirds\n"
+"      -train -save <save file name>] | -test -load <load file name>\n"
+"      [-maleInitialFood <amount> (default=" STRING(MALE_DEFAULT_INITIAL_FOOD) ")]\n"
+"      [-maleFoodDuration <amount> (default=" STRING(MALE_DEFAULT_FOOD_DURATION) ")]\n"
+"      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" STRING(MALE_DEFAULT_FOOD_DURATION) " upon eating food)]\n"
+"      [-maleMouseNeed <amount> (default=" STRING(MALE_DEFAULT_MOUSE_NEED) ")]\n"
+"      [-maleFemaleMouseNeed <amount> (default=" STRING(MALE_DEFAULT_FEMALE_MOUSE_NEED) ")]\n"
+"      [-maleStoneNeed <amount> (default=" STRING(MALE_DEFAULT_STONE_NEED) ")]\n"
+"      [-maleFemaleStoneNeed <amount> (default=" STRING(MALE_DEFAULT_FEMALE_STONE_NEED) ")]\n"
+"      [-femaleInitialFood <amount> (default=" STRING(FEMALE_DEFAULT_INITIAL_FOOD) ")]\n"
+"      [-femaleFoodDuration <amount> (default=" STRING(FEMALE_DEFAULT_FOOD_DURATION) ")]\n"
+"      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" STRING(FEMALE_DEFAULT_FOOD_DURATION) " upon eating food)]\n"
+"      [-femaleMouseNeed <amount> (default=" STRING(FEMALE_DEFAULT_MOUSE_NEED) ")]\n"
+"      [-femaleStoneNeed <amount> (default=" STRING(FEMALE_DEFAULT_STONE_NEED) ")]\n"
+"      [-femaleEggNeed <amount> (default=" STRING(FEMALE_DEFAULT_EGG_NEED) ")]\n"
+"      [-verbose <true | false> (default=true)]\n"
+"      [-randomSeed <seed> (default=" STRING(RANDOM_NUMBER_SEED) ")]\n"
+"      [-version]\n"
+"Exit codes:\n"
+"  0=success\n"
+"  1=error";
 
-// Locale map: plain=0, forest=1, food=2, desert=3, stone=4
+// Locale map: plain=0, forest=1, mouse=2, desert=3, stone=4
 const int  width      = 21, height = 21;
-const char locale[][] =
+const char worldConfig[width][height] =
 {
     { 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -64,199 +72,104 @@ const char locale[][] =
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3, 0, 0, 0 }
 };
 
-// Locale types.
-public static class LOCALE
-{
-    public static final int DESERT = 0;
-    public static final int FOREST = 1;
-    public static final int PLAIN  = 2;
-
-    // Locale to string.
-    public static String toString(int locale)
-    {
-        switch (locale)
-        {
-        case LOCALE.DESERT:
-        return("DESERT");
-
-        case LOCALE.FOREST:
-        return("FOREST");
-
-        case LOCALE.PLAIN:
-        return("PLAIN");
-        }
-        return("Unknown locale");
-    }
-};
-
-// Object types.
-public static class OBJECT
-{
-    public static final int NO_OBJECT = 0;
-    public static final int EGG       = 1;
-    public static final int MOUSE     = 2;
-    public static final int STONE     = 3;
-
-    // Object to string.
-    public static String toString(int object)
-    {
-        switch (object)
-        {
-        case OBJECT.NO_OBJECT:
-        return("NO_OBJECT");
-
-        case OBJECT.EGG:
-        return("EGG");
-
-        case OBJECT.MOUSE:
-        return("MOUSE");
-
-        case OBJECT.STONE:
-        return("STONE");
-        }
-        return("Unknown object");
-    }
-};
-
 // Probability of mouse movement.
-public static double MOUSE_MOVE_PROBABILITY = 0.1;
+static double MOUSE_MOVE_PROBABILITY = 0.1;
 
 // Cell.
-public class Cell
+class Cell
 {
-    public int locale;
-    public int object;
-    public Cell()
+public:
+    int locale;
+    int object;
+    Cell()
     {
-        locale = LOCALE.DESERT;
-        object = OBJECT.NO_OBJECT;
+        locale = LOCALE::DESERT;
+        object = OBJECT::NO_OBJECT;
     }
 };
 
 // World.
-public Cell[][] world;
+Cell world[width][height];
 
 // Birds.
-public MaleBird   male;
-public FemaleBird female;
-
-// Response drivers.
-public static class RESPONSE_DRIVER
-{
-    public static final int AUTOPILOT = 0;
-    public static final int MANUAL    = 1;
-    public static final int BIRD      = 2;
-
-
-    // To string.
-    public static String toString(int driver)
-    {
-        switch (driver)
-        {
-        case AUTOPILOT:
-        return("autopilot");
-
-        case MANUAL:
-        return("manual");
-
-        case BIRD:
-        return("bird");
-        }
-        return("Unknown driver");
-    }
-};
-public static int ResponseDriver = RESPONSE_DRIVER.AUTOPILOT;
-public void setResponseDriver(int driver) { ResponseDriver = driver; }
-
-// Autopilot controls.
-public boolean femaleWantFood;
-public boolean femaleWantStone;
-public int     femaleNestSequence;
-
-// Dataset writers.
-public static PrintWriter MaleDatasetWriter   = null;
-public static PrintWriter FemaleDatasetWriter = null;
+Male   *male;
+Female *female;
 
 // Verbosity.
-public static boolean Verbose = true;
+bool Verbose = true;
 
-// Construct.
-public NestingBirds()
+// Initialize.
+int init()
 {
     // Random numbers.
-    if (Randomizer == null)
-    {
-        Randomizer = new Random(RANDOM_NUMBER_SEED);
-    }
+    srand(RANDOM_NUMBER_SEED);
 
     // Initialize world.
-    world = new Cell[width][height];
     for (int x = 0; x < width; x++)
     {
         for (int y = 0; y < height; y++)
         {
-        world[x][y] = new Cell();
-        switch (locale[x][y])
-        {
-        case 0:
-            world[x][y].locale = LOCALE.PLAIN;
-            world[x][y].object = OBJECT.NO_OBJECT;
-            break;
+            switch (worldConfig[x][y])
+            {
+            case 0:
+                world[x][y].locale = LOCALE::PLAIN;
+                world[x][y].object = OBJECT::NO_OBJECT;
+                break;
 
-        case 1:
-            world[x][y].locale = LOCALE.FOREST;
-            world[x][y].object = OBJECT.NO_OBJECT;
-            break;
+            case 1:
+                world[x][y].locale = LOCALE::FOREST;
+                world[x][y].object = OBJECT::NO_OBJECT;
+                break;
 
-        case 2:
-            world[x][y].locale = LOCALE.FOREST;
-            world[x][y].object = OBJECT.MOUSE;
-            break;
+            case 2:
+                world[x][y].locale = LOCALE::FOREST;
+                world[x][y].object = OBJECT::MOUSE;
+                break;
 
-        case 3:
-            world[x][y].locale = LOCALE.DESERT;
-            world[x][y].object = OBJECT.NO_OBJECT;
-            break;
+            case 3:
+                world[x][y].locale = LOCALE::DESERT;
+                world[x][y].object = OBJECT::NO_OBJECT;
+                break;
 
-        case 4:
-            world[x][y].locale = LOCALE.DESERT;
-            world[x][y].object = OBJECT.STONE;
-            break;
-        }
+            case 4:
+                world[x][y].locale = LOCALE::DESERT;
+                world[x][y].object = OBJECT::STONE;
+                break;
+            }
         }
     }
 
     // Create birds.
-    female             = new FemaleBird();
-    female.x           = width / 2;
-    female.y           = height / 2;
-    female.food        = FemaleBird.INITIAL_FOOD;
-    female.response    = RESPONSE.DO_NOTHING;
-    male               = new MaleBird();
-    male.x             = width / 2;
-    male.y             = height / 2;
-    male.food          = MaleBird.INITIAL_FOOD;
-    male.response      = RESPONSE.DO_NOTHING;
-    femaleWantFood     = false;
+    female             = new Female();
+    female->x           = width / 2;
+    female->y           = height / 2;
+    female->food        = Female::INITIAL_FOOD;
+    female->response    = Bird::RESPONSE::DO_NOTHING;
+    male               = new Male();
+    male->x             = width / 2;
+    male->y             = height / 2;
+    male->food          = Male::INITIAL_FOOD;
+    male->response      = Bird::RESPONSE::DO_NOTHING;
+    femaleWantMouse     = false;
     femaleWantStone    = false;
     femaleNestSequence = 0;
-    setSensors(Bird.FEMALE);
-    setSensors(Bird.MALE);
+    setSensors(Bird::FEMALE);
+    setSensors(Bird::MALE);
 }
 
 
 // Step.
-public void step()
+void step()
 {
     // Do responses in world.
-    doResponse(Bird.FEMALE);
-    doResponse(Bird.MALE);
+    doResponse(Bird::FEMALE);
+    doResponse(Bird::MALE);
 
     // Step mice.
     stepMice();
 
     // Set female sensors.
-    setSensors(Bird.FEMALE);
+    setSensors(Bird::FEMALE);
 
     // Produce female response.
     switch (ResponseDriver)
@@ -1307,12 +1220,12 @@ public void doResponse(int gender)
     }
 
     // Digest food.
-    bird.digest();
+    bird->digest();
 }
 
 
 // Set bird sensors.
-public void setSensors(int gender)
+void setSensors(int gender)
 {
     Bird bird = null;
 
@@ -1322,7 +1235,7 @@ public void setSensors(int gender)
     {
         bird    = female;
         sensors = new int[FemaleBird.NUM_SENSORS];
-        female.setSensors(sensors);
+        female->setSensors(sensors);
     }
     else
     {

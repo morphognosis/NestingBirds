@@ -1,4 +1,4 @@
-Nesting birds running the Mona neural network.
+Nesting birds with the Mona neural network.
 
 To build:
 
@@ -10,11 +10,11 @@ Start Microsoft Visual Studio using solution.
 
 Directories:
 
-1. src:
+src:
 - mona: mona neural network.
 - common files.
 - nestingbirds: nesting birds.
-2. bin: executables.
+bin: executables.
 
 Commands:
 

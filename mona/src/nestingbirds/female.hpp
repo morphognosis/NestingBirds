@@ -47,13 +47,18 @@ public:
     int response;
 
     // Food.
+#define FEMALE_DEFAULT_FOOD_DURATION 200
     static int     FOOD_DURATION;
+#define FEMALE_DEFAULT_INITIAL_FOOD FEMALE_DEFAULT_FOOD_DURATION
     static int     INITIAL_FOOD;
     static bool RANDOMIZE_FOOD_LEVEL;
 
 	// Needs.
-	static const Mona::NEED FOOD_NEED;
+#define FEMALE_DEFAULT_MOUSE_NEED 100.0
+	static const Mona::NEED MOUSE_NEED;
+#define FEMALE_DEFAULT_STONE_NEED 0.0
 	static const Mona::NEED STONE_NEED;
+#define FEMALE_DEFAULT_EGG_NEED 5.0
 	static const Mona::NEED EGG_NEED;
 
 	// Constructor.

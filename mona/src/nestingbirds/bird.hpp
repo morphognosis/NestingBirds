@@ -90,7 +90,9 @@ public:
       static const int MOVE          = 5;
       static const int TURN_RIGHT    = 6;
       static const int TURN_LEFT     = 7;
-      static const int NUM_RESPONSES = 8;
+      static const int STATE_ZERO = 8;
+      static const int STATE_ONE = 9;    
+      static const int NUM_RESPONSES = 10;
 
       // Response to string.
       static string toString(int response)
@@ -121,6 +123,12 @@ public:
           case TURN_LEFT:
               return("TURN_LEFT");
 
+          case STATE_ZERO:
+              return("STATE_ZERO");
+
+          case STATE_ONE:
+              return("STATE_ONE");
+
           default:
               return("Unknown response");
           }
@@ -133,6 +141,7 @@ public:
    int orientation;
    int food;
    int hasObject;
+   int state;
 
    // Brain.
    Mona *brain;

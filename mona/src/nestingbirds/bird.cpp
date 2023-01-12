@@ -12,6 +12,7 @@ Bird::Bird(int gender)
     orientation = ORIENTATION::NORTH;
     food        = 0;
     hasObject   = OBJECT::NO_OBJECT;
+    state = 0;
 }
 
 // Digest food.
@@ -35,4 +36,5 @@ string Bird::stateToString()
     s += ", Food: " + food;
     s += ", Has_object: ";
     s += OBJECT::toString(hasObject);
+    s += ", State: " + state;
 }
