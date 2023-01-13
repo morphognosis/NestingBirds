@@ -26,7 +26,7 @@ public:
         static const  int NUM_RESPONSES = 3;
 
         // Response to string.
-        static string toString(int response)
+        static char *toString(int response)
         {
             switch (response)
             {
@@ -55,17 +55,17 @@ public:
 
 	// Needs.
 #define FEMALE_DEFAULT_MOUSE_NEED 100.0
-	static const Mona::NEED MOUSE_NEED;
+	static Mona::NEED MOUSE_NEED;
 #define FEMALE_DEFAULT_STONE_NEED 0.0
-	static const Mona::NEED STONE_NEED;
+	static Mona::NEED STONE_NEED;
 #define FEMALE_DEFAULT_EGG_NEED 5.0
-	static const Mona::NEED EGG_NEED;
+	static Mona::NEED EGG_NEED;
 
 	// Constructor.
 	Female();
 
     // Set sensors.
-    void setSensors(int* sensors);
+    void setSensors(int *sensors);
 
     // Cycle.
     int cycle();
@@ -77,7 +77,7 @@ public:
     void printSensors();
 
     // Sensors to string.
-    string sensorsToString();
+    char *sensorsToString();
 
     // Print response.
     void printResponse();

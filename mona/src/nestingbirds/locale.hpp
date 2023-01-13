@@ -12,7 +12,7 @@ public:
     static const int PLAIN = 2;
 
     // Locale to string.
-    static string toString(int locale)
+    static char *toString(int locale)
     {
         switch (locale)
         {

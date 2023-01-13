@@ -4,6 +4,7 @@
 
 #include "male.hpp"
 #include "female.hpp"
+#include <stdlib.h>
 
 // Version.
 const char* VERSION = "2.0";
@@ -17,6 +18,7 @@ const char* Usage =
 "Usage:\n"
 "    nestingbirds\n"
 "      -train -save <save file name>] | -test -load <load file name>\n"
+"      -steps <steps>\n"
 "      [-maleInitialFood <amount> (default=" STRING(MALE_DEFAULT_INITIAL_FOOD) ")]\n"
 "      [-maleFoodDuration <amount> (default=" STRING(MALE_DEFAULT_FOOD_DURATION) ")]\n"
 "      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" STRING(MALE_DEFAULT_FOOD_DURATION) " upon eating food)]\n"
@@ -24,12 +26,12 @@ const char* Usage =
 "      [-maleFemaleMouseNeed <amount> (default=" STRING(MALE_DEFAULT_Female_MOUSE_NEED) ")]\n"
 "      [-maleStoneNeed <amount> (default=" STRING(MALE_DEFAULT_STONE_NEED) ")]\n"
 "      [-maleFemaleStoneNeed <amount> (default=" STRING(MALE_DEFAULT_Female_STONE_NEED) ")]\n"
-"      [-FemaleInitialFood <amount> (default=" STRING(Female_DEFAULT_INITIAL_FOOD) ")]\n"
-"      [-FemaleFoodDuration <amount> (default=" STRING(Female_DEFAULT_FOOD_DURATION) ")]\n"
-"      [-FemaleRandomizeFoodLevel (food level probabilistically increases 0-" STRING(Female_DEFAULT_FOOD_DURATION) " upon eating food)]\n"
-"      [-FemaleMouseNeed <amount> (default=" STRING(Female_DEFAULT_MOUSE_NEED) ")]\n"
-"      [-FemaleStoneNeed <amount> (default=" STRING(Female_DEFAULT_STONE_NEED) ")]\n"
-"      [-FemaleEggNeed <amount> (default=" STRING(Female_DEFAULT_EGG_NEED) ")]\n"
+"      [-femaleInitialFood <amount> (default=" STRING(Female_DEFAULT_INITIAL_FOOD) ")]\n"
+"      [-femaleFoodDuration <amount> (default=" STRING(Female_DEFAULT_FOOD_DURATION) ")]\n"
+"      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" STRING(Female_DEFAULT_FOOD_DURATION) " upon eating food)]\n"
+"      [-femaleMouseNeed <amount> (default=" STRING(Female_DEFAULT_MOUSE_NEED) ")]\n"
+"      [-femaleStoneNeed <amount> (default=" STRING(Female_DEFAULT_STONE_NEED) ")]\n"
+"      [-femaleEggNeed <amount> (default=" STRING(Female_DEFAULT_EGG_NEED) ")]\n"
 "      [-verbose <true | false> (default=true)]\n"
 "      [-randomSeed <seed> (default=" STRING(RANDOM_NUMBER_SEED) ")]\n"
 "      [-version]\n"
@@ -39,6 +41,9 @@ const char* Usage =
 
 // Testing vs. training.
 bool Testing;
+
+// Steps.
+int Steps;
 
 // Training controls.
 bool FemaleWantMouse;
@@ -101,8 +106,19 @@ static double MOUSE_MOVE_PROBABILITY = 0.1;
 // Verbosity.
 bool Verbose = true;
 
+// Prototypes.
+void setSensors(int);
+void doResponse(int);
+void stepMice();
+void cycleAutopilot(int);
+void maleAutopilot();
+void femaleAutopilot();
+bool getMouse();
+bool getStone();
+bool returnToFemale();
+
 // Initialize.
-int init()
+void init()
 {
     // Random numbers.
     srand(RANDOM_NUMBER_SEED);
@@ -171,10 +187,10 @@ void step()
     // Step mice.
     stepMice();
 
-    // Set Female sensors.
+    // Set female sensors.
     setSensors(Bird::FEMALE);
 
-    // Produce Female response.
+    // Produce female response.
     if (Testing)
     {
         female->cycle();
@@ -730,18 +746,18 @@ void femaleAutopilot()
     {
         if (female->hasObject == OBJECT::MOUSE)
         {
-        female->response = Bird::RESPONSE::EAT;
+            female->response = Bird::RESPONSE::EAT;
         }
         else
         {
-        if (female->hasObject == OBJECT::NO_OBJECT)
-        {
-            female->response = Female::RESPONSE::WANT_MOUSE;
-        }
-        else
-        {
-            female->response = Bird::RESPONSE::TOSS;
-        }
+            if (female->hasObject == OBJECT::NO_OBJECT)
+            {
+                female->response = Female::RESPONSE::WANT_MOUSE;
+            }
+            else
+            {
+                female->response = Bird::RESPONSE::TOSS;
+            }
         }
         return;
     }
@@ -983,6 +999,7 @@ void femaleAutopilot()
 // Do bird response.
 void doResponse(int gender)
 {
+    int d;
     Bird* bird = (Bird*)male;
     if (gender == Bird::FEMALE)
     {
@@ -1051,9 +1068,9 @@ void doResponse(int gender)
         if (bird->hasObject == OBJECT::NO_OBJECT) { break; }
 
         // Object lands randomly nearby.
-        int i = HEIGHT / 2;
-        if (i > WIDTH / 2) { i = WIDTH / 2; }
-        for (int j = 5; j < i; j++)
+        d = HEIGHT / 2;
+        if (d > WIDTH / 2) { d = WIDTH / 2; }
+        for (int j = 5; j < d; j++)
         {
             int x = (int)(rand() % (long)j);
             int y = (int)(rand() % (long)j);
@@ -1079,80 +1096,80 @@ void doResponse(int gender)
         break;
 
         case Bird::RESPONSE::MOVE:
-        switch (bird->orientation)
-        {
-        case Bird::ORIENTATION::NORTH:
-            if (bird->y > 0)
+            switch (bird->orientation)
             {
-                bird->y--;
+            case Bird::ORIENTATION::NORTH:
+                if (bird->y > 0)
+                {
+                    bird->y--;
+                }
+                break;
+
+            case Bird::ORIENTATION::SOUTH:
+                if (bird->y < HEIGHT - 1)
+                {
+                    bird->y++;
+                }
+                break;
+
+
+            case Bird::ORIENTATION::EAST:
+                if (bird->x < WIDTH - 1)
+                {
+                    bird->x++;
+                }
+                break;
+
+            case Bird::ORIENTATION::WEST:
+                if (bird->x > 0)
+                {
+                    bird->x--;
+                }
+                break;
             }
             break;
-
-        case Bird::ORIENTATION::SOUTH:
-            if (bird->y < HEIGHT - 1)
-            {
-                bird->y++;
-            }
-            break;
-
-
-        case Bird::ORIENTATION::EAST:
-            if (bird->x < WIDTH - 1)
-            {
-                bird->x++;
-            }
-            break;
-
-        case Bird::ORIENTATION::WEST:
-            if (bird->x > 0)
-            {
-                bird->x--;
-            }
-            break;
-        }
-        break;
 
         case Bird::RESPONSE::TURN_RIGHT:
-        switch (bird->orientation)
-        {
-        case Bird::ORIENTATION::NORTH:
-            bird->orientation = Bird::ORIENTATION::EAST;
-            break;
+            switch (bird->orientation)
+            {
+            case Bird::ORIENTATION::NORTH:
+                bird->orientation = Bird::ORIENTATION::EAST;
+                break;
 
-        case Bird::ORIENTATION::SOUTH:
-            bird->orientation = Bird::ORIENTATION::WEST;
-            break;
+            case Bird::ORIENTATION::SOUTH:
+                bird->orientation = Bird::ORIENTATION::WEST;
+                break;
 
-        case Bird::ORIENTATION::EAST:
-            bird->orientation = Bird::ORIENTATION::SOUTH;
-            break;
+            case Bird::ORIENTATION::EAST:
+                bird->orientation = Bird::ORIENTATION::SOUTH;
+                break;
 
-        case Bird::ORIENTATION::WEST:
-            bird->orientation = Bird::ORIENTATION::NORTH;
+            case Bird::ORIENTATION::WEST:
+                bird->orientation = Bird::ORIENTATION::NORTH;
+                break;
+            }
             break;
-        }
-        break;
 
         case Bird::RESPONSE::TURN_LEFT:
-        switch (bird->orientation)
-        {
-        case Bird::ORIENTATION::NORTH:
-            bird->orientation = Bird::ORIENTATION::WEST;
-            break;
+            switch (bird->orientation)
+            {
+            case Bird::ORIENTATION::NORTH:
+                bird->orientation = Bird::ORIENTATION::WEST;
+                break;
 
-        case Bird::ORIENTATION::SOUTH:
-            bird->orientation = Bird::ORIENTATION::EAST;
-            break;
+            case Bird::ORIENTATION::SOUTH:
+                bird->orientation = Bird::ORIENTATION::EAST;
+                break;
 
-        case Bird::ORIENTATION::EAST:
-            bird->orientation = Bird::ORIENTATION::NORTH;
-            break;
+            case Bird::ORIENTATION::EAST:
+                bird->orientation = Bird::ORIENTATION::NORTH;
+                break;
 
-        case Bird::ORIENTATION::WEST:
-            bird->orientation = Bird::ORIENTATION::SOUTH;
+            case Bird::ORIENTATION::WEST:
+                bird->orientation = Bird::ORIENTATION::SOUTH;
+                break;
+            }
             break;
-        }
-        break;
         }
     }
     else
@@ -1461,16 +1478,16 @@ void setSensors(int gender)
         sensors[Male::WANT_STONE_SENSOR] = 0;
         if ((bird->x == female->x) && (bird->y == female->y))
         {
-        switch (female->response)
-        {
-        case Female::RESPONSE::WANT_MOUSE:
-            sensors[Male::WANT_MOUSE_SENSOR] = 1;
-            break;
+            switch (female->response)
+            {
+            case Female::RESPONSE::WANT_MOUSE:
+                sensors[Male::WANT_MOUSE_SENSOR] = 1;
+                break;
 
-        case Female::RESPONSE::WANT_STONE:
-            sensors[Male::WANT_STONE_SENSOR] = 1;
-            break;
-        }
+            case Female::RESPONSE::WANT_STONE:
+                sensors[Male::WANT_STONE_SENSOR] = 1;
+                break;
+            }
         }
     }
 }
@@ -1561,6 +1578,7 @@ void stepMice()
 void main(int argc, char* args[])
 {
     bool gotTrainTest = false;
+    bool gotSteps = false;
 
     for (int i = 1; i < argc; i++)
     {
@@ -1612,288 +1630,338 @@ void main(int argc, char* args[])
             Filename = args[i];
             continue;
         }
-        if (args[i].equals("-runs"))
+        if (strcmp(args[i], "-steps") == 0)
         {
-        i++;
-        if (i >= args.length)
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid steps option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Steps = atoi(args[i]);
+            if (Steps < 0)
+            {
+                fprintf(stderr, "Invalid steps option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            gotSteps = true;
+            continue;
+        }
+        if (strcmp(args[i], "-maleInitialFood") == 0)
         {
-            System.err.println("Invalid runs option");
-            System.err.println(Usage);
-            System.exit(1);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid maleInitialFood option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Male::INITIAL_FOOD = atoi(args[i]);
+            if (Male::INITIAL_FOOD < 0)
+            {
+                fprintf(stderr, "Invalid maleInitialFood option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        try
+        if (strcmp(args[i], "-maleFoodDuration") == 0)
         {
-            runs = Integer.parseInt(args[i]);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid maleFoodDuration option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Male::FOOD_DURATION = atoi(args[i]);
+            if (Male::FOOD_DURATION < 0)
+            {
+                fprintf(stderr, "Invalid maleFoodDuration option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        catch (NumberFormatException e) {
-            System.err.println("Invalid runs option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        if (runs < 0)
+        if (strcmp(args[i], "-maleRandomizeFoodLevel") == 0)
         {
-            System.err.println("Invalid runs option");
-            System.err.println(Usage);
-            System.exit(1);
+            Male::RANDOMIZE_FOOD_LEVEL = true;
+            continue;
         }
-        continue;
-        }
-        if (args[i].equals("-responseDriver"))
+        if (strcmp(args[i], "-maleMouseNeed") == 0)
         {
-        i++;
-        if (i >= args.length)
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid maleMouseNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Male::MOUSE_NEED = strtod(args[i], 0);
+            if (Male::MOUSE_NEED < 0.0)
+            {
+                fprintf(stderr, "Invalid maleMouseNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
+        }
+        if (strcmp(args[i], "-maleFemaleMouseNeed") == 0)
         {
-            System.err.println("Invalid driver option");
-            System.err.println(Usage);
-            System.exit(1);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid maleFemaleMouseNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Male::FEMALE_MOUSE_NEED = strtod(args[i], 0);
+            if (Male::FEMALE_MOUSE_NEED < 0.0)
+            {
+                fprintf(stderr, "Invalid maleFemaleMouseNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        if (args[i].equals("autopilot"))
+        if (strcmp(args[i], "-maleStoneNeed") == 0)
         {
-            ResponseDriver = RESPONSE_DRIVER.AUTOPILOT;
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid maleStoneNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Male::STONE_NEED = strtod(args[i], 0);
+            if (Male::STONE_NEED < 0.0)
+            {
+                fprintf(stderr, "Invalid maleStoneNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        else if (args[i].equals("bird"))
+        if (strcmp(args[i], "-maleFemaleStoneNeed") == 0)
         {
-            ResponseDriver = RESPONSE_DRIVER.BIRD;
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid maleFemaleStoneNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Male::FEMALE_STONE_NEED = strtod(args[i], 0);
+            if (Male::FEMALE_STONE_NEED < 0.0)
+            {
+                fprintf(stderr, "Invalid maleFemaleStoneNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        else
+        if (strcmp(args[i], "-femaleInitialFood") == 0)
         {
-            System.err.println("Invalid responseDriver option");
-            System.err.println(Usage);
-            System.exit(1);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid femaleInitialFood option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Female::INITIAL_FOOD = atoi(args[i]);
+            if (Female::INITIAL_FOOD < 0)
+            {
+                fprintf(stderr, "Invalid femaleInitialFood option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        continue;
-        }
-        if (args[i].equals("-maleInitialFood"))
+        if (strcmp(args[i], "-femaleFoodDuration") == 0)
         {
-        i++;
-        if (i >= args.length)
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid femaleFoodDuration option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Female::FOOD_DURATION = atoi(args[i]);
+            if (Female::FOOD_DURATION < 0)
+            {
+                fprintf(stderr, "Invalid femaleFoodDuration option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
+        }
+        if (strcmp(args[i], "-femaleRandomizeFoodLevel") == 0)
         {
-            System.err.println("Invalid maleInitialFood option");
-            System.err.println(Usage);
-            System.exit(1);
+            Female::RANDOMIZE_FOOD_LEVEL = true;
+            continue;
         }
-        try
+        if (strcmp(args[i], "-femaleMouseNeed") == 0)
         {
-            Male::INITIAL_FOOD = Integer.parseInt(args[i]);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid femaleMouseNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Female::MOUSE_NEED = 1.0;
+            Female::MOUSE_NEED = strtod(args[i], 0);
+            if (Female::MOUSE_NEED < 0.0)
+            {
+                fprintf(stderr, "Invalid femaleMouseNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        catch (NumberFormatException e) {
-            System.err.println("Invalid maleInitialFood option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        if (Male::INITIAL_FOOD < 0)
+        if (strcmp(args[i], "-femaleStoneNeed") == 0)
         {
-            System.err.println("Invalid maleInitialFood option");
-            System.err.println(Usage);
-            System.exit(1);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid femaleStoneNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Female::STONE_NEED = strtod(args[i], 0);
+            if (Female::STONE_NEED < 0.0)
+            {
+                fprintf(stderr, "Invalid femaleStoneNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        continue;
-        }
-        if (args[i].equals("-FemaleInitialFood"))
+        if (strcmp(args[i], "-femaleEggNeed") == 0)
         {
-        i++;
-        if (i >= args.length)
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid femaleEggNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            Female::EGG_NEED = strtod(args[i], 0);
+            if (Female::EGG_NEED < 0.0)
+            {
+                fprintf(stderr, "Invalid femaleEggNeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
+        }
+        if (strcmp(args[i], "-randomSeed") == 0)
         {
-            System.err.println("Invalid FemaleInitialFood option");
-            System.err.println(Usage);
-            System.exit(1);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid randomSeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            RANDOM_NUMBER_SEED = atoi(args[i]);
+            if (RANDOM_NUMBER_SEED <= 0)
+            {
+                fprintf(stderr, "Invalid randomSeed option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        try
+        if (strcmp(args[i], "-verbose") == 0)
         {
-            Female::INITIAL_FOOD = Integer.parseInt(args[i]);
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid verbose option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            if (strcmp(args[i], "true") == 0)
+            {
+                Verbose = true;
+            }
+            else if (strcmp(args[i], "false") == 0)
+            {
+                Verbose = false;
+            }
+            else
+            {
+                fprintf(stderr, "Invalid verbose option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
         }
-        catch (NumberFormatException e) {
-            System.err.println("Invalid FemaleInitialFood option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        if (Female::INITIAL_FOOD < 0)
+        if (strcmp(args[i], "-version") == 0)
         {
-            System.err.println("Invalid FemaleInitialFood option");
-            System.err.println(Usage);
-            System.exit(1);
+            printf("Nesting birds version = %s\n", VERSION);
+            exit(0);
         }
-        continue;
-        }
-        if (args[i].equals("-maleFoodDuration"))
+        if (strcmp(args[i], "-help") == 0 || strcmp(args[i], "-h") == 0 || strcmp(args[i], "-?") == 0)
         {
-        i++;
-        if (i >= args.length)
-        {
-            System.err.println("Invalid maleFoodDuration option");
-            System.err.println(Usage);
-            System.exit(1);
+            printf(Usage);
+            exit(0);
         }
-        try
-        {
-            Male::FOOD_DURATION = Integer.parseInt(args[i]);
-        }
-        catch (NumberFormatException e) {
-            System.err.println("Invalid maleFoodDuration option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        if (Male::FOOD_DURATION < 0)
-        {
-            System.err.println("Invalid maleFoodDuration option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        continue;
-        }
-        if (args[i].equals("-FemaleFoodDuration"))
-        {
-        i++;
-        if (i >= args.length)
-        {
-            System.err.println("Invalid FemaleFoodDuration option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        try
-        {
-            Female::FOOD_DURATION = Integer.parseInt(args[i]);
-        }
-        catch (NumberFormatException e) {
-            System.err.println("Invalid FemaleFoodDuration option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        if (Female::FOOD_DURATION < 0)
-        {
-            System.err.println("Invalid FemaleFoodDuration option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        continue;
-        }
-        if (args[i].equals("-randomizeMaleFoodLevel"))
-        {
-        Male::RANDOMIZE_FOOD_LEVEL = true;
-        continue;
-        }
-        if (args[i].equals("-randomizeFemaleFoodLevel"))
-        {
-        Female::RANDOMIZE_FOOD_LEVEL = true;
-        continue;
-        }
-        if (args[i].equals("-randomSeed"))
-        {
-        i++;
-        if (i >= args.length)
-        {
-            System.err.println("Invalid randomSeed option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        try
-        {
-            RANDOM_NUMBER_SEED = Integer.parseInt(args[i]);
-        }
-        catch (NumberFormatException e) {
-            System.err.println("Invalid randomSeed option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        if (RANDOM_NUMBER_SEED <= 0)
-        {
-            System.err.println("Invalid randomSeed option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        continue;
-        }
-        if (args[i].equals("-writeMaleDataset"))
-        {
-        writeMaleDataset = true;
-        continue;
-        }
-        if (args[i].equals("-writeFemaleDataset"))
-        {
-        writeFemaleDataset = true;
-        continue;
-        }
-        if (args[i].equals("-verbose"))
-        {
-        i++;
-        if (i >= args.length)
-        {
-            System.err.println("Invalid verbose option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        if (args[i].equals("true"))
-        {
-            Verbose = true;
-        }
-        else if (args[i].equals("false"))
-        {
-            Verbose = false;
-        }
-        else
-        {
-            System.err.println("Invalid verbose option");
-            System.err.println(Usage);
-            System.exit(1);
-        }
-        continue;
-        }
-        if (args[i].equals("-version"))
-        {
-        System.out.println("Nesting birds version = " + VERSION);
-        System.exit(0);
-        }
-        if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
-        {
-        System.out.println(Usage);
-        System.exit(0);
-        }
-        System.err.println(Usage);
-        System.exit(1);
+        fprintf(stderr, Usage);
+        exit(1);
     }
-    if (steps == -1)
+    if (!gotTrainTest)
     {
-        System.err.println(Usage);
-        System.exit(1);
+        fprintf(stderr, Usage);
+        exit(1);
+    }
+    if (!gotSteps)
+    {
+        fprintf(stderr, Usage);
+        exit(1);
     }
     if (Male::INITIAL_FOOD > Male::FOOD_DURATION)
     {
-        System.err.println("Male initial food cannot be greater than food duration");
-        System.err.println(Usage);
-        System.exit(1);
+        fprintf(stderr, "Male initial food cannot be greater than food duration\n");
+        fprintf(stderr, Usage);
+        exit(1);
     }
     if (Female::INITIAL_FOOD > Female::FOOD_DURATION)
     {
-        System.err.println("Female initial food cannot be greater than food duration");
-        System.err.println(Usage);
-        System.exit(1);
+        fprintf(stderr, "Female initial food cannot be greater than food duration");
+        fprintf(stderr, Usage);
+        exit(1);
     }
 
-    // Run birds.
-    for (int run = 0; run < runs; run++)
-    {
-        if (Verbose) { printf("Run=%d\n", run); }
-        int          eggLaidStep  = -1;
-        for (int step = 0; step < steps; step++)
-        {
-        if (Verbose) { System.out.println("Step=" + step); }
-        nestingbirds.step();
-        if ((eggLaidStep < 0) && (nestingbirds.World[WIDTH / 2][HEIGHT / 2].object == OBJECT::EGG))
-        {
-            eggLaidStep = step;
-        }
-        }
+    // Initialize.
+    init();
 
-        if (Verbose)
+    // Run birds.
+    int          eggLaidStep  = -1;
+    for (int i = 0; i < Steps; i++)
+    {
+        if (Verbose) { printf("Step=%d\n", i); }
+        step();
+        if ((eggLaidStep < 0) && (World[WIDTH / 2][HEIGHT / 2].object == OBJECT::EGG))
         {
-        System.out.print("Run results: ");
+            eggLaidStep = i;
+        }
+    }
+
+    if (Verbose)
+    {
+        printf("Run results: ");
         if (eggLaidStep >= 0)
         {
-            System.out.print("egg laid at step " + eggLaidStep);
+            printf("egg laid at step %d", eggLaidStep);
         }
         else
         {
-            System.out.print("no egg");
+            printf("no egg");
         }
         int mouseCount = 0;
         int stoneCount = 0;
@@ -1901,20 +1969,19 @@ void main(int argc, char* args[])
         {
             for (int y = 0; y < HEIGHT; y++)
             {
-                if ((nestingbirds.World[x][y].locale == LOCALE::FOREST) &&
-                    (nestingbirds.World[x][y].object == OBJECT::MOUSE))
+                if ((World[x][y].locale == LOCALE::FOREST) &&
+                    (World[x][y].object == OBJECT::MOUSE))
                 {
                     mouseCount++;
                 }
-                if ((nestingbirds.World[x][y].locale == LOCALE::DESERT) &&
-                    (nestingbirds.World[x][y].object == OBJECT::STONE))
+                if ((World[x][y].locale == LOCALE::DESERT) &&
+                    (World[x][y].object == OBJECT::STONE))
                 {
                     stoneCount++;
                 }
             }
         }
-        System.out.println(", remaining mice=" + mouseCount + ", remaining stones=" + stoneCount);
-        }
+        printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
     }
+    exit(0);
 }
-

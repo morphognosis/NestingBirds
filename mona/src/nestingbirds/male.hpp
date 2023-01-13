@@ -27,7 +27,7 @@ public:
         static const int NUM_RESPONSES = 2;
 
         // Response to string.
-        static string toString(int response)
+        static char *toString(int response)
         {
             switch (response)
             {
@@ -67,7 +67,7 @@ public:
 	Male();
 
     // Set sensors.
-    void setSensors(int* sensors);
+    void setSensors(int *sensors);
 
     // Cycle.
     int cycle();
@@ -79,7 +79,7 @@ public:
     void printSensors();
 
     // Sensors to string.
-    string sensorsToString();
+    char *sensorsToString();
 
     // Print response.
     void printResponse();

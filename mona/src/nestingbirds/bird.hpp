@@ -23,7 +23,7 @@ public:
       static const int WEST  = 3;
 
       // Orientation to string.
-      static string toString(int orientation)
+      static char *toString(int orientation)
       {
           switch (orientation)
           {
@@ -95,7 +95,7 @@ public:
       static const int NUM_RESPONSES = 10;
 
       // Response to string.
-      static string toString(int response)
+      static char *toString(int response)
       {
           switch (response)
           {
@@ -156,6 +156,6 @@ public:
    void printState();
 
    // State to string.
-   string stateToString();
+   char *stateToString();
 };
 #endif

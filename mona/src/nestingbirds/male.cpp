@@ -5,20 +5,21 @@
 #include "male.hpp"
 
 // Food.
-int     FOOD_DURATION = MALE_DEFAULT_FOOD_DURATION;
-int     INITIAL_FOOD = MALE_DEFAULT_INITIAL_FOOD;
-bool RANDOMIZE_FOOD_LEVEL = false;
+int     Male::FOOD_DURATION = MALE_DEFAULT_FOOD_DURATION;
+int     Male::INITIAL_FOOD = MALE_DEFAULT_INITIAL_FOOD;
+bool Male::RANDOMIZE_FOOD_LEVEL = false;
 
 // Needs.
-Mona::NEED MOUSE_NEED = MALE_DEFAULT_MOUSE_NEED;
-Mona::NEED FEMALE_MOUSE_NEED = MALE_DEFAULT_FEMALE_MOUSE_NEED;
-Mona::NEED STONE_NEED = MALE_DEFAULT_STONE_NEED;
-Mona::NEED FEMALE_STONE_NEED = MALE_DEFAULT_FEMALE_STONE_NEED;
-Mona::NEED ATTEND_FEMALE_NEED = MALE_DEFAULT_ATTEND_FEMALE_NEED;
+Mona::NEED Male::MOUSE_NEED = MALE_DEFAULT_MOUSE_NEED;
+Mona::NEED Male::FEMALE_MOUSE_NEED = MALE_DEFAULT_FEMALE_MOUSE_NEED;
+Mona::NEED Male::STONE_NEED = MALE_DEFAULT_STONE_NEED;
+Mona::NEED Male::FEMALE_STONE_NEED = MALE_DEFAULT_FEMALE_STONE_NEED;
+Mona::NEED Male::ATTEND_FEMALE_NEED = MALE_DEFAULT_ATTEND_FEMALE_NEED;
 
 // Construct male bird.
 Male::Male() : Bird(MALE)
 {
+	/*
 		brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
 			RESPONSE::NUM_MALE_RESPONSES);
 
@@ -324,8 +325,14 @@ Male::Male() : Bird(MALE)
 	goals.set(2, 0.0);
 	goals.set(3, CHECK_MATE_NEED);
 	matePresent->goals.setGoals(&goals, 1.0);
+	*/
 
-	response = RESPONSE::DO_NOTHING;
+	response = Bird::RESPONSE::DO_NOTHING;
+}
+
+// Set sensors.
+void Male::setSensors(int *sensors)
+{
 }
 
 // Cycle male.
@@ -346,11 +353,11 @@ int Male::cycle()
 void Male::print()
 {
 	printf("Sensors: [");
-	printf(sensorsToString().c_str());
+	printf(sensorsToString());
 	printf("], ");
-	printf(stateToString().c_str());
+	printf(stateToString());
 	printf(", Response: ");
-	printf(RESPONSE::toString(response).c_str());
+	printf(RESPONSE::toString(response));
 	printf("\n");
 }
 
@@ -358,13 +365,13 @@ void Male::print()
 // Print sensors.
 void Male::printSensors()
 {
-	printf(sensorsToString().c_str());
+	printf(sensorsToString());
 	printf("\n");
 }
 
 
 // Sensors to string.
-string Male::sensorsToString()
+char *Male::sensorsToString()
 {
 	string s = "[Cell sensors: ";
 
@@ -422,7 +429,7 @@ string Male::sensorsToString()
 		break;
 	}
 	s += ", Want food sensor: ";
-	if (sensors[WANT_FOOD_SENSOR] == 1)
+	if (sensors[WANT_MOUSE_SENSOR] == 1)
 	{
 		s += "true";
 	} else {
@@ -436,13 +443,13 @@ string Male::sensorsToString()
 	else {
 		s += "false";
 	}
-	return(s);
+	return((char *)s.c_str());
 }
 
 // Print response.
 void Male::printResponse()
 {
-	printf(RESPONSE::toString(response).c_str());
+	printf(RESPONSE::toString(response));
 	printf("\n");
 }
 

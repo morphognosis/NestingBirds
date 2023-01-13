@@ -24,12 +24,12 @@ void Bird::digest()
 // Print state.
 void Bird::printState()
 {
-    printf(stateToString().c_str());
+    printf(stateToString());
     printf("\n");
 }
 
 // State to string.
-string Bird::stateToString()
+char *Bird::stateToString()
 {
     string s = "Orientation: ";
     s += ORIENTATION::toString(orientation);

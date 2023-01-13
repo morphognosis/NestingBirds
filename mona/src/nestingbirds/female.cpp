@@ -5,18 +5,19 @@
 #include "female.hpp"
 
 // Food.
-int     FOOD_DURATION = FEMALE_DEFAULT_FOOD_DURATION;
-int     INITIAL_FOOD = FEMALE_DEFAULT_INITIAL_FOOD;
-bool RANDOMIZE_FOOD_LEVEL = false;
+int     Female::FOOD_DURATION = FEMALE_DEFAULT_FOOD_DURATION;
+int     Female::INITIAL_FOOD = FEMALE_DEFAULT_INITIAL_FOOD;
+bool Female::RANDOMIZE_FOOD_LEVEL = false;
 
 // Needs.
-Mona::NEED MOUSE_NEED = FEMALE_DEFAULT_MOUSE_NEED;
-Mona::NEED STONE_NEED = FEMALE_DEFAULT_STONE_NEED;
-Mona::NEED EGG_NEED = FEMALE_DEFAULT_EGG_NEED;
+Mona::NEED Female::MOUSE_NEED = FEMALE_DEFAULT_MOUSE_NEED;
+Mona::NEED Female::STONE_NEED = FEMALE_DEFAULT_STONE_NEED;
+Mona::NEED Female::EGG_NEED = FEMALE_DEFAULT_EGG_NEED;
 
 // Construct female bird.
 Female::Female() : Bird(FEMALE)
 {
+	/*
 	brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
 		RESPONSE::NUM_FEMALE_RESPONSES);
 
@@ -458,10 +459,16 @@ Female::Female() : Bird(FEMALE)
 	goals.set(0, 0.0);
 	goals.set(1, EGG_NEED);
 	eggInNest[30]->goals.setGoals(&goals, 1.0);
+	*/
 
-	response = RESPONSE::DO_NOTHING;
+	response = Bird::RESPONSE::DO_NOTHING;
 }
 
+
+// Set sensors.
+void Female::setSensors(int *sensors)
+{
+}
 
 // Cycle female.
 int Female::cycle()
@@ -481,11 +488,11 @@ int Female::cycle()
 void Female::print()
 {
 	printf("Sensors: [");
-	printf(sensorsToString().c_str());
+	printf(sensorsToString());
 	printf("], ");
-	printf(stateToString().c_str());
+	printf(stateToString());
 	printf(", Response: ");
-	printf(RESPONSE::toString(response).c_str());
+	printf(RESPONSE::toString(response));
 	printf("\n");
 }
 
@@ -493,13 +500,13 @@ void Female::print()
 // Print sensors.
 void Female::printSensors()
 {
-	printf(sensorsToString().c_str());
+	printf(sensorsToString());
 	printf("\n");
 }
 
 
 // Sensors to string.
-string Female::sensorsToString()
+char *Female::sensorsToString()
 {
 	string s = "[Cell sensors: ";
 
@@ -556,13 +563,13 @@ string Female::sensorsToString()
 		s += "RIGHT";
 		break;
 	}
-	return(s);
+	return((char *)s.c_str());
 }
 
 // Print response.
 void Female::printResponse()
 {
-	printf(RESPONSE::toString(response).c_str());
+	printf(RESPONSE::toString(response));
 	printf("\n");
 }
 

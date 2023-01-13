@@ -3,6 +3,8 @@
 #ifndef __OBJECT__
 #define __OBJECT__
 
+#include <string>
+
 // Object types.
 class OBJECT
 {
@@ -13,7 +15,7 @@ public:
     static const int STONE = 3;
 
     // Object to string.
-    static string toString(int object)
+    static char *toString(int object)
     {
         switch (object)
         {

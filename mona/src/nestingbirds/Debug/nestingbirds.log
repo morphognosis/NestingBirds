@@ -1,10 +1,4 @@
-﻿  bird.cpp
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\object.hpp(16,19): error C3646: 'toString': unknown override specifier
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\object.hpp(16,28): error C2062: type 'int' unexpected
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\object.hpp(17,5): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\locale.hpp(15,19): error C3646: 'toString': unknown override specifier
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\locale.hpp(15,28): error C2062: type 'int' unexpected
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\locale.hpp(16,5): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\bird.cpp(38,18): error C2039: 'toString': is not a member of 'OBJECT'
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\object.hpp(7): message : see declaration of 'OBJECT'
-C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\bird.cpp(38,26): error C3861: 'toString': identifier not found
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1363,5): warning MSB8012: TargetPath(C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\Debug\nestingbirds.exe) does not match the Linker's OutputFile property value (C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\bin\nestingbirds.exe). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+  LINK : ..\..\bin\nestingbirds.exe not found or not built by the last incremental link; performing full link
+     Creating library Debug\nestingbirds.lib and object Debug\nestingbirds.exp
+  nestingbirds.vcxproj -> C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\Debug\nestingbirds.exe
