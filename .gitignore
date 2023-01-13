@@ -1,2 +1,6 @@
 /target/
 /mona/.vs/
+/mona/src/nestingbirds/Debug/
+/mona/src/nestingbirds/Release/
+/mona/src/nestingbirds/nestingbirds.vcxproj.user
+
