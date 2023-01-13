@@ -5,14 +5,14 @@
 #include "female.hpp"
 
 // Food.
-int     Female::FOOD_DURATION = FEMALE_DEFAULT_FOOD_DURATION;
-int     Female::INITIAL_FOOD = FEMALE_DEFAULT_INITIAL_FOOD;
+int     Female::FOOD_DURATION = atoi(FEMALE_DEFAULT_FOOD_DURATION);
+int     Female::INITIAL_FOOD = atoi(FEMALE_DEFAULT_INITIAL_FOOD);
 bool Female::RANDOMIZE_FOOD_LEVEL = false;
 
 // Needs.
-Mona::NEED Female::MOUSE_NEED = FEMALE_DEFAULT_MOUSE_NEED;
-Mona::NEED Female::STONE_NEED = FEMALE_DEFAULT_STONE_NEED;
-Mona::NEED Female::EGG_NEED = FEMALE_DEFAULT_EGG_NEED;
+Mona::NEED Female::MOUSE_NEED = strtod(FEMALE_DEFAULT_MOUSE_NEED, 0);
+Mona::NEED Female::STONE_NEED = strtod(FEMALE_DEFAULT_STONE_NEED, 0);
+Mona::NEED Female::EGG_NEED = strtod(FEMALE_DEFAULT_EGG_NEED, 0);
 
 // Construct female bird.
 Female::Female() : Bird(FEMALE)

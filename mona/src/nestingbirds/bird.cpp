@@ -37,4 +37,5 @@ char *Bird::stateToString()
     s += ", Has_object: ";
     s += OBJECT::toString(hasObject);
     s += ", State: " + state;
+    return (char *)s.c_str();
 }

@@ -1,22 +1,25 @@
-# The Mona nesting birds makefile
+# The nesting birds makefile
 
 CC = gcc
 
 all: ../../bin/nestingbirds
 
-../../bin/nestingbirds: NestingBirds.o male.o female.o
-	$(CC) -o ../../bin/nestingbirds \
-		fileio.o gettime.o log.o md5.o quaternion.o random.o RDtree.o \
-		drive.o enable.o homeostat.o learn.o mona.o respond.o sense.o \
-		male.o female.o NestingbBirds.o -lm -lstdc++
+../../bin/nestingbirds: NestingBirds.o male.o female.o bird.o
+	$(CC) -o ../../bin/nestingbirds NestingBirds.o male.o female.o bird.o\
+		../common/fileio.o ../common/gettime.o ../common/log.o ../common/md5.o ../common/quaternion.o ../common/random.o ../common/RDtree.o \
+		../mona/drive.o ../mona/enable.o ../mona/homeostat.o ../mona/learn.o ../mona/mona.o ../mona/respond.o ../mona/sense.o \
+		-lm -lstdc++
 
-male.o: ../mona/mona.hpp male.hpp male.cpp NestingBirds.cpp
+bird.o: ../mona/mona.hpp bird.hpp bird.cpp
+	$(CC) $(CCFLAGS) -c bird.cpp
+
+male.o: ../mona/mona.hpp male.hpp male.cpp
 	$(CC) $(CCFLAGS) -c male.cpp
 
-female.o: ../mona/mona.hpp female.hpp female.cpp NestingBirds.cpp
+female.o: ../mona/mona.hpp female.hpp female.cpp
 	$(CC) $(CCFLAGS) -c female.cpp
 
-NestingBirds.o: ../mona/mona.hpp male.hpp female.hpp NestingBirds.cpp
+NestingBirds.o: ../mona/mona.hpp bird.hpp male.hpp female.hpp NestingBirds.cpp
 	$(CC) $(CCFLAGS) -c NestingBirds.cpp
 
 clean:

@@ -13,6 +13,10 @@ class Bird
 {
 public:
 
+    // Gender.
+    static const int MALE = 0;
+    static const int FEMALE = 1;
+
    // Orientation.
    class ORIENTATION
    {
@@ -44,10 +48,6 @@ public:
           }
       }
    };
-
-   // Gender.
-   static const int MALE   = 0;
-   static const int FEMALE = 1;
 
    // Sensors.
    class CELL_SENSOR

@@ -10,30 +10,30 @@
 const char* VERSION = "2.0";
 
 // Random numbers.
+#define DEFAULT_RANDOM_NUMBER_SEED "4517"
 int    RANDOM_NUMBER_SEED = 4517;
 
 // Usage.
-#define STRING(X) #X
-const char* Usage =
+const char *Usage =
 "Usage:\n"
 "    nestingbirds\n"
 "      -train -save <save file name>] | -test -load <load file name>\n"
 "      -steps <steps>\n"
-"      [-maleInitialFood <amount> (default=" STRING(MALE_DEFAULT_INITIAL_FOOD) ")]\n"
-"      [-maleFoodDuration <amount> (default=" STRING(MALE_DEFAULT_FOOD_DURATION) ")]\n"
-"      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" STRING(MALE_DEFAULT_FOOD_DURATION) " upon eating food)]\n"
-"      [-maleMouseNeed <amount> (default=" STRING(MALE_DEFAULT_MOUSE_NEED) ")]\n"
-"      [-maleFemaleMouseNeed <amount> (default=" STRING(MALE_DEFAULT_Female_MOUSE_NEED) ")]\n"
-"      [-maleStoneNeed <amount> (default=" STRING(MALE_DEFAULT_STONE_NEED) ")]\n"
-"      [-maleFemaleStoneNeed <amount> (default=" STRING(MALE_DEFAULT_Female_STONE_NEED) ")]\n"
-"      [-femaleInitialFood <amount> (default=" STRING(Female_DEFAULT_INITIAL_FOOD) ")]\n"
-"      [-femaleFoodDuration <amount> (default=" STRING(Female_DEFAULT_FOOD_DURATION) ")]\n"
-"      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" STRING(Female_DEFAULT_FOOD_DURATION) " upon eating food)]\n"
-"      [-femaleMouseNeed <amount> (default=" STRING(Female_DEFAULT_MOUSE_NEED) ")]\n"
-"      [-femaleStoneNeed <amount> (default=" STRING(Female_DEFAULT_STONE_NEED) ")]\n"
-"      [-femaleEggNeed <amount> (default=" STRING(Female_DEFAULT_EGG_NEED) ")]\n"
+"      [-maleInitialFood <amount> (default=" MALE_DEFAULT_INITIAL_FOOD "]\n" 
+"      [-maleFoodDuration <amount> (default=" MALE_DEFAULT_FOOD_DURATION ")]\n"
+"      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" MALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
+"      [-maleMouseNeed <amount> (default=" MALE_DEFAULT_MOUSE_NEED ")]\n"
+"      [-maleFemaleMouseNeed <amount> (default=" MALE_DEFAULT_FEMALE_MOUSE_NEED ")]\n"
+"      [-maleStoneNeed <amount> (default=" MALE_DEFAULT_STONE_NEED ")]\n"
+"      [-maleFemaleStoneNeed <amount> (default=" MALE_DEFAULT_FEMALE_STONE_NEED ")]\n"
+"      [-femaleInitialFood <amount> (default=" FEMALE_DEFAULT_INITIAL_FOOD ")]\n"
+"      [-femaleFoodDuration <amount> (default=" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
+"      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
+"      [-femaleMouseNeed <amount> (default=" FEMALE_DEFAULT_MOUSE_NEED ")]\n"
+"      [-femaleStoneNeed <amount> (default=" FEMALE_DEFAULT_STONE_NEED ")]\n"
+"      [-femaleEggNeed <amount> (default=" FEMALE_DEFAULT_EGG_NEED ")]\n"
 "      [-verbose <true | false> (default=true)]\n"
-"      [-randomSeed <seed> (default=" STRING(RANDOM_NUMBER_SEED) ")]\n"
+"      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"
 "      [-version]\n"
 "Exit codes:\n"
 "  0=success\n"
@@ -307,7 +307,7 @@ bool getMouse()
     }
     if (male->sensors[Bird::RIGHT_OBJECT_SENSOR] == OBJECT::MOUSE)
     {
-        male->response = Bird::RESPONSE::TURN_RIGHT;
+        male->response = Bird::RESPONSE::TURN_RIGHT;;
         return(true);
     }
     if ((male->sensors[Bird::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST) ||
@@ -321,23 +321,23 @@ bool getMouse()
                 (male->sensors[Bird::FORWARD_LOCALE_SENSOR] != LOCALE::FOREST) &&
                 (male->sensors[Bird::RIGHT_LOCALE_SENSOR] != LOCALE::FOREST))
             {
-                male->response = Bird::RESPONSE::TURN_RIGHT;
+                male->response = Bird::RESPONSE::TURN_RIGHT;;
             }
             else
             {
                 vector<int> responses;
                 if (male->sensors[Bird::FORWARD_LOCALE_SENSOR] == LOCALE::FOREST)
                 {
-                    responses.push_back(Bird::RESPONSE::MOVE);
-                    responses.push_back(Bird::RESPONSE::MOVE);
+                    responses.push_back(55);
+                    responses.push_back(55);
                 }
                 if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::FOREST)
                 {
-                    responses.push_back(Bird::RESPONSE::TURN_LEFT);
+                    responses.push_back(77);
                 }
                 if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::FOREST)
                 {
-                    responses.push_back(Bird::RESPONSE::TURN_RIGHT);
+                    responses.push_back(66);
                 }
                 male->response = responses[rand() % responses.size()];
             }
@@ -347,16 +347,16 @@ bool getMouse()
             vector<int> responses;
             if (male->sensors[Bird::FORWARD_LOCALE_SENSOR] == LOCALE::FOREST)
             {
-                responses.push_back(Bird::RESPONSE::MOVE);
-                responses.push_back(Bird::RESPONSE::MOVE);
+                responses.push_back(55);
+                responses.push_back(55);
             }
             if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::FOREST)
             {
-                responses.push_back(Bird::RESPONSE::TURN_LEFT);
+                responses.push_back(77);
             }
             if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::FOREST)
             {
-                responses.push_back(Bird::RESPONSE::TURN_RIGHT);
+                responses.push_back(66);
             }
             male->response = responses[rand() % responses.size()];
         }
@@ -374,7 +374,7 @@ bool getMouse()
         {
         if (male->orientation == Bird::ORIENTATION::SOUTH)
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         else
         {
@@ -397,7 +397,7 @@ bool getMouse()
         }
         else
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         }
         return(true);
@@ -416,7 +416,7 @@ bool getMouse()
         }
         else
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         }
         return(true);
@@ -431,7 +431,7 @@ bool getMouse()
         {
         if (male->orientation == Bird::ORIENTATION::EAST)
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         else
         {
@@ -491,7 +491,7 @@ bool getStone()
     if ((male->sensors[Bird::RIGHT_OBJECT_SENSOR] == OBJECT::STONE) &&
         (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::DESERT))
     {
-        male->response = Bird::RESPONSE::TURN_RIGHT;
+        male->response = Bird::RESPONSE::TURN_RIGHT;;
         return(true);
     }
     if ((male->sensors[Bird::CURRENT_LOCALE_SENSOR] == LOCALE::DESERT) ||
@@ -505,23 +505,23 @@ bool getStone()
                 (male->sensors[Bird::FORWARD_LOCALE_SENSOR] != LOCALE::DESERT) &&
                 (male->sensors[Bird::RIGHT_LOCALE_SENSOR] != LOCALE::DESERT))
             {
-                male->response = Bird::RESPONSE::TURN_RIGHT;
+                male->response = Bird::RESPONSE::TURN_RIGHT;;
             }
             else
             {
                 vector<int> responses;
                 if (male->sensors[Bird::FORWARD_LOCALE_SENSOR] == LOCALE::DESERT)
                 {
-                    responses.push_back(Bird::RESPONSE::MOVE);
-                    responses.push_back(Bird::RESPONSE::MOVE);
+                    responses.push_back(55);
+                    responses.push_back(55);
                 }
                 if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::DESERT)
                 {
-                    responses.push_back(Bird::RESPONSE::TURN_LEFT);
+                    responses.push_back(77);
                 }
                 if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::DESERT)
                 {
-                    responses.push_back(Bird::RESPONSE::TURN_RIGHT);
+                    responses.push_back(66);
                 }
                 male->response = responses[rand() % responses.size()];
             }
@@ -531,16 +531,16 @@ bool getStone()
             vector<int> responses;
             if (male->sensors[Bird::FORWARD_LOCALE_SENSOR] == LOCALE::DESERT)
             {
-                responses.push_back(Bird::RESPONSE::MOVE);
-                responses.push_back(Bird::RESPONSE::MOVE);
+                responses.push_back(55);
+                responses.push_back(55);
             }
             if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::DESERT)
             {
-                responses.push_back(Bird::RESPONSE::TURN_LEFT);
+                responses.push_back(77);
             }
             if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::DESERT)
             {
-                responses.push_back(Bird::RESPONSE::TURN_RIGHT);
+                responses.push_back(66);
             }
             male->response = responses[rand() % responses.size()];
         }
@@ -558,7 +558,7 @@ bool getStone()
         {
         if (male->orientation == Bird::ORIENTATION::SOUTH)
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         else
         {
@@ -581,7 +581,7 @@ bool getStone()
         }
         else
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         }
         return(true);
@@ -600,7 +600,7 @@ bool getStone()
         }
         else
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         }
         return(true);
@@ -615,7 +615,7 @@ bool getStone()
         {
         if (male->orientation == Bird::ORIENTATION::EAST)
         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
+            male->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         else
         {
@@ -645,7 +645,7 @@ bool returnToFemale()
         break;
 
     case Bird::MATE_PROXIMITY_RIGHT:
-        male->response = Bird::RESPONSE::TURN_RIGHT;
+        male->response = Bird::RESPONSE::TURN_RIGHT;;
         break;
 
     case Bird::MATE_PROXIMITY_UNKNOWN:
@@ -665,7 +665,7 @@ bool returnToFemale()
             }
             else
             {
-                male->response = Bird::RESPONSE::TURN_RIGHT;
+                male->response = Bird::RESPONSE::TURN_RIGHT;;
             }
         }
         }
@@ -679,7 +679,7 @@ bool returnToFemale()
         {
             if (male->orientation == Bird::ORIENTATION::SOUTH)
             {
-                male->response = Bird::RESPONSE::TURN_RIGHT;
+                male->response = Bird::RESPONSE::TURN_RIGHT;;
             }
             else
             {
@@ -697,7 +697,7 @@ bool returnToFemale()
             {
                 if (male->orientation == Bird::ORIENTATION::EAST)
                 {
-                    male->response = Bird::RESPONSE::TURN_RIGHT;
+                    male->response = Bird::RESPONSE::TURN_RIGHT;;
                 }
                 else
                 {
@@ -715,7 +715,7 @@ bool returnToFemale()
             {
                 if (male->orientation == Bird::ORIENTATION::WEST)
                 {
-                    male->response = Bird::RESPONSE::TURN_RIGHT;
+                    male->response = Bird::RESPONSE::TURN_RIGHT;;
                 }
                 else
                 {
@@ -779,7 +779,7 @@ void femaleAutopilot()
         }
         else
         {
-            female->response = Bird::RESPONSE::TURN_RIGHT;
+            female->response = Bird::RESPONSE::TURN_RIGHT;;
         }
         break;
 
@@ -985,7 +985,7 @@ void femaleAutopilot()
         }
         else
         {
-            female->response    = Bird::RESPONSE::TURN_RIGHT;
+            female->response    = Bird::RESPONSE::TURN_RIGHT;;
             FemaleNestSequence = 0;
         }
         break;
@@ -1095,7 +1095,7 @@ void doResponse(int gender)
         }
         break;
 
-        case Bird::RESPONSE::MOVE:
+        case 55:
             switch (bird->orientation)
             {
             case Bird::ORIENTATION::NORTH:
@@ -1129,7 +1129,7 @@ void doResponse(int gender)
             }
             break;
 
-        case Bird::RESPONSE::TURN_RIGHT:
+        case 66:
             switch (bird->orientation)
             {
             case Bird::ORIENTATION::NORTH:
@@ -1150,7 +1150,7 @@ void doResponse(int gender)
             }
             break;
 
-        case Bird::RESPONSE::TURN_LEFT:
+        case 77:
             switch (bird->orientation)
             {
             case Bird::ORIENTATION::NORTH:
@@ -1169,6 +1169,14 @@ void doResponse(int gender)
                 bird->orientation = Bird::ORIENTATION::SOUTH;
                 break;
             }
+            break;
+
+        case Bird::RESPONSE::STATE_ZERO:
+            bird->state = 0;
+            break;
+
+        case Bird::RESPONSE::STATE_ONE:
+            bird->state = 1;
             break;
         }
     }
@@ -1511,9 +1519,9 @@ void stepMice()
         {
         if ((World[x][y].object == OBJECT::MOUSE) &&
             ((male->x != x) || (male->y != y) || (male->response != Bird::RESPONSE::GET)) &&
-            (((double)rand() / (double)(RAND_MAX + 1))) < MOUSE_MOVE_PROBABILITY)
+            (((double)((long)rand()) / (double)(((long)RAND_MAX) + 1))) < MOUSE_MOVE_PROBABILITY)
         {
-            boolean move = false;
+            bool move = false;
             for (int i = (rand() % 4), i2 = 0; i2 < 4 && !move; i = (i + 1) % 4, i2++)
             {
                 switch (i)
@@ -1575,7 +1583,7 @@ void stepMice()
 }
 
 // Main.
-void main(int argc, char* args[])
+int main(int argc, char* args[])
 {
     bool gotTrainTest = false;
     bool gotSteps = false;

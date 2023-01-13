@@ -20,9 +20,9 @@ public:
     class RESPONSE
     {
     public:
-        static const int WANT_MOUSE = 8;
-        static const  int WANT_STONE = 9;
-        static const  int LAY_EGG = 10;
+        static const int WANT_MOUSE = 10;
+        static const  int WANT_STONE = 11;
+        static const  int LAY_EGG = 12;
         static const  int NUM_RESPONSES = 3;
 
         // Response to string.
@@ -47,18 +47,18 @@ public:
     int response;
 
     // Food.
-#define FEMALE_DEFAULT_FOOD_DURATION 200
+#define FEMALE_DEFAULT_FOOD_DURATION "200"
     static int     FOOD_DURATION;
 #define FEMALE_DEFAULT_INITIAL_FOOD FEMALE_DEFAULT_FOOD_DURATION
     static int     INITIAL_FOOD;
     static bool RANDOMIZE_FOOD_LEVEL;
 
 	// Needs.
-#define FEMALE_DEFAULT_MOUSE_NEED 100.0
+#define FEMALE_DEFAULT_MOUSE_NEED "100.0"
 	static Mona::NEED MOUSE_NEED;
-#define FEMALE_DEFAULT_STONE_NEED 0.0
+#define FEMALE_DEFAULT_STONE_NEED "0.0"
 	static Mona::NEED STONE_NEED;
-#define FEMALE_DEFAULT_EGG_NEED 5.0
+#define FEMALE_DEFAULT_EGG_NEED "5.0"
 	static Mona::NEED EGG_NEED;
 
 	// Constructor.

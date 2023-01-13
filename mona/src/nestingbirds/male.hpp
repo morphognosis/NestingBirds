@@ -22,8 +22,8 @@ public:
     class RESPONSE
     {
     public:
-        static const int GIVE_MOUSE = 8;
-        static const int GIVE_STONE = 9;
+        static const int GIVE_MOUSE = 10;
+        static const int GIVE_STONE = 11;
         static const int NUM_RESPONSES = 2;
 
         // Response to string.
@@ -45,22 +45,22 @@ public:
     int response;
 
     // Food.
-#define MALE_DEFAULT_FOOD_DURATION 200
+#define MALE_DEFAULT_FOOD_DURATION "200"
     static int     FOOD_DURATION;
 #define MALE_DEFAULT_INITIAL_FOOD MALE_DEFAULT_FOOD_DURATION
     static int     INITIAL_FOOD;
     static bool RANDOMIZE_FOOD_LEVEL;
 
 	// Needs.
-#define MALE_DEFAULT_MOUSE_NEED 100.0
+#define MALE_DEFAULT_MOUSE_NEED "100.0"
 	static Mona::NEED MOUSE_NEED;
-#define MALE_DEFAULT_FEMALE_MOUSE_NEED 50.0
+#define MALE_DEFAULT_FEMALE_MOUSE_NEED "50.0"
 	static Mona::NEED FEMALE_MOUSE_NEED;
-#define MALE_DEFAULT_STONE_NEED 7.5
+#define MALE_DEFAULT_STONE_NEED "7.5"
 	static Mona::NEED STONE_NEED;
-#define MALE_DEFAULT_FEMALE_STONE_NEED 10.0
+#define MALE_DEFAULT_FEMALE_STONE_NEED "10.0"
 	static Mona::NEED FEMALE_STONE_NEED;
-#define MALE_DEFAULT_ATTEND_FEMALE_NEED 5.0
+#define MALE_DEFAULT_ATTEND_FEMALE_NEED "5.0"
 	static Mona::NEED ATTEND_FEMALE_NEED;
 
 	// Constructor.
