@@ -24,18 +24,8 @@ void Bird::digest()
 // Print state.
 void Bird::printState()
 {
-    printf(stateToString());
-    printf("\n");
-}
-
-// State to string.
-char *Bird::stateToString()
-{
-    string s = "Orientation: ";
-    s += ORIENTATION::toString(orientation);
-    s += ", Food: " + food;
-    s += ", Has_object: ";
-    s += OBJECT::toString(hasObject);
-    s += ", State: " + state;
-    return (char *)s.c_str();
+    printf("Orientation: %s", ORIENTATION::toString(orientation));
+    printf(", Food: %d", food);
+    printf(", Has_object: %s", OBJECT::toString(hasObject));
+    printf(", State: %d", state);
 }

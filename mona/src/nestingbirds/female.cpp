@@ -464,12 +464,6 @@ Female::Female() : Bird(FEMALE)
 	response = Bird::RESPONSE::DO_NOTHING;
 }
 
-
-// Set sensors.
-void Female::setSensors(int *sensors)
-{
-}
-
 // Cycle female.
 int Female::cycle()
 {
@@ -488,88 +482,77 @@ int Female::cycle()
 void Female::print()
 {
 	printf("Sensors: [");
-	printf(sensorsToString());
+	printSensors();
 	printf("], ");
-	printf(stateToString());
+	printState();
 	printf(", Response: ");
-	printf(RESPONSE::toString(response));
-	printf("\n");
+	printResponse();
 }
 
 
 // Print sensors.
 void Female::printSensors()
 {
-	printf(sensorsToString());
-	printf("\n");
-}
-
-
-// Sensors to string.
-char *Female::sensorsToString()
-{
-	string s = "[Cell sensors: ";
+	printf("[Cell sensors: ");
 
 	for (int i = 0; i < Bird::NUM_CELL_SENSORS; i++)
 	{
-		s += "[";
+		printf("[");
 		switch (i)
 		{
 		case 0:
-			s += "Current: ";
+			printf("Current: ");
 			break;
 
 		case 1:
-			s += "Left: ";
+			printf("Left: ");
 			break;
 
 		case 2:
-			s += "Forward: ";
+			printf("Forward: ");
 			break;
 
 		case 3:
-			s += "Right: ";
+			printf("Right: ");
 			break;
 		}
-		s += LOCALE::toString(sensors[i * Bird::CELL_SENSOR::NUM_SENSORS]);
-		s += ",";
-		s += OBJECT::toString(sensors[(i * Bird::CELL_SENSOR::NUM_SENSORS) + 1]);
-		s += "]";
+		printf("%s", LOCALE::toString(sensors[i * Bird::CELL_SENSOR::NUM_SENSORS]));
+		printf(",");
+		printf("%s", OBJECT::toString(sensors[(i * Bird::CELL_SENSOR::NUM_SENSORS) + 1]));
+		printf("]");
 		if (i < NUM_CELL_SENSORS - 1)
 		{
-			s += ",";
+			printf(",");
 		}
 	}
-	s += "], Mate proximity: ";
+	printf("], Mate proximity: ");
 	switch (sensors[MATE_PROXIMITY_SENSOR])
 	{
 	case MATE_PROXIMITY_UNKNOWN:
-		s += "UNKNOWN";
+		printf("UNKNOWN");
 		break;
 
 	case MATE_PROXIMITY_PRESENT:
-		s += "PRESENT";
+		printf("PRESENT");
 		break;
 
 	case MATE_PROXIMITY_LEFT:
-		s += "LEFT";
+		printf("LEFT");
 		break;
 
 	case MATE_PROXIMITY_FORWARD:
-		s += "FORWARD";
+		printf("FORWARD");
 		break;
 
 	case MATE_PROXIMITY_RIGHT:
-		s += "RIGHT";
+		printf("RIGHT");
 		break;
 	}
-	return((char *)s.c_str());
 }
 
 // Print response.
 void Female::printResponse()
 {
 	printf(RESPONSE::toString(response));
-	printf("\n");
 }
 

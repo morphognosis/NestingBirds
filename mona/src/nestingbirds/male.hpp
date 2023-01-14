@@ -66,9 +66,6 @@ public:
 	// Constructor.
 	Male();
 
-    // Set sensors.
-    void setSensors(int *sensors);
-
     // Cycle.
     int cycle();
 
@@ -77,9 +74,6 @@ public:
 
     // Print sensors.
     void printSensors();
-
-    // Sensors to string.
-    char *sensorsToString();
 
     // Print response.
     void printResponse();

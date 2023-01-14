@@ -90,8 +90,8 @@ public:
       static const int MOVE          = 5;
       static const int TURN_RIGHT    = 6;
       static const int TURN_LEFT     = 7;
-      static const int STATE_ZERO = 8;
-      static const int STATE_ONE = 9;    
+      static const int STATE_ON = 8;
+      static const int STATE_OFF = 9;    
       static const int NUM_RESPONSES = 10;
 
       // Response to string.
@@ -123,11 +123,11 @@ public:
           case TURN_LEFT:
               return("TURN_LEFT");
 
-          case STATE_ZERO:
-              return("STATE_ZERO");
+          case STATE_OFF:
+              return("STATE_OFF");
 
-          case STATE_ONE:
-              return("STATE_ONE");
+          case STATE_ON:
+              return("STATE_ON");
 
           default:
               return("Unknown response");
@@ -154,8 +154,5 @@ public:
 
    // Print state.
    void printState();
-
-   // State to string.
-   char *stateToString();
 };
 #endif
