@@ -13,14 +13,14 @@ class Bird
 {
 public:
 
-    // Gender.
-    static const int MALE = 0;
-    static const int FEMALE = 1;
+   // Gender.
+   static const int MALE   = 0;
+   static const int FEMALE = 1;
 
    // Orientation.
    class ORIENTATION
    {
-   public:
+public:
       static const int NORTH = 0;
       static const int SOUTH = 1;
       static const int EAST  = 2;
@@ -29,30 +29,30 @@ public:
       // Orientation to string.
       static char *toString(int orientation)
       {
-          switch (orientation)
-          {
-          case NORTH:
-              return("NORTH");
+         switch (orientation)
+         {
+         case NORTH:
+            return("NORTH");
 
-          case SOUTH:
-              return("SOUTH");
+         case SOUTH:
+            return("SOUTH");
 
-          case EAST:
-              return("EAST");
+         case EAST:
+            return("EAST");
 
-          case WEST:
-              return("WEST");
+         case WEST:
+            return("WEST");
 
-          default:
-              return("Unknown orientation");
-          }
+         default:
+            return("Unknown orientation");
+         }
       }
    };
 
    // Sensors.
    class CELL_SENSOR
    {
-   public:
+public:
       static const int NUM_SENSORS = 2;
       int              locale;
       int              object;
@@ -81,7 +81,7 @@ public:
    // Responses.
    class RESPONSE
    {
-   public:
+public:
       static const int DO_NOTHING    = 0;
       static const int EAT           = 1;
       static const int GET           = 2;
@@ -90,48 +90,48 @@ public:
       static const int MOVE          = 5;
       static const int TURN_RIGHT    = 6;
       static const int TURN_LEFT     = 7;
-      static const int STATE_ON = 8;
-      static const int STATE_OFF = 9;    
+      static const int STATE_ON      = 8;
+      static const int STATE_OFF     = 9;
       static const int NUM_RESPONSES = 10;
 
       // Response to string.
       static char *toString(int response)
       {
-          switch (response)
-          {
-          case DO_NOTHING:
-              return("DO_NOTHING");
+         switch (response)
+         {
+         case DO_NOTHING:
+            return("DO_NOTHING");
 
-          case EAT:
-              return("EAT");
+         case EAT:
+            return("EAT");
 
-          case GET:
-              return("GET");
+         case GET:
+            return("GET");
 
-          case PUT:
-              return("PUT");
+         case PUT:
+            return("PUT");
 
-          case TOSS:
-              return("TOSS");
+         case TOSS:
+            return("TOSS");
 
-          case MOVE:
-              return("MOVE");
+         case MOVE:
+            return("MOVE");
 
-          case TURN_RIGHT:
-              return("TURN_RIGHT");
+         case TURN_RIGHT:
+            return("TURN_RIGHT");
 
-          case TURN_LEFT:
-              return("TURN_LEFT");
+         case TURN_LEFT:
+            return("TURN_LEFT");
 
-          case STATE_OFF:
-              return("STATE_OFF");
+         case STATE_OFF:
+            return("STATE_OFF");
 
-          case STATE_ON:
-              return("STATE_ON");
+         case STATE_ON:
+            return("STATE_ON");
 
-          default:
-              return("Unknown response");
-          }
+         default:
+            return("Unknown response");
+         }
       }
    };
 

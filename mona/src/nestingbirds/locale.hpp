@@ -7,28 +7,27 @@
 class LOCALE
 {
 public:
-    static const int DESERT = 0;
-    static const int FOREST = 1;
-    static const int PLAIN = 2;
+   static const int DESERT = 0;
+   static const int FOREST = 1;
+   static const int PLAIN  = 2;
 
-    // Locale to string.
-    static char *toString(int locale)
-    {
-        switch (locale)
-        {
-        case DESERT:
-            return("DESERT");
+   // Locale to string.
+   static char *toString(int locale)
+   {
+      switch (locale)
+      {
+      case DESERT:
+         return("DESERT");
 
-        case FOREST:
-            return("FOREST");
+      case FOREST:
+         return("FOREST");
 
-        case PLAIN:
-            return("PLAIN");
+      case PLAIN:
+         return("PLAIN");
 
-        default:
-            return("Unknown locale");
-        }
-    }
+      default:
+         return("Unknown locale");
+      }
+   }
 };
 #endif
-
