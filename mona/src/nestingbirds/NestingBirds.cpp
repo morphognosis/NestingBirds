@@ -20,27 +20,27 @@ const char *Usage =
    "      -train -save <save file name>] | -test -load <load file name>\n"
    "      -steps <steps>\n"
    "      [-maleInitialFood <amount> (default=" MALE_DEFAULT_INITIAL_FOOD "]\n"
-                                                                          "      [-maleFoodDuration <amount> (default=" MALE_DEFAULT_FOOD_DURATION ")]\n"
-                                                                                                                                                   "      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" MALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
-                                                                                                                                                                                                                                                          "      [-maleMouseNeed <amount> (default=" MALE_DEFAULT_MOUSE_NEED ")]\n"
-                                                                                                                                                                                                                                                                                                                             "      [-maleFemaleMouseNeed <amount> (default=" MALE_DEFAULT_FEMALE_MOUSE_NEED ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                             "      [-maleStoneNeed <amount> (default=" MALE_DEFAULT_STONE_NEED ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "      [-maleFemaleStoneNeed <amount> (default=" MALE_DEFAULT_FEMALE_STONE_NEED ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "      [-femaleInitialFood <amount> (default=" FEMALE_DEFAULT_INITIAL_FOOD ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "      [-femaleFoodDuration <amount> (default=" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        "      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   "      [-femaleMouseNeed <amount> (default=" FEMALE_DEFAULT_MOUSE_NEED ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          "      [-femaleStoneNeed <amount> (default=" FEMALE_DEFAULT_STONE_NEED ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 "      [-femaleEggNeed <amount> (default=" FEMALE_DEFAULT_EGG_NEED ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    "      [-verbose <true | false> (default=true)]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "      [-version]\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "Exit codes:\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "  0=success\n"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "  1=error\n";
+   "      [-maleFoodDuration <amount> (default=" MALE_DEFAULT_FOOD_DURATION ")]\n"
+   "      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" MALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
+   "      [-maleMouseNeed <amount> (default=" MALE_DEFAULT_MOUSE_NEED ")]\n"
+   "      [-maleFemaleMouseNeed <amount> (default=" MALE_DEFAULT_FEMALE_MOUSE_NEED ")]\n"
+   "      [-maleStoneNeed <amount> (default=" MALE_DEFAULT_STONE_NEED ")]\n"
+   "      [-maleFemaleStoneNeed <amount> (default=" MALE_DEFAULT_FEMALE_STONE_NEED ")]\n"
+   "      [-femaleInitialFood <amount> (default=" FEMALE_DEFAULT_INITIAL_FOOD ")]\n"
+   "      [-femaleFoodDuration <amount>(default" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
+   "      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
+   "      [-femaleMouseNeed <amount> (default=" FEMALE_DEFAULT_MOUSE_NEED ")]\n"
+   "      [-femaleStoneNeed <amount> (default=" FEMALE_DEFAULT_STONE_NEED ")]\n"
+   "      [-femaleEggNeed <amount> (default=" FEMALE_DEFAULT_EGG_NEED ")]\n"
+   "      [-verbose <true | false> (default=true)]\n"
+   "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+   "      [-version]\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+   "Exit codes:\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+   "  0=success\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+   "  1=error\n";
 
 // Testing vs. training.
-bool Testing;
+bool Test;
 
 // Steps.
 int Steps;
@@ -191,7 +191,7 @@ void step()
    setSensors(Bird::FEMALE);
 
    // Produce female response.
-   if (Testing)
+   if (Test)
    {
       female->cycle();
    }
@@ -210,7 +210,7 @@ void step()
    setSensors(Bird::MALE);
 
    // Produce male response.
-   if (Testing)
+   if (Test)
    {
       male->cycle();
    }
@@ -1638,7 +1638,7 @@ int main(int argc, char *args[])
    {
       if (strcmp(args[i], "-train") == 0)
       {
-         Testing = false;
+         Test = false;
          if (gotTrainTest)
          {
             fprintf(stderr, "Duplicate train/test option\n");
@@ -1662,7 +1662,7 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-test") == 0)
       {
-         Testing = true;
+         Test = true;
          if (gotTrainTest)
          {
             fprintf(stderr, "Duplicate train/test option\n");
@@ -1994,6 +1994,24 @@ int main(int argc, char *args[])
    // Initialize.
    init();
 
+   // Load?
+   if (Test)
+   {
+       FILE* fp;
+       if ((fp = fopen(Filename, "r")) == NULL)
+       {
+           fprintf(stderr, "Cannot load training");
+           exit(1);
+       }
+       male->brain->load(fp);
+       female->brain->load(fp);
+       fclose(fp);
+       if (Verbose)
+       {
+           printf("Networks loaded from file %s\n", Filename);
+       }
+   }
+
    // Run birds.
    int eggLaidStep = -1;
    for (int i = 0; i < Steps; i++)
@@ -2039,6 +2057,24 @@ int main(int argc, char *args[])
          }
       }
       printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
+   }
+
+   // Save training?
+   if (!Test)
+   {
+       FILE* fp;
+       if ((fp = fopen(Filename, "w")) == NULL)
+       {
+           fprintf(stderr, "Cannot save training");
+           exit(1);
+       }
+       male->brain->save(fp);
+       female->brain->save(fp);
+       fclose(fp);
+       if (Verbose)
+       {
+           printf("Training saved to file %s\n", Filename);
+       }
    }
    exit(0);
 }

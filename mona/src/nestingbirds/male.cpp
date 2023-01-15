@@ -16,13 +16,14 @@ Mona::NEED Male::STONE_NEED         = strtod(MALE_DEFAULT_STONE_NEED, 0);
 Mona::NEED Male::FEMALE_STONE_NEED  = strtod(MALE_DEFAULT_FEMALE_STONE_NEED, 0);
 Mona::NEED Male::ATTEND_FEMALE_NEED = strtod(MALE_DEFAULT_ATTEND_FEMALE_NEED, 0);
 
+extern int RANDOM_NUMBER_SEED;
+
 // Construct male bird.
 Male::Male() : Bird(MALE)
 {
-   /*
-    *      brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
-    *              RESPONSE::NUM_MALE_RESPONSES);
-    *
+    brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
+        RESPONSE::NUM_RESPONSES, 1, RANDOM_NUMBER_SEED);
+    /*
     * Mona::Receptor *anywhere, *desert, *forest,
     * *foodOnGround, *stoneOnGround, *noObject,
     * *gotFood, *gotStone,

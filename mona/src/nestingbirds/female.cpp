@@ -14,14 +14,15 @@ Mona::NEED Female::MOUSE_NEED = strtod(FEMALE_DEFAULT_MOUSE_NEED, 0);
 Mona::NEED Female::STONE_NEED = strtod(FEMALE_DEFAULT_STONE_NEED, 0);
 Mona::NEED Female::EGG_NEED   = strtod(FEMALE_DEFAULT_EGG_NEED, 0);
 
+extern int RANDOM_NUMBER_SEED;
+
 // Construct female bird.
 Female::Female() : Bird(FEMALE)
 {
-   /*
-    * brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
-    *      RESPONSE::NUM_FEMALE_RESPONSES);
-    *
-    * Mona::Receptor *anywhere, *emptyGround, *stoneOnGround,
+    brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
+        RESPONSE::NUM_RESPONSES, 1, RANDOM_NUMBER_SEED);
+
+    /* Mona::Receptor *anywhere, *emptyGround, *stoneOnGround,
     * *haveStone, *mateHasStone, *readyToLayEgg, *eggOnGround,
     * *mateHasFood, *gotFood, *foodOK;
     * Mona::Motor *eat, *get, *layEgg, *put, *receive,
