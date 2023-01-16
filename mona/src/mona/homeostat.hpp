@@ -90,7 +90,7 @@ public:
                NEED goalValue);
 
    // Add goal value to receptor if needed.
-   void addGoal(void *receptor);
+   //void addGoal(void *receptor);
 
    // Find index of goal matching sensors, sensor mode
    // and response. Return -1 for no match.

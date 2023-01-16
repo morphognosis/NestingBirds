@@ -69,6 +69,7 @@ public:
    static const int RIGHT_LOCALE_SENSOR   = 6;
    static const int RIGHT_OBJECT_SENSOR   = 7;
 
+   // Mate proximity sensor.
    static const int MATE_PROXIMITY_SENSOR  = NUM_CELL_SENSORS * CELL_SENSOR::NUM_SENSORS;
    static const int MATE_PROXIMITY_UNKNOWN = -1;
    static const int MATE_PROXIMITY_PRESENT = 0;
@@ -76,7 +77,21 @@ public:
    static const int MATE_PROXIMITY_FORWARD = 2;
    static const int MATE_PROXIMITY_RIGHT   = 3;
 
-   static const int NUM_SENSORS = MATE_PROXIMITY_SENSOR + 1;
+   // State.
+   int gender;
+   int x, y;
+   int orientation;
+   int food;
+   int hasObject;
+   int state;
+
+   // State sensors.
+   static const int ORIENTATION_SENSOR = MATE_PROXIMITY_SENSOR + 1;
+   static const int HUNGER_SENSOR = ORIENTATION_SENSOR + 1;
+   static const int HAS_OBJECT_SENSOR = HUNGER_SENSOR + 1;
+   static const int STATE_SENSOR = HAS_OBJECT_SENSOR + 1;
+
+   static const int NUM_SENSORS = STATE_SENSOR + 1;
 
    // Responses.
    class RESPONSE
@@ -134,14 +149,6 @@ public:
          }
       }
    };
-
-   // State.
-   int gender;
-   int x, y;
-   int orientation;
-   int food;
-   int hasObject;
-   int state;
 
    // Brain.
    Mona *brain;

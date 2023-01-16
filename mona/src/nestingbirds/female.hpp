@@ -54,12 +54,16 @@ public:
    static bool RANDOMIZE_FOOD_LEVEL;
 
    // Needs.
-#define FEMALE_DEFAULT_MOUSE_NEED    "100.0"
+   static const int MOUSE_NEED_INDEX = 0;
+#define FEMALE_DEFAULT_MOUSE_NEED    "0.3"
    static Mona::NEED MOUSE_NEED;
-#define FEMALE_DEFAULT_STONE_NEED    "0.0"
+   static const int STONE_NEED_INDEX = 1;
+#define FEMALE_DEFAULT_STONE_NEED    "0.1"
    static Mona::NEED STONE_NEED;
-#define FEMALE_DEFAULT_EGG_NEED      "5.0"
+   static const int EGG_NEED_INDEX = 2;
+#define FEMALE_DEFAULT_EGG_NEED      "0.2"
    static Mona::NEED EGG_NEED;
+   static const int NUM_NEEDS = 3;
 
    // Constructor.
    Female();
@@ -75,5 +79,17 @@ public:
 
    // Print response.
    void printResponse();
+
+private:
+
+    // Set sensors.
+    void setSensors(vector<Mona::SENSOR>& sensors,
+        Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
+        Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
+        Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
+        Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
+        Mona::SENSOR mateProximity,
+        Mona::SENSOR orienatation, Mona::SENSOR hungerSensor,
+        Mona::SENSOR hasObject, Mona::SENSOR stateSensor);
 };
 #endif

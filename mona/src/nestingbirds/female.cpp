@@ -19,452 +19,83 @@ extern int RANDOM_NUMBER_SEED;
 // Construct female bird.
 Female::Female() : Bird(FEMALE)
 {
+    // Create Mona bird brain.
     brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
-        RESPONSE::NUM_RESPONSES, 1, RANDOM_NUMBER_SEED);
+        RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
+    vector<bool> sensorMask;
+    for (int i = 0; i < NUM_SENSORS; i++)
+    {
+        sensorMask.push_back(true);
+    }
+    brain->addSensorMode(sensorMask);
 
-    /* Mona::Receptor *anywhere, *emptyGround, *stoneOnGround,
-    * *haveStone, *mateHasStone, *readyToLayEgg, *eggOnGround,
-    * *mateHasFood, *gotFood, *foodOK;
-    * Mona::Motor *eat, *get, *layEgg, *put, *receive,
-    * *step, *toss, *turn, *wantStoneSet, *wantStoneUnset;
-    * Mona::Mediator *eatFood, *foodEaten,
-    * *receiveFood, *foodReceived,
-    * *eggInNest[50], *buildNest[30],
-    * *clearNest[30], *layEggInNest, *eggLaidInNest;
-    * Mona::SENSOR *s;
-    * VALUE_SET goals;
-    * int i;
-    * char *description;
-    *
-    * assert(mona != NULL);
-    * this->mona = mona;
-    *
-    * // Needs.
-    * mona->initNeed(0, 0.0, "Need for food");
-    * mona->initNeed(1, 0.0, "Need for egg in nest");
-    *
-    * // Receptors:
-    * // setSensors(locale, object, condition.wantsFood, condition.wantsStone,
-    * //  condition.hasObject, mate.present, mate.condition.wantsFood,
-    * //  mate.condition.wantsStone, mate.condition.hasObject)
-    * s = MonAmi::setSensors(DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * anywhere = this->mona->newReceptor(s, "Anywhere");
-    * s = MonAmi::setSensors(GRASSLAND, NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * emptyGround = this->mona->newReceptor(s, "Empty ground");
-    * s = MonAmi::setSensors(GRASSLAND, STONE, DONT_CARE, DONT_CARE, DONT_CARE,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * stoneOnGround = this->mona->newReceptor(s, "Stone on ground");
-    * s = MonAmi::setSensors(GRASSLAND, NO_OBJECT, DONT_CARE, DONT_CARE, NO_OBJECT,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * readyToLayEgg = this->mona->newReceptor(s, "Ready to lay egg");
-    * s = MonAmi::setSensors(GRASSLAND, EGG, DONT_CARE, DONT_CARE, DONT_CARE,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * eggOnGround = this->mona->newReceptor(s, "Egg on ground");
-    * s = MonAmi::setSensors(GRASSLAND, NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, STONE);
-    * mateHasStone = this->mona->newReceptor(s, "Have stone");
-    * s = MonAmi::setSensors(GRASSLAND, NO_OBJECT, DONT_CARE, DONT_CARE, STONE,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * haveStone = this->mona->newReceptor(s, "Have stone");
-    * s = MonAmi::setSensors(DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, NO_OBJECT,
-    *      TRUE, DONT_CARE, DONT_CARE, FOOD);
-    * mateHasFood = this->mona->newReceptor(s, "Mate has food");
-    * s = MonAmi::setSensors(DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, FOOD,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * gotFood = this->mona->newReceptor(s, "Got food");
-    * s = MonAmi::setSensors(DONT_CARE, DONT_CARE, FALSE, DONT_CARE, NO_OBJECT,
-    *      DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    * foodOK = this->mona->newReceptor(s, "Food OK");
-    *
-    * // Motors:
-    * eat = this->mona->newMotor(EAT, "Eat");
-    * get = this->mona->newMotor(GET, "Get");
-    * layEgg = this->mona->newMotor(LAY_EGG, "Lay egg");
-    * put = this->mona->newMotor(PUT, "Put");
-    * receive = this->mona->newMotor(RECEIVE, "Receive");
-    * step = this->mona->newMotor(STEP, "Step");
-    * toss = this->mona->newMotor(TOSS, "Toss");
-    * turn = this->mona->newMotor(TURN, "Turn");
-    * wantStoneSet = this->mona->newMotor(WANT_STONE_SET, "Want stone set");
-    * wantStoneUnset = this->mona->newMotor(WANT_STONE_UNSET, "Want stone unset");
-    *
-    * // Mediators:
-    *
-    * // eatFood: (gotFood -> eat)
-    * eatFood = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, "Eat food");
-    * eatFood->addEvent(Mona::CAUSE, (Mona::Neuron *)gotFood);
-    * eatFood->addEvent(Mona::EFFECT, (Mona::Neuron *)eat);
-    *
-    * // foodEaten: (eatFood -> foodOK)
-    * foodEaten = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, "Food eaten");
-    * foodEaten->addEvent(Mona::CAUSE, (Mona::Neuron *)eatFood);
-    * foodEaten->addEvent(Mona::EFFECT, (Mona::Neuron *)foodOK);
-    *
-    * // receiveFood: (mateHasFood -> receive)
-    * receiveFood = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, "Receive food");
-    * receiveFood->addEvent(Mona::CAUSE, (Mona::Neuron *)mateHasFood);
-    * receiveFood->addEvent(Mona::EFFECT, (Mona::Neuron *)receive);
-    *
-    * // foodReceived: (receiveFood -> gotFood)
-    * foodReceived = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, "Food received");
-    * foodReceived->addEvent(Mona::CAUSE, (Mona::Neuron *)receiveFood);
-    * foodReceived->addEvent(Mona::EFFECT, (Mona::Neuron *)gotFood);
-    *
-    * // eggInNest: egg in nest
-    *
-    * // Prepare to check nest.
-    * i = 0;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)turn);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)anywhere);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Move to center and lay egg.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)eggOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)turn);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build SE corner.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)turn);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build south side.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build SW corner.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)turn);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build west side.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build NW corner.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)turn);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build north side.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build NE corner.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)turn);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Build east side.
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MIN_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)step);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Egg in nest[%d]", i);
-    * eggInNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * eggInNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * eggInNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)eggInNest[i-1]);
-    *
-    * // Set long wait parameter since building nest is lengthy.
-    * for (i = 0; i <= 30; i++)
-    * {
-    *      eggInNest[i]->timedWagerWeights[0] = 0.0;
-    *      eggInNest[i]->timedWagerWeights[1] = 1.0;
-    * }
-    *
-    * // buildNest: (emptyGround -> wantStoneSet -> mateHasStone ->
-    * //	receive -> haveStone -> wantStoneUnset -> haveStone ->
-    * //	put -> stoneOnGround)
-    * i = 0;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)emptyGround);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)wantStoneSet);
-    * buildNest[i]->setRepeater(true);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)buildNest[i-1]);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)mateHasStone);
-    * buildNest[i]->setRepeater(true);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)buildNest[i-1]);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)receive);
-    * buildNest[i]->setRepeater(true);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)buildNest[i-1]);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)haveStone);
-    * buildNest[i]->setRepeater(true);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)buildNest[i-1]);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)wantStoneUnset);
-    * buildNest[i]->setRepeater(true);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)buildNest[i-1]);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)haveStone);
-    * buildNest[i]->setRepeater(true);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)buildNest[i-1]);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)put);
-    * buildNest[i]->setRepeater(true);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Build nest[%d]", i);
-    * buildNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * buildNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)buildNest[i-1]);
-    * buildNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)stoneOnGround);
-    *
-    * // clearNest: (stoneOnGround -> get -> haveStone -> toss -> readyToLayEgg)
-    * i = 0;
-    * description = new char[50];
-    * sprintf(description, "Clear nest[%d]", i);
-    * clearNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * clearNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)stoneOnGround);
-    * clearNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)get);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Clear nest[%d]", i);
-    * clearNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * clearNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)clearNest[i-1]);
-    * clearNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)haveStone);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Clear nest[%d]", i);
-    * clearNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * clearNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)clearNest[i-1]);
-    * clearNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)toss);
-    *
-    * i++;
-    * description = new char[50];
-    * sprintf(description, "Clear nest[%d]", i);
-    * clearNest[i] = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, description);
-    * clearNest[i]->addEvent(Mona::CAUSE, (Mona::Neuron *)clearNest[i-1]);
-    * clearNest[i]->addEvent(Mona::EFFECT, (Mona::Neuron *)readyToLayEgg);
-    *
-    * // layEggInNest: (readyToLayEgg -> layEgg)
-    * layEggInNest = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, "Lay egg in nest");
-    * layEggInNest->addEvent(Mona::CAUSE, (Mona::Neuron *)readyToLayEgg);
-    * layEggInNest->addEvent(Mona::EFFECT, (Mona::Neuron *)layEgg);
-    *
-    * // eggLaidInNest: (layEggInNest -> eggOnGround)
-    * eggLaidInNest = this->mona->newMediator(Mona::MAX_ENABLEMENT, true, "Egg laid in nest");
-    * eggLaidInNest->addEvent(Mona::CAUSE, (Mona::Neuron *)layEggInNest);
-    * eggLaidInNest->addEvent(Mona::EFFECT, (Mona::Neuron *)eggOnGround);
-    *
-    * // Goals:
-    * goals.alloc(mona->numNeeds);
-    * goals.set(0, FOOD_NEED);
-    * foodOK->goals.setGoals(&goals, 1.0);
-    * goals.set(0, 0.0);
-    * goals.set(1, EGG_NEED);
-    * eggInNest[30]->goals.setGoals(&goals, 1.0);
-    */
+    // Motors:
+    Mona::Motor *doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
+    Mona::Motor *eat = brain->newMotor(Bird::RESPONSE::EAT);
+    Mona::Motor *get = brain->newMotor(Bird::RESPONSE::GET);
+    Mona::Motor *put = brain->newMotor(Bird::RESPONSE::PUT);
+    Mona::Motor *toss = brain->newMotor(Bird::RESPONSE::TOSS);
+    Mona::Motor *move = brain->newMotor(Bird::RESPONSE::MOVE);
+    Mona::Motor *turnRight = brain->newMotor(Bird::RESPONSE::TURN_RIGHT);
+    Mona::Motor *turnLeft = brain->newMotor(Bird::RESPONSE::TURN_LEFT);
+    Mona::Motor *stateOn = brain->newMotor(Bird::RESPONSE::STATE_ON);
+    Mona::Motor *stateOff = brain->newMotor(Bird::RESPONSE::STATE_OFF);
+    Mona::Motor *wantMouse = brain->newMotor(Female::RESPONSE::WANT_MOUSE);
+    Mona::Motor *wantStone = brain->newMotor(Female::RESPONSE::WANT_STONE);
+    Mona::Motor *layEgg = brain->newMotor(Female::RESPONSE::LAY_EGG);
 
-   response = Bird::RESPONSE::DO_NOTHING;
+    // Needs.
+    brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
+    brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
+    brain->setNeed(EGG_NEED_INDEX, EGG_NEED);
+
+    // Goals.
+
+    // Food goal:
+    vector<Mona::SENSOR> sensors;
+    setSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
+    Mona::Receptor* hasMouse = brain->newReceptor(sensors, 0);
+    setSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
+    Mona::Receptor* mouseEaten = brain->newReceptor(sensors, 0);
+    Mona::Mediator *eatFood = brain->newMediator(brain->MIN_ENABLEMENT);
+    eatFood->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)hasMouse);
+    eatFood->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)eat);
+    eatFood->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)mouseEaten);
+    //brain->addGoal(MOUSE_NEED_INDEX, eatFood);
+
+    // Set initial response.
+    response = Bird::RESPONSE::DO_NOTHING;
 }
 
+// Set sensors.
+void Female::setSensors(vector<Mona::SENSOR>& sensors,
+    Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
+    Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
+    Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
+    Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
+    Mona::SENSOR mateProximity,
+    Mona::SENSOR orientation, Mona::SENSOR hunger,
+    Mona::SENSOR hasObject, Mona::SENSOR state)
+{
+    sensors.clear();
+    sensors.push_back(currentLocale);
+    sensors.push_back(currentObject);
+    sensors.push_back(leftLocale);
+    sensors.push_back(leftObject);
+    sensors.push_back(forwardLocale);
+    sensors.push_back(forwardObject);
+    sensors.push_back(rightLocale);
+    sensors.push_back(rightObject);
+    sensors.push_back(mateProximity);
+    sensors.push_back(orientation);
+    sensors.push_back(hunger);
+    sensors.push_back(hasObject);
+    sensors.push_back(state);
+}
 
 // Cycle female.
 int Female::cycle()

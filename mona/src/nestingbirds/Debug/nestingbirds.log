@@ -1,22 +1,2 @@
-﻿  fileio.cpp
-  gettime.cpp
-  log.cpp
-  md5.cpp
-  quaternion.cpp
-  random.cpp
-  RDtree.cpp
-  drive.cpp
-  enable.cpp
-  homeostat.cpp
-  learn.cpp
-  mona.cpp
-  respond.cpp
-  sense.cpp
-  bird.cpp
-  female.cpp
-  male.cpp
-  NestingBirds.cpp
-  Generating Code...
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1363,5): warning MSB8012: TargetPath(C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\Debug\nestingbirds.exe) does not match the Linker's OutputFile property value (C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\bin\nestingbirds.exe). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
-     Creating library Debug\nestingbirds.lib and object Debug\nestingbirds.exp
+﻿  female.cpp
   nestingbirds.vcxproj -> C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\Debug\nestingbirds.exe
