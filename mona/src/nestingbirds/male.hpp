@@ -52,16 +52,22 @@ public:
    static bool RANDOMIZE_FOOD_LEVEL;
 
    // Needs.
+   static const int MOUSE_NEED_INDEX = 0;
 #define MALE_DEFAULT_MOUSE_NEED            "0.5"
    static Mona::NEED MOUSE_NEED;
+   static const int FEMALE_MOUSE_NEED_INDEX = 1;
 #define MALE_DEFAULT_FEMALE_MOUSE_NEED     "0.4"
    static Mona::NEED FEMALE_MOUSE_NEED;
+   static const int STONE_NEED_INDEX = 2;
 #define MALE_DEFAULT_STONE_NEED            "0.2"
    static Mona::NEED STONE_NEED;
+   static const int FEMALE_STONE_NEED_INDEX = 3;
 #define MALE_DEFAULT_FEMALE_STONE_NEED     "0.3"
    static Mona::NEED FEMALE_STONE_NEED;
+   static const int ATTEND_FEMALE_NEED_INDEX = 4;
 #define MALE_DEFAULT_ATTEND_FEMALE_NEED    "0.1"
    static Mona::NEED ATTEND_FEMALE_NEED;
+   static const int NUM_NEEDS = 5;
 
    // Constructor.
    Male();

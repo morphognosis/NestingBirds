@@ -190,12 +190,11 @@ void step()
    // Set female sensors.
    setSensors(Bird::FEMALE);
 
-   // Produce female response.
-   if (Test)
-   {
-      female->cycle();
-   }
-   else
+   // Cycle female.
+   female->cycle();
+
+   // Train response?
+   if (!Test)
    {
       cycleAutopilot(Bird::FEMALE);
    }
@@ -209,12 +208,11 @@ void step()
    // Set male sensors.
    setSensors(Bird::MALE);
 
-   // Produce male response.
-   if (Test)
-   {
-      male->cycle();
-   }
-   else
+   // Cycle male.
+   male->cycle();
+
+   // Train response?
+   if (!Test)
    {
       cycleAutopilot(Bird::MALE);
    }
@@ -1522,6 +1520,17 @@ void setSensors(int gender)
          break;
       }
    }
+
+   // Internal state.
+   sensors[Bird::ORIENTATION_SENSOR] = bird->orientation;
+   if (bird->food > 0)
+   {
+       sensors[Bird::HUNGER_SENSOR] = 0;
+   } else {
+       sensors[Bird::HUNGER_SENSOR] = 1;
+   }
+   sensors[Bird::HAS_OBJECT_SENSOR] = bird->hasObject;
+   sensors[Bird::STATE_SENSOR] = bird->state;
 
    // Male senses female want?
    if (gender == Bird::MALE)

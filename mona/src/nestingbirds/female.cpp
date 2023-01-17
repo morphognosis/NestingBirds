@@ -22,12 +22,6 @@ Female::Female() : Bird(FEMALE)
     // Create Mona bird brain.
     brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
         RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
-    vector<bool> sensorMask;
-    for (int i = 0; i < NUM_SENSORS; i++)
-    {
-        sensorMask.push_back(true);
-    }
-    brain->addSensorMode(sensorMask);
 
     // Motors:
     Mona::Motor *doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
@@ -100,13 +94,11 @@ void Female::setSensors(vector<Mona::SENSOR>& sensors,
 // Cycle female.
 int Female::cycle()
 {
-   vector<Mona::SENSOR> brainSensors(NUM_SENSORS + 2);
+   vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
    for (int i = 0; i < NUM_SENSORS; i++)
    {
       brainSensors[i] = (Mona::SENSOR)brain->sensors[i];
    }
-   brainSensors[NUM_SENSORS]     = (Mona::SENSOR)hasObject;
-   brainSensors[NUM_SENSORS + 1] = (Mona::SENSOR)food;
    return(brain->cycle(brainSensors));
 }
 

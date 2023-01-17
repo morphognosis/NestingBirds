@@ -296,6 +296,14 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
       sensors.push_back(0.0f);
    }
 
+   // Add base sensor mode.
+   vector<bool> sensorMask;
+   for (i = 0; i < numSensors; i++)
+   {
+       sensorMask.push_back(true);
+   }
+   addSensorMode(sensorMask);
+
    // Initialize response apparatus and motor neurons.
    response = 0;
    responsePotentials.resize(numResponses);

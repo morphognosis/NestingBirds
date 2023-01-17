@@ -345,10 +345,8 @@ int Mona::addSensorMode(vector<bool>& sensorMask, SENSOR sensorResolution)
       }
       if (duplicate)
       {
-         if (sensorModes[i]->resolution == sensorResolution)
-         {
-            return(sensorModes[i]->mode);
-         }
+         sensorModes[i]->resolution = sensorResolution;
+         return(sensorModes[i]->mode);
       }
    }
 
