@@ -507,6 +507,19 @@ bool Mona::getGoalInfo(int needIndex, int goalIndex,
                                              sensorMode, response, goalValue, enabled));
 }
 
+// Get goal receptor for a need.
+Mona::Receptor *Mona::getGoalReceptor(int needIndex, int goalIndex)
+{
+    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+    return(homeostats[needIndex]->getGoalReceptor(goalIndex));
+}
+
+// Get goal motor for a need.
+Mona::Motor *Mona::getGoalMotor(int needIndex, int goalIndex)
+{
+    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+    return(homeostats[needIndex]->getGoalMotor(goalIndex));
+}
 
 // Is goal for need enabled?
 bool Mona::isGoalEnabled(int needIndex, int goalIndex)

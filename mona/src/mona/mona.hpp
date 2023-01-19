@@ -100,6 +100,7 @@ public:
    bool setSensorResolution(SENSOR sensorResolution);
    int addSensorMode(vector<bool>& sensorMask);
    int addSensorMode(vector<bool>& sensorMask, SENSOR sensorResolution);
+   bool delSensorMode(int mode);
 
    // Destructor.
    ~Mona();
@@ -201,6 +202,8 @@ public:
    bool getGoalInfo(int needIndex, int goalIndex,
                     vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
                     RESPONSE& response, NEED& goalValue, bool& enabled);
+   Receptor *getGoalReceptor(int needIndex, int goalIndex);
+   Motor* getGoalMotor(int needIndex, int goalIndex);
    bool isGoalEnabled(int needIndex, int goalIndex);
    bool enableGoal(int needIndex, int goalIndex);
    bool disableGoal(int needIndex, int goalIndex);
@@ -371,9 +374,8 @@ public:
    };
 
    // Receptor neuron.
-   // Contains a centroid for a cluster of vectors
-   // in sensor values space.
-   // Fires when centroid is closest to sensor vector.
+   // Contains a centroid in sensor vector space.
+   // Fires when centroid is closest to input sensor vector.
    class Receptor : public Neuron
    {
 public:

@@ -370,6 +370,29 @@ int Mona::addSensorMode(vector<bool>& sensorMask)
    return(addSensorMode(sensorMask, SENSOR_RESOLUTION));
 }
 
+// Delete sensor mode.
+bool Mona::delSensorMode(int mode)
+{
+    // Must delete modes before cycling.
+    if ((int)receptors.size() > 0)
+    {
+        return(false);
+    }
+
+    // Mode exists?
+    if ((int)sensorModes.size() <= mode)
+    {
+        return(false);
+    }
+
+    // Delete mode.
+    sensorModes.erase(sensorModes.begin() + mode);
+
+    // Delete centroid.
+    sensorCentroids.erase(sensorCentroids.begin() + mode);
+
+    return(true);
+}
 
 // Update goal value.
 void Mona::Receptor::updateGoalValue()

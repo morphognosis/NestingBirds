@@ -193,6 +193,29 @@ bool Homeostat::getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
    return(true);
 }
 
+// Get receptor for goal at index.
+Mona::Receptor *Homeostat::getGoalReceptor(int goalIndex)
+{
+    if ((goalIndex < 0) || (goalIndex >= (int)goals.size()))
+    {
+        return(NULL);
+    }
+    else {
+        return (Mona::Receptor *)goals[goalIndex].receptor;
+    }
+}
+
+// Get motor for goal at index.
+Mona::Motor *Homeostat::getGoalMotor(int goalIndex)
+{
+    if ((goalIndex < 0) || (goalIndex >= (int)goals.size()))
+    {
+        return(NULL);
+    }
+    else {
+        return (Mona::Motor *)goals[goalIndex].motor;
+    }
+}
 
 // Is goal enabled?
 bool Homeostat::isGoalEnabled(int goalIndex)

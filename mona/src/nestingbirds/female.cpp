@@ -50,16 +50,17 @@ Female::Female() : Bird(FEMALE)
     setSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
-    Mona::Receptor* hasMouse = brain->newReceptor(sensors, 0);
+    Mona::Receptor *hasMouse = brain->newReceptor(sensors, 0);
     setSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
-    Mona::Receptor* mouseEaten = brain->newReceptor(sensors, 0);
+    int goal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
+    Mona::Receptor *mouseEaten = brain->getGoalReceptor(MOUSE_NEED_INDEX, goal);
     Mona::Mediator *eatFood = brain->newMediator(brain->MIN_ENABLEMENT);
     eatFood->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)hasMouse);
     eatFood->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)eat);
     eatFood->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)mouseEaten);
-    //brain->addGoal(MOUSE_NEED_INDEX, eatFood);
+
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;

@@ -89,9 +89,6 @@ public:
    int addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                NEED goalValue);
 
-   // Add goal value to receptor if needed.
-   //void addGoal(void *receptor);
-
    // Find index of goal matching sensors, sensor mode
    // and response. Return -1 for no match.
    int findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
@@ -105,6 +102,12 @@ public:
    bool getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
                     SENSOR_MODE& sensorMode, RESPONSE& response,
                     NEED& goalValue, bool& enabled);
+
+   // Get receptor for goal at index.
+   Mona::Receptor *getGoalReceptor(int goalIndex);
+
+   // Get motor for goal at index.
+   Mona::Motor *getGoalMotor(int goalIndex);
 
    // Is goal enabled?
    bool isGoalEnabled(int goalIndex);
