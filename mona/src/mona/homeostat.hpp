@@ -104,10 +104,10 @@ public:
                     NEED& goalValue, bool& enabled);
 
    // Get receptor for goal at index.
-   Mona::Receptor *getGoalReceptor(int goalIndex);
+   void *getGoalReceptor(int goalIndex);
 
    // Get motor for goal at index.
-   Mona::Motor *getGoalMotor(int goalIndex);
+   void *getGoalMotor(int goalIndex);
 
    // Is goal enabled?
    bool isGoalEnabled(int goalIndex);
