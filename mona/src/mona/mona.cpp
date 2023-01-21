@@ -81,7 +81,8 @@ void Mona::initParms()
    MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL   = 3;
    MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL = 3;
    SENSOR_RESOLUTION = 0.0f;
-   LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL = -1;
+   LEARN_MEDIATOR_GOAL_VALUE = false;
+   LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL = 2;
    LEARN_RECEPTOR_GOAL_VALUE           = false;
 
    // Initialize effect event intervals.
@@ -1824,6 +1825,7 @@ Mona::load(FILE *fp)
    FREAD_INT(&MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL, fp);
    FREAD_INT(&MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL, fp);
    FREAD_FLOAT(&SENSOR_RESOLUTION, fp);
+   FREAD_BOOL(&LEARN_MEDIATOR_GOAL_VALUE, fp);
    FREAD_INT(&LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL, fp);
    FREAD_BOOL(&LEARN_RECEPTOR_GOAL_VALUE, fp);
    effectEventIntervals.resize(MAX_MEDIATOR_LEVEL + 1);
@@ -2112,6 +2114,7 @@ Mona::save(FILE *fp)
    FWRITE_INT(&MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL, fp);
    FWRITE_INT(&MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL, fp);
    FWRITE_FLOAT(&SENSOR_RESOLUTION, fp);
+   FWRITE_BOOL(&LEARN_MEDIATOR_GOAL_VALUE, fp);
    FWRITE_INT(&LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL, fp);
    FWRITE_BOOL(&LEARN_RECEPTOR_GOAL_VALUE, fp);
    for (i = 0; i < (int)effectEventIntervals.size(); i++)
@@ -2525,6 +2528,14 @@ Mona::printParms(FILE *out)
    fprintf(out, "<parameter>MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL</parameter><value>%d</value>\n", MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL);
    fprintf(out, "<parameter>MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL</parameter><value>%d</value>\n", MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL);
    fprintf(out, "<parameter>SENSOR_RESOLUTION</parameter><value>%f</value>\n", SENSOR_RESOLUTION);
+   if (LEARN_MEDIATOR_GOAL_VALUE)
+   {
+       fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE</parameter><value>true</value>\n");
+   }
+   else
+   {
+       fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE</parameter><value>false</value>\n");
+   }
    fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL</parameter><value>%d</value>\n", LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL);
    if (LEARN_RECEPTOR_GOAL_VALUE)
    {

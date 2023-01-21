@@ -534,7 +534,7 @@ void Mona::Mediator::updateGoalValue(VALUE_SET& needs)
    NEED      need;
    VALUE_SET needsBase, needDeltas;
 
-   if (mona->LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL == -1 ||
+   if (!mona->LEARN_MEDIATOR_GOAL_VALUE ||
        level < mona->LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL)
    {
       return;
