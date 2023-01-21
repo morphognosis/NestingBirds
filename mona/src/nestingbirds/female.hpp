@@ -55,15 +55,18 @@ public:
 
    // Needs.
    static const int MOUSE_NEED_INDEX = 0;
-#define FEMALE_DEFAULT_MOUSE_NEED    "0.3"
+#define FEMALE_DEFAULT_MOUSE_NEED    "0.4"
    static Mona::NEED MOUSE_NEED;
    static const int STONE_NEED_INDEX = 1;
-#define FEMALE_DEFAULT_STONE_NEED    "0.1"
+#define FEMALE_DEFAULT_STONE_NEED    "0.2"
    static Mona::NEED STONE_NEED;
    static const int EGG_NEED_INDEX = 2;
-#define FEMALE_DEFAULT_EGG_NEED      "0.2"
+#define FEMALE_DEFAULT_EGG_NEED      "0.3"
    static Mona::NEED EGG_NEED;
-   static const int NUM_NEEDS = 3;
+   static const int ROOST_NEED_INDEX = 3;
+#define FEMALE_DEFAULT_ROOST_NEED      "0.1"
+   static Mona::NEED ROOST_NEED;
+   static const int NUM_NEEDS = 4;
 
    // Constructor.
    Female();

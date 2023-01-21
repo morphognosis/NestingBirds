@@ -81,7 +81,7 @@ void Mona::initParms()
    MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL   = 3;
    MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL = 3;
    SENSOR_RESOLUTION = 0.0f;
-   LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL = 2;
+   LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL = -1;
    LEARN_RECEPTOR_GOAL_VALUE           = false;
 
    // Initialize effect event intervals.
@@ -469,6 +469,12 @@ int Mona::addGoal(int needIndex, vector<SENSOR>& sensors,
    return(homeostats[needIndex]->addGoal(sensors, sensorMode, goalValue));
 }
 
+// Add goal for mediator.
+int Mona::addGoal(int needIndex, Mediator* mediator, NEED goalValue)
+{
+    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+    return(homeostats[needIndex]->addGoal(mediator, goalValue));
+}
 
 // Find goal for need.
 int Mona::findGoal(int needIndex, vector<SENSOR>& sensors,

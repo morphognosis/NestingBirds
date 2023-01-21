@@ -39,6 +39,7 @@ public:
       void           *receptor;
       RESPONSE       response;
       void           *motor;
+      void           *mediator;
       NEED           goalValue;
       bool           enabled;
    };
@@ -88,6 +89,7 @@ public:
                RESPONSE response, NEED goalValue);
    int addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                NEED goalValue);
+   int addGoal(void *mediator, NEED goalValue);
 
    // Find index of goal matching sensors, sensor mode
    // and response. Return -1 for no match.
@@ -97,6 +99,10 @@ public:
    // Find index of goal matching sensors and sensor mode.
    // Return -1 for no match.
    int findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode);
+
+   // Find index of goal matching mediator.
+   // Return -1 for no match.
+   int findGoal(void *mediator);
 
    // Get goal information at index.
    bool getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
@@ -108,6 +114,9 @@ public:
 
    // Get motor for goal at index.
    void *getGoalMotor(int goalIndex);
+
+   // Get mediator for goal at index.
+   void* getGoalMediator(int goalIndex);
 
    // Is goal enabled?
    bool isGoalEnabled(int goalIndex);
@@ -134,6 +143,9 @@ public:
 
    // Update homeostat based on response.
    void responseUpdate();
+
+   // Update homeostat based on mediator.
+   void mediatorUpdate(void *mediator, double firingStrength);
 
    // Load homeostat.
    void load(char *filename);

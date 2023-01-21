@@ -194,16 +194,19 @@ public:
                SENSOR_MODE sensorMode, RESPONSE response, NEED goalValue);
    int addGoal(int needIndex, vector<SENSOR>& sensors,
                SENSOR_MODE sensorMode, NEED goalValue);
+   int addGoal(int needIndex, Mediator* mediator, NEED goalValue);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
                 SENSOR_MODE sensorMode, RESPONSE response);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
                 SENSOR_MODE sensorMode);
+   int findGoal(int needIndex, Mediator *mediator);
    int getNumGoals(int needIndex);
    bool getGoalInfo(int needIndex, int goalIndex,
                     vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
                     RESPONSE& response, NEED& goalValue, bool& enabled);
    Receptor *getGoalReceptor(int needIndex, int goalIndex);
    Motor* getGoalMotor(int needIndex, int goalIndex);
+   Mediator* getGoalMediator(int needIndex, int goalIndex);
    bool isGoalEnabled(int needIndex, int goalIndex);
    bool enableGoal(int needIndex, int goalIndex);
    bool disableGoal(int needIndex, int goalIndex);

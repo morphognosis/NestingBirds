@@ -268,7 +268,7 @@ Mona::Mediator::effectFiring(WEIGHT notifyStrength)
          // Update goal value.
          updateGoalValue(enabling->needs);
       }
-
+ 
       // Handle expired enablement.
       if ((enabling->value > 0.0) &&
           (enabling->age >= mona->effectEventIntervals[level][enabling->timerIndex]))
@@ -290,6 +290,12 @@ Mona::Mediator::effectFiring(WEIGHT notifyStrength)
          baseEnablement += enabling->value;
          enabling->value = 0.0;
       }
+   }
+
+   // Update need based on firing strength.
+   for (i = 0; i < mona->numNeeds; i++)
+   {
+       mona->homeostats[i]->mediatorUpdate(this, firingStrength);
    }
 
    // Update enablement and utility for firing enablings.
@@ -528,7 +534,8 @@ void Mona::Mediator::updateGoalValue(VALUE_SET& needs)
    NEED      need;
    VALUE_SET needsBase, needDeltas;
 
-   if (level < mona->LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL)
+   if (mona->LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL == -1 ||
+       level < mona->LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL)
    {
       return;
    }

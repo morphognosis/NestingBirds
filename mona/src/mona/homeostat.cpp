@@ -67,7 +67,7 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
    Goal           goal;
 
    // Check for duplicate.
-   if ((goalIndex = findGoal(sensors, sensorMode, false)) != -1)
+   if ((goalIndex = findGoal(sensors, sensorMode, NULL_RESPONSE)) != -1)
    {
       ((Mona::Receptor *)goals[goalIndex].receptor)->goals.setValue(needIndex, goalValue);
       if (goals[goalIndex].response != NULL_RESPONSE)
@@ -116,6 +116,7 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
       {
          goal.motor = NULL;
       }
+      goal.mediator = NULL;
       goal.goalValue = goalValue;
       goal.enabled   = true;
       goals.push_back(goal);
@@ -131,6 +132,34 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
    return(addGoal(sensors, sensorMode, NULL_RESPONSE, goalValue));
 }
 
+// Add mediator goal.
+int Homeostat::addGoal(void* mediator, NEED goalValue)
+{
+    int goalIndex;
+    Goal           goal;
+
+    // Check for duplicate.
+    if ((goalIndex = findGoal(mediator)) != -1)
+    {
+        ((Mona::Mediator*)goals[goalIndex].mediator)->goals.setValue(needIndex, goalValue);
+        goals[goalIndex].goalValue = goalValue;
+    }
+    else
+    {
+        // Add entry.
+        goal.sensorMode = 0;
+        goal.receptor = NULL;
+        goal.response = NULL_RESPONSE;
+        goal.motor = NULL;
+        goal.mediator = mediator;
+        ((Mona::Mediator*)goal.mediator)->goals.setValue(needIndex, goalValue);
+        goal.goalValue = goalValue;
+        goal.enabled = true;
+        goals.push_back(goal);
+        goalIndex = (int)goals.size() - 1;
+    }
+    return(goalIndex);
+}
 
 // Find index of goal matching sensors, sensor mode
 // and response. Return -1 for no match.
@@ -175,6 +204,19 @@ int Homeostat::findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
    return(-1);
 }
 
+// Find index of goal matching mediator.
+// Return -1 for no match.
+int Homeostat::findGoal(void* mediator)
+{
+    for (int i = 0; i < (int)goals.size(); i++)
+    {
+        if (goals[i].mediator == mediator)
+        {
+            return(i);
+        }
+    }
+    return(-1);
+}
 
 // Get goal information at index.
 bool Homeostat::getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
@@ -214,6 +256,18 @@ void *Homeostat::getGoalMotor(int goalIndex)
     }
     else {
         return goals[goalIndex].motor;
+    }
+}
+
+// Get mediator for goal at index.
+void* Homeostat::getGoalMediator(int goalIndex)
+{
+    if ((goalIndex < 0) || (goalIndex >= (int)goals.size()))
+    {
+        return(NULL);
+    }
+    else {
+        return goals[goalIndex].mediator;
     }
 }
 
@@ -319,12 +373,10 @@ void Homeostat::removeNeuron(void *neuron)
 // Update homeostat based on sensors.
 void Homeostat::sensorsUpdate()
 {
-   int i;
-
    vector<SENSOR> sensors;
 
    // Update the need value when sensors match.
-   for (i = 0; i < (int)goals.size(); i++)
+   for (int i = 0; i < (int)goals.size(); i++)
    {
       mona->applySensorMode(mona->sensors, sensors, goals[i].sensorMode);
       if (Mona::Receptor::sensorDistance(&goals[i].sensors, &sensors)
@@ -382,6 +434,29 @@ void Homeostat::responseUpdate()
    }
 }
 
+// Update homeostat based on mediator.
+void Homeostat::mediatorUpdate(void* mediator, double firingStrength)
+{
+    // Update the need value when sensors match.
+    for (int i = 0; i < (int)goals.size(); i++)
+    {
+        if (goals[i].mediator == mediator)
+        {
+            if (firingStrength > 1.0)
+            {
+                firingStrength = 1.0;
+            }
+            if (firingStrength > 0.0)
+            {
+                need -= goals[i].goalValue * firingStrength;
+                if (need < 0.0)
+                {
+                    need = 0.0;
+                }
+            }
+        }
+    }
+}
 
 // Load homeostat.
 void Homeostat::load(char *filename)
@@ -424,7 +499,11 @@ void Homeostat::load(FILE *fp)
       }
       FREAD_INT(&g.sensorMode, fp);
       FREAD_LONG_LONG(&id, fp);
-      g.receptor = (void *)mona->findByID(id);
+      g.receptor = NULL;
+      if (id != (ID)(-1))
+      {
+          g.receptor = (void*)mona->findByID(id);
+      }
       FREAD_INT(&g.response, fp);
       if (g.response != NULL_RESPONSE)
       {
@@ -433,6 +512,12 @@ void Homeostat::load(FILE *fp)
       else
       {
          g.motor = NULL;
+      }
+      FREAD_LONG_LONG(&id, fp);
+      g.mediator = NULL;
+      if (id != (ID)(-1))
+      {
+          g.mediator = (void*)mona->findByID(id);
       }
       FREAD_DOUBLE(&g.goalValue, fp);
       FREAD_BOOL(&g.enabled, fp);
@@ -460,6 +545,7 @@ void Homeostat::save(char *filename)
 void Homeostat::save(FILE *fp)
 {
    int i, j, p, q;
+   ID     id;
 
    FWRITE_DOUBLE(&need, fp);
    FWRITE_INT(&needIndex, fp);
@@ -478,8 +564,19 @@ void Homeostat::save(FILE *fp)
          FWRITE_FLOAT(&goals[i].sensors[p], fp);
       }
       FWRITE_INT(&goals[i].sensorMode, fp);
-      FWRITE_LONG_LONG(&((Mona::Receptor *)goals[i].receptor)->id, fp);
+      id = (ID)(-1);
+      if (goals[i].receptor != NULL)
+      {
+          id = ((Mona::Receptor*)(goals[i].receptor))->id;
+      }
+      FWRITE_LONG_LONG(&id, fp);
       FWRITE_INT(&goals[i].response, fp);
+      id = (ID)(-1);
+      if (goals[i].mediator != NULL)
+      {
+          id = ((Mona::Mediator*)(goals[i].mediator))->id;
+      }
+      FWRITE_LONG_LONG(&id, fp);
       FWRITE_DOUBLE(&goals[i].goalValue, fp);
       FWRITE_BOOL(&goals[i].enabled, fp);
    }
@@ -506,6 +603,15 @@ void Homeostat::print(FILE *out)
       }
       fprintf(out, "</sensors>");
       fprintf(out, "<sensorMode>%d</sensorMode>", goals[i].sensorMode);
+      if (goals[i].receptor == NULL)
+      {
+          fprintf(out, "<receptor_id>null</receptor_id>");
+      }
+      else
+      {
+          ID id = ((Mona::Receptor*)(goals[i].receptor))->id;
+          fprintf(out, "<receptor_id>%lld</receptor_id>", id);
+      }
       if (goals[i].response == NULL_RESPONSE)
       {
          fprintf(out, "<response>null</response>");
@@ -513,6 +619,15 @@ void Homeostat::print(FILE *out)
       else
       {
          fprintf(out, "<response>%d</response>", goals[i].response);
+      }
+      if (goals[i].mediator == NULL)
+      {
+          fprintf(out, "<mediator_id>null</mediator_id>");
+      }
+      else
+      {
+          ID id = ((Mona::Mediator*)(goals[i].mediator))->id;
+          fprintf(out, "<mediator_id>%lld</mediator_id>", id);
       }
       fprintf(out, "<goalValue>%f</goalValue>", goals[i].goalValue);
       if (goals[i].enabled)
