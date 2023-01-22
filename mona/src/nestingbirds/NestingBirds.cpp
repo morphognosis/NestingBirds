@@ -110,9 +110,9 @@ bool Verbose = true;
 void setSensors(int);
 void doResponse(int);
 void stepMice();
-void cycleAutopilot(int);
-void maleAutopilot();
-void femaleAutopilot();
+void train(int);
+void trainMale();
+void trainFemale();
 bool getMouse();
 bool getStone();
 bool returnToFemale();
@@ -193,10 +193,10 @@ void step()
    // Cycle female.
    female->cycle();
 
-   // Train response?
+   // Train?
    if (!Test)
    {
-      cycleAutopilot(Bird::FEMALE);
+      train(Bird::FEMALE);
    }
    if (Verbose)
    {
@@ -211,10 +211,10 @@ void step()
    // Cycle male.
    male->cycle();
 
-   // Train response?
+   // Train?
    if (!Test)
    {
-      cycleAutopilot(Bird::MALE);
+      train(Bird::MALE);
    }
    if (Verbose)
    {
@@ -225,22 +225,22 @@ void step()
 }
 
 
-// Cycle on autopilot.
-void cycleAutopilot(int gender)
+// Train.
+void train(int gender)
 {
    if (gender == Bird::MALE)
    {
-      maleAutopilot();
+      trainMale();
    }
    else
    {
-      femaleAutopilot();
+      trainFemale();
    }
 }
 
 
-// Male autopilot.
-void maleAutopilot()
+// Train male.
+void trainMale()
 {
    if (World[male->x][male->y].object == OBJECT::EGG)
    {
@@ -752,14 +752,16 @@ bool returnToFemale()
 }
 
 
-// Female autopilot.
-void femaleAutopilot()
+// Train female.
+void trainFemale()
 {
    if (World[female->x][female->y].object == OBJECT::EGG)
    {
       female->response = Bird::RESPONSE::DO_NOTHING;
       return;
    }
+#ifdef FOOD_TRAIN
+   female->food = Female::INITIAL_FOOD;  
    if (female->food < 0)
    {
       female->food = 0;
@@ -783,6 +785,9 @@ void femaleAutopilot()
       }
       return;
    }
+#else
+   female->food = 200;
+#endif
    switch (FemaleNestSequence)
    {
    case 0:
@@ -1091,6 +1096,24 @@ void doResponse(int gender)
          if (bird->hasObject == OBJECT::NO_OBJECT)
          {
             break;
+         }
+
+         // Stone tossed back to desert.
+         if (bird->hasObject == OBJECT::STONE)
+         {
+             for (int j = 0; j < 20; j++)
+             {
+                 int x = (int)(rand() % (long)13) + 8;
+                 int y = (int)(rand() % (long)7) + 13;
+                 if (World[x][y].locale == LOCALE::DESERT &&
+                     World[x][y].object == OBJECT::NO_OBJECT)
+                 {
+                     World[x][y].object = OBJECT::STONE;
+                     break;
+                 }
+             } 
+             bird->hasObject = OBJECT::NO_OBJECT;
+             break;
          }
 
          // Object lands randomly nearby.

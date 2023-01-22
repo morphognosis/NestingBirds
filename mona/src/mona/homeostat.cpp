@@ -194,7 +194,8 @@ int Homeostat::findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
 
    for (int i = 0; i < (int)goals.size(); i++)
    {
-      if ((goals[i].sensorMode == sensorMode) &&
+      if (goals[i].receptor != NULL &&
+          goals[i].sensorMode == sensorMode &&          
           (Mona::Receptor::sensorDistance(&goals[i].sensors, &sensorsWork)
            <= mona->sensorModes[sensorMode]->resolution))
       {
@@ -378,25 +379,28 @@ void Homeostat::sensorsUpdate()
    // Update the need value when sensors match.
    for (int i = 0; i < (int)goals.size(); i++)
    {
-      mona->applySensorMode(mona->sensors, sensors, goals[i].sensorMode);
-      if (Mona::Receptor::sensorDistance(&goals[i].sensors, &sensors)
-          <= mona->sensorModes[goals[i].sensorMode]->resolution)
-      {
-         if (goals[i].response != NULL_RESPONSE)
-         {
-            // Shift goal value to motor.
-            ((Mona::Motor *)goals[i].motor)->goals.setValue(needIndex, goals[i].goalValue);
-            ((Mona::Receptor *)goals[i].receptor)->goals.setValue(needIndex, 0.0);
-         }
-         else
-         {
-            need -= goals[i].goalValue;
-            if (need < 0.0)
-            {
-               need = 0.0;
-            }
-         }
-      }
+       if (goals[i].receptor != NULL)
+       {
+           mona->applySensorMode(mona->sensors, sensors, goals[i].sensorMode);
+           if (Mona::Receptor::sensorDistance(&goals[i].sensors, &sensors)
+               <= mona->sensorModes[goals[i].sensorMode]->resolution)
+           {
+               if (goals[i].response != NULL_RESPONSE)
+               {
+                   // Shift goal value to motor.
+                   ((Mona::Motor*)goals[i].motor)->goals.setValue(needIndex, goals[i].goalValue);
+                   ((Mona::Receptor*)goals[i].receptor)->goals.setValue(needIndex, 0.0);
+               }
+               else
+               {
+                   need -= goals[i].goalValue;
+                   if (need < 0.0)
+                   {
+                       need = 0.0;
+                   }
+               }
+           }
+       }
    }
 }
 

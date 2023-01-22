@@ -58,7 +58,7 @@ int Male::cycle()
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
    for (int i = 0; i < NUM_SENSORS; i++)
    {
-      brainSensors[i] = (Mona::SENSOR)brain->sensors[i];
+      brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
    return(brain->cycle(brainSensors));
 }

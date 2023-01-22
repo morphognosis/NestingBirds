@@ -25,19 +25,19 @@ Female::Female() : Bird(FEMALE)
         RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Motors:
-    Mona::Motor *doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
-    Mona::Motor *eat = brain->newMotor(Bird::RESPONSE::EAT);
-    Mona::Motor *get = brain->newMotor(Bird::RESPONSE::GET);
-    Mona::Motor *put = brain->newMotor(Bird::RESPONSE::PUT);
-    Mona::Motor *toss = brain->newMotor(Bird::RESPONSE::TOSS);
-    Mona::Motor *move = brain->newMotor(Bird::RESPONSE::MOVE);
-    Mona::Motor *turnRight = brain->newMotor(Bird::RESPONSE::TURN_RIGHT);
-    Mona::Motor *turnLeft = brain->newMotor(Bird::RESPONSE::TURN_LEFT);
-    Mona::Motor *stateOn = brain->newMotor(Bird::RESPONSE::STATE_ON);
-    Mona::Motor *stateOff = brain->newMotor(Bird::RESPONSE::STATE_OFF);
-    Mona::Motor *wantMouse = brain->newMotor(Female::RESPONSE::WANT_MOUSE);
-    Mona::Motor *wantStone = brain->newMotor(Female::RESPONSE::WANT_STONE);
-    Mona::Motor *layEgg = brain->newMotor(Female::RESPONSE::LAY_EGG);
+    doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
+    eat = brain->newMotor(Bird::RESPONSE::EAT);
+    get = brain->newMotor(Bird::RESPONSE::GET);
+    put = brain->newMotor(Bird::RESPONSE::PUT);
+    toss = brain->newMotor(Bird::RESPONSE::TOSS);
+    move = brain->newMotor(Bird::RESPONSE::MOVE);
+    turnRight = brain->newMotor(Bird::RESPONSE::TURN_RIGHT);
+    turnLeft = brain->newMotor(Bird::RESPONSE::TURN_LEFT);
+    stateOn = brain->newMotor(Bird::RESPONSE::STATE_ON);
+    stateOff = brain->newMotor(Bird::RESPONSE::STATE_OFF);
+    wantMouse = brain->newMotor(Female::RESPONSE::WANT_MOUSE);
+    wantStone = brain->newMotor(Female::RESPONSE::WANT_STONE);
+    layEgg = brain->newMotor(Female::RESPONSE::LAY_EGG);
 
     // Needs.
     brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
@@ -49,81 +49,87 @@ Female::Female() : Bird(FEMALE)
 
     // Food goals.
     vector<Mona::SENSOR> sensors;
-    setSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    Mona::Receptor* hungry = brain->newReceptor(sensors, 0);
-    Mona::Mediator* askForMouse = brain->newMediator(brain->INITIAL_ENABLEMENT);
+    hungry = brain->newReceptor(sensors, 0);
+    askForMouse = brain->newMediator(1.0);
     askForMouse->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)hungry);
     askForMouse->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)wantMouse);
     askForMouse->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)hungry);
     brain->addGoal(MOUSE_NEED_INDEX, askForMouse, MOUSE_NEED);
-    setSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+    askForMouse->instinct = true;
+    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
-    Mona::Receptor *readyToEat = brain->newReceptor(sensors, 0);
-    setSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+    readyToEat = brain->newReceptor(sensors, 0);
+    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    Mona::Receptor* notHungry = brain->newReceptor(sensors, 0);
-    Mona::Mediator *eatMouse = brain->newMediator(brain->INITIAL_ENABLEMENT);
+    notHungry = brain->newReceptor(sensors, 0);
+    eatMouse = brain->newMediator(1.0);
     eatMouse->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToEat);
     eatMouse->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)eat);
     eatMouse->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)notHungry);
     brain->addGoal(MOUSE_NEED_INDEX, eatMouse, MOUSE_NEED);
+    eatMouse->instinct = true;
 
     // Stone goals.
-    setSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
+    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    Mona::Receptor* missingStone = brain->newReceptor(sensors, 0);
-    Mona::Mediator* askForStone = brain->newMediator(brain->INITIAL_ENABLEMENT);
+    missingStone = brain->newReceptor(sensors, 0);
+    askForStone = brain->newMediator(1.0);
     askForStone->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)missingStone);
     askForStone->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)wantStone);
     askForStone->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)missingStone);
     brain->addGoal(STONE_NEED_INDEX, askForStone, STONE_NEED);
-    setSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
+    askForStone->instinct = true;
+    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE);
-    Mona::Receptor* stoneReady = brain->newReceptor(sensors, 0);
-    setSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, DONT_CARE,
+    stoneReady = brain->newReceptor(sensors, 0);
+    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    Mona::Receptor* stonePlaced = brain->newReceptor(sensors, 0);
-    Mona::Mediator* placeStone = brain->newMediator(brain->INITIAL_ENABLEMENT);
+    stonePlaced = brain->newReceptor(sensors, 0);
+    placeStone = brain->newMediator(1.0);
     placeStone->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)missingStone);
     placeStone->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)put);
     placeStone->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)stonePlaced);
     brain->addGoal(STONE_NEED_INDEX, placeStone, STONE_NEED);
+    placeStone->instinct = true;
 
     // Lay egg goals.
-    setSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
+    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE, DONT_CARE);
-    Mona::Receptor* readyToLayEgg = brain->newReceptor(sensors, 0);
-    setSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
+    readyToLayEgg = brain->newReceptor(sensors, 0);
+    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    Mona::Receptor* eggInNest = brain->newReceptor(sensors, 0);
-    Mona::Mediator* layEggInNest = brain->newMediator(brain->INITIAL_ENABLEMENT);
+    eggInNest = brain->newReceptor(sensors, 0);
+    layEggInNest = brain->newMediator(1.0);
     layEggInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToLayEgg);
     layEggInNest->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)layEgg);
     layEggInNest->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)eggInNest);
     brain->addGoal(EGG_NEED_INDEX, layEggInNest, EGG_NEED);
+    layEggInNest->instinct = true;
 
     // Roost in nest.
-    Mona::Mediator* roostInNest = brain->newMediator(brain->INITIAL_ENABLEMENT);
+    roostInNest = brain->newMediator(1.0);
     roostInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)eggInNest);
     roostInNest->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)doNothing);
     roostInNest->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)eggInNest);
     brain->addGoal(ROOST_NEED_INDEX, roostInNest, ROOST_NEED);
+    roostInNest->instinct = true;
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;
 }
 
-// Set sensors.
-void Female::setSensors(vector<Mona::SENSOR>& sensors,
+// Load sensors.
+void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
     Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
     Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
@@ -154,7 +160,7 @@ int Female::cycle()
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
    for (int i = 0; i < NUM_SENSORS; i++)
    {
-      brainSensors[i] = (Mona::SENSOR)brain->sensors[i];
+      brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
    return(brain->cycle(brainSensors));
 }

@@ -83,10 +83,47 @@ public:
    // Print response.
    void printResponse();
 
-private:
+   // Motors:
+   Mona::Motor* doNothing;
+   Mona::Motor* eat;
+   Mona::Motor* get;
+   Mona::Motor* put;
+   Mona::Motor* toss;
+   Mona::Motor* move;
+   Mona::Motor* turnRight;
+   Mona::Motor* turnLeft;
+   Mona::Motor* stateOn;
+   Mona::Motor* stateOff;
+   Mona::Motor* wantMouse;
+   Mona::Motor* wantStone;
+   Mona::Motor* layEgg;
 
-    // Set sensors.
-    void setSensors(vector<Mona::SENSOR>& sensors,
+   // Goals.
+
+   // Food goals.
+   Mona::Receptor* hungry;
+   Mona::Mediator* askForMouse;
+   Mona::Receptor* readyToEat;
+   Mona::Receptor* notHungry;
+   Mona::Mediator* eatMouse;
+
+   // Stone goals.
+   Mona::Receptor* missingStone;
+   Mona::Mediator* askForStone;
+   Mona::Receptor* stoneReady;
+   Mona::Receptor* stonePlaced;
+   Mona::Mediator* placeStone;
+
+   // Lay egg goals.
+   Mona::Receptor* readyToLayEgg;
+   Mona::Receptor* eggInNest;
+   Mona::Mediator* layEggInNest;
+
+   // Roost in nest.
+   Mona::Mediator* roostInNest;
+
+    // Load sensors.
+    void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
         Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
         Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
