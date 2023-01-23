@@ -12,10 +12,18 @@ class Male : public Bird
 {
 public:
 
+    // Mate proximity.
+    static const int MATE_PROXIMITY_UNKNOWN = -1;
+    static const int MATE_PROXIMITY_PRESENT = 0;
+    static const int MATE_PROXIMITY_LEFT = 1;
+    static const int MATE_PROXIMITY_FORWARD = 2;
+    static const int MATE_PROXIMITY_RIGHT = 3;
+
    // Sensors.
-   static const int WANT_MOUSE_SENSOR = Bird::NUM_SENSORS;
-   static const int WANT_STONE_SENSOR = Bird::NUM_SENSORS + 1;
-   static const int NUM_SENSORS       = Bird::NUM_SENSORS + 2;
+   static const int MATE_PROXIMITY_SENSOR = Bird::NUM_SENSORS;
+   static const int WANT_MOUSE_SENSOR = Bird::NUM_SENSORS + 1;
+   static const int WANT_STONE_SENSOR = Bird::NUM_SENSORS + 2;
+   static const int NUM_SENSORS       = Bird::NUM_SENSORS + 3;
    int              sensors[NUM_SENSORS];
 
    // Responses.

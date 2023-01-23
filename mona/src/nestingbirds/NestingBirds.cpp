@@ -649,25 +649,25 @@ bool getStone()
 // Male returns to female.
 bool returnToFemale()
 {
-   switch (male->sensors[Bird::MATE_PROXIMITY_SENSOR])
+   switch (male->sensors[Male::MATE_PROXIMITY_SENSOR])
    {
-   case Bird::MATE_PROXIMITY_PRESENT:
+   case Male::MATE_PROXIMITY_PRESENT:
       male->response = Bird::RESPONSE::DO_NOTHING;
       return(true);
 
-   case Bird::MATE_PROXIMITY_LEFT:
+   case Male::MATE_PROXIMITY_LEFT:
       male->response = Bird::RESPONSE::TURN_LEFT;
       break;
 
-   case Bird::MATE_PROXIMITY_FORWARD:
+   case Male::MATE_PROXIMITY_FORWARD:
       male->response = Bird::RESPONSE::MOVE;
       break;
 
-   case Bird::MATE_PROXIMITY_RIGHT:
+   case Male::MATE_PROXIMITY_RIGHT:
       male->response = Bird::RESPONSE::TURN_RIGHT;
       break;
 
-   case Bird::MATE_PROXIMITY_UNKNOWN:
+   case Male::MATE_PROXIMITY_UNKNOWN:
       int centerx = WIDTH / 2;
       int centery = HEIGHT / 2;
       if (male->x < centerx)
@@ -1330,7 +1330,10 @@ void setSensors(int gender)
    }
 
    // Set locale, object, and mate proximity sensors.
-   sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_UNKNOWN;
+   if (gender == Bird::MALE)
+   {
+       sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_UNKNOWN;
+   }
    int x = -1;
    int y = -1;
    for (int i = 0; i < Bird::NUM_CELL_SENSORS; i++)
@@ -1341,9 +1344,12 @@ void setSensors(int gender)
       case 0:
          sensors[Bird::CURRENT_LOCALE_SENSOR] = World[bird->x][bird->y].locale;
          sensors[Bird::CURRENT_OBJECT_SENSOR] = World[bird->x][bird->y].object;
-         if ((male->x == female->x) && (male->y == female->y))
+         if (gender == Bird::MALE)
          {
-            sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_PRESENT;
+            if ((female->x == male->x) && (female->y == male->y))
+            {
+                sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_PRESENT;
+            }
          }
          break;
 
@@ -1393,20 +1399,13 @@ void setSensors(int gender)
             }
             break;
          }
-         if (x >= 0)
+         if (gender == Bird::MALE)
          {
-            if (gender == Bird::MALE)
+            if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
             {
                if ((female->x == x) && (female->y == y))
                {
-                  sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_LEFT;
-               }
-            }
-            else
-            {
-               if ((male->x == x) && (male->y == y))
-               {
-                  sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_LEFT;
+                  sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_LEFT;
                }
             }
          }
@@ -1458,22 +1457,15 @@ void setSensors(int gender)
             }
             break;
          }
-         if (x >= 0)
+         if (gender == Bird::MALE)
          {
-            if (gender == Bird::MALE)
-            {
-               if ((female->x == x) && (female->y == y))
-               {
-                  sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_FORWARD;
-               }
-            }
-            else
-            {
-               if ((male->x == x) && (male->y == y))
-               {
-                  sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_FORWARD;
-               }
-            }
+             if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
+             {
+                 if ((female->x == x) && (female->y == y))
+                 {
+                     sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_FORWARD;
+                 }
+             }
          }
          break;
 
@@ -1523,22 +1515,15 @@ void setSensors(int gender)
             }
             break;
          }
-         if (x >= 0)
+         if (gender == Bird::MALE)
          {
-            if (gender == Bird::MALE)
-            {
-               if ((female->x == x) && (female->y == y))
-               {
-                  sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_RIGHT;
-               }
-            }
-            else
-            {
-               if ((male->x == x) && (male->y == y))
-               {
-                  sensors[Bird::MATE_PROXIMITY_SENSOR] = Bird::MATE_PROXIMITY_RIGHT;
-               }
-            }
+             if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
+             {
+                 if ((female->x == x) && (female->y == y))
+                 {
+                     sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_RIGHT;
+                 }
+             }
          }
          break;
       }

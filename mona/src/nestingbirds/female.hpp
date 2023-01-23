@@ -128,7 +128,6 @@ public:
         Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
         Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
         Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
-        Mona::SENSOR mateProximity,
         Mona::SENSOR orienatation, Mona::SENSOR hungerSensor,
         Mona::SENSOR hasObject, Mona::SENSOR stateSensor);
 };

@@ -51,7 +51,7 @@ Female::Female() : Bird(FEMALE)
     vector<Mona::SENSOR> sensors;
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
+        DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     hungry = brain->newReceptor(sensors, 0);
     askForMouse = brain->newMediator(1.0);
     askForMouse->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)hungry);
@@ -61,11 +61,11 @@ Female::Female() : Bird(FEMALE)
     askForMouse->instinct = true;
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
+        DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
     readyToEat = brain->newReceptor(sensors, 0);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
+        DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     notHungry = brain->newReceptor(sensors, 0);
     eatMouse = brain->newMediator(1.0);
     eatMouse->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToEat);
@@ -77,7 +77,7 @@ Female::Female() : Bird(FEMALE)
     // Stone goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
+        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     missingStone = brain->newReceptor(sensors, 0);
     askForStone = brain->newMediator(1.0);
     askForStone->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)missingStone);
@@ -87,11 +87,11 @@ Female::Female() : Bird(FEMALE)
     askForStone->instinct = true;
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE);
+        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE);
     stoneReady = brain->newReceptor(sensors, 0);
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
+        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     stonePlaced = brain->newReceptor(sensors, 0);
     placeStone = brain->newMediator(1.0);
     placeStone->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)missingStone);
@@ -103,11 +103,11 @@ Female::Female() : Bird(FEMALE)
     // Lay egg goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
-        DONT_CARE, (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE, DONT_CARE);
+        (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE, DONT_CARE);
     readyToLayEgg = brain->newReceptor(sensors, 0);
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
     eggInNest = brain->newReceptor(sensors, 0);
     layEggInNest = brain->newMediator(1.0);
     layEggInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToLayEgg);
@@ -134,7 +134,6 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
     Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
     Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
-    Mona::SENSOR mateProximity,
     Mona::SENSOR orientation, Mona::SENSOR hunger,
     Mona::SENSOR hasObject, Mona::SENSOR state)
 {
@@ -147,7 +146,6 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(forwardObject);
     sensors.push_back(rightLocale);
     sensors.push_back(rightObject);
-    sensors.push_back(mateProximity);
     sensors.push_back(orientation);
     sensors.push_back(hunger);
     sensors.push_back(hasObject);
@@ -213,29 +211,7 @@ void Female::printSensors()
          printf(",");
       }
    }
-   printf("], Mate proximity: ");
-   switch (sensors[MATE_PROXIMITY_SENSOR])
-   {
-   case MATE_PROXIMITY_UNKNOWN:
-      printf("UNKNOWN");
-      break;
-
-   case MATE_PROXIMITY_PRESENT:
-      printf("PRESENT");
-      break;
-
-   case MATE_PROXIMITY_LEFT:
-      printf("LEFT");
-      break;
-
-   case MATE_PROXIMITY_FORWARD:
-      printf("FORWARD");
-      break;
-
-   case MATE_PROXIMITY_RIGHT:
-      printf("RIGHT");
-      break;
-   }
+   printf("]");
 }
 
 
