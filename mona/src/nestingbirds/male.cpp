@@ -101,6 +101,10 @@ void Male::printSensors()
       case 3:
          printf("Right: ");
          break;
+
+      case 4:
+          printf("Rear: ");
+          break;
       }
       printf("%s", LOCALE::toString(sensors[i * Bird::CELL_SENSOR::NUM_SENSORS]));
       printf(",");
@@ -133,6 +137,10 @@ void Male::printSensors()
    case MATE_PROXIMITY_RIGHT:
       printf("RIGHT");
       break;
+
+   case MATE_PROXIMITY_REAR:
+       printf("REAR");
+       break;
    }
    printf(", Want food sensor: ");
    if (sensors[WANT_MOUSE_SENSOR] == 1)

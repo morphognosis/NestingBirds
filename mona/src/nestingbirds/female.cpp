@@ -50,7 +50,7 @@ Female::Female() : Bird(FEMALE)
     // Food goals.
     vector<Mona::SENSOR> sensors;
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     hungry = brain->newReceptor(sensors, 0);
     askForMouse = brain->newMediator(1.0);
@@ -60,11 +60,11 @@ Female::Female() : Bird(FEMALE)
     brain->addGoal(MOUSE_NEED_INDEX, askForMouse, MOUSE_NEED);
     askForMouse->instinct = true;
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
     readyToEat = brain->newReceptor(sensors, 0);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     notHungry = brain->newReceptor(sensors, 0);
     eatMouse = brain->newMediator(1.0);
@@ -76,7 +76,7 @@ Female::Female() : Bird(FEMALE)
 
     // Stone goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     missingStone = brain->newReceptor(sensors, 0);
     askForStone = brain->newMediator(1.0);
@@ -86,11 +86,11 @@ Female::Female() : Bird(FEMALE)
     brain->addGoal(STONE_NEED_INDEX, askForStone, STONE_NEED);
     askForStone->instinct = true;
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE);
     stoneReady = brain->newReceptor(sensors, 0);
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
     stonePlaced = brain->newReceptor(sensors, 0);
     placeStone = brain->newMediator(1.0);
@@ -102,11 +102,11 @@ Female::Female() : Bird(FEMALE)
 
     // Lay egg goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
-        DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
+        DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE, DONT_CARE);
     readyToLayEgg = brain->newReceptor(sensors, 0);
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
     eggInNest = brain->newReceptor(sensors, 0);
     layEggInNest = brain->newMediator(1.0);
@@ -134,6 +134,7 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
     Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
     Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
+    Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
     Mona::SENSOR orientation, Mona::SENSOR hunger,
     Mona::SENSOR hasObject, Mona::SENSOR state)
 {
@@ -146,6 +147,8 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(forwardObject);
     sensors.push_back(rightLocale);
     sensors.push_back(rightObject);
+    sensors.push_back(rearLocale);
+    sensors.push_back(rearObject);
     sensors.push_back(orientation);
     sensors.push_back(hunger);
     sensors.push_back(hasObject);
@@ -201,6 +204,10 @@ void Female::printSensors()
       case 3:
          printf("Right: ");
          break;
+
+      case 4:
+          printf("Rear: ");
+          break;
       }
       printf("%s", LOCALE::toString(sensors[i * Bird::CELL_SENSOR::NUM_SENSORS]));
       printf(",");
