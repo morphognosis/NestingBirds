@@ -242,17 +242,10 @@ void train(int gender)
 // Train male.
 void trainMale()
 {
-   if (World[male->x][male->y].object == OBJECT::EGG)
-   {
-      male->response = Bird::RESPONSE::DO_NOTHING;
-   }
-   else
-   {
       if (!getMouse() && !getStone())
       {
          returnToFemale();
       }
-   }
 }
 
 
@@ -880,22 +873,16 @@ bool returnToFemale()
 // Train female.
 void trainFemale()
 {
-   if (World[female->x][female->y].object == OBJECT::EGG)
-   {
-      female->response = Bird::RESPONSE::DO_NOTHING;
-      return;
-   }
-#ifdef FOOD_TRAIN
-   female->food = Female::INITIAL_FOOD;  
    if (female->food < 0)
    {
       female->food = 0;
    }
    if (female->food == 0)
    {
+       female->brain->setNeed(Female::MOUSE_NEED_INDEX, Female::MOUSE_NEED);
       if (female->hasObject == OBJECT::MOUSE)
       {
-         female->response = Bird::RESPONSE::EAT;
+         female->response = Bird::RESPONSE::EAT_MOUSE;
       }
       else
       {
@@ -905,14 +892,18 @@ void trainFemale()
          }
          else
          {
-            female->response = Bird::RESPONSE::TOSS;
+            female->response = Bird::RESPONSE::TOSS_OBJECT;
          }
       }
       return;
    }
-#else
-   female->food = 200;
-#endif
+
+   if (World[female->x][female->y].object == OBJECT::EGG)
+   {
+       female->response = Bird::RESPONSE::DO_NOTHING;
+       return;
+   }
+
    switch (FemaleNestSequence)
    {
    case 0:
@@ -1401,31 +1392,25 @@ void doResponse(int gender)
          switch (male->response)
          {
          case Male::RESPONSE::GIVE_MOUSE:
-            if (gender == Bird::MALE)
-            {
-               if ((bird->hasObject == OBJECT::MOUSE) && (female->hasObject == OBJECT::NO_OBJECT))
+               if ((male->hasObject == OBJECT::MOUSE) && (female->hasObject == OBJECT::NO_OBJECT))
                {
-                  if ((bird->x == female->x) && (bird->y == female->y))
+                  if ((male->x == female->x) && (male->y == female->y))
                   {
-                     female->hasObject = bird->hasObject;
-                     bird->hasObject   = OBJECT::NO_OBJECT;
+                     female->hasObject = male->hasObject;
+                     male->hasObject   = OBJECT::NO_OBJECT;
                   }
                }
-            }
             break;
 
          case Male::RESPONSE::GIVE_STONE:
-            if (gender == Bird::MALE)
-            {
-               if ((bird->hasObject == OBJECT::STONE) && (female->hasObject == OBJECT::NO_OBJECT))
+               if ((male->hasObject == OBJECT::STONE) && (female->hasObject == OBJECT::NO_OBJECT))
                {
-                  if ((bird->x == female->x) && (bird->y == female->y))
+                  if ((male->x == female->x) && (male->y == female->y))
                   {
                      female->hasObject = bird->hasObject;
-                     bird->hasObject   = OBJECT::NO_OBJECT;
+                     male->hasObject   = OBJECT::NO_OBJECT;
                   }
                }
-            }
             break;
          }
       }
@@ -1441,13 +1426,10 @@ void doResponse(int gender)
             break;
 
          case Female::RESPONSE::LAY_EGG:
-            if (gender == Bird::FEMALE)
-            {
                if (cell->object == OBJECT::NO_OBJECT)
                {
                   cell->object = OBJECT::EGG;
                }
-            }
             break;
          }
       }
@@ -1470,7 +1452,7 @@ void setSensors(int gender)
       sensors = female->sensors;
       for (int i = 0; i < Female::NUM_SENSORS; i++)
       {
-          sensors[i] = 0;
+          sensors[i] = DONT_CARE;
       }
    }
    else
@@ -1479,7 +1461,7 @@ void setSensors(int gender)
       sensors = male->sensors;
       for (int i = 0; i < Female::NUM_SENSORS; i++)
       {
-          sensors[i] = 0;
+          sensors[i] = DONT_CARE;
       }
    }
 

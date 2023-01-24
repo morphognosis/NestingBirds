@@ -31,8 +31,8 @@ public:
    class RESPONSE
    {
 public:
-      static const int GIVE_MOUSE    = 10;
-      static const int GIVE_STONE    = 11;
+      static const int GIVE_MOUSE    = Bird::RESPONSE::NUM_RESPONSES;
+      static const int GIVE_STONE    = GIVE_MOUSE + 1;
       static const int NUM_RESPONSES = 2;
 
       // Response to string.

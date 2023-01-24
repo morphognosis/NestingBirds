@@ -20,9 +20,9 @@ public:
    class RESPONSE
    {
 public:
-      static const int WANT_MOUSE    = 10;
-      static const int WANT_STONE    = 11;
-      static const int LAY_EGG       = 12;
+      static const int WANT_MOUSE    = Bird::RESPONSE::NUM_RESPONSES;
+      static const int WANT_STONE    = WANT_MOUSE + 1;
+      static const int LAY_EGG       = WANT_STONE + 1;
       static const int NUM_RESPONSES = 3;
 
       // Response to string.
