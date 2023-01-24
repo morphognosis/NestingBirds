@@ -16,7 +16,7 @@ public:
     static const int MATE_PROXIMITY_UNKNOWN = -1;
     static const int MATE_PROXIMITY_PRESENT = 0;
     static const int MATE_PROXIMITY_LEFT = 1;
-    static const int MATE_PROXIMITY_FORWARD = 2;
+    static const int MATE_PROXIMITY_FRONT = 2;
     static const int MATE_PROXIMITY_REAR = 3;
     static const int MATE_PROXIMITY_RIGHT = 4;
 

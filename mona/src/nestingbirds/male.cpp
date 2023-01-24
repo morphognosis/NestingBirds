@@ -27,13 +27,14 @@ Male::Male() : Bird(MALE)
 
     // Motors:
     Mona::Motor* doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
-    Mona::Motor* eat = brain->newMotor(Bird::RESPONSE::EAT);
-    Mona::Motor* get = brain->newMotor(Bird::RESPONSE::GET);
-    Mona::Motor* put = brain->newMotor(Bird::RESPONSE::PUT);
-    Mona::Motor* toss = brain->newMotor(Bird::RESPONSE::TOSS);
-    Mona::Motor* move = brain->newMotor(Bird::RESPONSE::MOVE);
+    Mona::Motor* eat = brain->newMotor(Bird::RESPONSE::EAT_MOUSE);
+    Mona::Motor* get = brain->newMotor(Bird::RESPONSE::GET_OBJECT);
+    Mona::Motor* put = brain->newMotor(Bird::RESPONSE::PUT_OBJECT);
+    Mona::Motor* toss = brain->newMotor(Bird::RESPONSE::TOSS_OBJECT);
+    Mona::Motor* move = brain->newMotor(Bird::RESPONSE::MOVE_FORWARD);
     Mona::Motor* turnRight = brain->newMotor(Bird::RESPONSE::TURN_RIGHT);
     Mona::Motor* turnLeft = brain->newMotor(Bird::RESPONSE::TURN_LEFT);
+    Mona::Motor* turnAround = brain->newMotor(Bird::RESPONSE::TURN_AROUND);
     Mona::Motor* stateOn = brain->newMotor(Bird::RESPONSE::STATE_ON);
     Mona::Motor* stateOff = brain->newMotor(Bird::RESPONSE::STATE_OFF);
     Mona::Motor* giveMouse = brain->newMotor(Male::RESPONSE::GIVE_MOUSE);
@@ -95,7 +96,7 @@ void Male::printSensors()
          break;
 
       case 2:
-         printf("Forward: ");
+         printf("Front: ");
          break;
 
       case 3:
@@ -130,8 +131,8 @@ void Male::printSensors()
       printf("LEFT");
       break;
 
-   case MATE_PROXIMITY_FORWARD:
-      printf("FORWARD");
+   case MATE_PROXIMITY_FRONT:
+      printf("FRONT");
       break;
 
    case MATE_PROXIMITY_RIGHT:

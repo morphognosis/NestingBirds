@@ -58,14 +58,14 @@ public:
       int              object;
    };
 
-   // Bird senses current, left, forward, right, and rear cells.
+   // Bird senses current, left, front, right, and rear cells.
    static const int NUM_CELL_SENSORS      = 5;
    static const int CURRENT_LOCALE_SENSOR = 0;
    static const int CURRENT_OBJECT_SENSOR = 1;
    static const int LEFT_LOCALE_SENSOR    = 2;
    static const int LEFT_OBJECT_SENSOR    = 3;
-   static const int FORWARD_LOCALE_SENSOR = 4;
-   static const int FORWARD_OBJECT_SENSOR = 5;
+   static const int FRONT_LOCALE_SENSOR = 4;
+   static const int FRONT_OBJECT_SENSOR = 5;
    static const int RIGHT_LOCALE_SENSOR   = 6;
    static const int RIGHT_OBJECT_SENSOR   = 7;
    static const int REAR_LOCALE_SENSOR = 8;
@@ -92,16 +92,17 @@ public:
    {
 public:
       static const int DO_NOTHING    = 0;
-      static const int EAT           = 1;
-      static const int GET           = 2;
-      static const int PUT           = 3;
-      static const int TOSS          = 4;
-      static const int MOVE          = 5;
+      static const int EAT_MOUSE           = 1;
+      static const int GET_OBJECT           = 2;
+      static const int PUT_OBJECT           = 3;
+      static const int TOSS_OBJECT          = 4;
+      static const int MOVE_FORWARD          = 5;
       static const int TURN_RIGHT    = 6;
       static const int TURN_LEFT     = 7;
-      static const int STATE_ON      = 8;
-      static const int STATE_OFF     = 9;
-      static const int NUM_RESPONSES = 10;
+      static const int TURN_AROUND = 8;
+      static const int STATE_ON      = 9;
+      static const int STATE_OFF     = 10;
+      static const int NUM_RESPONSES = 11;
 
       // Response to string.
       static char *toString(int response)
@@ -111,26 +112,29 @@ public:
          case DO_NOTHING:
             return("DO_NOTHING");
 
-         case EAT:
-            return("EAT");
+         case EAT_MOUSE:
+            return("EAT_MOUSE");
 
-         case GET:
-            return("GET");
+         case GET_OBJECT:
+            return("GET_OBJECT");
 
-         case PUT:
-            return("PUT");
+         case PUT_OBJECT:
+            return("PUT_OBJECT");
 
-         case TOSS:
-            return("TOSS");
+         case TOSS_OBJECT:
+            return("TOSS_OBJECT");
 
-         case MOVE:
-            return("MOVE");
+         case MOVE_FORWARD:
+            return("MOVE_FORWARD");
 
          case TURN_RIGHT:
             return("TURN_RIGHT");
 
          case TURN_LEFT:
             return("TURN_LEFT");
+
+         case TURN_AROUND:
+             return("TURN_AROUND");
 
          case STATE_OFF:
             return("STATE_OFF");

@@ -26,13 +26,14 @@ Female::Female() : Bird(FEMALE)
 
     // Motors:
     doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
-    eat = brain->newMotor(Bird::RESPONSE::EAT);
-    get = brain->newMotor(Bird::RESPONSE::GET);
-    put = brain->newMotor(Bird::RESPONSE::PUT);
-    toss = brain->newMotor(Bird::RESPONSE::TOSS);
-    move = brain->newMotor(Bird::RESPONSE::MOVE);
+    eat = brain->newMotor(Bird::RESPONSE::EAT_MOUSE);
+    get = brain->newMotor(Bird::RESPONSE::GET_OBJECT);
+    put = brain->newMotor(Bird::RESPONSE::PUT_OBJECT);
+    toss = brain->newMotor(Bird::RESPONSE::TOSS_OBJECT);
+    move = brain->newMotor(Bird::RESPONSE::MOVE_FORWARD);
     turnRight = brain->newMotor(Bird::RESPONSE::TURN_RIGHT);
     turnLeft = brain->newMotor(Bird::RESPONSE::TURN_LEFT);
+    turnAround = brain->newMotor(Bird::RESPONSE::TURN_AROUND);
     stateOn = brain->newMotor(Bird::RESPONSE::STATE_ON);
     stateOff = brain->newMotor(Bird::RESPONSE::STATE_OFF);
     wantMouse = brain->newMotor(Female::RESPONSE::WANT_MOUSE);
@@ -108,12 +109,12 @@ Female::Female() : Bird(FEMALE)
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    eggInNest = brain->newReceptor(sensors, 0);
+    int goal = brain->addGoal(EGG_NEED_INDEX, sensors, 0, EGG_NEED);
+    eggInNest = brain->getGoalReceptor(EGG_NEED_INDEX, goal);
     layEggInNest = brain->newMediator(1.0);
     layEggInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToLayEgg);
     layEggInNest->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)layEgg);
     layEggInNest->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)eggInNest);
-    brain->addGoal(EGG_NEED_INDEX, layEggInNest, EGG_NEED);
     layEggInNest->instinct = true;
 
     // Roost in nest.
@@ -132,7 +133,7 @@ Female::Female() : Bird(FEMALE)
 void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
     Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
-    Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
+    Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
     Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
     Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
     Mona::SENSOR orientation, Mona::SENSOR hunger,
@@ -143,8 +144,8 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(currentObject);
     sensors.push_back(leftLocale);
     sensors.push_back(leftObject);
-    sensors.push_back(forwardLocale);
-    sensors.push_back(forwardObject);
+    sensors.push_back(frontLocale);
+    sensors.push_back(frontObject);
     sensors.push_back(rightLocale);
     sensors.push_back(rightObject);
     sensors.push_back(rearLocale);
@@ -198,7 +199,7 @@ void Female::printSensors()
          break;
 
       case 2:
-         printf("Forward: ");
+         printf("Front: ");
          break;
 
       case 3:

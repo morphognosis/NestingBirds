@@ -92,6 +92,7 @@ public:
    Mona::Motor* move;
    Mona::Motor* turnRight;
    Mona::Motor* turnLeft;
+   Mona::Motor* turnAround;
    Mona::Motor* stateOn;
    Mona::Motor* stateOff;
    Mona::Motor* wantMouse;
@@ -126,7 +127,7 @@ public:
     void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
         Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
-        Mona::SENSOR forwardLocale, Mona::SENSOR forwardObject,
+        Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
         Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
         Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
         Mona::SENSOR orienatation, Mona::SENSOR hungerSensor,
