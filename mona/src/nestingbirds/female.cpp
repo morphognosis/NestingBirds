@@ -12,8 +12,8 @@ bool Female::RANDOMIZE_FOOD_LEVEL = false;
 // Needs.
 Mona::NEED Female::MOUSE_NEED = strtod(FEMALE_DEFAULT_MOUSE_NEED, 0);
 Mona::NEED Female::STONE_NEED = strtod(FEMALE_DEFAULT_STONE_NEED, 0);
-Mona::NEED Female::EGG_NEED   = strtod(FEMALE_DEFAULT_EGG_NEED, 0);
-Mona::NEED Female::ROOST_NEED = strtod(FEMALE_DEFAULT_ROOST_NEED, 0);
+Mona::NEED Female::LAY_EGG_NEED   = strtod(FEMALE_DEFAULT_LAY_EGG_NEED, 0);
+Mona::NEED Female::BROOD_EGG_NEED = strtod(FEMALE_DEFAULT_BROOD_EGG_NEED, 0);
 
 extern int RANDOM_NUMBER_SEED;
 
@@ -41,10 +41,10 @@ Female::Female() : Bird(FEMALE)
     layEgg = brain->newMotor(Female::RESPONSE::LAY_EGG);
 
     // Needs.
-    brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
-    brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
-    brain->setNeed(EGG_NEED_INDEX, EGG_NEED);
-    brain->setNeed(ROOST_NEED_INDEX, ROOST_NEED);
+    brain->setNeed(MOUSE_NEED_INDEX, 0.0);
+    brain->setNeed(STONE_NEED_INDEX, 0.0);
+    brain->setNeed(LAY_EGG_NEED_INDEX, LAY_EGG_NEED);
+    brain->setNeed(BROOD_EGG_NEED_INDEX, 0.0);
 
     // Goals.
 
@@ -109,20 +109,20 @@ Female::Female() : Bird(FEMALE)
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    int goal = brain->addGoal(EGG_NEED_INDEX, sensors, 0, EGG_NEED);
-    eggInNest = brain->getGoalReceptor(EGG_NEED_INDEX, goal);
+    int goal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, LAY_EGG_NEED);
+    eggInNest = brain->getGoalReceptor(LAY_EGG_NEED_INDEX, goal);
     layEggInNest = brain->newMediator(1.0);
     layEggInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToLayEgg);
     layEggInNest->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)layEgg);
     layEggInNest->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)eggInNest);
     layEggInNest->instinct = true;
 
-    // Roost in nest.
+    // Brooding on egg.
     roostInNest = brain->newMediator(1.0);
     roostInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)eggInNest);
     roostInNest->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)doNothing);
     roostInNest->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)eggInNest);
-    brain->addGoal(ROOST_NEED_INDEX, roostInNest, ROOST_NEED);
+    brain->addGoal(BROOD_EGG_NEED_INDEX, roostInNest, BROOD_EGG_NEED);
     roostInNest->instinct = true;
 
     // Set initial response.
@@ -154,6 +154,25 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(hunger);
     sensors.push_back(hasObject);
     sensors.push_back(state);
+}
+
+// Set female needs.
+void Female::setNeeds()
+{
+    if (food <= 0)
+    {
+        brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
+    }
+
+    if (state == 1 && sensors[Bird::CURRENT_OBJECT_SENSOR] == OBJECT::NO_OBJECT)
+    {
+        brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
+    }
+
+    if (sensors[Bird::CURRENT_OBJECT_SENSOR] == OBJECT::EGG)
+    {
+        brain->setNeed(BROOD_EGG_NEED_INDEX, BROOD_EGG_NEED);
+    }
 }
 
 // Cycle female.

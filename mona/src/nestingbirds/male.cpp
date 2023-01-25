@@ -52,6 +52,10 @@ Male::Male() : Bird(MALE)
     response = Bird::RESPONSE::DO_NOTHING;
 }
 
+// Set male needs.
+void Male::setNeeds()
+{
+}
 
 // Cycle male.
 int Male::cycle()

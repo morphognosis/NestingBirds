@@ -31,7 +31,8 @@ const char *Usage =
    "      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
    "      [-femaleMouseNeed <amount> (default=" FEMALE_DEFAULT_MOUSE_NEED ")]\n"
    "      [-femaleStoneNeed <amount> (default=" FEMALE_DEFAULT_STONE_NEED ")]\n"
-   "      [-femaleEggNeed <amount> (default=" FEMALE_DEFAULT_EGG_NEED ")]\n"
+   "      [-femaleLayEggNeed <amount> (default=" FEMALE_DEFAULT_LAY_EGG_NEED ")]\n"
+   "      [-femaleBroodEggNeed <amount> (default=" FEMALE_DEFAULT_BROOD_EGG_NEED ")]\n"
    "      [-verbose <true | false> (default=true)]\n"
    "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
    "      [-version]\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
@@ -190,6 +191,9 @@ void step()
    // Set female sensors.
    setSensors(Bird::FEMALE);
 
+   // Set female needs.
+   female->setNeeds();
+
    // Cycle female.
    female->cycle();
 
@@ -207,6 +211,9 @@ void step()
 
    // Set male sensors.
    setSensors(Bird::MALE);
+
+   // Set male needs.
+   male->setNeeds();
 
    // Cycle male.
    male->cycle();
@@ -242,6 +249,12 @@ void train(int gender)
 // Train male.
 void trainMale()
 {
+    if (World[male->x][male->y].object == OBJECT::EGG)
+    {
+        male->response = Bird::RESPONSE::DO_NOTHING;
+        return;
+    }
+
       if (!getMouse() && !getStone())
       {
          returnToFemale();
@@ -873,13 +886,18 @@ bool returnToFemale()
 // Train female.
 void trainFemale()
 {
+    if (World[female->x][female->y].object == OBJECT::EGG)
+    {
+        female->response = Bird::RESPONSE::DO_NOTHING;
+        return;
+    }
+
    if (female->food < 0)
    {
       female->food = 0;
    }
    if (female->food == 0)
    {
-       female->brain->setNeed(Female::MOUSE_NEED_INDEX, Female::MOUSE_NEED);
       if (female->hasObject == OBJECT::MOUSE)
       {
          female->response = Bird::RESPONSE::EAT_MOUSE;
@@ -896,12 +914,6 @@ void trainFemale()
          }
       }
       return;
-   }
-
-   if (World[female->x][female->y].object == OBJECT::EGG)
-   {
-       female->response = Bird::RESPONSE::DO_NOTHING;
-       return;
    }
 
    switch (FemaleNestSequence)
@@ -1765,7 +1777,6 @@ static double distance(double x1, double y1, double x2, double y2)
    return(sqrt((xd * xd) + (yd * yd)));
 }
 
-
 // Move mice in forest.
 void stepMice()
 {
@@ -2105,23 +2116,41 @@ int main(int argc, char *args[])
          }
          continue;
       }
-      if (strcmp(args[i], "-femaleEggNeed") == 0)
+      if (strcmp(args[i], "-femaleLayEggNeed") == 0)
       {
          i++;
          if (i >= argc)
          {
-            fprintf(stderr, "Invalid femaleEggNeed option\n");
+            fprintf(stderr, "Invalid femaleLayEggNeed option\n");
             fprintf(stderr, Usage);
             exit(1);
          }
-         Female::EGG_NEED = strtod(args[i], 0);
-         if (Female::EGG_NEED < 0.0)
+         Female::LAY_EGG_NEED = strtod(args[i], 0);
+         if (Female::LAY_EGG_NEED < 0.0)
          {
-            fprintf(stderr, "Invalid femaleEggNeed option\n");
+            fprintf(stderr, "Invalid femaleLayEggNeed option\n");
             fprintf(stderr, Usage);
             exit(1);
          }
          continue;
+      }
+      if (strcmp(args[i], "-femaleBroodEggNeed") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid femaleBroodEggNeed option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          Female::BROOD_EGG_NEED = strtod(args[i], 0);
+          if (Female::BROOD_EGG_NEED < 0.0)
+          {
+              fprintf(stderr, "Invalid femaleBroodEggNeed option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          continue;
       }
       if (strcmp(args[i], "-randomSeed") == 0)
       {
