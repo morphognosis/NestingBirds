@@ -49,7 +49,7 @@ public:
    // Food.
 #define FEMALE_DEFAULT_FOOD_DURATION    "200"
    static int FOOD_DURATION;
-#define FEMALE_DEFAULT_INITIAL_FOOD     FEMALE_DEFAULT_FOOD_DURATION
+#define FEMALE_DEFAULT_INITIAL_FOOD     "200"
    static int  INITIAL_FOOD;
    static bool RANDOMIZE_FOOD_LEVEL;
 
@@ -82,6 +82,9 @@ public:
 
    // Print sensors.
    void printSensors();
+
+   // Print needs.
+   void printNeeds();
 
    // Print response.
    void printResponse();

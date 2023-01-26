@@ -164,7 +164,7 @@ void Female::setNeeds()
         brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
     }
 
-    if (state == 1 && sensors[Bird::CURRENT_OBJECT_SENSOR] == OBJECT::NO_OBJECT)
+    if (sensors[Bird::CURRENT_OBJECT_SENSOR] == OBJECT::NO_OBJECT)
     {
         brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
     }
@@ -194,7 +194,11 @@ void Female::print()
    printSensors();
    printf("], ");
    printState();
-   printf(", Response: ");
+   printf("], "), 
+   printf("Needs: [");
+   printNeeds();
+   printf("], ");
+   printf("Response: ");
    printResponse();
 }
 
@@ -241,6 +245,31 @@ void Female::printSensors()
    printf("]");
 }
 
+// Print needs.
+void Female::printNeeds()
+{
+    for (int i = 0; i < NUM_NEEDS; i++)
+    {
+        switch (i)
+        {
+        case MOUSE_NEED_INDEX:
+            printf("[Mouse: %f],", brain->getNeed(MOUSE_NEED_INDEX));
+            break;
+
+        case STONE_NEED_INDEX:
+            printf("[Stone: %f],", brain->getNeed(STONE_NEED_INDEX));
+            break;
+
+        case LAY_EGG_NEED_INDEX:
+            printf("[Lay egg: %f],", brain->getNeed(LAY_EGG_NEED_INDEX));
+            break;
+
+        case BROOD_EGG_NEED_INDEX:
+            printf("[Brood egg: %f]", brain->getNeed(BROOD_EGG_NEED_INDEX));
+            break;
+        }
+    }
+}
 
 // Print response.
 void Female::printResponse()

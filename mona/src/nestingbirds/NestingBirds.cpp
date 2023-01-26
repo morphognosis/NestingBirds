@@ -784,7 +784,7 @@ bool returnToFemale()
 
    case Male::MATE_PROXIMITY_UNKNOWN:
       int centerx = WIDTH / 2;
-      int centery = HEIGHT / 2;
+      int centery = (HEIGHT / 2) + 1;
       if (male->x < centerx)
       {
          if (male->orientation == Bird::ORIENTATION::EAST)
@@ -886,12 +886,14 @@ bool returnToFemale()
 // Train female.
 void trainFemale()
 {
+    // Brooding egg?
     if (World[female->x][female->y].object == OBJECT::EGG)
     {
         female->response = Bird::RESPONSE::DO_NOTHING;
         return;
     }
 
+    // Hunger.
    if (female->food < 0)
    {
       female->food = 0;
@@ -916,32 +918,36 @@ void trainFemale()
       return;
    }
 
+   // Nest building.
    switch (FemaleNestSequence)
    {
    case 0:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         female->response = Bird::RESPONSE::GET_OBJECT;
+         if (female->orientation == Bird::ORIENTATION::WEST)
+         {
+            female->response = Bird::RESPONSE::MOVE_FORWARD;
+            FemaleNestSequence++;
+         }
+         else
+         {
+            female->response = Bird::RESPONSE::TURN_LEFT;
+         }
       }
       else if (female->hasObject == OBJECT::STONE)
       {
-         female->response = Bird::RESPONSE::TOSS_OBJECT;
-      }
-      else if (female->orientation == Bird::ORIENTATION::NORTH)
-      {
-         female->response = Bird::RESPONSE::MOVE_FORWARD;
-         FemaleNestSequence++;
+         female->response = Bird::RESPONSE::PUT_OBJECT;
       }
       else
       {
-         female->response = Bird::RESPONSE::TURN_RIGHT;
+         female->response = Female::RESPONSE::WANT_STONE;
       }
       break;
 
    case 1:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         if (female->orientation == Bird::ORIENTATION::WEST)
+         if (female->orientation == Bird::ORIENTATION::SOUTH)
          {
             female->response = Bird::RESPONSE::MOVE_FORWARD;
             FemaleNestSequence++;
@@ -964,29 +970,6 @@ void trainFemale()
    case 2:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         if (female->orientation == Bird::ORIENTATION::SOUTH)
-         {
-            female->response = Bird::RESPONSE::MOVE_FORWARD;
-            FemaleNestSequence++;
-         }
-         else
-         {
-            female->response = Bird::RESPONSE::TURN_LEFT;
-         }
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
-      }
-      else
-      {
-         female->response = Female::RESPONSE::WANT_STONE;
-      }
-      break;
-
-   case 3:
-      if (World[female->x][female->y].object == OBJECT::STONE)
-      {
          female->response = Bird::RESPONSE::MOVE_FORWARD;
          FemaleNestSequence++;
       }
@@ -1000,7 +983,7 @@ void trainFemale()
       }
       break;
 
-   case 4:
+   case 3:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
          if (female->orientation == Bird::ORIENTATION::EAST)
@@ -1023,7 +1006,7 @@ void trainFemale()
       }
       break;
 
-   case 5:
+   case 4:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
          female->response = Bird::RESPONSE::MOVE_FORWARD;
@@ -1039,7 +1022,7 @@ void trainFemale()
       }
       break;
 
-   case 6:
+   case 5:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
          if (female->orientation == Bird::ORIENTATION::NORTH)
@@ -1062,7 +1045,7 @@ void trainFemale()
       }
       break;
 
-   case 7:
+   case 6:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
          female->response = Bird::RESPONSE::MOVE_FORWARD;
@@ -1078,7 +1061,7 @@ void trainFemale()
       }
       break;
 
-   case 8:
+   case 7:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
          if (female->orientation == Bird::ORIENTATION::WEST)
@@ -1101,9 +1084,7 @@ void trainFemale()
       }
       break;
 
-   case 9:
-      if (World[female->x][female->y].object == OBJECT::STONE)
-      {
+   case 8:
          if (female->orientation == Bird::ORIENTATION::SOUTH)
          {
             female->response = Bird::RESPONSE::MOVE_FORWARD;
@@ -1113,39 +1094,14 @@ void trainFemale()
          {
             female->response = Bird::RESPONSE::TURN_LEFT;
          }
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
-      }
-      else
-      {
-         female->response = Female::RESPONSE::WANT_STONE;
-      }
+      break;
+
+   case 9:
+         female->response = Female::RESPONSE::LAY_EGG;
+         FemaleNestSequence++;
       break;
 
    case 10:
-      if (World[female->x][female->y].object == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::GET_OBJECT;
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::TOSS_OBJECT;
-      }
-      else if (World[female->x][female->y].object == OBJECT::NO_OBJECT)
-      {
-         female->response = Female::RESPONSE::LAY_EGG;
-         FemaleNestSequence++;
-      }
-      else
-      {
-         female->response   = Bird::RESPONSE::TURN_RIGHT;
-         FemaleNestSequence = 0;
-      }
-      break;
-
-   case 11:
       break;
    }
 }
@@ -2261,7 +2217,7 @@ int main(int argc, char *args[])
          printf("Step=%d\n", i);
       }
       step();
-      if ((eggLaidStep < 0) && (World[WIDTH / 2][HEIGHT / 2].object == OBJECT::EGG))
+      if ((eggLaidStep < 0) && (World[WIDTH / 2][(HEIGHT / 2) + 1].object == OBJECT::EGG))
       {
          eggLaidStep = i;
       }
