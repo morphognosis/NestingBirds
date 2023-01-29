@@ -6,7 +6,6 @@
 void
 Mona::sense()
 {
-   int         i, j;
    SENSOR_MODE sensorMode;
 
    vector<SENSOR>     sensorsWork;
@@ -20,7 +19,7 @@ Mona::sense()
    {
       printf("***Sense phase***\n");
       printf("Sensors: ");
-      for (i = 0; i < (int)sensors.size(); i++)
+      for (int i = 0, j = (int)sensors.size(); i < j; i++)
       {
          printf("%f ", sensors[i]);
       }
@@ -29,13 +28,13 @@ Mona::sense()
 #endif
 
    // Update need based on sensors.
-   for (i = 0; i < numNeeds; i++)
+   for (int i = 0; i < numNeeds; i++)
    {
       homeostats[i]->sensorsUpdate();
    }
 
    // Clear receptor firings.
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
       receptor->firingStrength = 0.0;
@@ -45,7 +44,7 @@ Mona::sense()
    if (sensorModes.size() == 0)
    {
       vector<bool> mask;
-      for (i = 0; i < numSensors; i++)
+      for (int i = 0; i < numSensors; i++)
       {
          mask.push_back(true);
       }
@@ -53,7 +52,8 @@ Mona::sense()
    }
 
    // Fire receptors matching sensor modes.
-   for (sensorMode = 0; sensorMode < (int)sensorModes.size(); sensorMode++)
+   int n = (int)sensorModes.size();
+   for (sensorMode = 0; sensorMode < n; sensorMode++)
    {
       // Apply sensor mode to sensors.
       applySensorMode(sensors, sensorsWork, sensorMode);
@@ -74,9 +74,10 @@ Mona::sense()
       // Incorporate into sensor mode sets.
       if (addReceptor)
       {
-         for (i = 0; i < (int)oldReceptorSet.size(); i++)
+         for (int i = 0, n = (int)oldReceptorSet.size(); i < n; i++)
          {
-            for (j = 0; j < (int)sensorModes[sensorMode]->subsets.size(); j++)
+             int j, k;
+            for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
             {
                if (oldReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
                {
@@ -89,7 +90,7 @@ Mona::sense()
             {
                continue;
             }
-            for (j = 0; j < (int)sensorModes[sensorMode]->supersets.size(); j++)
+            for (j = 0, k = (int)sensorModes[sensorMode]->supersets.size(); j < k; j++)
             {
                if (oldReceptorSet[i]->sensorMode == sensorModes[sensorMode]->supersets[j])
                {
@@ -100,9 +101,10 @@ Mona::sense()
             }
          }
       }
-      for (i = 0; i < (int)newReceptorSet.size(); i++)
+      for (int i = 0, n = (int)newReceptorSet.size(); i < n; i++)
       {
-         for (j = 0; j < (int)sensorModes[sensorMode]->subsets.size(); j++)
+          int j, k;
+         for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
          {
             if (newReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
             {
@@ -115,7 +117,7 @@ Mona::sense()
          {
             continue;
          }
-         for (j = 0; j < (int)sensorModes[sensorMode]->supersets.size(); j++)
+         for (j = 0, k = (int)sensorModes[sensorMode]->supersets.size(); j < k; j++)
          {
             if (newReceptorSet[i]->sensorMode == sensorModes[sensorMode]->supersets[j])
             {
@@ -145,7 +147,7 @@ Mona::sense()
       if (traceSense)
       {
          printf("Receptor firing: centroid=[ ");
-         for (i = 0; i < numSensors; i++)
+         for (int i = 0; i < numSensors; i++)
          {
             printf("%f ", receptor->centroid[i]);
          }
@@ -163,14 +165,12 @@ Mona::sense()
 void Mona::applySensorMode(vector<SENSOR>& sensorsIn,
                            vector<SENSOR>& sensorsOut, SENSOR_MODE sensorMode)
 {
-   int i;
-
    // Defaulting to base sensor mode?
    if (sensorModes.size() == 0)
    {
       assert(sensorMode == 0);
       vector<bool> mask;
-      for (i = 0; i < numSensors; i++)
+      for (int i = 0; i < numSensors; i++)
       {
          mask.push_back(true);
       }
@@ -178,7 +178,7 @@ void Mona::applySensorMode(vector<SENSOR>& sensorsIn,
    }
 
    sensorsOut.clear();
-   for (i = 0; i < (int)sensorsIn.size(); i++)
+   for (int i = 0, j = (int)sensorsIn.size(); i < j; i++)
    {
       if (sensorModes[sensorMode]->mask[i])
       {
@@ -196,7 +196,7 @@ void Mona::applySensorMode(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
 {
    vector<SENSOR> sensorsWork;
    applySensorMode(sensors, sensorsWork, sensorMode);
-   for (int i = 0; i < (int)sensors.size(); i++)
+   for (int i = 0, j = (int)sensors.size(); i < j; i++)
    {
       sensors[i] = sensorsWork[i];
    }
@@ -242,7 +242,7 @@ Mona::SENSOR Mona::Receptor::sensorDistance(vector<SENSOR> *sensorsA,
    SENSOR d;
    SENSOR dist = 0.0f;
 
-   for (int i = 0; i < (int)sensorsA->size(); i++)
+   for (int i = 0, j = (int)sensorsA->size(); i < j; i++)
    {
       d     = (*sensorsA)[i] - (*sensorsB)[i];
       dist += (d * d);
@@ -278,7 +278,7 @@ void Mona::Receptor::savePattern(void *sensorsIn, FILE *fp)
    SENSOR s;
 
    vector<SENSOR> *sensors = (vector<SENSOR> *)sensorsIn;
-   for (int i = 0; i < (int)sensors->size(); i++)
+   for (int i = 0, j = (int)sensors->size(); i < j; i++)
    {
       s = (*sensors)[i];
       FWRITE_FLOAT(&s, fp);
@@ -332,10 +332,10 @@ int Mona::addSensorMode(vector<bool>& sensorMask, SENSOR sensorResolution)
    }
 
    // Duplicate?
-   for (int i = 0; i < (int)sensorModes.size(); i++)
+   for (int i = 0, n = (int)sensorModes.size(); i < n; i++)
    {
       bool duplicate = true;
-      for (int j = 0; j < (int)sensorMask.size(); j++)
+      for (int j = 0, k = (int)sensorMask.size(); j < k; j++)
       {
          if (sensorModes[i]->mask[j] != sensorMask[j])
          {

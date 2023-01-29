@@ -10,7 +10,6 @@
 void
 Mona::learn()
 {
-   int           i, j, k;
    LearningEvent *learningEvent;
 
    list<LearningEvent *>::iterator learningEventItr;
@@ -27,12 +26,12 @@ Mona::learn()
 #endif
 
    // Purge obsolete events.
-   j = MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL;
-   if (j > MAX_MEDIATOR_LEVEL)
+   int n = MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL;
+   if (n > MAX_MEDIATOR_LEVEL)
    {
-      j = MAX_MEDIATOR_LEVEL;
+      n = MAX_MEDIATOR_LEVEL;
    }
-   for (i = 0; i < (int)learningEvents.size(); i++)
+   for (int i = 0, j = (int)learningEvents.size(), k = 0; i < j; i++)
    {
       for (learningEventItr = learningEvents[i].begin();
            learningEventItr != learningEvents[i].end(); )
@@ -43,7 +42,7 @@ Mona::learn()
             // Is event still recent enough to form a new mediator?
             if (learningEvent->neuron->type == MOTOR)
             {
-               k = j;
+               k = n;
             }
             else
             {
@@ -68,7 +67,7 @@ Mona::learn()
    }
 
    // Time-stamp and store significant events.
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
       if (receptor->firingStrength > NEARLY_ZERO)
@@ -78,7 +77,7 @@ Mona::learn()
          learningEvents[0].push_back(learningEvent);
       }
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       if (motor->firingStrength > NEARLY_ZERO)
@@ -104,7 +103,7 @@ Mona::learn()
    }
 
    // Create new mediators based on potential effect events.
-   for (i = 0; i < (int)learningEvents.size(); i++)
+   for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
    {
       for (learningEventItr = learningEvents[i].begin();
            learningEventItr != learningEvents[i].end(); learningEventItr++)
@@ -121,7 +120,7 @@ Mona::learn()
    }
 
    // Create mediators with generalized receptor effects.
-   for (i = 0; i < (int)generalizationEvents.size(); i++)
+   for (int i = 0, j = (int)generalizationEvents.size(); i < j; i++)
    {
       generalizeMediator(generalizationEvents[i]);
       delete generalizationEvents[i];
@@ -147,7 +146,7 @@ Mona::learn()
 void
 Mona::createMediator(LearningEvent *effectEvent)
 {
-   int           i, level;
+   int           level;
    bool          effectRespEq, causeRespEq;
    LearningEvent *causeEvent, *responseEvent, *learningEvent;
 
@@ -230,7 +229,9 @@ Mona::createMediator(LearningEvent *effectEvent)
    {
       // Make a weighted probabilistic pick of a candidate.
       chooseProb = random.RAND_INTERVAL(0.0, accumProb);
-      for (i = 0, p = 0.0; i < (int)candidates.size(); i++)
+      PROBABILITY p = 0.0;
+      int i = 0;
+      for (int j = (int)candidates.size(); i < j; i++)
       {
          if (candidates[i] == NULL)
          {
@@ -334,7 +335,6 @@ Mona::generalizeMediator(GeneralizationEvent *generalizationEvent)
    Mediator                *mediator;
    vector<LearningEvent *> candidates;
    PROBABILITY             accumProb, chooseProb, p;
-   int i;
 
    // Find effect event candidates.
    accumProb = 0.0;
@@ -358,7 +358,7 @@ Mona::generalizeMediator(GeneralizationEvent *generalizationEvent)
       // Is this a direct superset of the mediator's effect?
       candidateReceptor = (Receptor *)candidateEvent->neuron;
       effectReceptor    = (Receptor *)generalizationEvent->mediator->effect;
-      for (i = 0; i < (int)effectReceptor->superSensorModes.size(); i++)
+      for (int i = 0, j = (int)effectReceptor->superSensorModes.size(); i < j; i++)
       {
          if (effectReceptor->superSensorModes[i] == candidateReceptor)
          {
@@ -375,7 +375,9 @@ Mona::generalizeMediator(GeneralizationEvent *generalizationEvent)
    {
       // Make a weighted probabilistic pick of a candidate.
       chooseProb = random.RAND_INTERVAL(0.0, accumProb);
-      for (i = 0, p = 0.0; i < (int)candidates.size(); i++)
+      p = 0.0;
+      int i = 0;
+      for (int j = (int)candidates.size(); i < j; i++)
       {
          if (candidates[i] == NULL)
          {
@@ -443,7 +445,6 @@ Mona::generalizeMediator(GeneralizationEvent *generalizationEvent)
 // Is mediator a duplicate?
 bool Mona::isDuplicateMediator(Mediator *mediator)
 {
-   int           i, j;
    struct Notify *notify;
 
    if (mediator->cause->notifyList.size() < mediator->effect->notifyList.size())
@@ -451,7 +452,7 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
       if ((mediator->response == NULL) ||
           (mediator->cause->notifyList.size() < mediator->response->notifyList.size()))
       {
-         for (i = 0, j = (int)mediator->cause->notifyList.size(); i < j; i++)
+         for (int i = 0, j = (int)mediator->cause->notifyList.size(); i < j; i++)
          {
             notify = mediator->cause->notifyList[i];
             if (notify->mediator != mediator)
@@ -467,7 +468,7 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
       }
       else
       {
-         for (i = 0, j = (int)mediator->response->notifyList.size(); i < j; i++)
+         for (int i = 0, j = (int)mediator->response->notifyList.size(); i < j; i++)
          {
             notify = mediator->response->notifyList[i];
             if (notify->mediator != mediator)
@@ -487,7 +488,7 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
       if ((mediator->response == NULL) ||
           (mediator->effect->notifyList.size() < mediator->response->notifyList.size()))
       {
-         for (i = 0, j = (int)mediator->effect->notifyList.size(); i < j; i++)
+         for (int i = 0, j = (int)mediator->effect->notifyList.size(); i < j; i++)
          {
             notify = mediator->effect->notifyList[i];
             if (notify->mediator != mediator)
@@ -503,7 +504,7 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
       }
       else
       {
-         for (i = 0, j = (int)mediator->response->notifyList.size(); i < j; i++)
+         for (int i = 0, j = (int)mediator->response->notifyList.size(); i < j; i++)
          {
             notify = mediator->response->notifyList[i];
             if (notify->mediator != mediator)
@@ -524,7 +525,6 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
 // Clear working memory.
 void Mona::clearWorkingMemory()
 {
-   int      i;
    Receptor *receptor;
    Motor    *motor;
    Mediator *mediator;
@@ -533,7 +533,7 @@ void Mona::clearWorkingMemory()
    LearningEvent                   *learningEvent;
    list<LearningEvent *>::iterator learningEventItr;
 
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
       receptor->firingStrength = 0.0;
@@ -542,7 +542,7 @@ void Mona::clearWorkingMemory()
       receptor->tracker.clear();
 #endif
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       motor->firingStrength = 0.0;
@@ -562,7 +562,7 @@ void Mona::clearWorkingMemory()
       mediator->tracker.clear();
 #endif
    }
-   for (i = 0; i < (int)learningEvents.size(); i++)
+   for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
    {
       for (learningEventItr = learningEvents[i].begin();
            learningEventItr != learningEvents[i].end(); learningEventItr++)

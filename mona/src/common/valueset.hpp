@@ -197,12 +197,11 @@ public:
    // Load.
    inline void load(FILE *fp)
    {
-      int i;
-
+      int i, j;
       values.clear();
       FREAD_INT(&i, fp);
       values.resize(i);
-      for (i = 0; i < (int)values.size(); i++)
+      for (i = 0, j = (int)values.size(); i < j; i++)
       {
          FREAD_DOUBLE(&values[i], fp);
       }
@@ -215,7 +214,8 @@ public:
       int i = (int)values.size();
 
       FWRITE_INT(&i, fp);
-      for (i = 0; i < (int)values.size(); i++)
+      int n = (int)values.size();
+      for (i = 0; i < n; i++)
       {
          FWRITE_DOUBLE(&values[i], fp);
       }
@@ -225,7 +225,7 @@ public:
    // Print.
    inline void print(FILE *out = stdout)
    {
-      for (int i = 0; i < (int)values.size(); i++)
+      for (int i = 0, j = (int)values.size(); i < j; i++)
       {
          fprintf(out, "%f ", values[i]);
       }

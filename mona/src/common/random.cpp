@@ -199,25 +199,25 @@ double Random::genrand_res53(void)
 
 /* Load and save added by TEP: */
 
-/* load state from file pointer */
+/* Load state from file pointer */
 void Random::load_genrand(FILE *fp)
 {
+   FREAD_INT(&mti, fp);
    for (int i = 0; i < RAND_N; i++)
    {
-      FREAD_LONG(&mt[i], fp);
+      FREAD_LONG_LONG(&mt[i], fp);
    }
-   FREAD_INT(&mti, fp);
 }
 
 
-/* save state to file pointer */
+/* Save state to file pointer */
 void Random::save_genrand(FILE *fp)
 {
+   FWRITE_INT(&mti, fp);
    for (int i = 0; i < RAND_N; i++)
    {
-      FWRITE_LONG(&mt[i], fp);
+      FWRITE_LONG_LONG(&mt[i], fp);
    }
-   FWRITE_INT(&mti, fp);
 }
 
 

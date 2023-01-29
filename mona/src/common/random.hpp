@@ -6,8 +6,8 @@
 #include "common.h"
 
 // Random value.
-typedef unsigned long   RANDOM;
-#define INVALID_RANDOM    0xffffffffUL
+typedef unsigned long long   RANDOM;
+#define INVALID_RANDOM    ((unsigned long long)(-1))
 
 // Probability type.
 typedef double          PROBABILITY;

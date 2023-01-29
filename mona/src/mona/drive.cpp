@@ -7,7 +7,6 @@
 void
 Mona::drive()
 {
-   int      i;
    Neuron   *neuron;
    Receptor *receptor;
    Motor    *motor;
@@ -26,7 +25,7 @@ Mona::drive()
 
    // Copy needs from homeostats to work set.
    needs.alloc(numNeeds);
-   for (i = 0; i < numNeeds; i++)
+   for (int i = 0; i < numNeeds; i++)
    {
       needs.set(i, homeostats[i]->getNeed());
    }
@@ -40,12 +39,12 @@ Mona::drive()
 #endif
 
    // Initialize drive.
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       neuron = (Neuron *)receptors[i];
       neuron->initDrive(needs);
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       neuron = (Neuron *)motors[i];
       neuron->initDrive(needs);
@@ -58,7 +57,7 @@ Mona::drive()
    }
 
    // Drive.
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
       if (receptor->goals.getValue() != 0.0)
@@ -78,7 +77,7 @@ Mona::drive()
       }
    }
 
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       if (motor->goals.getValue() != 0.0)
@@ -134,7 +133,6 @@ Mona::drive()
 bool
 Mona::Mediator::goalValueSubsumed()
 {
-   int    i;
    NEED   goalValue;
    Neuron *cause      = this->cause;
    Neuron *response   = this->response;
@@ -143,13 +141,13 @@ Mona::Mediator::goalValueSubsumed()
 
    assert(goalBlocks != NULL);
 
-   for (i = 0; i < mona->numNeeds; i++)
+   for (int i = 0; i < mona->numNeeds; i++)
    {
       goalBlocks[i] = false;
    }
    while (effect != NULL)
    {
-      for (i = 0; i < mona->numNeeds; i++)
+      for (int i = 0; i < mona->numNeeds; i++)
       {
          goalValue = goals.getValue(i);
          if (goalValue > 0.0)
@@ -171,6 +169,7 @@ Mona::Mediator::goalValueSubsumed()
             }
          }
       }
+      int i;
       for (i = 0; i < mona->numNeeds; i++)
       {
          if (!goalBlocks[i])
@@ -209,7 +208,6 @@ Mona::Mediator::goalValueSubsumed()
 void
 Mona::Neuron::initDrive(VALUE_SET& needs)
 {
-   int           i;
    ENABLEMENT    up, down, e, ce, re, ee;
    Mediator      *mediator;
    struct Notify *notify;
@@ -274,7 +272,7 @@ Mona::Neuron::initDrive(VALUE_SET& needs)
    }
 
    // Distribute the up amount among parents.
-   for (i = 0; i < (int)notifyList.size(); i++)
+   for (int i = 0, j = (int)notifyList.size(); i < j; i++)
    {
       notify   = notifyList[i];
       mediator = notify->mediator;
@@ -295,17 +293,16 @@ Mona::Neuron::initDrive(VALUE_SET& needs)
 void
 Mona::clearMotiveWork()
 {
-   int    i;
    Neuron *neuron;
 
    list<Mediator *>::iterator mediatorItr;
 
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       neuron = (Neuron *)receptors[i];
       neuron->clearMotiveWork();
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       neuron = (Neuron *)motors[i];
       neuron->clearMotiveWork();
@@ -335,17 +332,16 @@ Mona::Neuron::clearMotiveWork()
 void
 Mona::setMotives()
 {
-   int    i;
    Neuron *neuron;
 
    list<Mediator *>::iterator mediatorItr;
 
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       neuron = (Neuron *)receptors[i];
       neuron->setMotive();
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       neuron = (Neuron *)motors[i];
       neuron->setMotive();
@@ -363,9 +359,7 @@ Mona::setMotives()
 void
 Mona::Neuron::setMotive()
 {
-   MOTIVE m;
-
-   m = motiveWork.getValue();
+   MOTIVE m = motiveWork.getValue();
    if (!motiveValid || (motive < m))
    {
       motiveValid = true;
@@ -384,13 +378,11 @@ Mona::Neuron::setMotive()
 void
 Mona::Neuron::accumMotiveTracking()
 {
-   int i, j, k;
-
    if (type != MOTOR)
    {
       return;
    }
-   for (i = 0; i < (int)tracker.motiveWorkPaths.size(); i++)
+   for (int i = 0, n = (int)tracker.motiveWorkPaths.size(); i < n; i++)
    {
       if (tracker.motivePaths.size() < Mona::MAX_DRIVER_TRACKS)
       {
@@ -398,7 +390,8 @@ Mona::Neuron::accumMotiveTracking()
       }
       else
       {
-         for (j = 0, k = -1; j < (int)tracker.motiveWorkPaths.size(); j++)
+          int k = -1;
+         for (int j = 0, n2 = (int)tracker.motiveWorkPaths.size(); j < n2; j++)
          {
             if (tracker.motiveWorkPaths[i].motive > tracker.motivePaths[j].motive)
             {
@@ -423,17 +416,16 @@ Mona::Neuron::accumMotiveTracking()
 void
 Mona::finalizeMotives()
 {
-   int    i;
    Neuron *neuron;
 
    list<Mediator *>::iterator mediatorItr;
 
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       neuron = (Neuron *)receptors[i];
       neuron->finalizeMotive();
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       neuron = (Neuron *)motors[i];
       neuron->finalizeMotive();
@@ -467,7 +459,6 @@ Mona::Neuron::finalizeMotive()
 void
 Mona::Neuron::drive(MotiveAccum motiveAccum)
 {
-   int         i;
    Mediator    *mediator;
    Receptor    *receptor;
    MOTIVE      m;
@@ -549,7 +540,7 @@ Mona::Neuron::drive(MotiveAccum motiveAccum)
    // Receptor drives motive to subset receptors.
    case RECEPTOR:
       receptor = (Receptor *)this;
-      for (i = 0; i < (int)receptor->subSensorModes.size(); i++)
+      for (int i = 0, j = (int)receptor->subSensorModes.size(); i < j; i++)
       {
          accumWork.config(motiveAccum, 1.0);
          receptor->subSensorModes[i]->drive(accumWork);
@@ -562,7 +553,7 @@ Mona::Neuron::drive(MotiveAccum motiveAccum)
    }
 
    // Drive motive to parent mediators.
-   for (i = 0; i < (int)notifyList.size(); i++)
+   for (int i = 0, j = (int)notifyList.size(); i < j; i++)
    {
       mediator = notifyList[i]->mediator;
       if ((w = driveWeights[mediator]) > NEARLY_ZERO)
@@ -579,7 +570,6 @@ Mona::Neuron::drive(MotiveAccum motiveAccum)
 void
 Mona::Mediator::driveCause(MotiveAccum motiveAccum)
 {
-   int         i;
    Mediator    *mediator;
    MOTIVE      m;
    WEIGHT      w;
@@ -632,7 +622,7 @@ Mona::Mediator::driveCause(MotiveAccum motiveAccum)
    }
 
    // Drive motive to parent mediators.
-   for (i = 0; i < (int)notifyList.size(); i++)
+   for (int i = 0, j = (int)notifyList.size(); i < j; i++)
    {
       mediator = notifyList[i]->mediator;
       if ((w = driveWeights[mediator]) > NEARLY_ZERO)
@@ -650,12 +640,11 @@ Mona::Mediator::driveCause(MotiveAccum motiveAccum)
 bool
 Mona::Neuron::trackMotive(MotiveAccum& in, MotiveAccum& out)
 {
-   int i, j;
    struct MotiveAccum::DriveElem e;
    struct Activation::DrivePath  d;
    VALUE_SET needs;
 
-   for (i = 0; i < (int)in.drivers.size(); i++)
+   for (int i = 0, j = (int)in.drivers.size(); i < j; i++)
    {
       if (in.drivers[i].neuron == this)
       {
@@ -665,7 +654,7 @@ Mona::Neuron::trackMotive(MotiveAccum& in, MotiveAccum& out)
       d.drivers.push_back(in.drivers[i]);
    }
    needs.alloc(mona->numNeeds);
-   for (i = 0; i < mona->numNeeds; i++)
+   for (int i = 0; i < mona->numNeeds; i++)
    {
       needs.set(i, mona->homeostats[i]->getNeed());
    }
@@ -692,21 +681,22 @@ Mona::Neuron::trackMotive(MotiveAccum& in, MotiveAccum& out)
    }
    else
    {
-      for (i = 0, j = -1; i < (int)tracker.motiveWorkPaths.size(); i++)
+       int k = -1;
+      for (int i = 0, j = (int)tracker.motiveWorkPaths.size(); i < j; i++)
       {
          if (d.motiveWork.getValue() > tracker.motiveWorkPaths[i].motiveWork.getValue())
          {
-            if ((j == -1) ||
+            if ((k == -1) ||
                 (tracker.motiveWorkPaths[i].motiveWork.getValue() <
-                 tracker.motiveWorkPaths[j].motiveWork.getValue()))
+                 tracker.motiveWorkPaths[k].motiveWork.getValue()))
             {
-               j = i;
+               k = i;
             }
          }
       }
-      if (j != -1)
+      if (k != -1)
       {
-         tracker.motiveWorkPaths[j] = d;
+         tracker.motiveWorkPaths[k] = d;
       }
       else
       {

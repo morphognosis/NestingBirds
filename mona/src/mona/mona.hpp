@@ -52,7 +52,7 @@ class PUBLIC_API Mona
 public:
 
    // Content format.
-   enum { FORMAT=10 };
+   enum { FORMAT=11 };
 
    // Data types.
    typedef Homeostat::ID            ID;

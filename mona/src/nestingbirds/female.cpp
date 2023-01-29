@@ -25,26 +25,23 @@ Female::Female() : Bird(FEMALE)
         RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Motors:
-    doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
-    eat = brain->newMotor(Bird::RESPONSE::EAT_MOUSE);
-    get = brain->newMotor(Bird::RESPONSE::GET_OBJECT);
-    put = brain->newMotor(Bird::RESPONSE::PUT_OBJECT);
-    toss = brain->newMotor(Bird::RESPONSE::TOSS_OBJECT);
-    move = brain->newMotor(Bird::RESPONSE::MOVE_FORWARD);
-    turnRight = brain->newMotor(Bird::RESPONSE::TURN_RIGHT);
-    turnLeft = brain->newMotor(Bird::RESPONSE::TURN_LEFT);
-    turnAround = brain->newMotor(Bird::RESPONSE::TURN_AROUND);
-    stateOn = brain->newMotor(Bird::RESPONSE::STATE_ON);
-    stateOff = brain->newMotor(Bird::RESPONSE::STATE_OFF);
-    wantMouse = brain->newMotor(Female::RESPONSE::WANT_MOUSE);
-    wantStone = brain->newMotor(Female::RESPONSE::WANT_STONE);
-    layEgg = brain->newMotor(Female::RESPONSE::LAY_EGG);
+    doNothing = brain->motors[Bird::RESPONSE::DO_NOTHING];
+    eat = brain->motors[Bird::RESPONSE::EAT_MOUSE];
+    get = brain->motors[Bird::RESPONSE::GET_OBJECT];
+    put = brain->motors[Bird::RESPONSE::PUT_OBJECT];
+    toss = brain->motors[Bird::RESPONSE::TOSS_OBJECT];
+    move = brain->motors[Bird::RESPONSE::MOVE_FORWARD];
+    turnRight = brain->motors[Bird::RESPONSE::TURN_RIGHT];
+    turnLeft = brain->motors[Bird::RESPONSE::TURN_LEFT];
+    turnAround = brain->motors[Bird::RESPONSE::TURN_AROUND];
+    stateOn = brain->motors[Bird::RESPONSE::STATE_ON];
+    stateOff = brain->motors[Bird::RESPONSE::STATE_OFF];
+    wantMouse = brain->motors[Female::RESPONSE::WANT_MOUSE];
+    wantStone = brain->motors[Female::RESPONSE::WANT_STONE];
+    layEgg = brain->motors[Female::RESPONSE::LAY_EGG];
 
     // Needs.
-    brain->setNeed(MOUSE_NEED_INDEX, 0.0);
-    brain->setNeed(STONE_NEED_INDEX, 0.0);
-    brain->setNeed(LAY_EGG_NEED_INDEX, LAY_EGG_NEED);
-    brain->setNeed(BROOD_EGG_NEED_INDEX, 0.0);
+    initNeeds();
 
     // Goals.
 
@@ -79,12 +76,14 @@ Female::Female() : Bird(FEMALE)
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    missingStone = brain->newReceptor(sensors, 0);
+    int goal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, RESPONSE::WANT_STONE, STONE_NEED);
+    missingStone = brain->getGoalReceptor(STONE_NEED_INDEX, goal);
+    //missingStone = brain->newReceptor(sensors, 0);
     askForStone = brain->newMediator(1.0);
     askForStone->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)missingStone);
     askForStone->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)wantStone);
     askForStone->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)missingStone);
-    brain->addGoal(STONE_NEED_INDEX, askForStone, STONE_NEED);
+    //brain->addGoal(STONE_NEED_INDEX, askForStone, STONE_NEED);
     askForStone->instinct = true;
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -109,7 +108,7 @@ Female::Female() : Bird(FEMALE)
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    int goal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, LAY_EGG_NEED);
+    goal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, LAY_EGG_NEED);
     eggInNest = brain->getGoalReceptor(LAY_EGG_NEED_INDEX, goal);
     layEggInNest = brain->newMediator(1.0);
     layEggInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToLayEgg);
@@ -154,6 +153,14 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(hunger);
     sensors.push_back(hasObject);
     sensors.push_back(state);
+}
+// Initialize female needs.
+void Female::initNeeds()
+{
+    brain->setNeed(MOUSE_NEED_INDEX, 0.0);
+    brain->setNeed(STONE_NEED_INDEX, 0.0);
+    brain->setNeed(LAY_EGG_NEED_INDEX, LAY_EGG_NEED);
+    brain->setNeed(BROOD_EGG_NEED_INDEX, 0.0);
 }
 
 // Set female needs.

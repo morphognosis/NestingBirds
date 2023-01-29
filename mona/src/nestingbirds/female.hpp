@@ -71,7 +71,8 @@ public:
    // Constructor.
    Female();
 
-   // Set needs.
+   // Needs.
+   void initNeeds();
    void setNeeds();
 
    // Cycle.

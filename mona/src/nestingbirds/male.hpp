@@ -81,7 +81,8 @@ public:
    // Constructor.
    Male();
 
-   // Set needs.
+   // Needs.
+   void initNeeds();
    void setNeeds();
 
    // Cycle.

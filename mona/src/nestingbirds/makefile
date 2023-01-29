@@ -4,7 +4,9 @@ CC = gcc
 
 all: ../../bin/nestingbirds
 
-../../bin/nestingbirds: NestingBirds.o male.o female.o bird.o NestingBirds.o
+../../bin/nestingbirds: NestingBirds.o male.o female.o bird.o \
+		../common/fileio.o ../common/gettime.o ../common/log.o ../common/md5.o ../common/quaternion.o ../common/random.o ../common/RDtree.o \
+		../mona/drive.o ../mona/enable.o ../mona/homeostat.o ../mona/learn.o ../mona/mona.o ../mona/respond.o ../mona/sense.o
 	$(CC) -o ../../bin/nestingbirds NestingBirds.o male.o female.o bird.o\
 		../common/fileio.o ../common/gettime.o ../common/log.o ../common/md5.o ../common/quaternion.o ../common/random.o ../common/RDtree.o \
 		../mona/drive.o ../mona/enable.o ../mona/homeostat.o ../mona/learn.o ../mona/mona.o ../mona/respond.o ../mona/sense.o \

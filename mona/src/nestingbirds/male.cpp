@@ -26,30 +26,36 @@ Male::Male() : Bird(MALE)
         RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Motors:
-    Mona::Motor* doNothing = brain->newMotor(Bird::RESPONSE::DO_NOTHING);
-    Mona::Motor* eat = brain->newMotor(Bird::RESPONSE::EAT_MOUSE);
-    Mona::Motor* get = brain->newMotor(Bird::RESPONSE::GET_OBJECT);
-    Mona::Motor* put = brain->newMotor(Bird::RESPONSE::PUT_OBJECT);
-    Mona::Motor* toss = brain->newMotor(Bird::RESPONSE::TOSS_OBJECT);
-    Mona::Motor* move = brain->newMotor(Bird::RESPONSE::MOVE_FORWARD);
-    Mona::Motor* turnRight = brain->newMotor(Bird::RESPONSE::TURN_RIGHT);
-    Mona::Motor* turnLeft = brain->newMotor(Bird::RESPONSE::TURN_LEFT);
-    Mona::Motor* turnAround = brain->newMotor(Bird::RESPONSE::TURN_AROUND);
-    Mona::Motor* stateOn = brain->newMotor(Bird::RESPONSE::STATE_ON);
-    Mona::Motor* stateOff = brain->newMotor(Bird::RESPONSE::STATE_OFF);
-    Mona::Motor* giveMouse = brain->newMotor(Male::RESPONSE::GIVE_MOUSE);
-    Mona::Motor* giveStone = brain->newMotor(Male::RESPONSE::GIVE_STONE);
+    Mona::Motor* doNothing = brain->motors[Bird::RESPONSE::DO_NOTHING];
+    Mona::Motor* eat = brain->motors[Bird::RESPONSE::EAT_MOUSE];
+    Mona::Motor* get = brain->motors[Bird::RESPONSE::GET_OBJECT];
+    Mona::Motor* put = brain->motors[Bird::RESPONSE::PUT_OBJECT];
+    Mona::Motor* toss = brain->motors[Bird::RESPONSE::TOSS_OBJECT];
+    Mona::Motor* move = brain->motors[Bird::RESPONSE::MOVE_FORWARD];
+    Mona::Motor* turnRight = brain->motors[Bird::RESPONSE::TURN_RIGHT];
+    Mona::Motor* turnLeft = brain->motors[Bird::RESPONSE::TURN_LEFT];
+    Mona::Motor* turnAround = brain->motors[Bird::RESPONSE::TURN_AROUND];
+    Mona::Motor* stateOn = brain->motors[Bird::RESPONSE::STATE_ON];
+    Mona::Motor* stateOff = brain->motors[Bird::RESPONSE::STATE_OFF];
+    Mona::Motor* giveMouse = brain->motors[Male::RESPONSE::GIVE_MOUSE];
+    Mona::Motor* giveStone = brain->motors[Male::RESPONSE::GIVE_STONE];
 
     // Needs.
+    initNeeds();
+
+    // Set initial response.
+    response = Bird::RESPONSE::DO_NOTHING;
+}
+
+// Initialize male needs.
+void Male::initNeeds()
+{
     brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
     brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
     brain->setNeed(FEMALE_MOUSE_NEED_INDEX, FEMALE_MOUSE_NEED);
     brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
     brain->setNeed(FEMALE_STONE_NEED_INDEX, FEMALE_STONE_NEED);
     brain->setNeed(ATTEND_FEMALE_NEED_INDEX, ATTEND_FEMALE_NEED);
-
-    // Set initial response.
-    response = Bird::RESPONSE::DO_NOTHING;
 }
 
 // Set male needs.

@@ -3,8 +3,6 @@
 #ifndef __FILEIO__
 #define __FILEIO__
 
-#define BINARY_FILE_FORMAT    1
-
 #ifdef _WIN32
 #ifndef WIN32
 #define WIN32

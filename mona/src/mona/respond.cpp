@@ -6,7 +6,6 @@
 void
 Mona::respond()
 {
-   int                i, j;
    Motor              *motor;
    RESPONSE_POTENTIAL max;
 
@@ -18,18 +17,18 @@ Mona::respond()
 #endif
 
    // Get response potentials from motor motives.
-   for (i = 0; i < numResponses; i++)
+   for (int i = 0; i < numResponses; i++)
    {
       responsePotentials[i] = 0.0;
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       responsePotentials[motor->response] += motor->motive;
    }
 
    // Incorporate minimal randomness.
-   for (i = 0; i < numResponses; i++)
+   for (int i = 0; i < numResponses; i++)
    {
       if (responsePotentials[i] <= NEARLY_ZERO)
       {
@@ -45,7 +44,7 @@ Mona::respond()
       {
          double *responseWeights = new double[numResponses];
          assert(responseWeights != NULL);
-         for (i = 0; i < numResponses; i++)
+         for (int i = 0; i < numResponses; i++)
          {
             responseWeights[i] = responsePotentials[i];
             if (i > 0)
@@ -55,6 +54,7 @@ Mona::respond()
          }
          int    j = numResponses - 1;
          double n = random.RAND_INTERVAL(0.0, responseWeights[j]);
+         int i;
          for (i = 0; i < j; i++)
          {
             if (n <= responseWeights[i])
@@ -74,8 +74,8 @@ Mona::respond()
    {
       // Select maximum response potential.
       bool first = true;
-      j = random.RAND_CHOICE(numResponses);
-      for (i = response = 0, max = 0.0; i < numResponses; i++)
+      int j = random.RAND_CHOICE(numResponses);
+      for (int i = response = 0, max = 0.0; i < numResponses; i++)
       {
          if (first || (responsePotentials[j] > max))
          {
@@ -111,7 +111,7 @@ Mona::respond()
    }
 
    // Fire responding motor.
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       if (motor->response == response)
@@ -142,7 +142,7 @@ Mona::respond()
 #endif
 
    // Update need based on response.
-   for (i = 0; i < numNeeds; i++)
+   for (int i = 0; i < numNeeds; i++)
    {
       homeostats[i]->responseUpdate();
    }
@@ -152,15 +152,13 @@ Mona::respond()
 // Add a response.
 Mona::RESPONSE Mona::addResponse()
 {
-   int i;
-
    numResponses++;
    responsePotentials.resize(numResponses);
-   for (i = 0; i < numResponses; i++)
+   for (int i = 0; i < numResponses; i++)
    {
       responsePotentials[i] = 0.0;
    }
-   i = numResponses - 1;
+   int i = numResponses - 1;
    newMotor(i);
    return(i);
 }

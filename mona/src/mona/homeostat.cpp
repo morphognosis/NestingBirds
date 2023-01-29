@@ -59,7 +59,7 @@ void Homeostat::clearPeriodicNeed()
 int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                        RESPONSE response, NEED goalValue)
 {
-   int goalIndex, i;
+   int goalIndex;
 
    vector<SENSOR> sensorsWork;
    Mona::Receptor *receptor;
@@ -92,7 +92,7 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
    {
       // Add entry.
       mona->applySensorMode(sensors, sensorsWork, sensorMode);
-      for (i = 0; i < (int)sensorsWork.size(); i++)
+      for (int i = 0, j = (int)sensorsWork.size(); i < j; i++)
       {
          goal.sensors.push_back(sensorsWork[i]);
       }
@@ -166,8 +166,7 @@ int Homeostat::addGoal(void* mediator, NEED goalValue)
 int Homeostat::findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                         RESPONSE response)
 {
-   int i;
-
+    int i = -1;
    if ((i = findGoal(sensors, sensorMode)) != -1)
    {
       if (goals[i].response == response)
@@ -192,7 +191,7 @@ int Homeostat::findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
    // Apply the sensor mode.
    mona->applySensorMode(sensors, sensorsWork, sensorMode);
 
-   for (int i = 0; i < (int)goals.size(); i++)
+   for (int i = 0, j = (int)goals.size(); i < j; i++)
    {
       if (goals[i].receptor != NULL &&
           goals[i].sensorMode == sensorMode &&          
@@ -209,7 +208,7 @@ int Homeostat::findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
 // Return -1 for no match.
 int Homeostat::findGoal(void* mediator)
 {
-    for (int i = 0; i < (int)goals.size(); i++)
+    for (int i = 0, j = (int)goals.size(); i < j; i++)
     {
         if (goals[i].mediator == mediator)
         {
@@ -346,14 +345,13 @@ bool Homeostat::removeGoal(int goalIndex)
 // Remove neuron from goals.
 void Homeostat::removeNeuron(void *neuron)
 {
-   int  i;
    bool done;
 
    done = false;
    while (!done)
    {
       done = true;
-      for (i = 0; i < (int)goals.size(); i++)
+      for (int i = 0, j = (int)goals.size(); i < j; i++)
       {
          if ((goals[i].receptor == neuron) || (goals[i].motor == neuron))
          {
@@ -377,7 +375,7 @@ void Homeostat::sensorsUpdate()
    vector<SENSOR> sensors;
 
    // Update the need value when sensors match.
-   for (int i = 0; i < (int)goals.size(); i++)
+   for (int i = 0, j = (int)goals.size(); i < j; i++)
    {
        if (goals[i].receptor != NULL)
        {
@@ -409,7 +407,7 @@ void Homeostat::sensorsUpdate()
 void Homeostat::responseUpdate()
 {
    // Update the need value when response matches.
-   for (int i = 0; i < (int)goals.size(); i++)
+   for (int i = 0, j = (int)goals.size(); i < j; i++)
    {
       if (goals[i].response != NULL_RESPONSE)
       {
@@ -442,7 +440,7 @@ void Homeostat::responseUpdate()
 void Homeostat::mediatorUpdate(void* mediator, double firingStrength)
 {
     // Update the need value when sensors match.
-    for (int i = 0; i < (int)goals.size(); i++)
+    for (int i = 0, j = (int)goals.size(); i < j; i++)
     {
         if (goals[i].mediator == mediator)
         {
@@ -597,11 +595,11 @@ void Homeostat::print(FILE *out)
    fprintf(out, "<periodicNeed>%f</periodicNeed>", periodicNeed);
    fprintf(out, "<frequency>%d</frequency>", frequency);
    fprintf(out, "<sensory_response_goals>");
-   for (int i = 0; i < (int)goals.size(); i++)
+   for (int i = 0, n = (int)goals.size(); i < n; i++)
    {
       fprintf(out, "<sensory_response_goal>");
       fprintf(out, "<sensors>");
-      for (int j = 0; j < (int)goals[i].sensors.size(); j++)
+      for (int j = 0, k = (int)goals[i].sensors.size(); j < k; j++)
       {
          fprintf(out, "<value>%f</value>", goals[i].sensors[j]);
       }

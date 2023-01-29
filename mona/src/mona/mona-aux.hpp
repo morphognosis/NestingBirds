@@ -35,13 +35,12 @@ public:
    int init(vector<bool>& mask, SENSOR resolution,
             vector<SensorMode *> *sensorModes)
    {
-      int        i, j;
       bool       sub, super;
       SensorMode *s;
 
       // Initialize.
       this->mask.clear();
-      for (i = 0; i < (int)mask.size(); i++)
+      for (int i = 0, j = (int)mask.size(); i < j; i++)
       {
          this->mask.push_back(mask[i]);
       }
@@ -49,7 +48,7 @@ public:
       this->resolution = resolution;
 
       // Determine subset/supersets.
-      for (i = 0, j = (int)sensorModes->size(); i < j; i++)
+      for (int i = 0, j = (int)sensorModes->size(); i < j; i++)
       {
          s = (*sensorModes)[i];
          subSuper(s, sub, super);
@@ -80,7 +79,7 @@ public:
    void subSuper(SensorMode *sensorMode, bool& sub, bool& super)
    {
       sub = super = true;
-      for (int i = 0; i < (int)mask.size() && (sub || super); i++)
+      for (int i = 0, j = (int)mask.size() && (sub || super); i < j; i++)
       {
          if (mask[i])
          {
@@ -107,7 +106,7 @@ public:
       bool       sub, super;
       SensorMode *s;
 
-      for (int i = 0; i < (int)subsets.size(); i++)
+      for (int i = 0, j = (int)subsets.size(); i < j; i++)
       {
          s = (*sensorModes)[i];
          s->subSuper((*sensorModes)[idx], sub, super);
@@ -127,7 +126,7 @@ public:
       bool       sub, super;
       SensorMode *s;
 
-      for (int i = 0; i < (int)supersets.size(); i++)
+      for (int i = 0, j = (int)supersets.size(); i < j; i++)
       {
          s = (*sensorModes)[i];
          s->subSuper((*sensorModes)[idx], sub, super);
@@ -464,7 +463,7 @@ public:
       loadNeeds(accum);
       scale(weight);
       this->weight = accum.weight * weight;
-      for (int i = 0; i < (int)accum.path.size(); i++)
+      for (int i = 0, j = (int)accum.path.size(); i < j; i++)
       {
          path.push_back(accum.path[i]);
       }
@@ -500,7 +499,7 @@ public:
    // Return true if no loop detected.
    inline bool addPath(Neuron *neuron)
    {
-      for (int i = 0; i < (int)path.size(); i++)
+      for (int i = 0, j = (int)path.size(); i < j; i++)
       {
          if (path[i] == neuron) { return(false); }
       }

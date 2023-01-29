@@ -99,14 +99,12 @@ void Mona::initParms()
 // Initialize effect event intervals and weights.
 void Mona::initEffectEventIntervals()
 {
-   int i, j;
-
    // Create the intervals.
    effectEventIntervals.resize(MAX_MEDIATOR_LEVEL + 1);
-   for (i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
+   for (int i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
       effectEventIntervals[i].resize(DEFAULT_NUM_EFFECT_EVENT_INTERVALS);
-      for (j = 0; j < DEFAULT_NUM_EFFECT_EVENT_INTERVALS; j++)
+      for (int j = 0; j < DEFAULT_NUM_EFFECT_EVENT_INTERVALS; j++)
       {
          effectEventIntervals[i][j] = (int)(pow(2.0, i)) * (j + 1);
       }
@@ -137,7 +135,7 @@ void Mona::initEffectEventInterval(int level, int numIntervals)
 void Mona::initEffectEventIntervalWeights()
 {
    effectEventIntervalWeights.resize((int)effectEventIntervals.size());
-   for (int i = 0; i < (int)effectEventIntervalWeights.size(); i++)
+   for (int i = 0, j = (int)effectEventIntervalWeights.size(); i < j; i++)
    {
       initEffectEventIntervalWeight(i);
    }
@@ -147,16 +145,15 @@ void Mona::initEffectEventIntervalWeights()
 // Initialize the effect event interval weights for a specific level.
 void Mona::initEffectEventIntervalWeight(int level)
 {
-   int    i;
    WEIGHT sum;
 
    sum = 0.0;
    effectEventIntervalWeights[level].resize((int)effectEventIntervals[level].size());
-   for (i = 0; i < (int)effectEventIntervalWeights[level].size(); i++)
+   for (int i = 0, j = (int)effectEventIntervalWeights[level].size(); i < j; i++)
    {
       sum += (1.0 / (double)effectEventIntervals[level][i]);
    }
-   for (i = 0; i < (int)effectEventIntervalWeights[level].size(); i++)
+   for (int i = 0, j = (int)effectEventIntervalWeights[level].size(); i < j; i++)
    {
       effectEventIntervalWeights[level][i] =
          (1.0 / (double)effectEventIntervals[level][i]) / sum;
@@ -167,10 +164,8 @@ void Mona::initEffectEventIntervalWeight(int level)
 // Initialize the maximum learning effect event intervals.
 void Mona::initMaxLearningEffectEventIntervals()
 {
-   int i, j;
-
    maxLearningEffectEventIntervals.clear();
-   for (i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
+   for (int i = 0, j = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
       // Response-equipped mediators learn with immediate intervals.
       if (i <= MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL)
@@ -190,7 +185,6 @@ void Mona::initMaxLearningEffectEventIntervals()
 // Return false if invalid interval found.
 bool Mona::auditDefaultEffectEventIntervals()
 {
-   int    i, j;
    WEIGHT sum;
 
    if (DEFAULT_NUM_EFFECT_EVENT_INTERVALS <= 0)
@@ -218,13 +212,13 @@ bool Mona::auditDefaultEffectEventIntervals()
       return(false);
    }
 
-   for (i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
+   for (int i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
       if ((int)effectEventIntervals[i].size() != DEFAULT_NUM_EFFECT_EVENT_INTERVALS)
       {
          return(false);
       }
-      for (j = 0; j < (int)effectEventIntervals[i].size(); j++)
+      for (int j = 0, k = (int)effectEventIntervals[i].size(); j < k; j++)
       {
          if (effectEventIntervals[i][j] < (int)(pow(2.0, i)))
          {
@@ -233,7 +227,7 @@ bool Mona::auditDefaultEffectEventIntervals()
       }
    }
 
-   for (i = 0; i < (int)effectEventIntervalWeights.size(); i++)
+   for (int i = 0, n = (int)effectEventIntervalWeights.size(); i < n; i++)
    {
       if ((int)effectEventIntervalWeights[i].size() !=
           DEFAULT_NUM_EFFECT_EVENT_INTERVALS)
@@ -241,7 +235,7 @@ bool Mona::auditDefaultEffectEventIntervals()
          return(false);
       }
       sum = 0.0;
-      for (j = 0; j < (int)effectEventIntervalWeights[i].size(); j++)
+      for (int j = 0, k = (int)effectEventIntervalWeights[i].size(); j < k; j++)
       {
          sum += effectEventIntervalWeights[i][j];
       }
@@ -251,7 +245,7 @@ bool Mona::auditDefaultEffectEventIntervals()
       }
    }
 
-   for (i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
+   for (int i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
       if (maxLearningEffectEventIntervals[i] < 0)
       {
@@ -267,8 +261,6 @@ bool Mona::auditDefaultEffectEventIntervals()
 void Mona::initNet(int numSensors, int numResponses, int numNeeds,
                    RANDOM randomSeed)
 {
-   int i;
-
    // Sanity checks.
    assert(numSensors > 0);
    assert(numResponses >= 0);
@@ -292,14 +284,14 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
 
    // Initialize sensors.
    sensors.clear();
-   for (i = 0; i < numSensors; i++)
+   for (int i = 0; i < numSensors; i++)
    {
       sensors.push_back(0.0f);
    }
 
    // Add base sensor mode.
    vector<bool> sensorMask;
-   for (i = 0; i < numSensors; i++)
+   for (int i = 0; i < numSensors; i++)
    {
        sensorMask.push_back(true);
    }
@@ -308,7 +300,7 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
    // Initialize response apparatus and motor neurons.
    response = 0;
    responsePotentials.resize(numResponses);
-   for (i = 0; i < numResponses; i++)
+   for (int i = 0; i < numResponses; i++)
    {
       responsePotentials[i] = 0.0;
       newMotor(i);
@@ -317,7 +309,7 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
    responseOverridePotential = -1.0;
 
    // Create homeostats to manage needs.
-   for (i = 0; i < numNeeds; i++)
+   for (int i = 0; i < numNeeds; i++)
    {
       homeostats.push_back(new Homeostat(i, this));
       assert(homeostats[i] != NULL);
@@ -383,7 +375,6 @@ Mona::setNeed(int index, NEED value)
 void
 Mona::inflateNeed(int index)
 {
-   int                 i;
    NEED                currentNeed, deltaNeed, need;
    Mediator            *mediator;
    Enabling            *enabling;
@@ -409,7 +400,7 @@ Mona::inflateNeed(int index)
          enabling->needs.set(index, need);
       }
    }
-   for (i = 0; i < (int)learningEvents.size(); i++)
+   for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
    {
       for (learningEventItr = learningEvents[i].begin();
            learningEventItr != learningEvents[i].end(); learningEventItr++)
@@ -419,7 +410,7 @@ Mona::inflateNeed(int index)
          learningEvent->needs.set(index, need);
       }
    }
-   for (i = 0; i < (int)generalizationEvents.size(); i++)
+   for (int i = 0, j = (int)generalizationEvents.size(); i < j; i++)
    {
       generalizationEvent = generalizationEvents[i];
       need = generalizationEvent->needs.get(index) + deltaNeed;
@@ -584,7 +575,7 @@ Mona::Neuron::clear()
    motiveWorkValid = false;
    driveWeights.clear();
    instinct = false;
-   for (int i = 0; i < (int)notifyList.size(); i++)
+   for (int i = 0, j = (int)notifyList.size(); i < j; i++)
    {
       delete notifyList[i];
    }
@@ -603,7 +594,7 @@ Mona::Neuron::hasParentInstinct()
 {
    Mediator *mediator;
 
-   for (int i = 0; i < (int)notifyList.size(); i++)
+   for (int i = 0, j = (int)notifyList.size(); i < j; i++)
    {
       mediator = notifyList[i]->mediator;
       if (mediator->instinct ||
@@ -619,7 +610,7 @@ Mona::Neuron::hasParentInstinct()
 // Load neuron.
 void Mona::Neuron::load(FILE *fp)
 {
-   int           i, j;
+    int i, j;
    struct Notify *notify;
 
    clear();
@@ -634,7 +625,8 @@ void Mona::Neuron::load(FILE *fp)
    notifyList.clear();
    FREAD_INT(&i, fp);
    notifyList.resize(i);
-   for (i = 0; i < (int)notifyList.size(); i++)
+   i = 0;
+   for (int n = (int)notifyList.size(); i < n; i++)
    {
       notify = new struct Notify;
       assert(notify != NULL);
@@ -665,7 +657,8 @@ void Mona::Neuron::save(FILE *fp)
    FWRITE_BOOL(&instinct, fp);
    i = (int)notifyList.size();
    FWRITE_INT(&i, fp);
-   for (i = 0; i < (int)notifyList.size(); i++)
+   i = 0;
+   for (int n = (int)notifyList.size(); i < n; i++)
    {
       notify = notifyList[i];
       FWRITE_LONG_LONG(&notify->mediator->id, fp);
@@ -687,7 +680,7 @@ Mona::newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode)
    r->creationTime = eventClock;
    vector<SENSOR> *sensors = new vector<SENSOR>();
    assert(sensors != NULL);
-   for (int i = 0; i < (int)r->centroid.size(); i++)
+   for (int i = 0, j = (int)r->centroid.size(); i < j; i++)
    {
       sensors->push_back(r->centroid[i]);
    }
@@ -703,7 +696,7 @@ Mona::Receptor::Receptor(vector<SENSOR>& centroid,
 {
    assert((int)centroid.size() == mona->numSensors);
    this->centroid.clear();
-   for (int i = 0; i < (int)centroid.size(); i++)
+   for (int i = 0, j = (int)centroid.size(); i < j; i++)
    {
       this->centroid.push_back(centroid[i]);
    }
@@ -1080,7 +1073,7 @@ Mona::Mediator::getEffectiveUtility()
    UTILITY  bestUtility, utilityWork;
 
    bestUtility = utility;
-   for (int i = 0; i < (int)notifyList.size(); i++)
+   for (int i = 0, j = (int)notifyList.size(); i < j; i++)
    {
       mediator    = notifyList[i]->mediator;
       utilityWork = mediator->getEffectiveUtility();
@@ -1097,7 +1090,6 @@ Mona::Mediator::getEffectiveUtility()
 void
 Mona::Mediator::addEvent(EVENT_TYPE type, Neuron *neuron)
 {
-   int           i, j, k;
    struct Notify *notify;
    Mediator      *mediator;
 
@@ -1135,9 +1127,9 @@ Mona::Mediator::addEvent(EVENT_TYPE type, Neuron *neuron)
    neuron->notifyList.push_back(notify);
 
    // Sort by type: effect, response, cause.
-   for (i = 0, j = (int)neuron->notifyList.size(); i < j; i++)
+   for (int i = 0, j = (int)neuron->notifyList.size(); i < j; i++)
    {
-      for (k = i + 1; k < j; k++)
+      for (int k = i + 1; k < j; k++)
       {
          switch (neuron->notifyList[k]->eventType)
          {
@@ -1203,8 +1195,7 @@ bool Mona::Mediator::isDuplicate(Mediator *mediator)
 // Load mediator.
 void Mona::Mediator::load(FILE *fp)
 {
-   int i;
-
+    int i;
    clear();
    ((Neuron *)this)->load(fp);
    FREAD_INT(&level, fp);
@@ -1316,29 +1307,27 @@ void Mona::Mediator::print(TRACKING_FLAGS tracking, bool brief,
 void Mona::Mediator::print(bool brief, int level, FILE *out)
 #endif
 {
-   int i;
-
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "<mediator>\n");
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "  <id>%llu</id>\n", id);
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "  <level>%d</level>\n", this->level);
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "  <creationTime>%llu</creationTime>\n", this->creationTime);
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
@@ -1350,22 +1339,22 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    {
       fprintf(out, "  <instinct>false</instinct>\n");
    }
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "  <enablement>%f</enablement>\n", getEnablement());
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "  <utility>%f</utility>\n", utility);
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "  <utilityWeight>%f</utilityWeight>\n", utilityWeight);
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
@@ -1375,7 +1364,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
 #ifdef MONA_TRACKING
    if ((tracking & TRACK_FIRE) && tracker.fire)
    {
-      for (i = 0; i < level; i++)
+      for (int i = 0; i < level; i++)
       {
          fprintf(out, "    ");
       }
@@ -1383,7 +1372,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    }
    if ((tracking & TRACK_ENABLE) && tracker.enable)
    {
-      for (i = 0; i < level; i++)
+      for (int i = 0; i < level; i++)
       {
          fprintf(out, "    ");
       }
@@ -1391,14 +1380,14 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    }
    if ((tracking & TRACK_DRIVE) && tracker.drive)
    {
-      for (i = 0; i < level; i++)
+      for (int i = 0; i < level; i++)
       {
          fprintf(out, "    ");
       }
       fprintf(out, "  <motive>%f</motive>\n", tracker.motive);
    }
 #endif
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
@@ -1407,7 +1396,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    {
       if (brief)
       {
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1426,7 +1415,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    {
       if (brief)
       {
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1434,7 +1423,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
       }
       else
       {
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1446,7 +1435,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
          fprintf(out, "\n");
       }
    }
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
@@ -1455,17 +1444,17 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    {
       if (brief)
       {
-         for (i = 0; i < level; i++)
+         for (int i = 0; i < level; i++)
          {
             fprintf(out, "    ");
          }
          fprintf(out, "  <response>\n");
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
          fprintf(out, "<motor><id>%llu</id></motor>\n", response->id);
-         for (i = 0; i < level; i++)
+         for (int i = 0; i < level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1473,12 +1462,12 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
       }
       else
       {
-         for (i = 0; i < level; i++)
+         for (int i = 0; i < level; i++)
          {
             fprintf(out, "    ");
          }
          fprintf(out, "  <response>\n");
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1488,14 +1477,14 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
          ((Motor *)response)->print(out);
 #endif
          fprintf(out, "\n");
-         for (i = 0; i < level; i++)
+         for (int i = 0; i < level; i++)
          {
             fprintf(out, "    ");
          }
          fprintf(out, "  </response>\n");
       }
    }
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
@@ -1504,7 +1493,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    {
       if (brief)
       {
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1523,7 +1512,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
    {
       if (brief)
       {
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1531,7 +1520,7 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
       }
       else
       {
-         for (i = 0; i <= level; i++)
+         for (int i = 0; i <= level; i++)
          {
             fprintf(out, "    ");
          }
@@ -1543,12 +1532,12 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
          fprintf(out, "\n");
       }
    }
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
    fprintf(out, "  </effect>\n");
-   for (i = 0; i < level; i++)
+   for (int i = 0; i < level; i++)
    {
       fprintf(out, "    ");
    }
@@ -1560,7 +1549,6 @@ void Mona::Mediator::print(bool brief, int level, FILE *out)
 void
 Mona::deleteNeuron(Neuron *neuron)
 {
-   int           i, j;
    struct Notify *notify;
    LearningEvent *learningEvent;
 
@@ -1575,11 +1563,8 @@ Mona::deleteNeuron(Neuron *neuron)
    }
 
    // Remove from learning space.
-   if (neuron->type != MEDIATOR)
-   {
-      i = 0;
-   }
-   else
+   int i = 0;
+   if (neuron->type == MEDIATOR)
    {
       i = ((Mediator *)neuron)->level + 1;
    }
@@ -1607,7 +1592,7 @@ Mona::deleteNeuron(Neuron *neuron)
    {
    case RECEPTOR:
       receptor = (Receptor *)neuron;
-      for (i = 0; i < (int)receptors.size(); i++)
+      for (int i = 0, j = (int)receptors.size(); i < j; i++)
       {
          if (receptors[i] == receptor)
          {
@@ -1615,10 +1600,10 @@ Mona::deleteNeuron(Neuron *neuron)
             break;
          }
       }
-      for (i = 0; i < (int)receptor->subSensorModes.size(); i++)
+      for (int i = 0, n = (int)receptor->subSensorModes.size(); i < n; i++)
       {
          refReceptor = receptor->subSensorModes[i];
-         for (j = 0; j < (int)refReceptor->superSensorModes.size(); j++)
+         for (int j = 0, k = (int)refReceptor->superSensorModes.size(); j < k; j++)
          {
             if (refReceptor->superSensorModes[j] == receptor)
             {
@@ -1627,10 +1612,10 @@ Mona::deleteNeuron(Neuron *neuron)
             }
          }
       }
-      for (i = 0; i < (int)receptor->superSensorModes.size(); i++)
+      for (int i = 0, n = (int)receptor->superSensorModes.size(); i < n; i++)
       {
          refReceptor = receptor->superSensorModes[i];
-         for (j = 0; j < (int)refReceptor->subSensorModes.size(); j++)
+         for (int j = 0, k = (int)refReceptor->subSensorModes.size(); j < k; j++)
          {
             if (refReceptor->subSensorModes[j] == receptor)
             {
@@ -1639,7 +1624,7 @@ Mona::deleteNeuron(Neuron *neuron)
             }
          }
       }
-      for (i = 0; i < (int)homeostats.size(); i++)
+      for (int i = 0, j = (int)homeostats.size(); i < j; i++)
       {
          homeostats[i]->removeNeuron(neuron);
       }
@@ -1651,7 +1636,7 @@ Mona::deleteNeuron(Neuron *neuron)
       break;
 
    case MOTOR:
-      for (i = 0; i < (int)motors.size(); i++)
+      for (int i = 0, j = (int)motors.size(); i < j; i++)
       {
          if (motors[i] == (Motor *)neuron)
          {
@@ -1659,7 +1644,7 @@ Mona::deleteNeuron(Neuron *neuron)
             break;
          }
       }
-      for (i = 0; i < (int)homeostats.size(); i++)
+      for (int i = 0, j = (int)homeostats.size(); i < j; i++)
       {
          homeostats[i]->removeNeuron(neuron);
       }
@@ -1784,7 +1769,7 @@ Mona::load(char *filename)
 bool
 Mona::load(FILE *fp)
 {
-   int           i, j, k, format;
+   int           format;
    TIME          t;
    double        d;
    SensorMode    *sensorMode;
@@ -1829,28 +1814,29 @@ Mona::load(FILE *fp)
    FREAD_INT(&LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL, fp);
    FREAD_BOOL(&LEARN_RECEPTOR_GOAL_VALUE, fp);
    effectEventIntervals.resize(MAX_MEDIATOR_LEVEL + 1);
-   for (i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
+   for (int i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
+       int k;
       FREAD_INT(&k, fp);
       effectEventIntervals[i].resize(k);
-      for (j = 0; j < k; j++)
+      for (int j = 0; j < k; j++)
       {
          FREAD_LONG_LONG(&t, fp);
          effectEventIntervals[i][j] = t;
       }
    }
    effectEventIntervalWeights.resize((int)effectEventIntervals.size());
-   for (i = 0; i < (int)effectEventIntervalWeights.size(); i++)
+   for (int i = 0, n = (int)effectEventIntervalWeights.size(); i < n; i++)
    {
       effectEventIntervalWeights[i].resize((int)effectEventIntervals[i].size());
-      for (j = 0; j < (int)effectEventIntervalWeights[i].size(); j++)
+      for (int j = 0, k = (int)effectEventIntervalWeights[i].size(); j < k; j++)
       {
          FREAD_DOUBLE(&d, fp);
          effectEventIntervalWeights[i][j] = d;
       }
    }
    maxLearningEffectEventIntervals.resize(MAX_MEDIATOR_LEVEL + 1);
-   for (i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
+   for (int i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
       FREAD_LONG_LONG(&t, fp);
       maxLearningEffectEventIntervals[i] = t;
@@ -1858,11 +1844,12 @@ Mona::load(FILE *fp)
    FREAD_INT(&numSensors, fp);
    FREAD_INT(&numResponses, fp);
    FREAD_INT(&numNeeds, fp);
-   FREAD_LONG(&randomSeed, fp);
+   FREAD_LONG_LONG(&randomSeed, fp);
    initNet(numSensors, numResponses, numNeeds, randomSeed);
    sensorModes.clear();
-   FREAD_INT(&j, fp);
-   for (i = 0; i < j; i++)
+   int n2 = 0;
+   FREAD_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
    {
       sensorMode = new SensorMode();
       assert(sensorMode != NULL);
@@ -1870,16 +1857,18 @@ Mona::load(FILE *fp)
       sensorModes.push_back(sensorMode);
    }
    random.RAND_LOAD(fp);
-   for (i = 0; i < (int)sensors.size(); i++)
+   for (int i = 0, j = (int)sensors.size(); i < j; i++)
    {
       FREAD_FLOAT(&sensors[i], fp);
    }
    FREAD_INT(&response, fp);
    FREAD_LONG_LONG(&eventClock, fp);
-   for (i = 0; i < (int)learningEvents.size(); i++)
+   int n = (int)learningEvents.size();
+   for (int i = 0; i < n; i++)
    {
+       int j = 0;
       FREAD_INT(&j, fp);
-      for (k = 0; k < j; k++)
+      for (int k = 0; k < j; k++)
       {
          learningEvent = new LearningEvent();
          assert(learningEvent != NULL);
@@ -1888,8 +1877,10 @@ Mona::load(FILE *fp)
       }
    }
    idDispenser = 0;
-   FREAD_INT(&j, fp);
-   for (i = 0; i < j; i++)
+   receptors.clear();
+   n2 = 0;
+   FREAD_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
    {
       receptor = new Receptor(sensors, 0, this);
       assert(receptor != NULL);
@@ -1900,17 +1891,24 @@ Mona::load(FILE *fp)
          idDispenser = receptor->id + 1;
       }
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   motors.clear();
+   n2 = 0;
+   FREAD_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
    {
-      motor = motors[i];
-      motor->load(fp);
+       motor = new Motor(0, this);
+       assert(motor != NULL);
+       motor->load(fp);
+       motors.push_back(motor);
       if (motor->id > idDispenser)
       {
          idDispenser = motor->id + 1;
       }
    }
-   FREAD_INT(&j, fp);
-   for (i = 0; i < j; i++)
+   mediators.clear();
+   n2 = 0;
+   FREAD_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
    {
       mediator = new Mediator(0.0, this);
       assert(mediator != NULL);
@@ -1923,24 +1921,24 @@ Mona::load(FILE *fp)
    }
 
    // Resolve neuron addresses using id.
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, n = (int)receptors.size(); i < n; i++)
    {
       receptor = receptors[i];
-      for (j = 0, k = (int)receptor->subSensorModes.size(); j < k; j++)
+      for (int j = 0, k = (int)receptor->subSensorModes.size(); j < k; j++)
       {
          id = (ID *)(receptor->subSensorModes[j]);
          receptor->subSensorModes[j] = (Receptor *)findByID(*id);
          assert(receptor->subSensorModes[j] != NULL);
          delete id;
       }
-      for (j = 0, k = (int)receptor->superSensorModes.size(); j < k; j++)
+      for (int j = 0, k = (int)receptor->superSensorModes.size(); j < k; j++)
       {
          id = (ID *)(receptor->superSensorModes[j]);
          receptor->superSensorModes[j] = (Receptor *)findByID(*id);
          assert(receptor->superSensorModes[j] != NULL);
          delete id;
       }
-      for (j = 0, k = (int)receptor->notifyList.size(); j < k; j++)
+      for (int j = 0, k = (int)receptor->notifyList.size(); j < k; j++)
       {
          notify           = receptor->notifyList[j];
          id               = (ID *)(notify->mediator);
@@ -1949,10 +1947,10 @@ Mona::load(FILE *fp)
          delete id;
       }
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, n = (int)motors.size(); i < n; i++)
    {
       motor = motors[i];
-      for (j = 0, k = (int)motor->notifyList.size(); j < k; j++)
+      for (int j = 0, k = (int)motor->notifyList.size(); j < k; j++)
       {
          notify           = motor->notifyList[j];
          id               = (ID *)(notify->mediator);
@@ -1980,7 +1978,7 @@ Mona::load(FILE *fp)
       mediator->effect = findByID(*id);
       assert(mediator->effect != NULL);
       delete id;
-      for (i = 0, j = (int)mediator->notifyList.size(); i < j; i++)
+      for (int i = 0, j = (int)mediator->notifyList.size(); i < j; i++)
       {
          notify           = mediator->notifyList[i];
          id               = (ID *)(notify->mediator);
@@ -1989,7 +1987,7 @@ Mona::load(FILE *fp)
          delete id;
       }
    }
-   for (i = 0, j = (int)learningEvents.size(); i < j; i++)
+   for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
    {
       for (learningEventItr = learningEvents[i].begin();
            learningEventItr != learningEvents[i].end(); learningEventItr++)
@@ -2001,13 +1999,14 @@ Mona::load(FILE *fp)
          delete id;
       }
    }
-   for (i = 0; i < numNeeds; i++)
+   for (int i = 0; i < numNeeds; i++)
    {
       homeostats[i]->load(fp);
    }
    sensorCentroids.clear();
-   FREAD_INT(&j, fp);
-   for (i = 0; i < j; i++)
+   n2 = 0;
+   FREAD_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
    {
       rdTree = new RDtree(Mona::Receptor::patternDistance,
                           Mona::Receptor::deletePattern);
@@ -2024,14 +2023,13 @@ Mona::load(FILE *fp)
 Mona::Neuron *
 Mona::findByID(ID id)
 {
-   int      i;
    Receptor *receptor;
    Motor    *motor;
    Mediator *mediator;
 
    list<Mediator *>::iterator mediatorItr;
 
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
       if (receptor->id == id)
@@ -2039,7 +2037,7 @@ Mona::findByID(ID id)
          return((Neuron *)receptor);
       }
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       if (motor->id == id)
@@ -2080,7 +2078,6 @@ Mona::save(char *filename)
 bool
 Mona::save(FILE *fp)
 {
-   int           i, j, k;
    TIME          t;
    double        d;
    int           format;
@@ -2117,25 +2114,25 @@ Mona::save(FILE *fp)
    FWRITE_BOOL(&LEARN_MEDIATOR_GOAL_VALUE, fp);
    FWRITE_INT(&LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL, fp);
    FWRITE_BOOL(&LEARN_RECEPTOR_GOAL_VALUE, fp);
-   for (i = 0; i < (int)effectEventIntervals.size(); i++)
+   for (int i = 0, n = (int)effectEventIntervals.size(); i < n; i++)
    {
-      k = (int)effectEventIntervals[i].size();
+      int k = (int)effectEventIntervals[i].size();
       FWRITE_INT(&k, fp);
-      for (j = 0; j < k; j++)
+      for (int j = 0; j < k; j++)
       {
          t = effectEventIntervals[i][j];
          FWRITE_LONG_LONG(&t, fp);
       }
    }
-   for (i = 0; i < (int)effectEventIntervalWeights.size(); i++)
+   for (int i = 0, n = (int)effectEventIntervalWeights.size(); i < n; i++)
    {
-      for (j = 0; j < (int)effectEventIntervalWeights[i].size(); j++)
+      for (int j = 0, k = (int)effectEventIntervalWeights[i].size(); j < k; j++)
       {
          d = effectEventIntervalWeights[i][j];
          FWRITE_DOUBLE(&d, fp);
       }
    }
-   for (i = 0; i < (int)maxLearningEffectEventIntervals.size(); i++)
+   for (int i = 0, j = (int)maxLearningEffectEventIntervals.size(); i < j; i++)
    {
       t = maxLearningEffectEventIntervals[i];
       FWRITE_LONG_LONG(&t, fp);
@@ -2143,21 +2140,21 @@ Mona::save(FILE *fp)
    FWRITE_INT(&numSensors, fp);
    FWRITE_INT(&numResponses, fp);
    FWRITE_INT(&numNeeds, fp);
-   FWRITE_LONG(&randomSeed, fp);
-   j = (int)sensorModes.size();
+   FWRITE_LONG_LONG(&randomSeed, fp);
+   int j = (int)sensorModes.size();
    FWRITE_INT(&j, fp);
-   for (i = 0; i < j; i++)
+   for (int i = 0; i < j; i++)
    {
       sensorModes[i]->save(fp);
    }
    random.RAND_SAVE(fp);
-   for (i = 0; i < (int)sensors.size(); i++)
+   for (int i = 0, j = (int)sensors.size(); i < j; i++)
    {
       FWRITE_FLOAT(&sensors[i], fp);
    }
    FWRITE_INT(&response, fp);
    FWRITE_LONG_LONG(&eventClock, fp);
-   for (i = 0; i < (int)learningEvents.size(); i++)
+   for (int i = 0, n = (int)learningEvents.size(); i < n; i++)
    {
       j = (int)learningEvents[i].size();
       FWRITE_INT(&j, fp);
@@ -2168,33 +2165,35 @@ Mona::save(FILE *fp)
          learningEvent->save(fp);
       }
    }
-   i = (int)receptors.size();
-   FWRITE_INT(&i, fp);
-   for (i = 0; i < (int)receptors.size(); i++)
+   int n2 = (int)receptors.size();
+   FWRITE_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
    {
       receptor = receptors[i];
       receptor->save(fp);
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   n2 = (int)motors.size();
+   FWRITE_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
    {
       motor = motors[i];
       motor->save(fp);
    }
-   i = (int)mediators.size();
-   FWRITE_INT(&i, fp);
+   int n = (int)mediators.size();
+   FWRITE_INT(&n, fp);
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
    {
       mediator = *mediatorItr;
       mediator->save(fp);
    }
-   for (i = 0; i < numNeeds; i++)
+   for (int i = 0; i < numNeeds; i++)
    {
       homeostats[i]->save(fp);
    }
    j = (int)sensorCentroids.size();
    FWRITE_INT(&j, fp);
-   for (i = 0; i < j; i++)
+   for (int i = 0; i < j; i++)
    {
       sensorCentroids[i]->save(fp, Mona::Receptor::savePattern,
                                Mona::Receptor::saveClient);
@@ -2207,7 +2206,6 @@ Mona::save(FILE *fp)
 void
 Mona::clear()
 {
-   int      i;
    Receptor *receptor;
    Motor    *motor;
 
@@ -2217,12 +2215,12 @@ Mona::clear()
 
    random.RAND_CLEAR();
    sensors.clear();
-   for (i = 0; i < (int)sensorModes.size(); i++)
+   for (int i = 0, j = (int)sensorModes.size(); i < j; i++)
    {
       delete sensorModes[i];
    }
    sensorModes.clear();
-   for (i = 0; i < (int)sensorCentroids.size(); i++)
+   for (int i = 0, j = (int)sensorCentroids.size(); i < j; i++)
    {
       delete sensorCentroids[i];
    }
@@ -2234,18 +2232,18 @@ Mona::clear()
    }
    receptors.clear();
    responsePotentials.clear();
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       delete motor;
    }
    motors.clear();
-   for (i = 0; i < (int)homeostats.size(); i++)
+   for (int i = 0, j = (int)homeostats.size(); i < j; i++)
    {
       delete homeostats[i];
    }
    homeostats.clear();
-   for (i = 0; i < (int)learningEvents.size(); i++)
+   for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
    {
       for (learningEventItr = learningEvents[i].begin();
            learningEventItr != learningEvents[i].end(); learningEventItr++)
@@ -2340,7 +2338,6 @@ void
 Mona::print(bool brief, FILE *out)
 #endif
 {
-   int      i;
    Receptor *receptor;
    Motor    *motor;
    Mediator *mediator;
@@ -2358,16 +2355,16 @@ Mona::print(bool brief, FILE *out)
    printParms(out);
    fprintf(out, "<numSensors>%d</numSensors>\n", numSensors);
    fprintf(out, "<sensorModes>");
-   for (i = 0; i < (int)sensorModes.size(); i++)
+   for (int i = 0, j = (int)sensorModes.size(); i < j; i++)
    {
       sensorModes[i]->print(out);
    }
    fprintf(out, "</sensorModes>\n");
    fprintf(out, "<numResponses>%d</numResponses>\n", numResponses);
    fprintf(out, "<numNeeds>%d</numNeeds>\n", numNeeds);
-   fprintf(out, "<randomSeed>%lu</randomSeed>\n", randomSeed);
+   fprintf(out, "<randomSeed>%llu</randomSeed>\n", randomSeed);
    fprintf(out, "<needs>\n");
-   for (i = 0; i < numNeeds; i++)
+   for (int i = 0; i < numNeeds; i++)
    {
       homeostats[i]->print(out);
       fprintf(out, "\n");
@@ -2377,7 +2374,8 @@ Mona::print(bool brief, FILE *out)
 #ifdef MONA_TRACKING
    if (tracking & TRACK_DRIVE)
    {
-      for (i = 0; i < (int)motors.size(); i++)
+       int i = 0;
+      for (int j = (int)motors.size(); i < j; i++)
       {
          driveMotor = motors[i];
          if (driveMotor->tracker.fire)
@@ -2431,7 +2429,7 @@ Mona::print(bool brief, FILE *out)
       }
 #endif
    fprintf(out, "<receptors>\n");
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
 #ifdef MONA_TRACKING
@@ -2449,7 +2447,7 @@ Mona::print(bool brief, FILE *out)
    }
    fprintf(out, "</receptors>\n");
    fprintf(out, "<motors>\n");
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
 #ifdef MONA_TRACKING
@@ -2496,11 +2494,6 @@ Mona::print(bool brief, FILE *out)
    }
 }
 #endif
-
-
-
-
-
    fprintf(out, "</network>\n");
    fflush(out);
 }
@@ -2510,8 +2503,6 @@ Mona::print(bool brief, FILE *out)
 void
 Mona::printParms(FILE *out)
 {
-   int i, j;
-
    fprintf(out, "<parameters>\n");
    fprintf(out, "<parameter>MIN_ENABLEMENT</parameter><value>%f</value>\n", MIN_ENABLEMENT);
    fprintf(out, "<parameter>INITIAL_ENABLEMENT</parameter><value>%f</value>\n", INITIAL_ENABLEMENT);
@@ -2546,10 +2537,10 @@ Mona::printParms(FILE *out)
       fprintf(out, "<parameter>LEARN_RECEPTOR_GOAL_VALUE</parameter><value>false</value>\n");
    }
    fprintf(out, "<effect_event_intervals>\n");
-   for (i = 0; i < (int)effectEventIntervals.size(); i++)
+   for (int i = 0, n = (int)effectEventIntervals.size(); i < n; i++)
    {
       fprintf(out, "<intervals><level>%d</level>", i);
-      for (j = 0; j < (int)effectEventIntervals[i].size(); j++)
+      for (int j = 0, k = (int)effectEventIntervals[i].size(); j < k; j++)
       {
          fprintf(out, "<time>%llu</time>", effectEventIntervals[i][j]);
       }
@@ -2557,10 +2548,10 @@ Mona::printParms(FILE *out)
    }
    fprintf(out, "</effect_event_intervals>\n");
    fprintf(out, "<effect_event_interval_weights>\n");
-   for (i = 0; i < (int)effectEventIntervalWeights.size(); i++)
+   for (int i = 0, n = (int)effectEventIntervalWeights.size(); i < n; i++)
    {
       fprintf(out, "<weights><level>%d</level>", i);
-      for (j = 0; j < (int)effectEventIntervalWeights[i].size(); j++)
+      for (int j = 0, k = (int)effectEventIntervalWeights[i].size(); j < k; j++)
       {
          fprintf(out, "<weight>%f</weight>", effectEventIntervalWeights[i][j]);
       }
@@ -2568,7 +2559,7 @@ Mona::printParms(FILE *out)
    }
    fprintf(out, "</effect_event_interval_weights>\n");
    fprintf(out, "<maximum_learning_effect_event_intervals>\n");
-   for (i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
+   for (int i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
       fprintf(out, "<interval><level>%d</level><time>%llu</time></interval>\n",
               i, maxLearningEffectEventIntervals[i]);
@@ -2584,19 +2575,18 @@ Mona::printParms(FILE *out)
 void
 Mona::clearTracking()
 {
-   int      i;
    Receptor *receptor;
    Motor    *motor;
    Mediator *mediator;
 
    list<Mediator *>::iterator mediatorItr;
 
-   for (i = 0; i < (int)receptors.size(); i++)
+   for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
       receptor->tracker.clear();
    }
-   for (i = 0; i < (int)motors.size(); i++)
+   for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
       motor->tracker.clear();
@@ -2608,6 +2598,4 @@ Mona::clearTracking()
       mediator->tracker.clear();
    }
 }
-
-
 #endif

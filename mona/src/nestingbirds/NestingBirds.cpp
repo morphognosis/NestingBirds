@@ -2206,6 +2206,10 @@ int main(int argc, char *args[])
        {
            printf("Networks loaded from file %s\n", Filename);
        }
+
+       // Initialize needs.
+       male->initNeeds();
+       female->initNeeds();
    }
 
    // Run birds.
