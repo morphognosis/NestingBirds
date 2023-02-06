@@ -465,7 +465,7 @@ int Mona::addGoal(int needIndex, vector<SENSOR>& sensors,
 int Mona::addGoal(int needIndex, Mediator* mediator, NEED goalValue)
 {
     assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->addGoal(mediator, goalValue));
+    return(homeostats[needIndex]->addGoalMediator(mediator, goalValue));
 }
 
 // Find goal for need.
@@ -505,11 +505,11 @@ bool Mona::getGoalInfo(int needIndex, int goalIndex,
                                              sensorMode, response, goalValue, enabled));
 }
 
-// Get goal receptor for a need.
-Mona::Receptor *Mona::getGoalReceptor(int needIndex, int goalIndex)
+// Get goal receptors for a need.
+void Mona::getGoalReceptors(int needIndex, int goalIndex, vector<void*>& receptors)
 {
     assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return((Mona::Receptor *)homeostats[needIndex]->getGoalReceptor(goalIndex));
+    homeostats[needIndex]->getGoalReceptors(goalIndex, receptors);
 }
 
 // Get goal motor for a need.
@@ -1653,6 +1653,10 @@ Mona::deleteNeuron(Neuron *neuron)
 
    case MEDIATOR:
       mediators.remove((Mediator *)neuron);
+      for (int i = 0, j = (int)homeostats.size(); i < j; i++)
+      {
+          homeostats[i]->removeNeuron(neuron);
+      }
       delete (Mediator *)neuron;
       break;
    }

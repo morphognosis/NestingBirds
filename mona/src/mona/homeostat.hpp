@@ -30,13 +30,13 @@ public:
 
    // Sensory-response goal.
    // Environmental stimuli and response that produce need changes.
-   // Used to update receptor neuron goal values.
    class Goal
    {
 public:
       vector<SENSOR> sensors;
       SENSOR_MODE    sensorMode;
-      void           *receptor;
+      vector<void *>  receptors;
+      void *pendingReceptor;
       RESPONSE       response;
       void           *motor;
       void           *mediator;
@@ -89,7 +89,8 @@ public:
                RESPONSE response, NEED goalValue);
    int addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                NEED goalValue);
-   int addGoal(void *mediator, NEED goalValue);
+   void addGoalReceptor(void* receptor);
+   int addGoalMediator(void *mediator, NEED goalValue);
 
    // Find index of goal matching sensors, sensor mode
    // and response. Return -1 for no match.
@@ -100,17 +101,21 @@ public:
    // Return -1 for no match.
    int findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode);
 
+   // Find goal matching receptor.
+   // Return false for not found.
+   bool findGoalReceptor(void* receptor);
+
    // Find index of goal matching mediator.
    // Return -1 for no match.
-   int findGoal(void *mediator);
+   int findGoalMediator(void *mediator);
 
    // Get goal information at index.
    bool getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
                     SENSOR_MODE& sensorMode, RESPONSE& response,
                     NEED& goalValue, bool& enabled);
 
-   // Get receptor for goal at index.
-   void *getGoalReceptor(int goalIndex);
+   // Get receptors for goal at index.
+   void getGoalReceptors(int goalIndex, vector<void *> &receptors);
 
    // Get motor for goal at index.
    void *getGoalMotor(int goalIndex);
@@ -138,8 +143,8 @@ public:
    // Remove neuron from goals.
    void removeNeuron(void *neuron);
 
-   // Update homeostat based on sensors.
-   void sensorsUpdate();
+   // Update homeostat based on receptor.
+   void receptorUpdate(void *neuron);
 
    // Update homeostat based on response.
    void responseUpdate();
@@ -157,5 +162,9 @@ public:
 
    // Print homeostat.
    void print(FILE *out = stdout);
+
+private:
+    // Is goal superset of sensors?
+    bool goalSuperset(int goalIndex, vector<SENSOR>& sensors);
 };
 #endif

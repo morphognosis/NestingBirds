@@ -205,7 +205,7 @@ public:
    bool getGoalInfo(int needIndex, int goalIndex,
                     vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
                     RESPONSE& response, NEED& goalValue, bool& enabled);
-   Receptor *getGoalReceptor(int needIndex, int goalIndex);
+   void getGoalReceptors(int needIndex, int goalIndex, vector<void*>& receptors);
    Motor* getGoalMotor(int needIndex, int goalIndex);
    Mediator* getGoalMediator(int needIndex, int goalIndex);
    bool isGoalEnabled(int needIndex, int goalIndex);
@@ -407,8 +407,14 @@ public:
       // Is given receptor a duplicate of this?
       bool isDuplicate(Receptor *);
 
-      // Update goal value.
-      void updateGoalValue();
+      // Add goals.
+      void addGoals();
+
+      // Update needs.
+      void updateNeeds();
+
+      // Update goal values.
+      void updateGoalValues();
 
       // Load receptor.
       void load(FILE *fp);

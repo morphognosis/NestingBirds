@@ -50,79 +50,33 @@ Female::Female() : Bird(FEMALE)
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    hungry = brain->newReceptor(sensors, 0);
-    askForMouse = brain->newMediator(1.0);
-    askForMouse->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)hungry);
-    askForMouse->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)wantMouse);
-    askForMouse->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)hungry);
-    brain->addGoal(MOUSE_NEED_INDEX, askForMouse, MOUSE_NEED);
-    askForMouse->instinct = true;
+    brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, RESPONSE::WANT_MOUSE, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
-    readyToEat = brain->newReceptor(sensors, 0);
-    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    notHungry = brain->newReceptor(sensors, 0);
-    eatMouse = brain->newMediator(1.0);
-    eatMouse->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToEat);
-    eatMouse->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)eat);
-    eatMouse->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)notHungry);
-    brain->addGoal(MOUSE_NEED_INDEX, eatMouse, MOUSE_NEED);
-    eatMouse->instinct = true;
+    brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, Bird::RESPONSE::EAT_MOUSE, MOUSE_NEED);
 
     // Stone goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    int goal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, RESPONSE::WANT_STONE, STONE_NEED);
-    missingStone = brain->getGoalReceptor(STONE_NEED_INDEX, goal);
-    //missingStone = brain->newReceptor(sensors, 0);
-    askForStone = brain->newMediator(1.0);
-    askForStone->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)missingStone);
-    askForStone->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)wantStone);
-    askForStone->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)missingStone);
-    //brain->addGoal(STONE_NEED_INDEX, askForStone, STONE_NEED);
-    askForStone->instinct = true;
+    brain->addGoal(STONE_NEED_INDEX, sensors, 0, RESPONSE::WANT_STONE, STONE_NEED);
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE);
-    stoneReady = brain->newReceptor(sensors, 0);
-    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    stonePlaced = brain->newReceptor(sensors, 0);
-    placeStone = brain->newMediator(1.0);
-    placeStone->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)missingStone);
-    placeStone->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)put);
-    placeStone->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)stonePlaced);
-    brain->addGoal(STONE_NEED_INDEX, placeStone, STONE_NEED);
-    placeStone->instinct = true;
+    brain->addGoal(STONE_NEED_INDEX, sensors, 0, Bird::RESPONSE::PUT_OBJECT, STONE_NEED);
 
     // Lay egg goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE, DONT_CARE);
-    readyToLayEgg = brain->newReceptor(sensors, 0);
+    brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, RESPONSE::LAY_EGG, LAY_EGG_NEED);
+
+    // Brooding on egg.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    goal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, LAY_EGG_NEED);
-    eggInNest = brain->getGoalReceptor(LAY_EGG_NEED_INDEX, goal);
-    layEggInNest = brain->newMediator(1.0);
-    layEggInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)readyToLayEgg);
-    layEggInNest->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)layEgg);
-    layEggInNest->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)eggInNest);
-    layEggInNest->instinct = true;
-
-    // Brooding on egg.
-    roostInNest = brain->newMediator(1.0);
-    roostInNest->addEvent(Mona::CAUSE_EVENT, (Mona::Neuron*)eggInNest);
-    roostInNest->addEvent(Mona::RESPONSE_EVENT, (Mona::Neuron*)doNothing);
-    roostInNest->addEvent(Mona::EFFECT_EVENT, (Mona::Neuron*)eggInNest);
-    brain->addGoal(BROOD_EGG_NEED_INDEX, roostInNest, BROOD_EGG_NEED);
-    roostInNest->instinct = true;
+    brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, 0, BROOD_EGG_NEED);
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;

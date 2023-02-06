@@ -55,40 +55,15 @@ void Homeostat::clearPeriodicNeed()
 
 
 // Add sensory-response goal.
-// Replace duplicate response and goal value.
 int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                        RESPONSE response, NEED goalValue)
 {
    int goalIndex;
-
    vector<SENSOR> sensorsWork;
-   Mona::Receptor *receptor;
-   SENSOR         distance;
    Goal           goal;
 
-   // Check for duplicate.
-   if ((goalIndex = findGoal(sensors, sensorMode, NULL_RESPONSE)) != -1)
-   {
-      ((Mona::Receptor *)goals[goalIndex].receptor)->goals.setValue(needIndex, goalValue);
-      if (goals[goalIndex].response != NULL_RESPONSE)
-      {
-         // Clear old motor goal value.
-         ((Mona::Motor *)goals[goalIndex].motor)->goals.setValue(needIndex, 0.0);
-      }
-      goals[goalIndex].response = response;
-      if (response != NULL_RESPONSE)
-      {
-         goals[goalIndex].motor = (void *)mona->findMotorByResponse(response);
-         assert(goals[goalIndex].motor != NULL);
-         ((Mona::Motor *)goals[goalIndex].motor)->goals.setValue(needIndex, 0.0);
-      }
-      else
-      {
-         goals[goalIndex].motor = NULL;
-      }
-      goals[goalIndex].goalValue = goalValue;
-   }
-   else
+   // New goal?
+   if ((goalIndex = findGoal(sensors, sensorMode, response)) == -1)
    {
       // Add entry.
       mona->applySensorMode(sensors, sensorsWork, sensorMode);
@@ -97,14 +72,7 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
          goal.sensors.push_back(sensorsWork[i]);
       }
       goal.sensorMode = sensorMode;
-      receptor        = mona->getCentroidReceptor(sensorsWork, sensorMode, distance);
-      if ((receptor == NULL) ||
-          ((receptor != NULL) && (distance > mona->sensorModes[sensorMode]->resolution)))
-      {
-         receptor = mona->newReceptor(sensorsWork, sensorMode);
-      }
-      receptor->goals.setValue(needIndex, goalValue);
-      goal.receptor = (void *)receptor;
+      goal.pendingReceptor = NULL;
       goal.response = response;
       if (response != NULL_RESPONSE)
       {
@@ -121,6 +89,32 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
       goal.enabled   = true;
       goals.push_back(goal);
       goalIndex = (int)goals.size() - 1;
+
+      // Add existing receptors.
+      for (int i = 0, n = goals.size() - 1; i < n; i++)
+      {
+          for (int j = 0, k = goals[i].receptors.size(); j < k; j++)
+          {
+              if (goalSuperset(goalIndex, ((Mona::Receptor*)goals[i].receptors[j])->centroid))
+              {
+                  bool duplicate = false;
+                  for (int p = 0, q = goals[goalIndex].receptors.size(); p < q; p++)
+                  {
+                      if (goals[goalIndex].receptors[p] == goals[i].receptors[j])
+                      {
+                          duplicate = true;
+                          break;
+                      }
+                  }
+                  if (!duplicate)
+                  {
+                      goals[goalIndex].receptors.push_back(goals[i].receptors[j]);
+                      NEED value = ((Mona::Receptor*)goals[i].receptors[j])->goals.getValue(needIndex);
+                      ((Mona::Receptor*)goals[i].receptors[j])->goals.setValue(needIndex, value + goalValue);
+                  }
+              }
+          }
+      }
    }
    return(goalIndex);
 }
@@ -132,23 +126,45 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
    return(addGoal(sensors, sensorMode, NULL_RESPONSE, goalValue));
 }
 
-// Add mediator goal.
-int Homeostat::addGoal(void* mediator, NEED goalValue)
+// Add receptor to existing goals.
+void Homeostat::addGoalReceptor(void* receptor)
+{
+    // Receptor already added?
+    for (int i = 0, n = (int)goals.size(); i < n; i++)
+    {
+        for (int j = 0, k = goals[i].receptors.size(); j < k; j++)
+        {
+            if (goals[i].receptors[j] == receptor)
+            {
+                return;
+            }
+        }
+    }
+
+    // Add receptor to goals having superset sensors.
+    for (int i = 0, n = (int)goals.size(); i < n; i++)
+    {
+        if (goalSuperset(i, ((Mona::Receptor*)receptor)->centroid))
+        {
+            NEED value = ((Mona::Receptor*)receptor)->goals.getValue(needIndex);
+            ((Mona::Receptor*)receptor)->goals.setValue(needIndex, value + goals[i].goalValue);
+            goals[i].receptors.push_back(receptor);
+        }
+    }
+}
+
+// Add goal mediator.
+int Homeostat::addGoalMediator(void* mediator, NEED goalValue)
 {
     int goalIndex;
     Goal           goal;
 
     // Check for duplicate.
-    if ((goalIndex = findGoal(mediator)) != -1)
-    {
-        ((Mona::Mediator*)goals[goalIndex].mediator)->goals.setValue(needIndex, goalValue);
-        goals[goalIndex].goalValue = goalValue;
-    }
-    else
+    if ((goalIndex = findGoalMediator(mediator)) == -1)
     {
         // Add entry.
         goal.sensorMode = 0;
-        goal.receptor = NULL;
+        goal.pendingReceptor = NULL;
         goal.response = NULL_RESPONSE;
         goal.motor = NULL;
         goal.mediator = mediator;
@@ -193,7 +209,7 @@ int Homeostat::findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
 
    for (int i = 0, j = (int)goals.size(); i < j; i++)
    {
-      if (goals[i].receptor != NULL &&
+      if (goals[i].sensors.size() > 0 &&
           goals[i].sensorMode == sensorMode &&          
           (Mona::Receptor::sensorDistance(&goals[i].sensors, &sensorsWork)
            <= mona->sensorModes[sensorMode]->resolution))
@@ -204,9 +220,26 @@ int Homeostat::findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
    return(-1);
 }
 
+// Find goal matching receptor.
+// Return false for not found.
+bool Homeostat::findGoalReceptor(void* receptor)
+{
+    for (int i = 0, n = (int)goals.size(); i < n; i++)
+    {
+        for (int j = 0, k = goals[i].receptors.size(); j < k; j++)
+        {
+            if (goals[i].receptors[j] == receptor)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // Find index of goal matching mediator.
 // Return -1 for no match.
-int Homeostat::findGoal(void* mediator)
+int Homeostat::findGoalMediator(void* mediator)
 {
     for (int i = 0, j = (int)goals.size(); i < j; i++)
     {
@@ -235,15 +268,16 @@ bool Homeostat::getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
    return(true);
 }
 
-// Get receptor for goal at index.
-void *Homeostat::getGoalReceptor(int goalIndex)
+// Get receptors for goal at index.
+void Homeostat::getGoalReceptors(int goalIndex, vector<void *> &receptors)
 {
-    if ((goalIndex < 0) || (goalIndex >= (int)goals.size()))
+    receptors.clear();
+    if ((goalIndex >= 0) && (goalIndex < (int)goals.size()))
     {
-        return(NULL);
-    }
-    else {
-        return goals[goalIndex].receptor;
+        for (int i = 0, j = goals[goalIndex].receptors.size(); i < j; i++)
+        {
+            receptors.push_back(goals[goalIndex].receptors[i]);
+        }
     }
 }
 
@@ -291,8 +325,6 @@ bool Homeostat::enableGoal(int goalIndex)
    if ((goalIndex >= 0) && (goalIndex < (int)goals.size()))
    {
       goals[goalIndex].enabled = true;
-      ((Mona::Receptor *)goals[goalIndex].receptor)->goals.setValue(needIndex,
-                                                                    goals[goalIndex].goalValue);
       return(true);
    }
    else
@@ -308,7 +340,6 @@ bool Homeostat::disableGoal(int goalIndex)
    if ((goalIndex >= 0) && (goalIndex < (int)goals.size()))
    {
       goals[goalIndex].enabled = false;
-      ((Mona::Receptor *)goals[goalIndex].receptor)->goals.setValue(needIndex, 0.0);
       return(true);
    }
    else
@@ -327,12 +358,16 @@ bool Homeostat::removeGoal(int goalIndex)
    }
 
    // Clear goal value of associated receptors.
-   ((Mona::Receptor *)goals[goalIndex].receptor)->goals.setValue(needIndex, 0.0);
-
-   // Clear goal value of associated motor.
-   if (goals[goalIndex].response != NULL_RESPONSE)
+   for (int i = 0, j = goals[goalIndex].receptors.size(); i < j; i++)
    {
-      ((Mona::Motor *)goals[goalIndex].motor)->goals.setValue(needIndex, 0.0);
+       NEED value = ((Mona::Receptor*)goals[goalIndex].receptors[i])->goals.getValue(needIndex);
+       ((Mona::Receptor*)goals[goalIndex].receptors[i])->goals.setValue(needIndex, value - goals[goalIndex].goalValue);
+   }
+
+   // Clear goal value of associated mediator.
+   if (goals[goalIndex].mediator != NULL)
+   {
+      ((Mona::Mediator *)goals[goalIndex].mediator)->goals.setValue(needIndex, 0.0);
    }
 
    // Remove entry.
@@ -351,51 +386,58 @@ void Homeostat::removeNeuron(void *neuron)
    while (!done)
    {
       done = true;
-      for (int i = 0, j = (int)goals.size(); i < j; i++)
+      for (int i = 0, n = (int)goals.size(); i < n; i++)
       {
-         if ((goals[i].receptor == neuron) || (goals[i].motor == neuron))
-         {
-            ((Mona::Receptor *)goals[i].receptor)->goals.setValue(needIndex, 0.0);
-            if (goals[i].response != NULL_RESPONSE)
-            {
-               ((Mona::Motor *)goals[i].motor)->goals.setValue(needIndex, 0.0);
-            }
-            goals.erase(goals.begin() + i);
-            done = false;
-            break;
-         }
+          if (goals[i].motor == neuron)
+          {
+              for (int j = 0, k = goals[i].receptors.size(); j < k; j++)
+              {
+                  NEED value = ((Mona::Receptor*)goals[i].receptors[j])->goals.getValue(needIndex);
+                  ((Mona::Receptor*)goals[i].receptors[j])->goals.setValue(needIndex, value - goals[i].goalValue);
+              }
+              goals[i].receptors.clear();
+              goals[i].response = NULL_RESPONSE;
+              goals[i].motor = NULL;
+          }
+          else if (goals[i].mediator == neuron)
+          {
+              ((Mona::Mediator*)goals[i].mediator)->goals.setValue(needIndex, 0.0);
+          } else {
+              for (int j = 0, k = goals[i].receptors.size(); j < k; j++)
+              {
+                  if (goals[i].receptors[j] == neuron)
+                  {
+                      NEED value = ((Mona::Receptor*)goals[i].receptors[j])->goals.getValue(needIndex);
+                      ((Mona::Receptor*)goals[i].receptors[j])->goals.setValue(needIndex, value - goals[i].goalValue);
+                      goals[i].receptors.erase(goals[i].receptors.begin() + j);
+                      break;
+                  }
+              }
+          }
       }
    }
 }
 
 
-// Update homeostat based on sensors.
-void Homeostat::sensorsUpdate()
+// Update homeostat based on receptor firing.
+void Homeostat::receptorUpdate(void *receptor)
 {
-   vector<SENSOR> sensors;
-
-   // Update the need value when sensors match.
-   for (int i = 0, j = (int)goals.size(); i < j; i++)
+   for (int i = 0, n = (int)goals.size(); i < n; i++)
    {
-       if (goals[i].receptor != NULL)
+       for (int j = 0, k = goals[i].receptors.size(); j < k; j++)
        {
-           mona->applySensorMode(mona->sensors, sensors, goals[i].sensorMode);
-           if (Mona::Receptor::sensorDistance(&goals[i].sensors, &sensors)
-               <= mona->sensorModes[goals[i].sensorMode]->resolution)
+           if (goals[i].receptors[j] == receptor)
            {
-               if (goals[i].response != NULL_RESPONSE)
-               {
-                   // Shift goal value to motor.
-                   ((Mona::Motor*)goals[i].motor)->goals.setValue(needIndex, goals[i].goalValue);
-                   ((Mona::Receptor*)goals[i].receptor)->goals.setValue(needIndex, 0.0);
-               }
-               else
+               if (goals[i].response == NULL_RESPONSE)
                {
                    need -= goals[i].goalValue;
                    if (need < 0.0)
                    {
                        need = 0.0;
                    }
+               }
+               else {
+                   goals[i].pendingReceptor = receptor;
                }
            }
        }
@@ -411,16 +453,15 @@ void Homeostat::responseUpdate()
    {
       if (goals[i].response != NULL_RESPONSE)
       {
-         if (goals[i].response == mona->response)
+         if (goals[i].pendingReceptor != NULL && goals[i].response == mona->response)
          {
-            need -= ((Mona::Motor *)goals[i].motor)->goals.getValue(needIndex);
+            need -= goals[i].goalValue;
             if (need < 0.0)
             {
                need = 0.0;
             }
          }
-         ((Mona::Motor *)goals[i].motor)->goals.setValue(needIndex, 0.0);
-         ((Mona::Receptor *)goals[i].receptor)->goals.setValue(needIndex, goals[i].goalValue);
+         goals[i].pendingReceptor = NULL;
       }
    }
 
@@ -500,11 +541,12 @@ void Homeostat::load(FILE *fp)
          g.sensors.push_back(s);
       }
       FREAD_INT(&g.sensorMode, fp);
-      FREAD_LONG_LONG(&id, fp);
-      g.receptor = NULL;
-      if (id != (ID)(-1))
+      g.receptors.clear();
+      FREAD_INT(&q, fp);
+      for (p = 0; p < q; p++)
       {
-          g.receptor = (void*)mona->findByID(id);
+          FREAD_LONG_LONG(&id, fp);
+          g.receptors.push_back((void*)mona->findByID(id));
       }
       FREAD_INT(&g.response, fp);
       if (g.response != NULL_RESPONSE)
@@ -566,12 +608,13 @@ void Homeostat::save(FILE *fp)
          FWRITE_FLOAT(&goals[i].sensors[p], fp);
       }
       FWRITE_INT(&goals[i].sensorMode, fp);
-      id = (ID)(-1);
-      if (goals[i].receptor != NULL)
+      q = (int)goals[i].receptors.size();
+      FWRITE_INT(&q, fp);
+      for (p = 0; p < q; p++)
       {
-          id = ((Mona::Receptor*)(goals[i].receptor))->id;
+          id = ((Mona::Receptor*)(goals[i].receptors[p]))->id;
+          FWRITE_LONG_LONG(&id, fp);
       }
-      FWRITE_LONG_LONG(&id, fp);
       FWRITE_INT(&goals[i].response, fp);
       id = (ID)(-1);
       if (goals[i].mediator != NULL)
@@ -605,15 +648,13 @@ void Homeostat::print(FILE *out)
       }
       fprintf(out, "</sensors>");
       fprintf(out, "<sensorMode>%d</sensorMode>", goals[i].sensorMode);
-      if (goals[i].receptor == NULL)
+      fprintf(out, "<receptors>");
+      for (int j = 0, k = (int)goals[i].receptors.size(); j < k; j++)
       {
-          fprintf(out, "<receptor_id>null</receptor_id>");
-      }
-      else
-      {
-          ID id = ((Mona::Receptor*)(goals[i].receptor))->id;
+          ID id = ((Mona::Receptor*)(goals[i].receptors[j]))->id;
           fprintf(out, "<receptor_id>%lld</receptor_id>", id);
       }
+      fprintf(out, "</receptors>");
       if (goals[i].response == NULL_RESPONSE)
       {
          fprintf(out, "<response>null</response>");
@@ -644,4 +685,24 @@ void Homeostat::print(FILE *out)
    }
    fprintf(out, "</sensory_response_goals>");
    fprintf(out, "</homeostat>");
+}
+
+// Is goal superset of sensors?
+bool Homeostat::goalSuperset(int goalIndex, vector<SENSOR>& sensors)
+{
+    if (goals[goalIndex].sensors.size() != sensors.size())
+    {
+        return false;
+    }
+    for (int i = 0, j = (int)goals[goalIndex].sensors.size(); i < j; i++)
+    {
+        if (goals[goalIndex].sensors[i] != DONT_CARE && sensors[i] != DONT_CARE)
+        {
+            if (goals[goalIndex].sensors[i] != sensors[i])
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }

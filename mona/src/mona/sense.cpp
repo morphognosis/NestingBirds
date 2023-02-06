@@ -27,12 +27,6 @@ Mona::sense()
    }
 #endif
 
-   // Update need based on sensors.
-   for (int i = 0; i < numNeeds; i++)
-   {
-      homeostats[i]->sensorsUpdate();
-   }
-
    // Clear receptor firings.
    for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
@@ -140,8 +134,17 @@ Mona::sense()
       // Fire receptor.
       receptor->firingStrength = 1.0;
 
-      // Update receptor goal value.
-      receptor->updateGoalValue();
+      // Add goals to new receptor?
+      if (addReceptor)
+      {
+          receptor->addGoals();
+      }
+
+      // Update needs.
+      receptor->updateNeeds();
+
+      // Update goal values.
+      receptor->updateGoalValues();
 
 #ifdef MONA_TRACE
       if (traceSense)
@@ -394,9 +397,33 @@ bool Mona::delSensorMode(int mode)
     return(true);
 }
 
-// Update goal value.
-void Mona::Receptor::updateGoalValue()
+// Add goals.
+void Mona::Receptor::addGoals()
 {
+    // Add receptor to homeostats.
+    for (int i = 0; i < mona->numNeeds; i++)
+    {
+        mona->homeostats[i]->addGoalReceptor(this);
+    }
+}
+
+// Update needs.
+void Mona::Receptor::updateNeeds()
+{
+    // Update homeostats.
+    for (int i = 0; i < mona->numNeeds; i++)
+    {
+        if (goals.getValue(i) != 0.0)
+        {
+            mona->homeostats[i]->receptorUpdate(this);
+        }
+    }
+}
+
+// Update goal values.
+void Mona::Receptor::updateGoalValues()
+{
+   // Update goal value of receptor.
    VALUE_SET needs, needDeltas;
 
    if (!mona->LEARN_RECEPTOR_GOAL_VALUE)

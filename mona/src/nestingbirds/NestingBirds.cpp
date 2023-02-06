@@ -17,7 +17,8 @@ int RANDOM_NUMBER_SEED = 4517;
 const char *Usage =
    "Usage:\n"
    "    nestingbirds\n"
-   "      -train -save <save file name>] | -test -load <load file name>\n"
+   "      -trainMale <male save file name> | -testMale <male load file name>\n"
+   "      -trainFemale <female save file name> | -testFemale <female load file name>\n"    
    "      -steps <steps>\n"
    "      [-maleInitialFood <amount> (default=" MALE_DEFAULT_INITIAL_FOOD "]\n"
    "      [-maleFoodDuration <amount> (default=" MALE_DEFAULT_FOOD_DURATION ")]\n"
@@ -41,7 +42,8 @@ const char *Usage =
    "  1=error\n";
 
 // Testing vs. training.
-bool Test;
+bool MaleTest;
+bool FemaleTest;
 
 // Steps.
 int Steps;
@@ -51,8 +53,9 @@ bool FemaleWantMouse;
 bool FemaleWantStone;
 int  FemaleNestSequence;
 
-// Save/load file name.
-char *Filename;
+// Save/load file names.
+char *MaleFilename;
+char* FemaleFilename;
 
 // World map: plain=0, forest=1, mouse=2, desert=3, stone=4
 const int  WIDTH = 21, HEIGHT = 21;
@@ -198,7 +201,7 @@ void step()
    female->cycle();
 
    // Train?
-   if (!Test)
+   if (!FemaleTest)
    {
       train(Bird::FEMALE);
    }
@@ -219,7 +222,7 @@ void step()
    male->cycle();
 
    // Train?
-   if (!Test)
+   if (!MaleTest)
    {
       train(Bird::MALE);
    }
@@ -1809,58 +1812,91 @@ void stepMice()
 // Main.
 int main(int argc, char *args[])
 {
-   bool gotTrainTest = false;
+   bool gotMaleTrainTest = false;
+   bool gotFemaleTrainTest = false;
    bool gotSteps     = false;
 
    for (int i = 1; i < argc; i++)
    {
-      if (strcmp(args[i], "-train") == 0)
+      if (strcmp(args[i], "-trainMale") == 0)
       {
-         Test = false;
-         if (gotTrainTest)
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid male save file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          MaleFilename = args[i];
+         MaleTest = false;
+         if (gotMaleTrainTest)
          {
-            fprintf(stderr, "Duplicate train/test option\n");
+            fprintf(stderr, "Duplicate male train/test option\n");
             fprintf(stderr, Usage);
             exit(1);
          }
-         gotTrainTest = true;
+         gotMaleTrainTest = true;
          continue;
       }
-      if (strcmp(args[i], "-save") == 0)
+      if (strcmp(args[i], "-testMale") == 0)
       {
-         i++;
-         if (i >= argc)
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid male load file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          MaleFilename = args[i];
+         MaleTest = true;
+         if (gotMaleTrainTest)
          {
-            fprintf(stderr, "Invalid save option\n");
+            fprintf(stderr, "Duplicate male train/test option\n");
             fprintf(stderr, Usage);
             exit(1);
          }
-         Filename = args[i];
+         gotMaleTrainTest = true;
          continue;
       }
-      if (strcmp(args[i], "-test") == 0)
+      if (strcmp(args[i], "-trainFemale") == 0)
       {
-         Test = true;
-         if (gotTrainTest)
-         {
-            fprintf(stderr, "Duplicate train/test option\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         gotTrainTest = true;
-         continue;
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid female save file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          FemaleFilename = args[i];
+          FemaleTest = false;
+          if (gotFemaleTrainTest)
+          {
+              fprintf(stderr, "Duplicate female train/test option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          gotFemaleTrainTest = true;
+          continue;
       }
-      if (strcmp(args[i], "-load") == 0)
+      if (strcmp(args[i], "-testFemale") == 0)
       {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid load option\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         Filename = args[i];
-         continue;
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid female load file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          FemaleFilename = args[i];
+          FemaleTest = true;
+          if (gotFemaleTrainTest)
+          {
+              fprintf(stderr, "Duplicate female train/test option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          gotFemaleTrainTest = true;
+          continue;
       }
       if (strcmp(args[i], "-steps") == 0)
       {
@@ -2164,15 +2200,26 @@ int main(int argc, char *args[])
       fprintf(stderr, Usage);
       exit(1);
    }
-   if (!gotTrainTest)
+   if (!gotMaleTrainTest)
    {
       fprintf(stderr, Usage);
       exit(1);
+   }
+   if (!gotFemaleTrainTest)
+   {
+       fprintf(stderr, Usage);
+       exit(1);
    }
    if (!gotSteps)
    {
       fprintf(stderr, Usage);
       exit(1);
+   }
+   if (strcmp(MaleFilename, FemaleFilename) == 0)
+   {
+       fprintf(stderr, "Male and female file names must be different\n");
+       fprintf(stderr, Usage);
+       exit(1);
    }
    if (Male::INITIAL_FOOD > Male::FOOD_DURATION)
    {
@@ -2191,24 +2238,40 @@ int main(int argc, char *args[])
    init();
 
    // Load?
-   if (Test)
+   if (MaleTest)
    {
        FILE* fp;
-       if ((fp = fopen(Filename, "r")) == NULL)
+       if ((fp = fopen(MaleFilename, "r")) == NULL)
        {
-           fprintf(stderr, "Cannot load training");
+           fprintf(stderr, "Cannot load male training");
            exit(1);
        }
        male->brain->load(fp);
-       female->brain->load(fp);
        fclose(fp);
        if (Verbose)
        {
-           printf("Networks loaded from file %s\n", Filename);
+           printf("Male network loaded from file %s\n", MaleFilename);
        }
 
        // Initialize needs.
        male->initNeeds();
+   }
+   if (FemaleTest)
+   {
+       FILE* fp;
+       if ((fp = fopen(FemaleFilename, "r")) == NULL)
+       {
+           fprintf(stderr, "Cannot load female training");
+           exit(1);
+       }
+       female->brain->load(fp);
+       fclose(fp);
+       if (Verbose)
+       {
+           printf("Female network loaded from file %s\n", FemaleFilename);
+       }
+
+       // Initialize needs.
        female->initNeeds();
    }
 
@@ -2260,20 +2323,34 @@ int main(int argc, char *args[])
    }
 
    // Save training?
-   if (!Test)
+   if (!MaleTest)
    {
        FILE* fp;
-       if ((fp = fopen(Filename, "w")) == NULL)
+       if ((fp = fopen(MaleFilename, "w")) == NULL)
        {
-           fprintf(stderr, "Cannot save training");
+           fprintf(stderr, "Cannot save male training");
            exit(1);
        }
        male->brain->save(fp);
+       fclose(fp);
+       if (Verbose)
+       {
+           printf("Male training saved to file %s\n", MaleFilename);
+       }
+   }
+   if (!FemaleTest)
+   {
+       FILE* fp;
+       if ((fp = fopen(FemaleFilename, "w")) == NULL)
+       {
+           fprintf(stderr, "Cannot save female training");
+           exit(1);
+       }
        female->brain->save(fp);
        fclose(fp);
        if (Verbose)
        {
-           printf("Training saved to file %s\n", Filename);
+           printf("Female training saved to file %s\n", FemaleFilename);
        }
    }
    exit(0);
