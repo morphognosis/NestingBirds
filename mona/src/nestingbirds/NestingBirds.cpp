@@ -198,7 +198,7 @@ void step()
    female->setNeeds();
 
    // Cycle female.
-   female->cycle();
+   female->response = female->cycle();
 
    // Train?
    if (!FemaleTest)
@@ -219,7 +219,7 @@ void step()
    male->setNeeds();
 
    // Cycle male.
-   male->cycle();
+   male->response = male->cycle();
 
    // Train?
    if (!MaleTest)

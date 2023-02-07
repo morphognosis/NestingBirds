@@ -108,28 +108,20 @@ public:
 
    // Goals.
 
-   // Food goals.
-   Mona::Receptor* hungry;
-   Mona::Mediator* askForMouse;
-   Mona::Receptor* readyToEat;
-   Mona::Receptor* notHungry;
-   Mona::Mediator* eatMouse;
+    // Food.
+   int wantMouseGoal;
+   int eatMouseGoal;
 
-   // Stone goals.
-   Mona::Receptor* missingStone;
-   Mona::Mediator* askForStone;
-   Mona::Receptor* stoneReady;
-   Mona::Receptor* stonePlaced;
-   Mona::Mediator* placeStone;
+   // Stone.
+   int wantStoneGoal;
+   int putStoneGoal;
 
-   // Lay egg goals.
-   Mona::Receptor* readyToLayEgg;
-   Mona::Receptor* eggInNest;
-   Mona::Mediator* layEggInNest;
+   // Lay egg.
+   int layEggGoal;
 
-   // Roost in nest.
-   Mona::Mediator* roostInNest;
-
+   // Brooding on egg.
+   int broodEggGoal;
+ 
     // Load sensors.
     void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale, Mona::SENSOR currentObject,

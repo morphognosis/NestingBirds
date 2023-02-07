@@ -35,6 +35,7 @@ extern const char *MonaVersion;
 // MONA_TRACE: use with run-time tracing flags below for execution flow trace.
 // MONA_TRACKING: use with dump and print options for firing, enabling and drive
 // event tracking.
+#define MONA_TRACE 1
 
 #ifdef WIN32
 #define PUBLIC_API    __declspec(dllexport)

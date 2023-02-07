@@ -142,6 +142,7 @@ void Homeostat::addGoalReceptor(void* receptor)
     }
 
     // Add receptor to goals having superset sensors.
+    ((Mona::Receptor*)receptor)->goals.setValue(needIndex, 0.0);
     for (int i = 0, n = (int)goals.size(); i < n; i++)
     {
         if (goalSuperset(i, ((Mona::Receptor*)receptor)->centroid))
@@ -438,6 +439,10 @@ void Homeostat::receptorUpdate(void *receptor)
                }
                else {
                    goals[i].pendingReceptor = receptor;
+                   NEED value = ((Mona::Receptor*)receptor)->goals.getValue(needIndex);
+                   ((Mona::Receptor*)receptor)->goals.setValue(needIndex, value - goals[i].goalValue);
+                   value = ((Mona::Motor*)goals[i].motor)->goals.getValue(needIndex);
+                   ((Mona::Motor*)goals[i].motor)->goals.setValue(needIndex, value + goals[i].goalValue);
                }
            }
        }
@@ -451,17 +456,23 @@ void Homeostat::responseUpdate()
    // Update the need value when response matches.
    for (int i = 0, j = (int)goals.size(); i < j; i++)
    {
-      if (goals[i].response != NULL_RESPONSE)
+      if (goals[i].pendingReceptor != NULL)
       {
-         if (goals[i].pendingReceptor != NULL && goals[i].response == mona->response)
-         {
-            need -= goals[i].goalValue;
-            if (need < 0.0)
-            {
-               need = 0.0;
-            }
-         }
-         goals[i].pendingReceptor = NULL;
+          if (goals[i].response != NULL_RESPONSE)
+          {
+              if (goals[i].response == mona->response)
+              {
+                  need -= goals[i].goalValue;
+                  if (need < 0.0)
+                  {
+                      need = 0.0;
+                  }
+              }
+              NEED value = ((Mona::Receptor*)goals[i].pendingReceptor)->goals.getValue(needIndex);
+              ((Mona::Receptor*)goals[i].pendingReceptor)->goals.setValue(needIndex, value + goals[i].goalValue);
+              ((Mona::Motor*)goals[i].motor)->goals.setValue(needIndex, 0.0);
+          }
+          goals[i].pendingReceptor = NULL;
       }
    }
 
@@ -522,7 +533,6 @@ void Homeostat::load(FILE *fp)
    Goal   g;
    SENSOR s;
    ID     id;
-
    FREAD_DOUBLE(&need, fp);
    FREAD_INT(&needIndex, fp);
    FREAD_DOUBLE(&needDelta, fp);
@@ -548,6 +558,7 @@ void Homeostat::load(FILE *fp)
           FREAD_LONG_LONG(&id, fp);
           g.receptors.push_back((void*)mona->findByID(id));
       }
+      g.pendingReceptor = NULL;
       FREAD_INT(&g.response, fp);
       if (g.response != NULL_RESPONSE)
       {
