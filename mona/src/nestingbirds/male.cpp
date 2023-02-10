@@ -63,6 +63,12 @@ void Male::setNeeds()
 {
 }
 
+// Set response override.
+void Male::setResponseOverride()
+{
+    brain->responseOverride = response;
+}
+
 // Cycle male.
 int Male::cycle()
 {
@@ -71,9 +77,35 @@ int Male::cycle()
    {
       brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
-   return(brain->cycle(brainSensors));
+   response = brain->cycle(brainSensors);
+   return response;
 }
 
+// Load.
+void Male::load(char* filename)
+{
+    FILE* fp;
+    if ((fp = fopen(filename, "r")) == NULL)
+    {
+        fprintf(stderr, "Cannot load male");
+        exit(1);
+    }
+    brain->load(fp);
+    fclose(fp);
+}
+
+// Save.
+void Male::save(char* filename)
+{
+    FILE* fp;
+    if ((fp = fopen(filename, "w")) == NULL)
+    {
+        fprintf(stderr, "Cannot save male");
+        exit(1);
+    }
+    brain->save(fp);
+    fclose(fp);
+}
 
 // Print male.
 void Male::print()

@@ -162,6 +162,25 @@ void init()
       }
    }
 
+   /*
+   int x = WIDTH / 2;  // flibber
+   int y = HEIGHT / 2;
+   x--;
+   World[x][y].object = OBJECT::STONE;
+   y++;
+   World[x][y].object = OBJECT::STONE;
+   y++;
+   World[x][y].object = OBJECT::STONE;
+   x++;
+   World[x][y].object = OBJECT::STONE;
+   x++;
+   World[x][y].object = OBJECT::STONE;
+   y--;
+   World[x][y].object = OBJECT::STONE;
+   y--;
+   World[x][y].object = OBJECT::STONE;
+   */
+
    // Create birds.
    female             = new Female();
    female->x          = WIDTH / 2;
@@ -194,17 +213,18 @@ void step()
    // Set female sensors.
    setSensors(Bird::FEMALE);
 
-   // Set female needs.
-   female->setNeeds();
-
-   // Cycle female.
-   female->response = female->cycle();
-
    // Train?
    if (!FemaleTest)
    {
       train(Bird::FEMALE);
    }
+
+   // Set female needs.
+   female->setNeeds();
+
+   // Cycle female.
+   female->cycle();
+
    if (Verbose)
    {
       printf("Female: Location: [%d,%d], ", female->x, female->y);
@@ -215,17 +235,18 @@ void step()
    // Set male sensors.
    setSensors(Bird::MALE);
 
-   // Set male needs.
-   male->setNeeds();
-
-   // Cycle male.
-   male->response = male->cycle();
-
    // Train?
    if (!MaleTest)
    {
       train(Bird::MALE);
    }
+
+   // Set male needs.
+   male->setNeeds();
+
+   // Cycle male.
+   male->cycle();
+
    if (Verbose)
    {
       printf("Male: Location: [%d,%d], ", male->x, male->y);
@@ -241,10 +262,12 @@ void train(int gender)
    if (gender == Bird::MALE)
    {
       trainMale();
+      male->setResponseOverride();
    }
    else
    {
       trainFemale();
+      female->setResponseOverride();
    }
 }
 
@@ -935,6 +958,8 @@ void trainFemale()
          else
          {
             female->response = Bird::RESPONSE::TURN_LEFT;
+            //female->response = Bird::RESPONSE::TURN_AROUND;  // flibber
+            //FemaleNestSequence = 8; // flibber
          }
       }
       else if (female->hasObject == OBJECT::STONE)
@@ -2240,14 +2265,7 @@ int main(int argc, char *args[])
    // Load?
    if (MaleTest)
    {
-       FILE* fp;
-       if ((fp = fopen(MaleFilename, "r")) == NULL)
-       {
-           fprintf(stderr, "Cannot load male training");
-           exit(1);
-       }
-       male->brain->load(fp);
-       fclose(fp);
+       male->load(MaleFilename);
        if (Verbose)
        {
            printf("Male network loaded from file %s\n", MaleFilename);
@@ -2258,14 +2276,7 @@ int main(int argc, char *args[])
    }
    if (FemaleTest)
    {
-       FILE* fp;
-       if ((fp = fopen(FemaleFilename, "r")) == NULL)
-       {
-           fprintf(stderr, "Cannot load female training");
-           exit(1);
-       }
-       female->brain->load(fp);
-       fclose(fp);
+       female->load(FemaleFilename);
        if (Verbose)
        {
            printf("Female network loaded from file %s\n", FemaleFilename);
@@ -2325,14 +2336,7 @@ int main(int argc, char *args[])
    // Save training?
    if (!MaleTest)
    {
-       FILE* fp;
-       if ((fp = fopen(MaleFilename, "w")) == NULL)
-       {
-           fprintf(stderr, "Cannot save male training");
-           exit(1);
-       }
-       male->brain->save(fp);
-       fclose(fp);
+       male->save(MaleFilename);
        if (Verbose)
        {
            printf("Male training saved to file %s\n", MaleFilename);
@@ -2340,14 +2344,7 @@ int main(int argc, char *args[])
    }
    if (!FemaleTest)
    {
-       FILE* fp;
-       if ((fp = fopen(FemaleFilename, "w")) == NULL)
-       {
-           fprintf(stderr, "Cannot save female training");
-           exit(1);
-       }
-       female->brain->save(fp);
-       fclose(fp);
+       female->save(FemaleFilename);
        if (Verbose)
        {
            printf("Female training saved to file %s\n", FemaleFilename);

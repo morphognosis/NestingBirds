@@ -75,8 +75,17 @@ public:
    void initNeeds();
    void setNeeds();
 
+   // Set response override.
+   void setResponseOverride();
+
    // Cycle.
    int cycle();
+
+   // Load.
+   void load(char *filename);
+
+   // Save.
+   void save(char *filename);
 
    // Print.
    void print();

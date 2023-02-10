@@ -198,25 +198,25 @@ Mona::createMediator(LearningEvent *effectEvent)
       }
       if (causeEvent->neuron->type == MOTOR)
       {
-         continue;
+          continue;
       }
       if (causeEvent->end >= effectEvent->begin)
       {
-         continue;
+          continue;
       }
 
       // The cause and effect must have equal response-equippage status.
-      if ((level == 0) || (((Mediator *)causeEvent->neuron)->response != NULL))
+      if ((level == 0) || (((Mediator*)causeEvent->neuron)->response != NULL))
       {
-         causeRespEq = true;
+          causeRespEq = true;
       }
       else
       {
-         causeRespEq = false;
+          causeRespEq = false;
       }
       if (causeRespEq != effectRespEq)
       {
-         continue;
+          continue;
       }
 
       // Save candidate.
@@ -227,73 +227,73 @@ Mona::createMediator(LearningEvent *effectEvent)
    // Choose causes and create mediators.
    while (true)
    {
-      // Make a weighted probabilistic pick of a candidate.
-      chooseProb = random.RAND_INTERVAL(0.0, accumProb);
-      PROBABILITY p = 0.0;
-      int i = 0;
-      for (int j = (int)candidates.size(); i < j; i++)
-      {
-         if (candidates[i] == NULL)
-         {
-            continue;
-         }
-         p += candidates[i]->probability;
-         if (chooseProb <= p)
-         {
-            break;
-         }
-      }
-      if (i == (int)candidates.size())
-      {
-         break;
-      }
-      causeEvent    = candidates[i];
-      accumProb    -= causeEvent->probability;
-      candidates[i] = NULL;
+       // Make a weighted probabilistic pick of a candidate.
+       chooseProb = random.RAND_INTERVAL(0.0, accumProb);
+       PROBABILITY p = 0.0;
+       int i = 0;
+       for (int j = (int)candidates.size(); i < j; i++)
+       {
+           if (candidates[i] == NULL)
+           {
+               continue;
+           }
+           p += candidates[i]->probability;
+           if (chooseProb <= p)
+           {
+               break;
+           }
+       }
+       if (i == (int)candidates.size())
+       {
+           break;
+       }
+       causeEvent = candidates[i];
+       accumProb -= causeEvent->probability;
+       candidates[i] = NULL;
 
-      // Make a probabilistic decision to create mediator.
-      if (!random.RAND_CHANCE(effectEvent->probability *
-                              causeEvent->probability))
-      {
-         continue;
-      }
+       // Make a probabilistic decision to create mediator.
+       if (!random.RAND_CHANCE(effectEvent->probability *
+           causeEvent->probability))
+       {
+           continue;
+       }
 
-      // Add a response?
-      // The components must also be response-equipped.
-      responseEvent = NULL;
-      if ((level < MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL) ||
-          (effectRespEq &&
-           (level <= MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL) &&
-           random.RAND_BOOL()))
-      {
-         tmpVector.clear();
-         for (responseEventItr = learningEvents[0].begin();
-              responseEventItr != learningEvents[0].end(); responseEventItr++)
-         {
-            responseEvent = *responseEventItr;
-            if ((responseEvent->neuron->type == MOTOR) &&
-                (responseEvent->firingStrength > NEARLY_ZERO) &&
-                (responseEvent->end == causeEvent->end + 1))
-            {
-               tmpVector.push_back(responseEvent);
-            }
-         }
-         if (tmpVector.size() == 0)
-         {
-            continue;
-         }
-         responseEvent = tmpVector[random.RAND_CHOICE((int)tmpVector.size())];
-      }
+       // Add a response?
+       // The components must also be response-equipped.
+       responseEvent = NULL;
+       if ((level < MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL) ||
+           (effectRespEq &&
+               (level <= MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL) &&
+               random.RAND_BOOL()))
+       {
+           tmpVector.clear();
+           for (responseEventItr = learningEvents[0].begin();
+               responseEventItr != learningEvents[0].end(); responseEventItr++)
+           {
+               responseEvent = *responseEventItr;
+               if ((responseEvent->neuron->type == MOTOR) &&
+                   (responseEvent->firingStrength > NEARLY_ZERO) &&
+                   (responseEvent->end == causeEvent->end + 1))
+               {
+                   tmpVector.push_back(responseEvent);
+               }
+           }
+           if (tmpVector.size() == 0)
+           {
+               continue;
+           }
+           responseEvent = tmpVector[random.RAND_CHOICE((int)tmpVector.size())];
+       }
 
-      // Create the mediator.
-      mediator = newMediator(INITIAL_ENABLEMENT);
-      mediator->addEvent(CAUSE_EVENT, causeEvent->neuron);
-      if (responseEvent != NULL)
-      {
-         mediator->addEvent(RESPONSE_EVENT, responseEvent->neuron);
-      }
-      mediator->addEvent(EFFECT_EVENT, effectEvent->neuron);
-      mediator->updateGoalValue(causeEvent->needs);
+       // Create the mediator.
+       mediator = newMediator(INITIAL_ENABLEMENT);
+       mediator->addEvent(CAUSE_EVENT, causeEvent->neuron);
+       if (responseEvent != NULL)
+       {
+           mediator->addEvent(RESPONSE_EVENT, responseEvent->neuron);
+       }
+       mediator->addEvent(EFFECT_EVENT, effectEvent->neuron);
+       mediator->updateGoalValue(causeEvent->needs);
 
       // Duplicate?
       if (isDuplicateMediator(mediator))

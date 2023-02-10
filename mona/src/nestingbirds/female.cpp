@@ -67,16 +67,16 @@ Female::Female() : Bird(FEMALE)
     putStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, Bird::RESPONSE::PUT_OBJECT, STONE_NEED);
 
     // Lay egg goals.
-    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
+    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE, DONT_CARE);
-    layEggGoal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, RESPONSE::LAY_EGG, LAY_EGG_NEED);
+    layEggGoal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, LAY_EGG_NEED);
 
     // Brooding on egg.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, 0, BROOD_EGG_NEED);
+    broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, 0, Bird::RESPONSE::DO_NOTHING, BROOD_EGG_NEED);
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;
@@ -113,8 +113,8 @@ void Female::initNeeds()
 {
     brain->setNeed(MOUSE_NEED_INDEX, 0.0);
     brain->setNeed(STONE_NEED_INDEX, 0.0);
-    brain->setNeed(LAY_EGG_NEED_INDEX, 0.0);
-    brain->setNeed(BROOD_EGG_NEED_INDEX, BROOD_EGG_NEED);
+    brain->setNeed(LAY_EGG_NEED_INDEX, LAY_EGG_NEED);
+    brain->setNeed(BROOD_EGG_NEED_INDEX, 0.0);
 }
 
 // Set female needs.
@@ -130,7 +130,19 @@ void Female::setNeeds()
         brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
     }
 
-    brain->setNeed(BROOD_EGG_NEED_INDEX, BROOD_EGG_NEED);
+    if (sensors[Bird::CURRENT_OBJECT_SENSOR] == OBJECT::EGG)
+    {
+        brain->setNeed(MOUSE_NEED_INDEX, 0.0);
+        brain->setNeed(STONE_NEED_INDEX, 0.0);
+        brain->setNeed(LAY_EGG_NEED_INDEX, 0.0);
+        brain->setNeed(BROOD_EGG_NEED_INDEX, BROOD_EGG_NEED);
+    }
+}
+
+// Set response override.
+void Female::setResponseOverride()
+{
+    brain->responseOverride = response;
 }
 
 // Cycle female.
@@ -141,7 +153,8 @@ int Female::cycle()
    {
       brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
-   return(brain->cycle(brainSensors));
+   response = brain->cycle(brainSensors);
+   return response;
 }
 
 
@@ -160,6 +173,31 @@ void Female::print()
    printResponse();
 }
 
+// Load.
+void Female::load(char *filename)
+{
+    FILE* fp;
+    if ((fp = fopen(filename, "r")) == NULL)
+    {
+        fprintf(stderr, "Cannot load female");
+        exit(1);
+    }
+    brain->load(fp);
+    fclose(fp);
+}
+
+// Save.
+void Female::save(char *filename)
+{
+    FILE* fp;
+    if ((fp = fopen(filename, "w")) == NULL)
+    {
+        fprintf(stderr, "Cannot save female");
+        exit(1);
+    }
+    brain->save(fp);
+    fclose(fp);
+}
 
 // Print sensors.
 void Female::printSensors()
