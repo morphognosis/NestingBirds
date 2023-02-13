@@ -162,25 +162,6 @@ void init()
       }
    }
 
-   /*
-   int x = WIDTH / 2;  // flibber
-   int y = HEIGHT / 2;
-   x--;
-   World[x][y].object = OBJECT::STONE;
-   y++;
-   World[x][y].object = OBJECT::STONE;
-   y++;
-   World[x][y].object = OBJECT::STONE;
-   x++;
-   World[x][y].object = OBJECT::STONE;
-   x++;
-   World[x][y].object = OBJECT::STONE;
-   y--;
-   World[x][y].object = OBJECT::STONE;
-   y--;
-   World[x][y].object = OBJECT::STONE;
-   */
-
    // Create birds.
    female             = new Female();
    female->x          = WIDTH / 2;
@@ -958,8 +939,6 @@ void trainFemale()
          else
          {
             female->response = Bird::RESPONSE::TURN_LEFT;
-            //female->response = Bird::RESPONSE::TURN_AROUND;  // flibber
-            //FemaleNestSequence = 8; // flibber
          }
       }
       else if (female->hasObject == OBJECT::STONE)
@@ -1455,7 +1434,7 @@ void setSensors(int gender)
    {
       bird    = male;
       sensors = male->sensors;
-      for (int i = 0; i < Female::NUM_SENSORS; i++)
+      for (int i = 0; i < Male::NUM_SENSORS; i++)
       {
           sensors[i] = DONT_CARE;
       }
@@ -1543,8 +1522,56 @@ void setSensors(int gender)
          }
          break;
 
-      // Front.
+      // Left front.
       case 2:
+          x = -1;
+          y = -1;
+          switch (bird->orientation)
+          {
+          case Bird::ORIENTATION::NORTH:
+              if (bird->x > 0 && bird->y > 0)
+              {
+                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                  x = bird->x - 1;
+                  y = bird->y - 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::SOUTH:
+              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                  x = bird->x + 1;
+                  y = bird->y + 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::EAST:
+              if (bird->x < WIDTH - 1 && bird->y > 0)
+              {
+                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                  x = bird->x + 1;
+                  y = bird->y - 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::WEST:
+              if (bird->x > 0 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                  x = bird->x - 1;
+                  y = bird->y + 1;
+              }
+              break;
+          }
+          break;
+
+      // Front.
+      case 3:
          x = -1;
          y = -1;
          switch (bird->orientation)
@@ -1601,8 +1628,56 @@ void setSensors(int gender)
          }
          break;
 
+      // Right front.
+      case 4:
+          x = -1;
+          y = -1;
+          switch (bird->orientation)
+          {
+          case Bird::ORIENTATION::NORTH:
+              if (bird->x < WIDTH - 1 && bird->y > 0)
+              {
+                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                  x = bird->x + 1;
+                  y = bird->y - 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::SOUTH:
+              if (bird->x > 0 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                  x = bird->x - 1;
+                  y = bird->y + 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::EAST:
+              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                  x = bird->x + 1;
+                  y = bird->y + 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::WEST:
+              if (bird->x > 0 && bird->y > 0)
+              {
+                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                  x = bird->x - 1;
+                  y = bird->y - 1;
+              }
+              break;
+          }
+          break;
+
       // Right.
-      case 3:
+      case 5:
          x = -1;
          y = -1;
          switch (bird->orientation)
@@ -1659,8 +1734,56 @@ void setSensors(int gender)
          }
          break;
 
+      // Right rear.
+      case 6:
+          x = -1;
+          y = -1;
+          switch (bird->orientation)
+          {
+          case Bird::ORIENTATION::NORTH:
+              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                  x = bird->x + 1;
+                  y = bird->y + 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::SOUTH:
+              if (bird->x > 0 && bird->y > 0)
+              {
+                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                  x = bird->x - 1;
+                  y = bird->y - 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::EAST:
+              if (bird->x > 0 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                  x = bird->x - 1;
+                  y = bird->y + 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::WEST:
+              if (bird->x < WIDTH - 1 && bird->y > 0)
+              {
+                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                  x = bird->x + 1;
+                  y = bird->y - 1;
+              }
+              break;
+          }
+          break;
+
       // Rear.
-      case 4:
+      case 7:
           x = -1;
           y = -1;
           switch (bird->orientation)
@@ -1714,6 +1837,54 @@ void setSensors(int gender)
                       sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_REAR;
                   }
               }
+          }
+          break;
+
+      // Left rear.
+      case 8:
+          x = -1;
+          y = -1;
+          switch (bird->orientation)
+          {
+          case Bird::ORIENTATION::NORTH:
+              if (bird->x > 0 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                  x = bird->x - 1;
+                  y = bird->y + 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::SOUTH:
+              if (bird->x < WIDTH - 1 && bird->y > 0)
+              {
+                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                  x = bird->x + 1;
+                  y = bird->y - 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::EAST:
+              if (bird->x > 0 && bird->y > 0)
+              {
+                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                  x = bird->x - 1;
+                  y = bird->y - 1;
+              }
+              break;
+
+          case Bird::ORIENTATION::WEST:
+              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+              {
+                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                  x = bird->x + 1;
+                  y = bird->y + 1;
+              }
+              break;
           }
           break;
       }

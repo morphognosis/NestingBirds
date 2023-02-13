@@ -130,23 +130,39 @@ void Male::printSensors()
       switch (i)
       {
       case 0:
-         printf("Current: ");
-         break;
+          printf("Current: ");
+          break;
 
       case 1:
-         printf("Left: ");
-         break;
+          printf("Left: ");
+          break;
 
       case 2:
-         printf("Front: ");
-         break;
+          printf("Left front: ");
+          break;
 
       case 3:
-         printf("Right: ");
-         break;
+          printf("Front: ");
+          break;
 
       case 4:
+          printf("Right front: ");
+          break;
+
+      case 5:
+          printf("Right: ");
+          break;
+
+      case 6:
+          printf("Right rear: ");
+          break;
+
+      case 7:
           printf("Rear: ");
+          break;
+
+      case 8:
+          printf("Left rear: ");
           break;
       }
       printf("%s", LOCALE::toString(sensors[i * Bird::CELL_SENSOR::NUM_SENSORS]));

@@ -148,7 +148,7 @@ public:
    // by "modality", analogous to sight, hearing,
    // touch. Sensing for a specific sensor mode
    // maps the next sensor vector to the closest
-   // receptor in a set reserved for the mode. This
+   // receptor in a space reserved for the mode. This
    // provides the network with selective attention
    // capabilities.
    vector<SensorMode *> sensorModes;

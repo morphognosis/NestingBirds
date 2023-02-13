@@ -59,17 +59,25 @@ public:
    };
 
    // Bird senses current, left, front, right, and rear cells.
-   static const int NUM_CELL_SENSORS      = 5;
+   static const int NUM_CELL_SENSORS      = 9;
    static const int CURRENT_LOCALE_SENSOR = 0;
    static const int CURRENT_OBJECT_SENSOR = 1;
    static const int LEFT_LOCALE_SENSOR    = 2;
    static const int LEFT_OBJECT_SENSOR    = 3;
-   static const int FRONT_LOCALE_SENSOR = 4;
-   static const int FRONT_OBJECT_SENSOR = 5;
-   static const int RIGHT_LOCALE_SENSOR   = 6;
-   static const int RIGHT_OBJECT_SENSOR   = 7;
-   static const int REAR_LOCALE_SENSOR = 8;
-   static const int REAR_OBJECT_SENSOR = 9;
+   static const int LEFT_FRONT_LOCALE_SENSOR = 4;
+   static const int LEFT_FRONT_OBJECT_SENSOR = 5;
+   static const int FRONT_LOCALE_SENSOR = 6;
+   static const int FRONT_OBJECT_SENSOR = 7;
+   static const int RIGHT_FRONT_LOCALE_SENSOR = 8;
+   static const int RIGHT_FRONT_OBJECT_SENSOR = 9;
+   static const int RIGHT_LOCALE_SENSOR   = 10;
+   static const int RIGHT_OBJECT_SENSOR   = 11;
+   static const int RIGHT_REAR_LOCALE_SENSOR = 12;
+   static const int RIGHT_REAR_OBJECT_SENSOR = 13;
+   static const int REAR_LOCALE_SENSOR = 14;
+   static const int REAR_OBJECT_SENSOR = 15;
+   static const int LEFT_REAR_LOCALE_SENSOR = 16;
+   static const int LEFT_REAR_OBJECT_SENSOR = 17;
 
    // State.
    int gender;

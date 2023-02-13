@@ -135,10 +135,14 @@ public:
     void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
         Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
+        Mona::SENSOR leftFrontLocale, Mona::SENSOR leftFrontObject,
         Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
+        Mona::SENSOR rightFrontLocale, Mona::SENSOR rightFrontObject,
         Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
+        Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
         Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
-        Mona::SENSOR orienatation, Mona::SENSOR hungerSensor,
-        Mona::SENSOR hasObject, Mona::SENSOR stateSensor);
+        Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
+        Mona::SENSOR orientation, Mona::SENSOR hunger,
+        Mona::SENSOR hasObject, Mona::SENSOR state);
 };
 #endif
