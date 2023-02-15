@@ -98,39 +98,9 @@ public:
 
    // Print response.
    void printResponse();
-
-   // Motors:
-   Mona::Motor* doNothing;
-   Mona::Motor* eat;
-   Mona::Motor* get;
-   Mona::Motor* put;
-   Mona::Motor* toss;
-   Mona::Motor* move;
-   Mona::Motor* turnRight;
-   Mona::Motor* turnLeft;
-   Mona::Motor* turnAround;
-   Mona::Motor* stateOn;
-   Mona::Motor* stateOff;
-   Mona::Motor* wantMouse;
-   Mona::Motor* wantStone;
-   Mona::Motor* layEgg;
-
-   // Goals.
-
-    // Food.
-   int wantMouseGoal;
-   int eatMouseGoal;
-
-   // Stone.
-   int wantStoneGoal;
-   int putStoneGoal;
-
-   // Lay egg.
-   int layEggGoal;
-
-   // Brooding on egg.
-   int broodEggGoal;
  
+private:
+
     // Load mask.
     void loadMask(vector<bool>& mask,
         bool currentLocale, bool currentObject,

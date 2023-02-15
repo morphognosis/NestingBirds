@@ -41,20 +41,20 @@ Female::Female() : Bird(FEMALE)
     int foodMode = 1;
 
     // Motors:
-    doNothing = brain->motors[Bird::RESPONSE::DO_NOTHING];
-    eat = brain->motors[Bird::RESPONSE::EAT_MOUSE];
-    get = brain->motors[Bird::RESPONSE::GET_OBJECT];
-    put = brain->motors[Bird::RESPONSE::PUT_OBJECT];
-    toss = brain->motors[Bird::RESPONSE::TOSS_OBJECT];
-    move = brain->motors[Bird::RESPONSE::MOVE_FORWARD];
-    turnRight = brain->motors[Bird::RESPONSE::TURN_RIGHT];
-    turnLeft = brain->motors[Bird::RESPONSE::TURN_LEFT];
-    turnAround = brain->motors[Bird::RESPONSE::TURN_AROUND];
-    stateOn = brain->motors[Bird::RESPONSE::STATE_ON];
-    stateOff = brain->motors[Bird::RESPONSE::STATE_OFF];
-    wantMouse = brain->motors[Female::RESPONSE::WANT_MOUSE];
-    wantStone = brain->motors[Female::RESPONSE::WANT_STONE];
-    layEgg = brain->motors[Female::RESPONSE::LAY_EGG];
+    Mona::Motor* doNothing = brain->motors[Bird::RESPONSE::DO_NOTHING];
+    Mona::Motor* eat = brain->motors[Bird::RESPONSE::EAT_MOUSE];
+    Mona::Motor* get = brain->motors[Bird::RESPONSE::GET_OBJECT];
+    Mona::Motor* put = brain->motors[Bird::RESPONSE::PUT_OBJECT];
+    Mona::Motor* toss = brain->motors[Bird::RESPONSE::TOSS_OBJECT];
+    Mona::Motor* move = brain->motors[Bird::RESPONSE::MOVE_FORWARD];
+    Mona::Motor* turnRight = brain->motors[Bird::RESPONSE::TURN_RIGHT];
+    Mona::Motor* turnLeft = brain->motors[Bird::RESPONSE::TURN_LEFT];
+    Mona::Motor* turnAround = brain->motors[Bird::RESPONSE::TURN_AROUND];
+    Mona::Motor* stateOn = brain->motors[Bird::RESPONSE::STATE_ON];
+    Mona::Motor* stateOff = brain->motors[Bird::RESPONSE::STATE_OFF];
+    Mona::Motor* wantMouse = brain->motors[Female::RESPONSE::WANT_MOUSE];
+    Mona::Motor* wantStone = brain->motors[Female::RESPONSE::WANT_STONE];
+    Mona::Motor* layEgg = brain->motors[Female::RESPONSE::LAY_EGG];
 
     // Needs.
     initNeeds();
@@ -67,119 +67,41 @@ Female::Female() : Bird(FEMALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    wantMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, RESPONSE::WANT_MOUSE, MOUSE_NEED);
+    int wantMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, RESPONSE::WANT_MOUSE, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
-    eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, Bird::RESPONSE::EAT_MOUSE, MOUSE_NEED);
+    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, Bird::RESPONSE::EAT_MOUSE, MOUSE_NEED);
 
     // Stone goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    wantStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, RESPONSE::WANT_STONE, STONE_NEED);
+    int wantStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, RESPONSE::WANT_STONE, STONE_NEED);
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE);
-    putStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, Bird::RESPONSE::PUT_OBJECT, STONE_NEED);
+    int putStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, Bird::RESPONSE::PUT_OBJECT, STONE_NEED);
 
     // Lay egg goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE, DONT_CARE);
-    layEggGoal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, nestMode, LAY_EGG_NEED);
+    int layEggGoal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, nestMode, LAY_EGG_NEED);
 
     // Brooding on egg.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, nestMode, Bird::RESPONSE::DO_NOTHING, BROOD_EGG_NEED);
+    int broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, nestMode, Bird::RESPONSE::DO_NOTHING, BROOD_EGG_NEED);
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;
-}
-
-// Load mask.
-void Female::loadMask(vector<bool>& mask,
-    bool currentLocale, bool currentObject,
-    bool leftLocale, bool leftObject,
-    bool leftFrontLocale, bool leftFrontObject,
-    bool frontLocale, bool frontObject,
-    bool rightFrontLocale, bool rightFrontObject,
-    bool rightLocale, bool rightObject,
-    bool rightRearLocale, bool rightRearObject,
-    bool rearLocale, bool rearObject,
-    bool leftRearLocale, bool leftRearObject,
-    bool orientation, bool hunger,
-    bool hasObject, bool state)
-{
-    mask.clear();
-    mask.push_back(currentLocale);
-    mask.push_back(currentObject);
-    mask.push_back(leftLocale);
-    mask.push_back(leftObject);
-    mask.push_back(leftFrontLocale);
-    mask.push_back(leftFrontObject);
-    mask.push_back(frontLocale);
-    mask.push_back(frontObject);
-    mask.push_back(rightFrontLocale);
-    mask.push_back(rightFrontObject);
-    mask.push_back(rightLocale);
-    mask.push_back(rightObject);
-    mask.push_back(rightRearLocale);
-    mask.push_back(rightRearObject);
-    mask.push_back(rearLocale);
-    mask.push_back(rearObject);
-    mask.push_back(leftRearLocale);
-    mask.push_back(leftRearObject);
-    mask.push_back(orientation);
-    mask.push_back(hunger);
-    mask.push_back(hasObject);
-    mask.push_back(state);
-}
-
-// Load sensors.
-void Female::loadSensors(vector<Mona::SENSOR>& sensors,
-    Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
-    Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
-    Mona::SENSOR leftFrontLocale, Mona::SENSOR leftFrontObject,
-    Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
-    Mona::SENSOR rightFrontLocale, Mona::SENSOR rightFrontObject,
-    Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
-    Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
-    Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
-    Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
-    Mona::SENSOR orientation, Mona::SENSOR hunger,
-    Mona::SENSOR hasObject, Mona::SENSOR state)
-{
-    sensors.clear();
-    sensors.push_back(currentLocale);
-    sensors.push_back(currentObject);
-    sensors.push_back(leftLocale);
-    sensors.push_back(leftObject);
-    sensors.push_back(leftFrontLocale);
-    sensors.push_back(leftFrontObject);
-    sensors.push_back(frontLocale);
-    sensors.push_back(frontObject);
-    sensors.push_back(rightFrontLocale);
-    sensors.push_back(rightFrontObject);
-    sensors.push_back(rightLocale);
-    sensors.push_back(rightObject);
-    sensors.push_back(rightRearLocale);
-    sensors.push_back(rightRearObject);
-    sensors.push_back(rearLocale);
-    sensors.push_back(rearObject);
-    sensors.push_back(leftRearLocale);
-    sensors.push_back(leftRearObject);
-    sensors.push_back(orientation);
-    sensors.push_back(hunger);
-    sensors.push_back(hasObject);
-    sensors.push_back(state);
 }
 
 // Initialize female needs.
@@ -360,4 +282,83 @@ void Female::printNeeds()
 void Female::printResponse()
 {
    printf(RESPONSE::toString(response));
+}
+
+
+// Load mask.
+void Female::loadMask(vector<bool>& mask,
+    bool currentLocale, bool currentObject,
+    bool leftLocale, bool leftObject,
+    bool leftFrontLocale, bool leftFrontObject,
+    bool frontLocale, bool frontObject,
+    bool rightFrontLocale, bool rightFrontObject,
+    bool rightLocale, bool rightObject,
+    bool rightRearLocale, bool rightRearObject,
+    bool rearLocale, bool rearObject,
+    bool leftRearLocale, bool leftRearObject,
+    bool orientation, bool hunger,
+    bool hasObject, bool state)
+{
+    mask.clear();
+    mask.push_back(currentLocale);
+    mask.push_back(currentObject);
+    mask.push_back(leftLocale);
+    mask.push_back(leftObject);
+    mask.push_back(leftFrontLocale);
+    mask.push_back(leftFrontObject);
+    mask.push_back(frontLocale);
+    mask.push_back(frontObject);
+    mask.push_back(rightFrontLocale);
+    mask.push_back(rightFrontObject);
+    mask.push_back(rightLocale);
+    mask.push_back(rightObject);
+    mask.push_back(rightRearLocale);
+    mask.push_back(rightRearObject);
+    mask.push_back(rearLocale);
+    mask.push_back(rearObject);
+    mask.push_back(leftRearLocale);
+    mask.push_back(leftRearObject);
+    mask.push_back(orientation);
+    mask.push_back(hunger);
+    mask.push_back(hasObject);
+    mask.push_back(state);
+}
+
+// Load sensors.
+void Female::loadSensors(vector<Mona::SENSOR>& sensors,
+    Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
+    Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
+    Mona::SENSOR leftFrontLocale, Mona::SENSOR leftFrontObject,
+    Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
+    Mona::SENSOR rightFrontLocale, Mona::SENSOR rightFrontObject,
+    Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
+    Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
+    Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
+    Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
+    Mona::SENSOR orientation, Mona::SENSOR hunger,
+    Mona::SENSOR hasObject, Mona::SENSOR state)
+{
+    sensors.clear();
+    sensors.push_back(currentLocale);
+    sensors.push_back(currentObject);
+    sensors.push_back(leftLocale);
+    sensors.push_back(leftObject);
+    sensors.push_back(leftFrontLocale);
+    sensors.push_back(leftFrontObject);
+    sensors.push_back(frontLocale);
+    sensors.push_back(frontObject);
+    sensors.push_back(rightFrontLocale);
+    sensors.push_back(rightFrontObject);
+    sensors.push_back(rightLocale);
+    sensors.push_back(rightObject);
+    sensors.push_back(rightRearLocale);
+    sensors.push_back(rightRearObject);
+    sensors.push_back(rearLocale);
+    sensors.push_back(rearObject);
+    sensors.push_back(leftRearLocale);
+    sensors.push_back(leftRearObject);
+    sensors.push_back(orientation);
+    sensors.push_back(hunger);
+    sensors.push_back(hasObject);
+    sensors.push_back(state);
 }

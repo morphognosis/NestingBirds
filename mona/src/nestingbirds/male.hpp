@@ -13,16 +13,16 @@ class Male : public Bird
 public:
 
     // Mate proximity.
-    static const int MATE_PROXIMITY_UNKNOWN = -1;
-    static const int MATE_PROXIMITY_PRESENT = 0;
-    static const int MATE_PROXIMITY_LEFT = 1;
-    static const int MATE_PROXIMITY_LEFT_FRONT = 2;
-    static const int MATE_PROXIMITY_FRONT = 3;
-    static const int MATE_PROXIMITY_RIGHT_FRONT = 4;
-    static const int MATE_PROXIMITY_RIGHT = 5;
-    static const int MATE_PROXIMITY_RIGHT_REAR = 6;
-    static const int MATE_PROXIMITY_REAR = 7;
-    static const int MATE_PROXIMITY_LEFT_REAR = 8;
+    static const int MATE_PROXIMITY_UNKNOWN = 0;
+    static const int MATE_PROXIMITY_PRESENT = 1;
+    static const int MATE_PROXIMITY_LEFT = 2;
+    static const int MATE_PROXIMITY_LEFT_FRONT = 3;
+    static const int MATE_PROXIMITY_FRONT = 4;
+    static const int MATE_PROXIMITY_RIGHT_FRONT = 5;
+    static const int MATE_PROXIMITY_RIGHT = 6;
+    static const int MATE_PROXIMITY_RIGHT_REAR = 7;
+    static const int MATE_PROXIMITY_REAR = 8;
+    static const int MATE_PROXIMITY_LEFT_REAR = 9;
 
    // Sensors.
    static const int MATE_PROXIMITY_SENSOR = Bird::NUM_SENSORS;
@@ -72,10 +72,10 @@ public:
 #define MALE_DEFAULT_FEMALE_MOUSE_NEED     "0.4"
    static Mona::NEED FEMALE_MOUSE_NEED;
    static const int STONE_NEED_INDEX = 2;
-#define MALE_DEFAULT_STONE_NEED            "0.2"
+#define MALE_DEFAULT_STONE_NEED            "0.3"
    static Mona::NEED STONE_NEED;
    static const int FEMALE_STONE_NEED_INDEX = 3;
-#define MALE_DEFAULT_FEMALE_STONE_NEED     "0.3"
+#define MALE_DEFAULT_FEMALE_STONE_NEED     "0.2"
    static Mona::NEED FEMALE_STONE_NEED;
    static const int ATTEND_FEMALE_NEED_INDEX = 4;
 #define MALE_DEFAULT_ATTEND_FEMALE_NEED    "0.1"
@@ -112,5 +112,37 @@ public:
 
    // Print response.
    void printResponse();
+
+private:
+
+    // Load mask.
+    void loadMask(vector<bool>& mask,
+        bool currentLocale, bool currentObject,
+        bool leftLocale, bool leftObject,
+        bool leftFrontLocale, bool leftFrontObject,
+        bool frontLocale, bool frontObject,
+        bool rightFrontLocale, bool rightFrontObject,
+        bool rightLocale, bool rightObject,
+        bool rightRearLocale, bool rightRearObject,
+        bool rearLocale, bool rearObject,
+        bool leftRearLocale, bool leftRearObject,
+        bool orientation, bool hunger,
+        bool hasObject, bool state,
+        bool mateProximity, bool wantMouse, bool wantStone);
+
+    // Load sensors.
+    void loadSensors(vector<Mona::SENSOR>& sensors,
+        Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
+        Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
+        Mona::SENSOR leftFrontLocale, Mona::SENSOR leftFrontObject,
+        Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
+        Mona::SENSOR rightFrontLocale, Mona::SENSOR rightFrontObject,
+        Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
+        Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
+        Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
+        Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
+        Mona::SENSOR orientation, Mona::SENSOR hunger,
+        Mona::SENSOR hasObject, Mona::SENSOR state,
+        Mona::SENSOR mateProximity, Mona::SENSOR wantMouse, Mona::SENSOR wantStone);
 };
 #endif
