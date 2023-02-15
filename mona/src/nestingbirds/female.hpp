@@ -47,9 +47,9 @@ public:
    int response;
 
    // Food.
-#define FEMALE_DEFAULT_FOOD_DURATION    "200"
+#define FEMALE_DEFAULT_FOOD_DURATION    "75"
    static int FOOD_DURATION;
-#define FEMALE_DEFAULT_INITIAL_FOOD     "200"
+#define FEMALE_DEFAULT_INITIAL_FOOD     "75"
    static int  INITIAL_FOOD;
    static bool RANDOMIZE_FOOD_LEVEL;
 
@@ -131,6 +131,20 @@ public:
    // Brooding on egg.
    int broodEggGoal;
  
+    // Load mask.
+    void loadMask(vector<bool>& mask,
+        bool currentLocale, bool currentObject,
+        bool leftLocale, bool leftObject,
+        bool leftFrontLocale, bool leftFrontObject,
+        bool frontLocale, bool frontObject,
+        bool rightFrontLocale, bool rightFrontObject,
+        bool rightLocale, bool rightObject,
+        bool rightRearLocale, bool rightRearObject,
+        bool rearLocale, bool rearObject,
+        bool leftRearLocale, bool leftRearObject,
+        bool orientation, bool hunger,
+        bool hasObject, bool state);
+
     // Load sensors.
     void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale, Mona::SENSOR currentObject,

@@ -305,10 +305,18 @@ bool getMouse()
          return(false);
       }
    }
-   if (male->hasObject != OBJECT::NO_OBJECT)
+   if (male->hasObject == OBJECT::STONE)
    {
-      male->response = Bird::RESPONSE::TOSS_OBJECT;
-      return(true);
+       if ((male->x == female->x) && (male->y == female->y))
+       {
+           male->response = Male::RESPONSE::GIVE_STONE;
+           FemaleWantStone = false;
+           return(true);
+       }
+       else
+       {
+           return(false);
+       }
    }
    if (World[male->x][male->y].object == OBJECT::MOUSE)
    {
@@ -911,17 +919,14 @@ void trainFemale()
       {
          female->response = Bird::RESPONSE::EAT_MOUSE;
       }
-      else
-      {
-         if (female->hasObject == OBJECT::NO_OBJECT)
-         {
-            female->response = Female::RESPONSE::WANT_MOUSE;
-         }
-         else
-         {
-            female->response = Bird::RESPONSE::TOSS_OBJECT;
-         }
-      }
+      else if (female->hasObject == OBJECT::STONE)
+        {
+        female->response = Bird::RESPONSE::PUT_OBJECT;
+        }
+        else
+        {
+        female->response = Female::RESPONSE::WANT_MOUSE;
+        }
       return;
    }
 
