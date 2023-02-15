@@ -23,6 +23,8 @@ Female::Female() : Bird(FEMALE)
     // Create Mona bird brain.
     brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
         RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
+
+    // Install sensor modes: nest mode ignores hunger.
     vector<bool> mask;
     loadMask(mask, true, true, true, true, true, true,
         true, true, true, true, true, true, true, true,
@@ -57,7 +59,7 @@ Female::Female() : Bird(FEMALE)
     // Needs.
     initNeeds();
 
-    // Goals.
+    // Goals:
 
     // Food goals.
     vector<Mona::SENSOR> sensors;
@@ -263,7 +265,7 @@ void Female::print()
     printf("], ");
     printState();
     printf("], "),
-        printf("Needs: [");
+    printf("Needs: [");
     printNeeds();
     printf("], ");
     printf("Response: ");

@@ -16,9 +16,13 @@ public:
     static const int MATE_PROXIMITY_UNKNOWN = -1;
     static const int MATE_PROXIMITY_PRESENT = 0;
     static const int MATE_PROXIMITY_LEFT = 1;
-    static const int MATE_PROXIMITY_FRONT = 2;
-    static const int MATE_PROXIMITY_REAR = 3;
-    static const int MATE_PROXIMITY_RIGHT = 4;
+    static const int MATE_PROXIMITY_LEFT_FRONT = 2;
+    static const int MATE_PROXIMITY_FRONT = 3;
+    static const int MATE_PROXIMITY_RIGHT_FRONT = 4;
+    static const int MATE_PROXIMITY_RIGHT = 5;
+    static const int MATE_PROXIMITY_RIGHT_REAR = 6;
+    static const int MATE_PROXIMITY_REAR = 7;
+    static const int MATE_PROXIMITY_LEFT_REAR = 8;
 
    // Sensors.
    static const int MATE_PROXIMITY_SENSOR = Bird::NUM_SENSORS;
@@ -102,6 +106,9 @@ public:
 
    // Print sensors.
    void printSensors();
+
+   // Print needs.
+   void printNeeds();
 
    // Print response.
    void printResponse();

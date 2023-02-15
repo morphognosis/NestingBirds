@@ -110,14 +110,17 @@ void Male::save(char* filename)
 // Print male.
 void Male::print()
 {
-   printf("Sensors: [");
-   printSensors();
-   printf("], ");
-   printState();
-   printf(", Response: ");
-   printResponse();
+    printf("Sensors: [");
+    printSensors();
+    printf("], ");
+    printState();
+    printf("], "),
+    printf("Needs: [");
+    printNeeds();
+    printf("], ");
+    printf("Response: ");
+    printResponse();
 }
-
 
 // Print sensors.
 void Male::printSensors()
@@ -189,16 +192,32 @@ void Male::printSensors()
       printf("LEFT");
       break;
 
+   case MATE_PROXIMITY_LEFT_FRONT:
+       printf("LEFT_FRONT");
+       break;
+
    case MATE_PROXIMITY_FRONT:
       printf("FRONT");
       break;
+
+   case MATE_PROXIMITY_RIGHT_FRONT:
+       printf("RIGHT_FRONT");
+       break;
 
    case MATE_PROXIMITY_RIGHT:
       printf("RIGHT");
       break;
 
+   case MATE_PROXIMITY_RIGHT_REAR:
+       printf("RIGHT_REAR");
+       break;
+
    case MATE_PROXIMITY_REAR:
        printf("REAR");
+       break;
+
+   case MATE_PROXIMITY_LEFT_REAR:
+       printf("LEFT_REAR");
        break;
    }
    printf(", Want food sensor: ");
@@ -221,6 +240,35 @@ void Male::printSensors()
    }
 }
 
+// Print needs.
+void Male::printNeeds()
+{
+    for (int i = 0; i < NUM_NEEDS; i++)
+    {
+        switch (i)
+        {
+        case MOUSE_NEED_INDEX:
+            printf("[Mouse: %f],", brain->getNeed(MOUSE_NEED_INDEX));
+            break;
+
+        case FEMALE_MOUSE_NEED_INDEX:
+            printf("[Female mouse: %f],", brain->getNeed(FEMALE_MOUSE_NEED_INDEX));
+            break;
+
+        case STONE_NEED_INDEX:
+            printf("[Stone: %f],", brain->getNeed(STONE_NEED_INDEX));
+            break;
+
+        case FEMALE_STONE_NEED_INDEX:
+            printf("[Female stone: %f]", brain->getNeed(FEMALE_STONE_NEED_INDEX));
+            break;
+
+        case ATTEND_FEMALE_NEED_INDEX:
+            printf("[Attend female: %f]", brain->getNeed(ATTEND_FEMALE_NEED_INDEX));
+            break;
+        }
+    }
+}
 
 // Print response.
 void Male::printResponse()

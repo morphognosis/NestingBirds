@@ -1,12 +1,4 @@
-﻿  drive.cpp
-  enable.cpp
-  homeostat.cpp
-  learn.cpp
-  mona.cpp
-  respond.cpp
-  sense.cpp
-  NestingBirds.cpp
-  bird.cpp
+﻿  NestingBirds.cpp
   female.cpp
   male.cpp
   Generating Code...
