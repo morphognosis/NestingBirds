@@ -272,51 +272,45 @@ void trainMale()
 // Get mouse.
 bool getMouse()
 {
+    if (male->food == 0)
+    {
+        if (male->hasObject == OBJECT::MOUSE)
+        {
+            male->response = Bird::RESPONSE::EAT_MOUSE;
+            return(true);
+        }
+        if (male->hasObject == OBJECT::STONE)
+        {
+            male->response = Bird::RESPONSE::TOSS_OBJECT;
+            return(true);
+        }
+    }
    if ((male->x == female->x) && (male->y == female->y))
    {
-      if (female->response == Female::RESPONSE::WANT_MOUSE)
+       if (male->hasObject == OBJECT::MOUSE)
+       {
+           male->response = Male::RESPONSE::GIVE_MOUSE;
+           FemaleWantMouse = false;
+           return(true);
+       }
+       if (female->response == Female::RESPONSE::WANT_MOUSE)
       {
          FemaleWantMouse = true;
       }
-   }
-   if ((male->food > 0) && !FemaleWantMouse)
-   {
-      return(false);
+      if (male->hasObject == OBJECT::STONE)
+      {
+              male->response = Male::RESPONSE::GIVE_STONE;
+              FemaleWantStone = false;
+              return(true);
+      }
    }
    if (male->hasObject == OBJECT::MOUSE)
    {
-      if (male->food < 0)
-      {
-         male->food = 0;
-      }
-      if (male->food == 0)
-      {
-         male->response = Bird::RESPONSE::EAT_MOUSE;
-         return(true);
-      }
-      if ((male->x == female->x) && (male->y == female->y))
-      {
-         male->response  = Male::RESPONSE::GIVE_MOUSE;
-         FemaleWantMouse = false;
-         return(true);
-      }
-      else
-      {
-         return(false);
-      }
+       return false;
    }
-   if (male->hasObject == OBJECT::STONE)
+   if (male->food > 0 && !FemaleWantMouse)
    {
-       if ((male->x == female->x) && (male->y == female->y))
-       {
-           male->response = Male::RESPONSE::GIVE_STONE;
-           FemaleWantStone = false;
-           return(true);
-       }
-       else
-       {
-           return(false);
-       }
+       return false;
    }
    if (World[male->x][male->y].object == OBJECT::MOUSE)
    {
@@ -988,26 +982,23 @@ void trainFemale()
         return;
     }
 
-    // Hunger.
-   if (female->food < 0)
-   {
-      female->food = 0;
-   }
-   if (female->food == 0)
-   {
+    // Handle delivery.
       if (female->hasObject == OBJECT::MOUSE)
       {
          female->response = Bird::RESPONSE::EAT_MOUSE;
+         return;
       }
-      else if (female->hasObject == OBJECT::STONE)
-        {
-        female->response = Bird::RESPONSE::PUT_OBJECT;
-        }
-        else
-        {
-        female->response = Female::RESPONSE::WANT_MOUSE;
-        }
-      return;
+      if (female->hasObject == OBJECT::STONE)
+      { 
+          female->response = Bird::RESPONSE::PUT_OBJECT;
+          return;
+      }
+
+   // Hunger?
+   if (female->food == 0)
+   {
+           female->response = Female::RESPONSE::WANT_MOUSE;
+       return;
    }
 
    // Nest building.
@@ -1025,10 +1016,6 @@ void trainFemale()
          {
             female->response = Bird::RESPONSE::TURN_LEFT;
          }
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
       }
       else
       {
@@ -1049,10 +1036,6 @@ void trainFemale()
             female->response = Bird::RESPONSE::TURN_LEFT;
          }
       }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
-      }
       else
       {
          female->response = Female::RESPONSE::WANT_STONE;
@@ -1064,10 +1047,6 @@ void trainFemale()
       {
          female->response = Bird::RESPONSE::MOVE_FORWARD;
          FemaleNestSequence++;
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
       }
       else
       {
@@ -1088,10 +1067,6 @@ void trainFemale()
             female->response = Bird::RESPONSE::TURN_LEFT;
          }
       }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
-      }
       else
       {
          female->response = Female::RESPONSE::WANT_STONE;
@@ -1103,10 +1078,6 @@ void trainFemale()
       {
          female->response = Bird::RESPONSE::MOVE_FORWARD;
          FemaleNestSequence++;
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
       }
       else
       {
@@ -1127,10 +1098,6 @@ void trainFemale()
             female->response = Bird::RESPONSE::TURN_LEFT;
          }
       }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
-      }
       else
       {
          female->response = Female::RESPONSE::WANT_STONE;
@@ -1142,10 +1109,6 @@ void trainFemale()
       {
          female->response = Bird::RESPONSE::MOVE_FORWARD;
          FemaleNestSequence++;
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
       }
       else
       {
@@ -1165,10 +1128,6 @@ void trainFemale()
          {
             female->response = Bird::RESPONSE::TURN_LEFT;
          }
-      }
-      else if (female->hasObject == OBJECT::STONE)
-      {
-         female->response = Bird::RESPONSE::PUT_OBJECT;
       }
       else
       {
