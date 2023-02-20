@@ -299,11 +299,9 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
 
    // Initialize response apparatus and motor neurons.
    response = 0;
-   responsePotentials.resize(numResponses);
    for (int i = 0; i < numResponses; i++)
    {
-      responsePotentials[i] = 0.0;
-      newMotor(i);
+      newMotor();
    }
    responseOverride          = NULL_RESPONSE;
    responseOverridePotential = -1.0;
@@ -855,28 +853,67 @@ void Mona::Receptor::print(FILE *out)
 
 // Create motor and add to network.
 Mona::Motor *
-Mona::newMotor(RESPONSE response)
+Mona::newMotor()
 {
-   Motor *m;
-
-   m = new Motor(response, this);
+   Motor *m = new Motor(motors.size(), false, this);
    assert(m != NULL);
    m->id = idDispenser;
    idDispenser++;
    m->creationTime = eventClock;
    motors.push_back(m);
+   responsePotentials.push_back(0.0);
+   numResponses++;
    return(m);
 }
 
+// Create movement motor and add to network.
+Mona::Motor*
+Mona::newMovementMotor()
+{
+    Motor* m = new Motor(motors.size(), true, this);
+    assert(m != NULL);
+    m->id = idDispenser;
+    idDispenser++;
+    m->creationTime = eventClock;
+    motors.push_back(m);
+    responsePotentials.push_back(0.0);
+    numResponses++;
+    return(m);
+}
+
+// Create place motor and add to network.
+Mona::Motor*
+Mona::newPlaceMotor(int x, int y)
+{
+    Motor* m = new Motor(x, y, this);
+    assert(m != NULL);
+    m->id = idDispenser;
+    idDispenser++;
+    m->creationTime = eventClock;
+    placeMotors.push_back(m);
+    return(m);
+}
 
 // Motor constructor.
-Mona::Motor::Motor(RESPONSE response, Mona *mona)
+Mona::Motor::Motor(RESPONSE response, bool movement, Mona *mona)
 {
    init(mona);
    type           = MOTOR;
    this->response = response;
+   this->movement = movement;
+   x = y = -1;
 }
 
+// Motor place constructor.
+Mona::Motor::Motor(int x, int y, Mona* mona)
+{
+    init(mona);
+    type = MOTOR;
+    response = -1;
+    movement = false;
+    this->x = x;
+    this->y = y;
+}
 
 // Motor destructor.
 Mona::Motor::~Motor()
@@ -888,8 +925,9 @@ Mona::Motor::~Motor()
 // Is given motor a duplicate of this?
 bool Mona::Motor::isDuplicate(Motor *motor)
 {
-   if (response == motor->response)
+   if (response == motor->response && x == motor->x && y == motor->y)
    {
+       assert(movement == motor->movement);
       return(true);
    }
    else
@@ -905,6 +943,9 @@ void Mona::Motor::load(FILE *fp)
    clear();
    ((Neuron *)this)->load(fp);
    FREAD_INT(&response, fp);
+   FREAD_BOOL(&movement, fp);
+   FREAD_INT(&x, fp);
+   FREAD_INT(&y, fp);
 }
 
 
@@ -914,6 +955,9 @@ void Mona::Motor::save(FILE *fp)
 {
    ((Neuron *)this)->save(fp);
    FWRITE_INT(&response, fp);
+   FWRITE_BOOL(&movement, fp);
+   FWRITE_INT(&x, fp);
+   FWRITE_INT(&y, fp);
 }
 
 
@@ -930,8 +974,20 @@ void Mona::Motor::print(TRACKING_FLAGS tracking, FILE *out)
 void Mona::Motor::print(FILE *out)
 #endif
 {
-   fprintf(out, "<motor><id>%llu</id><response>%d</response>",
-           id, response);
+   fprintf(out, "<motor><id>%llu</id>", id);
+   if (response != -1)
+   {
+       fprintf(out, "<response>%d</response>", response);
+       if (movement)
+       {
+           fprintf(out, "<movement>true</movment>");
+       }
+       else {
+           fprintf(out, "<movement>false</movment>");
+       }
+   } else {
+       fprintf(out, "<x>%d</x><y>%d</y>", x, y);
+   }
    fprintf(out, "<goals>");
    goals.print(out);
    fprintf(out, "</goals>");
@@ -1636,18 +1692,30 @@ Mona::deleteNeuron(Neuron *neuron)
       break;
 
    case MOTOR:
-      for (int i = 0, j = (int)motors.size(); i < j; i++)
-      {
-         if (motors[i] == (Motor *)neuron)
-         {
-            motors.erase(motors.begin() + i);
-            break;
-         }
-      }
-      for (int i = 0, j = (int)homeostats.size(); i < j; i++)
-      {
-         homeostats[i]->removeNeuron(neuron);
-      }
+       if (((Motor*)neuron)->response != -1)
+       {
+           for (int i = 0, j = (int)motors.size(); i < j; i++)
+           {
+               if (motors[i] == (Motor*)neuron)
+               {
+                   motors.erase(motors.begin() + i);
+                   break;
+               }
+           }
+           for (int i = 0, j = (int)homeostats.size(); i < j; i++)
+           {
+               homeostats[i]->removeNeuron(neuron);
+           }
+       } else {
+           for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+           {
+               if (placeMotors[i] == (Motor*)neuron)
+               {
+                   placeMotors.erase(placeMotors.begin() + i);
+                   break;
+               }
+           }
+       }
       delete (Motor *)neuron;
       break;
 
@@ -1900,7 +1968,7 @@ Mona::load(FILE *fp)
    FREAD_INT(&n2, fp);
    for (int i = 0; i < n2; i++)
    {
-       motor = new Motor(0, this);
+       motor = new Motor(0, false, this);
        assert(motor != NULL);
        motor->load(fp);
        motors.push_back(motor);
@@ -1908,6 +1976,20 @@ Mona::load(FILE *fp)
       {
          idDispenser = motor->id + 1;
       }
+   }
+   placeMotors.clear();
+   n2 = 0;
+   FREAD_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
+   {
+       motor = new Motor(0, 0, this);
+       assert(motor != NULL);
+       motor->load(fp);
+       placeMotors.push_back(motor);
+       if (motor->id > idDispenser)
+       {
+           idDispenser = motor->id + 1;
+       }
    }
    mediators.clear();
    n2 = 0;
@@ -2183,6 +2265,13 @@ Mona::save(FILE *fp)
       motor = motors[i];
       motor->save(fp);
    }
+   n2 = (int)placeMotors.size();
+   FWRITE_INT(&n2, fp);
+   for (int i = 0; i < n2; i++)
+   {
+       motor = placeMotors[i];
+       motor->save(fp);
+   }
    int n = (int)mediators.size();
    FWRITE_INT(&n, fp);
    for (mediatorItr = mediators.begin();
@@ -2242,6 +2331,8 @@ Mona::clear()
       delete motor;
    }
    motors.clear();
+   placeMotors.clear();
+   numResponses = 0;
    for (int i = 0, j = (int)homeostats.size(); i < j; i++)
    {
       delete homeostats[i];
@@ -2468,6 +2559,24 @@ Mona::print(bool brief, FILE *out)
 #endif
    }
    fprintf(out, "</motors>\n");
+   fprintf(out, "<place_motors>\n");
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       motor = placeMotors[i];
+#ifdef MONA_TRACKING
+       if (((tracking & TRACK_FIRE) && motor->tracker.fire) ||
+           ((tracking & TRACK_ENABLE) && motor->tracker.enable) ||
+           ((tracking & TRACK_DRIVE) && motor->tracker.drive))
+       {
+           motor->print(tracking, out);
+           fprintf(out, "\n");
+       }
+#else
+       motor->print(out);
+       fprintf(out, "\n");
+#endif
+   }
+   fprintf(out, "</place_motors>\n");
    fprintf(out, "<mediators>\n");
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)

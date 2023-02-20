@@ -21,8 +21,7 @@ extern int RANDOM_NUMBER_SEED;
 Female::Female() : Bird(FEMALE)
 {
     // Create Mona bird brain.
-    brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
-        RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
+    brain = new Mona(NUM_SENSORS, 0, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Install sensor modes: nest mode ignores hunger.
     vector<bool> mask;
@@ -41,20 +40,20 @@ Female::Female() : Bird(FEMALE)
     int foodMode = 1;
 
     // Motors:
-    Mona::Motor* doNothing = brain->motors[Bird::RESPONSE::DO_NOTHING];
-    Mona::Motor* eat = brain->motors[Bird::RESPONSE::EAT_MOUSE];
-    Mona::Motor* get = brain->motors[Bird::RESPONSE::GET_OBJECT];
-    Mona::Motor* put = brain->motors[Bird::RESPONSE::PUT_OBJECT];
-    Mona::Motor* toss = brain->motors[Bird::RESPONSE::TOSS_OBJECT];
-    Mona::Motor* move = brain->motors[Bird::RESPONSE::MOVE_FORWARD];
-    Mona::Motor* turnRight = brain->motors[Bird::RESPONSE::TURN_RIGHT];
-    Mona::Motor* turnLeft = brain->motors[Bird::RESPONSE::TURN_LEFT];
-    Mona::Motor* turnAround = brain->motors[Bird::RESPONSE::TURN_AROUND];
-    Mona::Motor* stateOn = brain->motors[Bird::RESPONSE::STATE_ON];
-    Mona::Motor* stateOff = brain->motors[Bird::RESPONSE::STATE_OFF];
-    Mona::Motor* wantMouse = brain->motors[Female::RESPONSE::WANT_MOUSE];
-    Mona::Motor* wantStone = brain->motors[Female::RESPONSE::WANT_STONE];
-    Mona::Motor* layEgg = brain->motors[Female::RESPONSE::LAY_EGG];
+    Mona::Motor* doNothing = brain->newMotor();
+    Mona::Motor* eat = brain->newMotor();
+    Mona::Motor* get = brain->newMotor();
+    Mona::Motor* put = brain->newMotor();
+    Mona::Motor* toss = brain->newMotor();
+    Mona::Motor* move = brain->newMotor();
+    Mona::Motor* turnRight = brain->newMotor();
+    Mona::Motor* turnLeft = brain->newMotor();
+    Mona::Motor* turnAround = brain->newMotor();
+    Mona::Motor* stateOn = brain->newMotor();
+    Mona::Motor* stateOff = brain->newMotor();
+    Mona::Motor* wantMouse = brain->newMotor();
+    Mona::Motor* wantStone = brain->newMotor();
+    Mona::Motor* layEgg = brain->newMotor();
 
     // Needs.
     initNeeds();

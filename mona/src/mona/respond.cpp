@@ -148,22 +148,6 @@ Mona::respond()
    }
 }
 
-
-// Add a response.
-Mona::RESPONSE Mona::addResponse()
-{
-   numResponses++;
-   responsePotentials.resize(numResponses);
-   for (int i = 0; i < numResponses; i++)
-   {
-      responsePotentials[i] = 0.0;
-   }
-   int i = numResponses - 1;
-   newMotor(i);
-   return(i);
-}
-
-
 // Get response potential.
 Mona::RESPONSE_POTENTIAL Mona::getResponsePotential(RESPONSE response)
 {

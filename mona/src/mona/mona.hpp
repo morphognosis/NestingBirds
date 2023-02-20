@@ -167,7 +167,6 @@ public:
    // Response.
    RESPONSE response;
    int      numResponses;
-   RESPONSE addResponse();
 
    vector<RESPONSE_POTENTIAL> responsePotentials;
    RESPONSE_POTENTIAL         getResponsePotential(RESPONSE);
@@ -445,11 +444,18 @@ public:
 public:
 
       // Construct/destruct.
-      Motor(RESPONSE response, Mona *mona);
+      Motor(RESPONSE response, bool movement, Mona *mona);
+      Motor(int x, int y, Mona* mona);
       ~Motor();
 
       // Response.
       RESPONSE response;
+
+      // Movement response.
+      bool movement;
+
+      // Place coordinates.
+      int x, y;
 
       // Is given motor a duplicate of this?
       bool isDuplicate(Motor *);
@@ -553,11 +559,14 @@ public:
    // Network.
    vector<Receptor *> receptors;
    vector<Motor *>    motors;
+   vector<Motor*> placeMotors;
    list<Mediator *>   mediators;
 
    // Add/delete neurons to/from network.
    Receptor *newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode);
-   Motor *newMotor(RESPONSE response);
+   Motor *newMotor();
+   Motor* newMovementMotor();
+   Motor* newPlaceMotor(int x, int y);
    Mediator *newMediator(ENABLEMENT enablement);
    void deleteNeuron(Neuron *);
 

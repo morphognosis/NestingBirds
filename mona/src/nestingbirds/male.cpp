@@ -22,23 +22,22 @@ extern int RANDOM_NUMBER_SEED;
 Male::Male() : Bird(MALE)
 {
     // Create Mona bird brain.
-    brain = new Mona(NUM_SENSORS, Bird::RESPONSE::NUM_RESPONSES +
-        RESPONSE::NUM_RESPONSES, NUM_NEEDS, RANDOM_NUMBER_SEED);
+    brain = new Mona(NUM_SENSORS, 0, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Motors:
-    Mona::Motor* doNothing = brain->motors[Bird::RESPONSE::DO_NOTHING];
-    Mona::Motor* eat = brain->motors[Bird::RESPONSE::EAT_MOUSE];
-    Mona::Motor* get = brain->motors[Bird::RESPONSE::GET_OBJECT];
-    Mona::Motor* put = brain->motors[Bird::RESPONSE::PUT_OBJECT];
-    Mona::Motor* toss = brain->motors[Bird::RESPONSE::TOSS_OBJECT];
-    Mona::Motor* move = brain->motors[Bird::RESPONSE::MOVE_FORWARD];
-    Mona::Motor* turnRight = brain->motors[Bird::RESPONSE::TURN_RIGHT];
-    Mona::Motor* turnLeft = brain->motors[Bird::RESPONSE::TURN_LEFT];
-    Mona::Motor* turnAround = brain->motors[Bird::RESPONSE::TURN_AROUND];
-    Mona::Motor* stateOn = brain->motors[Bird::RESPONSE::STATE_ON];
-    Mona::Motor* stateOff = brain->motors[Bird::RESPONSE::STATE_OFF];
-    Mona::Motor* giveMouse = brain->motors[Male::RESPONSE::GIVE_MOUSE];
-    Mona::Motor* giveStone = brain->motors[Male::RESPONSE::GIVE_STONE];
+    Mona::Motor* doNothing = brain->newMotor();
+    Mona::Motor* eat = brain->newMotor();
+    Mona::Motor* get = brain->newMotor();
+    Mona::Motor* put = brain->newMotor();
+    Mona::Motor* toss = brain->newMotor();
+    Mona::Motor* move = brain->newMovementMotor();
+    Mona::Motor* turnRight = brain->newMovementMotor();
+    Mona::Motor* turnLeft = brain->newMovementMotor();
+    Mona::Motor* turnAround = brain->newMovementMotor();
+    Mona::Motor* stateOn = brain->newMotor();
+    Mona::Motor* stateOff = brain->newMotor();
+    Mona::Motor* giveMouse = brain->newMotor();
+    Mona::Motor* giveStone = brain->newMotor();
 
     // Needs.
     initNeeds();
