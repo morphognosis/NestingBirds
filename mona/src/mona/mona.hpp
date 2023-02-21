@@ -84,6 +84,7 @@ public:
       EXPIRE,
       FIRE
    };
+
    static const ID NULL_ID;
    enum { NULL_RESPONSE = Homeostat::NULL_RESPONSE };
    enum { DEFAULT_RANDOM_SEED = 4517 };
@@ -118,6 +119,8 @@ public:
    WEIGHT     LEARNING_DECREASE_VELOCITY;
    WEIGHT     LEARNING_INCREASE_VELOCITY;
    WEIGHT     RESPONSE_RANDOMNESS;
+   int MIN_MOVEMENT_RESPONSE_PATH_LENGTH;
+   int MAX_MOVEMENT_RESPONSE_PATH_LENGTH;
    WEIGHT     UTILITY_ASYMPTOTE;
    int        DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL;
    int        DEFAULT_NUM_EFFECT_EVENT_INTERVALS;
@@ -167,7 +170,6 @@ public:
    // Response.
    RESPONSE response;
    int      numResponses;
-
    vector<RESPONSE_POTENTIAL> responsePotentials;
    RESPONSE_POTENTIAL         getResponsePotential(RESPONSE);
    RESPONSE           responseOverride;
@@ -176,6 +178,9 @@ public:
    bool               overrideResponseConditional(RESPONSE, RESPONSE_POTENTIAL);
    void clearResponseOverride();
    Motor *findMotorByResponse(RESPONSE response);
+   int movementResponsePathLength;
+   vector<Receptor*> movementCauses;
+   vector<Receptor*> movementEffects;
 
    // Needs.
    int                 numNeeds;
@@ -444,15 +449,15 @@ public:
 public:
 
       // Construct/destruct.
-      Motor(RESPONSE response, bool movement, Mona *mona);
+      Motor(int movementType, Mona *mona);
       Motor(int x, int y, Mona* mona);
       ~Motor();
 
       // Response.
       RESPONSE response;
 
-      // Movement response.
-      bool movement;
+      // Movement type.
+      int movementType;
 
       // Place coordinates.
       int x, y;
@@ -562,10 +567,34 @@ public:
    vector<Motor*> placeMotors;
    list<Mediator *>   mediators;
 
+   // Place.
+
+   // Movement type.
+   class MOVEMENT_TYPE
+   {
+   public:
+       static const int MOVE_FORWARD = 0;
+       static const int TURN_RIGHT = 1;
+       static const int TURN_LEFT = 2;
+       static const int TURN_AROUND = 3;
+   };
+
+   // Orientation.
+   class ORIENTATION
+   {
+   public:
+       static const int NORTH = 0;
+       static const int SOUTH = 1;
+       static const int EAST = 2;
+       static const int WEST = 3;
+   };
+   int orientation;
+   int x, y;
+
    // Add/delete neurons to/from network.
    Receptor *newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode);
    Motor *newMotor();
-   Motor* newMovementMotor();
+   Motor* newMovementMotor(int movementType);
    Motor* newPlaceMotor(int x, int y);
    Mediator *newMediator(ENABLEMENT enablement);
    void deleteNeuron(Neuron *);

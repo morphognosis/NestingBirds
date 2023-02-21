@@ -73,6 +73,8 @@ void Mona::initParms()
    LEARNING_DECREASE_VELOCITY      = 0.9;
    LEARNING_INCREASE_VELOCITY      = 0.1;
    RESPONSE_RANDOMNESS             = 0.0;
+   MIN_MOVEMENT_RESPONSE_PATH_LENGTH = 5;
+   MAX_MOVEMENT_RESPONSE_PATH_LENGTH = 50;
    UTILITY_ASYMPTOTE = 10.0;
    DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL = 2;
    DEFAULT_NUM_EFFECT_EVENT_INTERVALS         = 3;
@@ -265,6 +267,7 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
    assert(numSensors > 0);
    assert(numResponses >= 0);
    assert(numNeeds > 0);
+   assert(MAX_MOVEMENT_RESPONSE_PATH_LENGTH >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH);
    assert((MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL + 1) >=
           MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL);
    assert((int)effectEventIntervals.size() == MAX_MEDIATOR_LEVEL + 1);
@@ -855,7 +858,7 @@ void Mona::Receptor::print(FILE *out)
 Mona::Motor *
 Mona::newMotor()
 {
-   Motor *m = new Motor(motors.size(), false, this);
+   Motor *m = new Motor(-1, this);
    assert(m != NULL);
    m->id = idDispenser;
    idDispenser++;
@@ -868,9 +871,9 @@ Mona::newMotor()
 
 // Create movement motor and add to network.
 Mona::Motor*
-Mona::newMovementMotor()
+Mona::newMovementMotor(int movementType)
 {
-    Motor* m = new Motor(motors.size(), true, this);
+    Motor* m = new Motor(movementType, this);
     assert(m != NULL);
     m->id = idDispenser;
     idDispenser++;
@@ -895,12 +898,12 @@ Mona::newPlaceMotor(int x, int y)
 }
 
 // Motor constructor.
-Mona::Motor::Motor(RESPONSE response, bool movement, Mona *mona)
+Mona::Motor::Motor(int movementType, Mona *mona)
 {
    init(mona);
    type           = MOTOR;
-   this->response = response;
-   this->movement = movement;
+   response = mona->motors.size();
+   this->movementType = movementType;
    x = y = -1;
 }
 
@@ -910,7 +913,7 @@ Mona::Motor::Motor(int x, int y, Mona* mona)
     init(mona);
     type = MOTOR;
     response = -1;
-    movement = false;
+    movementType = -1;
     this->x = x;
     this->y = y;
 }
@@ -927,7 +930,7 @@ bool Mona::Motor::isDuplicate(Motor *motor)
 {
    if (response == motor->response && x == motor->x && y == motor->y)
    {
-       assert(movement == motor->movement);
+       assert(movementType == motor->movementType);
       return(true);
    }
    else
@@ -943,7 +946,7 @@ void Mona::Motor::load(FILE *fp)
    clear();
    ((Neuron *)this)->load(fp);
    FREAD_INT(&response, fp);
-   FREAD_BOOL(&movement, fp);
+   FREAD_INT(&movementType, fp);
    FREAD_INT(&x, fp);
    FREAD_INT(&y, fp);
 }
@@ -955,7 +958,7 @@ void Mona::Motor::save(FILE *fp)
 {
    ((Neuron *)this)->save(fp);
    FWRITE_INT(&response, fp);
-   FWRITE_BOOL(&movement, fp);
+   FWRITE_INT(&movementType, fp);
    FWRITE_INT(&x, fp);
    FWRITE_INT(&y, fp);
 }
@@ -978,12 +981,26 @@ void Mona::Motor::print(FILE *out)
    if (response != -1)
    {
        fprintf(out, "<response>%d</response>", response);
-       if (movement)
+
+       if (movementType != -1)
        {
-           fprintf(out, "<movement>true</movment>");
-       }
-       else {
-           fprintf(out, "<movement>false</movment>");
+           fprintf(out, "<movement_type>");
+           switch (movementType)
+           {
+           case MOVEMENT_TYPE::MOVE_FORWARD:
+               fprintf(out, "MOVE_FORWARD");
+               break;
+           case MOVEMENT_TYPE::TURN_RIGHT:
+               fprintf(out, "TURN_RIGHT");
+               break;
+           case MOVEMENT_TYPE::TURN_LEFT:
+               fprintf(out, "TURN_LEFT");
+               break;
+           case MOVEMENT_TYPE::TURN_AROUND:
+               fprintf(out, "TURN_AROUND");
+               break;
+           }
+           fprintf(out, "</movement_type>");
        }
    } else {
        fprintf(out, "<x>%d</x><y>%d</y>", x, y);
@@ -1874,6 +1891,8 @@ Mona::load(FILE *fp)
    FREAD_DOUBLE(&LEARNING_DECREASE_VELOCITY, fp);
    FREAD_DOUBLE(&LEARNING_INCREASE_VELOCITY, fp);
    FREAD_DOUBLE(&RESPONSE_RANDOMNESS, fp);
+   FREAD_INT(&MIN_MOVEMENT_RESPONSE_PATH_LENGTH, fp);
+   FREAD_INT(&MAX_MOVEMENT_RESPONSE_PATH_LENGTH, fp);
    FREAD_DOUBLE(&UTILITY_ASYMPTOTE, fp);
    FREAD_INT(&DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL, fp);
    FREAD_INT(&DEFAULT_NUM_EFFECT_EVENT_INTERVALS, fp);
@@ -2101,6 +2120,26 @@ Mona::load(FILE *fp)
                    Mona::Receptor::loadClient);
       sensorCentroids.push_back(rdTree);
    }
+   FREAD_INT(&movementResponsePathLength, fp);
+   ID ident;
+   movementCauses.clear();
+   int j;
+   FREAD_INT(&j, fp);
+   for (int i = 0; i < j; i++)
+   {
+       FREAD_LONG_LONG(&ident, fp);
+       movementCauses.push_back((Receptor*)findByID(ident));
+   }
+   movementEffects.clear();
+   FREAD_INT(&j, fp);
+   for (int i = 0; i < j; i++)
+   {
+       FREAD_LONG_LONG(&ident, fp);
+       movementEffects.push_back((Receptor*)findByID(ident));
+   }
+   FREAD_INT(&orientation, fp);
+   FREAD_INT(&x, fp);
+   FREAD_INT(&y, fp);
    return(true);
 }
 
@@ -2189,6 +2228,8 @@ Mona::save(FILE *fp)
    FWRITE_DOUBLE(&LEARNING_DECREASE_VELOCITY, fp);
    FWRITE_DOUBLE(&LEARNING_INCREASE_VELOCITY, fp);
    FWRITE_DOUBLE(&RESPONSE_RANDOMNESS, fp);
+   FWRITE_INT(&MIN_MOVEMENT_RESPONSE_PATH_LENGTH, fp);
+   FWRITE_INT(&MAX_MOVEMENT_RESPONSE_PATH_LENGTH, fp);
    FWRITE_DOUBLE(&UTILITY_ASYMPTOTE, fp);
    FWRITE_INT(&DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL, fp);
    FWRITE_INT(&DEFAULT_NUM_EFFECT_EVENT_INTERVALS, fp);
@@ -2291,6 +2332,22 @@ Mona::save(FILE *fp)
       sensorCentroids[i]->save(fp, Mona::Receptor::savePattern,
                                Mona::Receptor::saveClient);
    }
+   FWRITE_INT(&movementResponsePathLength, fp);
+   j = (int)movementCauses.size();
+   FWRITE_INT(&j, fp);
+   for (int i = 0; i < j; i++)
+   {
+       FWRITE_LONG_LONG(&movementCauses[i]->id, fp);
+   }
+   j = (int)movementEffects.size();
+   FWRITE_INT(&j, fp);
+   for (int i = 0; i < j; i++)
+   {
+       FWRITE_LONG_LONG(&movementEffects[i]->id, fp);
+   }
+   FWRITE_INT(&orientation, fp);
+   FWRITE_INT(&x, fp);
+   FWRITE_INT(&y, fp);
    return(true);
 }
 
@@ -2333,6 +2390,11 @@ Mona::clear()
    motors.clear();
    placeMotors.clear();
    numResponses = 0;
+   movementResponsePathLength = 0;
+   movementCauses.clear();
+   movementEffects.clear();
+   orientation = ORIENTATION::NORTH;
+   x = y = 0;
    for (int i = 0, j = (int)homeostats.size(); i < j; i++)
    {
       delete homeostats[i];
@@ -2607,6 +2669,25 @@ Mona::print(bool brief, FILE *out)
    }
 }
 #endif
+   fprintf(out, "<orientation>");
+   switch (orientation)
+   {
+   case ORIENTATION::NORTH:
+       fprintf(out, "NORTH");
+       break;
+   case ORIENTATION::SOUTH:
+       fprintf(out, "SOUTH");
+       break;
+   case ORIENTATION::EAST:
+       fprintf(out, "EAST");
+       break;
+   case ORIENTATION::WEST:
+       fprintf(out, "WEST");
+       break;
+   }
+   fprintf(out, "</orientation>\n");
+   fprintf(out, "<x>%d</x>\n", x);
+   fprintf(out, "<y>%d</y>\n", y);
    fprintf(out, "</network>\n");
    fflush(out);
 }
@@ -2624,6 +2705,8 @@ Mona::printParms(FILE *out)
    fprintf(out, "<parameter>LEARNING_DECREASE_VELOCITY</parameter><value>%f</value>\n", LEARNING_DECREASE_VELOCITY);
    fprintf(out, "<parameter>LEARNING_INCREASE_VELOCITY</parameter><value>%f</value>\n", LEARNING_INCREASE_VELOCITY);
    fprintf(out, "<parameter>RESPONSE_RANDOMNESS</parameter><value>%f</value>\n", RESPONSE_RANDOMNESS);
+   fprintf(out, "<parameter>MIN_MOVEMENT_RESPONSE_PATH_LENGTH</parameter><value>%f</value>\n", MIN_MOVEMENT_RESPONSE_PATH_LENGTH);
+   fprintf(out, "<parameter>MAX_MOVEMENT_RESPONSE_PATH_LENGTH</parameter><value>%f</value>\n", MAX_MOVEMENT_RESPONSE_PATH_LENGTH);
    fprintf(out, "<parameter>UTILITY_ASYMPTOTE</parameter><value>%f</value>\n", UTILITY_ASYMPTOTE);
    fprintf(out, "<parameter>DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL</parameter><value>%d</value>\n", DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL);
    fprintf(out, "<parameter>DEFAULT_NUM_EFFECT_EVENT_INTERVALS</parameter><value>%d</value>\n", DEFAULT_NUM_EFFECT_EVENT_INTERVALS);

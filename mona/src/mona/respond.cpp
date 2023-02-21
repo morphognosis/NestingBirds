@@ -118,6 +118,82 @@ Mona::respond()
       {
          motor->firingStrength = 1.0;
 
+         // Update orientation and position?
+         if (motor->movementType != -1)
+         {
+             switch (motor->movementType)
+             {
+             case MOVEMENT_TYPE::MOVE_FORWARD:
+                 if (orientation == ORIENTATION::NORTH)
+                 {
+                     y--;
+                 }
+                 else if (orientation == ORIENTATION::SOUTH)
+                 {
+                     y++;
+                 }
+                 else if (orientation == ORIENTATION::EAST)
+                 {
+                     x++;
+                 }
+                 else {
+                     x--;
+                 }
+                 break;
+             case MOVEMENT_TYPE::TURN_RIGHT:
+                 if (orientation == ORIENTATION::NORTH)
+                 {
+                     orientation = ORIENTATION::EAST;
+                 }
+                 else if (orientation == ORIENTATION::SOUTH)
+                 {
+                     orientation = ORIENTATION::WEST;
+                 }
+                 else if (orientation == ORIENTATION::EAST)
+                 {
+                     orientation = ORIENTATION::SOUTH;
+                 }
+                 else {
+                     orientation = ORIENTATION::NORTH;
+                 }
+                 break;
+             case MOVEMENT_TYPE::TURN_LEFT:
+                 if (orientation == ORIENTATION::NORTH)
+                 {
+                     orientation = ORIENTATION::WEST;
+                 }
+                 else if (orientation == ORIENTATION::SOUTH)
+                 {
+                     orientation = ORIENTATION::EAST;
+                 }
+                 else if (orientation == ORIENTATION::EAST)
+                 {
+                     orientation = ORIENTATION::NORTH;
+                 }
+                 else {
+                     orientation = ORIENTATION::SOUTH;
+                 }
+                 break;
+             case MOVEMENT_TYPE::TURN_AROUND:
+                 if (orientation == ORIENTATION::NORTH)
+                 {
+                     orientation = ORIENTATION::SOUTH;
+                 }
+                 else if (orientation == ORIENTATION::SOUTH)
+                 {
+                     orientation = ORIENTATION::NORTH;
+                 }
+                 else if (orientation == ORIENTATION::EAST)
+                 {
+                     orientation = ORIENTATION::WEST;
+                 }
+                 else {
+                     orientation = ORIENTATION::EAST;
+                 }
+                 break;
+             }
+         }
+
 #ifdef MONA_TRACE
          if (traceRespond)
          {

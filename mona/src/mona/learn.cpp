@@ -67,6 +67,8 @@ Mona::learn()
    }
 
    // Time-stamp and store significant events.
+   vector<Receptor*> movementReceptors;
+   movementReceptors.resize(sensorModes.size());
    for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
@@ -75,8 +77,26 @@ Mona::learn()
          learningEvent = new LearningEvent(receptor);
          assert(learningEvent != NULL);
          learningEvents[0].push_back(learningEvent);
+         movementReceptors[receptor->sensorMode] = receptor;
       }
    }
+   if (movementResponsePathLength == 0)
+   {
+       movementCauses.clear();
+       movementEffects.clear();
+       for (int i = 0, j = sensorModes.size(); i < j; i++)
+       { 
+           movementCauses.push_back(movementReceptors[i]);
+       }
+   }
+   else {
+       movementEffects.clear();
+       for (int i = 0, j = sensorModes.size(); i < j; i++)
+       {
+           movementEffects.push_back(movementReceptors[i]);
+       }
+   }
+   Motor* movementMotor = NULL;
    for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
@@ -85,7 +105,12 @@ Mona::learn()
          learningEvent = new LearningEvent(motor);
          assert(learningEvent != NULL);
          learningEvents[0].push_back(learningEvent);
+         movementMotor = motor;
       }
+   }
+   if (movementMotor != NULL)
+   {
+
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
