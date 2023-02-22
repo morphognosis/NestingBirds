@@ -179,8 +179,8 @@ public:
    void clearResponseOverride();
    Motor *findMotorByResponse(RESPONSE response);
    int movementResponsePathLength;
-   vector<Receptor*> movementCauses;
-   vector<Receptor*> movementEffects;
+   vector<LearningEvent*> movementCauses;
+   vector<LearningEvent*> movementEffects;
 
    // Needs.
    int                 numNeeds;
@@ -279,6 +279,7 @@ public:
    vector<GeneralizationEvent *>  generalizationEvents;
 
    // Mediator generation.
+   void createPlaceMediator();
    void createMediator(LearningEvent *event);
    void generalizeMediator(GeneralizationEvent *event);
    bool isDuplicateMediator(Mediator *);
@@ -589,7 +590,7 @@ public:
        static const int WEST = 3;
    };
    int orientation;
-   int x, y;
+   int X, Y;
 
    // Add/delete neurons to/from network.
    Receptor *newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode);

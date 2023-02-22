@@ -2121,25 +2121,36 @@ Mona::load(FILE *fp)
       sensorCentroids.push_back(rdTree);
    }
    FREAD_INT(&movementResponsePathLength, fp);
-   ID ident;
    movementCauses.clear();
    int j;
    FREAD_INT(&j, fp);
    for (int i = 0; i < j; i++)
    {
-       FREAD_LONG_LONG(&ident, fp);
-       movementCauses.push_back((Receptor*)findByID(ident));
+       learningEvent = new LearningEvent();
+       assert(learningEvent != NULL);
+       learningEvent->load(fp);
+       movementCauses.push_back(learningEvent);
+       id = (ID*)(learningEvent->neuron);
+       learningEvent->neuron = findByID(*id);
+       assert(learningEvent->neuron != NULL);
+       delete id;
    }
    movementEffects.clear();
    FREAD_INT(&j, fp);
    for (int i = 0; i < j; i++)
    {
-       FREAD_LONG_LONG(&ident, fp);
-       movementEffects.push_back((Receptor*)findByID(ident));
+       learningEvent = new LearningEvent();
+       assert(learningEvent != NULL);
+       learningEvent->load(fp);
+       movementEffects.push_back(learningEvent);
+       id = (ID*)(learningEvent->neuron);
+       learningEvent->neuron = findByID(*id);
+       assert(learningEvent->neuron != NULL);
+       delete id;
    }
    FREAD_INT(&orientation, fp);
-   FREAD_INT(&x, fp);
-   FREAD_INT(&y, fp);
+   FREAD_INT(&X, fp);
+   FREAD_INT(&Y, fp);
    return(true);
 }
 
@@ -2337,17 +2348,17 @@ Mona::save(FILE *fp)
    FWRITE_INT(&j, fp);
    for (int i = 0; i < j; i++)
    {
-       FWRITE_LONG_LONG(&movementCauses[i]->id, fp);
+       movementCauses[i]->save(fp);
    }
    j = (int)movementEffects.size();
    FWRITE_INT(&j, fp);
    for (int i = 0; i < j; i++)
    {
-       FWRITE_LONG_LONG(&movementEffects[i]->id, fp);
+       movementEffects[i]->save(fp);
    }
    FWRITE_INT(&orientation, fp);
-   FWRITE_INT(&x, fp);
-   FWRITE_INT(&y, fp);
+   FWRITE_INT(&X, fp);
+   FWRITE_INT(&Y, fp);
    return(true);
 }
 
@@ -2394,7 +2405,7 @@ Mona::clear()
    movementCauses.clear();
    movementEffects.clear();
    orientation = ORIENTATION::NORTH;
-   x = y = 0;
+   X = Y = 0;
    for (int i = 0, j = (int)homeostats.size(); i < j; i++)
    {
       delete homeostats[i];
@@ -2686,8 +2697,8 @@ Mona::print(bool brief, FILE *out)
        break;
    }
    fprintf(out, "</orientation>\n");
-   fprintf(out, "<x>%d</x>\n", x);
-   fprintf(out, "<y>%d</y>\n", y);
+   fprintf(out, "<X>%d</X>\n", X);
+   fprintf(out, "<Y>%d</Y>\n", Y);
    fprintf(out, "</network>\n");
    fflush(out);
 }

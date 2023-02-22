@@ -67,8 +67,8 @@ Mona::learn()
    }
 
    // Time-stamp and store significant events.
-   vector<Receptor*> movementReceptors;
-   movementReceptors.resize(sensorModes.size());
+   vector<LearningEvent*> movementEvents;
+   movementEvents.resize(sensorModes.size());
    for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
@@ -77,23 +77,33 @@ Mona::learn()
          learningEvent = new LearningEvent(receptor);
          assert(learningEvent != NULL);
          learningEvents[0].push_back(learningEvent);
-         movementReceptors[receptor->sensorMode] = receptor;
+         movementEvents[receptor->sensorMode] = new LearningEvent(receptor);
       }
    }
+   bool newMovementCause = false;
+   vector<LearningEvent*> tmpMovementEffects;
    if (movementResponsePathLength == 0)
    {
+       for (int i = 0, j = movementCauses.size(); i < j; i++)
+       { 
+           delete movementCauses[i];
+       }
        movementCauses.clear();
+       for (int i = 0, j = movementEffects.size(); i < j; i++)
+       {
+           delete movementEffects[i];
+       }
        movementEffects.clear();
        for (int i = 0, j = sensorModes.size(); i < j; i++)
        { 
-           movementCauses.push_back(movementReceptors[i]);
+           movementCauses.push_back(movementEvents[i]);
        }
+       newMovementCause = true;
    }
    else {
-       movementEffects.clear();
        for (int i = 0, j = sensorModes.size(); i < j; i++)
        {
-           movementEffects.push_back(movementReceptors[i]);
+           tmpMovementEffects.push_back(movementEvents[i]);
        }
    }
    Motor* movementMotor = NULL;
@@ -108,9 +118,55 @@ Mona::learn()
          movementMotor = motor;
       }
    }
-   if (movementMotor != NULL)
+   if (!newMovementCause)
    {
-
+       if (movementMotor->movementType != -1)
+       {
+           if (movementResponsePathLength < MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
+           {
+               for (int i = 0, j = movementEffects.size(); i < j; i++)
+               {
+                   delete movementEffects[i];
+               }
+               movementEffects.clear();
+               for (int i = 0, j = sensorModes.size(); i < j; i++)
+               {
+                   movementEffects.push_back(tmpMovementEffects[i]);
+               }
+               movementResponsePathLength++;
+           }
+           else {
+               movementResponsePathLength = 0;
+               for (int i = 0, j = movementCauses.size(); i < j; i++)
+               {
+                   delete movementCauses[i];
+               }
+               movementCauses.clear();
+               for (int i = 0, j = movementEffects.size(); i < j; i++)
+               {
+                   delete movementEffects[i];
+               }
+               movementEffects.clear();
+           }
+       }
+       else {
+           if (movementResponsePathLength >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH &&
+               movementEffects.size() > 0)
+           {
+               createPlaceMediator();
+           }
+               movementResponsePathLength = 0;
+               for (int i = 0, j = movementCauses.size(); i < j; i++)
+               {
+                   delete movementCauses[i];
+               }
+               movementCauses.clear();
+               for (int i = 0, j = movementEffects.size(); i < j; i++)
+               {
+                   delete movementEffects[i];
+               }
+               movementEffects.clear();
+       }
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -166,6 +222,45 @@ Mona::learn()
    eventClock++;
 }
 
+// Create place mediators.
+void
+Mona::createPlaceMediator()
+{
+    for (int i = 0, j = sensorModes.size(); i < j; i++)
+    {
+        Mediator *mediator = newMediator(INITIAL_ENABLEMENT);
+        mediator->addEvent(CAUSE_EVENT, movementCauses[i]->neuron);
+        mediator->addEvent(RESPONSE_EVENT, newPlaceMotor(X, Y));
+        mediator->addEvent(EFFECT_EVENT, movementEffects[i]->neuron);
+        mediator->updateGoalValue(movementCauses[i]->needs);
+
+        // Duplicate?
+        if (isDuplicateMediator(mediator))
+        {
+            deleteNeuron(mediator);
+            continue;
+        }
+
+        // Make new mediator available for learning.
+        if ((mediator->level + 1) < (int)learningEvents.size())
+        {
+            mediator->causeBegin = movementCauses[i]->begin;
+            mediator->firingStrength = movementCauses[i]->firingStrength *
+                movementEffects[i]->firingStrength;
+            LearningEvent *learningEvent = new LearningEvent(mediator);
+            assert(learningEvent != NULL);
+            learningEvents[mediator->level + 1].push_back(learningEvent);
+        }
+
+#ifdef MONA_TRACE
+        if (traceLearn)
+        {
+            printf("Create place mediator:\n");
+            mediator->print();
+        }
+#endif
+    }
+}
 
 // Create new mediators for given effect.
 void
@@ -482,10 +577,24 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
             notify = mediator->cause->notifyList[i];
             if (notify->mediator != mediator)
             {
-               if ((notify->mediator->response == mediator->response) &&
-                   (notify->mediator->effect == mediator->effect))
+               if (notify->mediator->effect == mediator->effect)
                {
-                  return(true);
+                   if (notify->mediator->response == mediator->response)
+                   {
+                       return true;
+                   }
+                   else {
+                       if (notify->mediator->response != NULL && mediator->response != NULL)
+                       {
+                           Motor* notifyMotor = (Motor*)notify->mediator->response;
+                           Motor* motor = (Motor*)mediator->response;
+                           if (notifyMotor->response == motor->response &&
+                               notifyMotor->x == motor->x && notifyMotor->y == motor->y)
+                           {
+                               return true;
+                           }
+                       }
+                   }
                }
             }
          }
@@ -518,10 +627,24 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
             notify = mediator->effect->notifyList[i];
             if (notify->mediator != mediator)
             {
-               if ((notify->mediator->cause == mediator->cause) &&
-                   (notify->mediator->response == mediator->response))
+               if (notify->mediator->cause == mediator->cause)
                {
-                  return(true);
+                   if (notify->mediator->response == mediator->response)
+                   {
+                       return true;
+                   }
+                   else {
+                       if (notify->mediator->response != NULL && mediator->response != NULL)
+                       {
+                           Motor* notifyMotor = (Motor*)notify->mediator->response;
+                           Motor* motor = (Motor*)mediator->response;
+                           if (notifyMotor->response == motor->response &&
+                               notifyMotor->x == motor->x && notifyMotor->y == motor->y)
+                           {
+                               return true;
+                           }
+                       }
+                   }                     
                }
             }
          }
@@ -576,6 +699,15 @@ void Mona::clearWorkingMemory()
       motor->tracker.clear();
 #endif
    }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       motor = placeMotors[i];
+       motor->firingStrength = 0.0;
+       motor->motive = 0.0;
+#ifdef MONA_TRACKING
+       motor->tracker.clear();
+#endif
+   }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
    {
@@ -597,6 +729,17 @@ void Mona::clearWorkingMemory()
       }
       learningEvents[i].clear();
    }
+   movementResponsePathLength = 0;
+   for (int i = 0, j = movementCauses.size(); i < j; i++)
+   {
+       delete movementCauses[i];
+   }
+   movementCauses.clear();
+   for (int i = 0, j = movementEffects.size(); i < j; i++)
+   {
+       delete movementEffects[i];
+   }
+   movementEffects.clear();
 }
 
 

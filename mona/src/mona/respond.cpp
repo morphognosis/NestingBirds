@@ -126,18 +126,18 @@ Mona::respond()
              case MOVEMENT_TYPE::MOVE_FORWARD:
                  if (orientation == ORIENTATION::NORTH)
                  {
-                     y--;
+                     Y--;
                  }
                  else if (orientation == ORIENTATION::SOUTH)
                  {
-                     y++;
+                     Y++;
                  }
                  else if (orientation == ORIENTATION::EAST)
                  {
-                     x++;
+                     X++;
                  }
                  else {
-                     x--;
+                     X--;
                  }
                  break;
              case MOVEMENT_TYPE::TURN_RIGHT:
