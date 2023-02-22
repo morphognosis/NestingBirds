@@ -82,18 +82,8 @@ Mona::learn()
    }
    bool newMovementCause = false;
    vector<LearningEvent*> tmpMovementEffects;
-   if (movementResponsePathLength == 0)
+   if (movementCauses.size() == 0)
    {
-       for (int i = 0, j = movementCauses.size(); i < j; i++)
-       { 
-           delete movementCauses[i];
-       }
-       movementCauses.clear();
-       for (int i = 0, j = movementEffects.size(); i < j; i++)
-       {
-           delete movementEffects[i];
-       }
-       movementEffects.clear();
        for (int i = 0, j = sensorModes.size(); i < j; i++)
        { 
            movementCauses.push_back(movementEvents[i]);
@@ -150,10 +140,9 @@ Mona::learn()
            }
        }
        else {
-           if (movementResponsePathLength >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH &&
-               movementEffects.size() > 0)
+           if (movementResponsePathLength >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH)
            {
-               createPlaceMediator();
+               createPlaceMediators();
            }
                movementResponsePathLength = 0;
                for (int i = 0, j = movementCauses.size(); i < j; i++)
@@ -224,7 +213,7 @@ Mona::learn()
 
 // Create place mediators.
 void
-Mona::createPlaceMediator()
+Mona::createPlaceMediators()
 {
     for (int i = 0, j = sensorModes.size(); i < j; i++)
     {

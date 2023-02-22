@@ -279,7 +279,7 @@ public:
    vector<GeneralizationEvent *>  generalizationEvents;
 
    // Mediator generation.
-   void createPlaceMediator();
+   void createPlaceMediators();
    void createMediator(LearningEvent *event);
    void generalizeMediator(GeneralizationEvent *event);
    bool isDuplicateMediator(Mediator *);
