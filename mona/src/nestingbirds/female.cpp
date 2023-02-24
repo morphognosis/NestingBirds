@@ -41,14 +41,14 @@ Female::Female() : Bird(FEMALE)
 
     // Motors:
     Mona::Motor* doNothing = brain->newMotor();
-    Mona::Motor* eat = brain->newMotor();
-    Mona::Motor* get = brain->newMotor();
-    Mona::Motor* put = brain->newMotor();
-    Mona::Motor* toss = brain->newMotor();
     Mona::Motor* move = brain->newMotor();
     Mona::Motor* turnRight = brain->newMotor();
     Mona::Motor* turnLeft = brain->newMotor();
     Mona::Motor* turnAround = brain->newMotor();
+    Mona::Motor* eat = brain->newMotor();
+    Mona::Motor* get = brain->newMotor();
+    Mona::Motor* put = brain->newMotor();
+    Mona::Motor* toss = brain->newMotor();
     Mona::Motor* stateOn = brain->newMotor();
     Mona::Motor* stateOff = brain->newMotor();
     Mona::Motor* wantMouse = brain->newMotor();

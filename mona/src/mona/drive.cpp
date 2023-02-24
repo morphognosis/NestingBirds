@@ -49,6 +49,11 @@ Mona::drive()
       neuron = (Neuron *)motors[i];
       neuron->initDrive(needs);
    }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       neuron = (Neuron*)placeMotors[i];
+       neuron->initDrive(needs);
+   }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
    {
@@ -96,6 +101,27 @@ Mona::drive()
             setMotives();
          }
       }
+   }
+
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       motor = placeMotors[i];
+       if (motor->goals.getValue() != 0.0)
+       {
+           motiveAccum.init(needs);
+           motiveAccum.accumGoals(motor->goals);
+           if (motiveAccum.getValue() != 0.0)
+           {
+               motiveAccum.init(needs);
+               motiveAccum.init(needs);
+               clearMotiveWork();
+#ifdef MONA_TRACKING
+               motiveAccum.drivers.clear();
+#endif
+               motor->drive(motiveAccum);
+               setMotives();
+           }
+       }
    }
 
    for (mediatorItr = mediators.begin();
@@ -429,6 +455,11 @@ Mona::finalizeMotives()
    {
       neuron = (Neuron *)motors[i];
       neuron->finalizeMotive();
+   }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       neuron = (Neuron*)placeMotors[i];
+       neuron->finalizeMotive();
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)

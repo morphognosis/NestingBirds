@@ -461,7 +461,13 @@ public:
       int movementType;
 
       // Place coordinates.
+      // If these are non-zero, this is a place motor, 
+      // meaning that the response navigates to these coordinates.
       int x, y;
+
+      // Set response to move to place coordinates.
+      void placeResponse();
+      static int gotoPlace(int orientation, int fromX, int fromY, int toX, int toY);
 
       // Is given motor a duplicate of this?
       bool isDuplicate(Motor *);
@@ -574,10 +580,11 @@ public:
    class MOVEMENT_TYPE
    {
    public:
-       static const int MOVE_FORWARD = 0;
-       static const int TURN_RIGHT = 1;
-       static const int TURN_LEFT = 2;
-       static const int TURN_AROUND = 3;
+       static const int DO_NOTHING = 0;
+       static const int MOVE_FORWARD = 1;
+       static const int TURN_RIGHT = 2;
+       static const int TURN_LEFT = 3;
+       static const int TURN_AROUND = 4;
    };
 
    // Orientation.

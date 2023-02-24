@@ -16,6 +16,13 @@ Mona::respond()
    }
 #endif
 
+   // Determine response that leads to place motor coordinates.
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       motor = placeMotors[i];
+       motor->placeResponse();
+   }
+
    // Get response potentials from motor motives.
    for (int i = 0; i < numResponses; i++)
    {
@@ -25,6 +32,11 @@ Mona::respond()
    {
       motor = motors[i];
       responsePotentials[motor->response] += motor->motive;
+   }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       motor = placeMotors[i];
+       responsePotentials[motor->response] += motor->motive;
    }
 
    // Incorporate minimal randomness.
@@ -113,101 +125,44 @@ Mona::respond()
    // Fire responding motor.
    for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
-      motor = motors[i];
-      if (motor->response == response)
-      {
-         motor->firingStrength = 1.0;
-
-         // Update orientation and position?
-         if (motor->movementType != -1)
-         {
-             switch (motor->movementType)
-             {
-             case MOVEMENT_TYPE::MOVE_FORWARD:
-                 if (orientation == ORIENTATION::NORTH)
-                 {
-                     Y--;
-                 }
-                 else if (orientation == ORIENTATION::SOUTH)
-                 {
-                     Y++;
-                 }
-                 else if (orientation == ORIENTATION::EAST)
-                 {
-                     X++;
-                 }
-                 else {
-                     X--;
-                 }
-                 break;
-             case MOVEMENT_TYPE::TURN_RIGHT:
-                 if (orientation == ORIENTATION::NORTH)
-                 {
-                     orientation = ORIENTATION::EAST;
-                 }
-                 else if (orientation == ORIENTATION::SOUTH)
-                 {
-                     orientation = ORIENTATION::WEST;
-                 }
-                 else if (orientation == ORIENTATION::EAST)
-                 {
-                     orientation = ORIENTATION::SOUTH;
-                 }
-                 else {
-                     orientation = ORIENTATION::NORTH;
-                 }
-                 break;
-             case MOVEMENT_TYPE::TURN_LEFT:
-                 if (orientation == ORIENTATION::NORTH)
-                 {
-                     orientation = ORIENTATION::WEST;
-                 }
-                 else if (orientation == ORIENTATION::SOUTH)
-                 {
-                     orientation = ORIENTATION::EAST;
-                 }
-                 else if (orientation == ORIENTATION::EAST)
-                 {
-                     orientation = ORIENTATION::NORTH;
-                 }
-                 else {
-                     orientation = ORIENTATION::SOUTH;
-                 }
-                 break;
-             case MOVEMENT_TYPE::TURN_AROUND:
-                 if (orientation == ORIENTATION::NORTH)
-                 {
-                     orientation = ORIENTATION::SOUTH;
-                 }
-                 else if (orientation == ORIENTATION::SOUTH)
-                 {
-                     orientation = ORIENTATION::NORTH;
-                 }
-                 else if (orientation == ORIENTATION::EAST)
-                 {
-                     orientation = ORIENTATION::WEST;
-                 }
-                 else {
-                     orientation = ORIENTATION::EAST;
-                 }
-                 break;
-             }
-         }
-
+       motor = motors[i];
+       if (motor->response == response)
+       {
+           motor->firingStrength = 1.0;
 #ifdef MONA_TRACE
-         if (traceRespond)
-         {
-            printf("Motor firing: %llu\n", motor->id);
-         }
+           if (traceRespond)
+           {
+               printf("Motor firing: %llu\n", motor->id);
+           }
 #endif
 #ifdef MONA_TRACKING
-         motor->tracker.fire = true;
+           motor->tracker.fire = true;
 #endif
-      }
-      else
-      {
-         motor->firingStrength = 0.0;
-      }
+       }
+       else {
+           motor->firingStrength = 0.0;
+       }
+   }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       motor = placeMotors[i];
+       if (motor->response == response)
+       {
+           motor->firingStrength = 1.0;
+#ifdef MONA_TRACE
+           if (traceRespond)
+           {
+               printf("Motor firing: %llu\n", motor->id);
+           }
+#endif
+#ifdef MONA_TRACKING
+           motor->tracker.fire = true;
+#endif
+       }
+       else {
+           motor->firingStrength = 0.0;
+       }
+       motor->response = -1;
    }
 
 #ifdef MONA_TRACE

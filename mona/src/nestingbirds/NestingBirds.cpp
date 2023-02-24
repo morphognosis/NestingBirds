@@ -453,95 +453,10 @@ bool getMouse()
    }
    int mousex = 3;
    int mousey = 5;
-   if (male->x > mousex)
+   male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, mousex, mousey);
+   if (male->response != Bird::RESPONSE::DO_NOTHING)
    {
-      if (male->orientation == Bird::ORIENTATION::WEST)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::SOUTH)
-         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else if (male->orientation == Bird::ORIENTATION::NORTH)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         } else {
-             male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return(true);
-   }
-   if (male->x < mousex)
-   {
-      if (male->orientation == Bird::ORIENTATION::EAST)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::SOUTH)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         }
-         else if (male->orientation == Bird::ORIENTATION::NORTH)
-         {
-             male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else
-         {
-            male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return(true);
-   }
-   if (male->y > mousey)
-   {
-      if (male->orientation == Bird::ORIENTATION::NORTH)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::EAST)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         }
-         else if (male->orientation == Bird::ORIENTATION::WEST)
-         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else 
-         {
-             male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return(true);
-   }
-   if (male->y < mousey)
-   {
-      if (male->orientation == Bird::ORIENTATION::SOUTH)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::EAST)
-         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else if(male->orientation == Bird::ORIENTATION::WEST)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         }
-         else 
-         {
-             male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return true;
+       return true;
    }
    vector<int> responses;
    int r = Bird::RESPONSE::MOVE_FORWARD;
@@ -735,97 +650,10 @@ bool getStone()
    }
    int stonex = 14;
    int stoney = 16;
-   if (male->x > stonex)
+   male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, stonex, stoney);
+   if (male->response != Bird::RESPONSE::DO_NOTHING)
    {
-      if (male->orientation == Bird::ORIENTATION::WEST)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::SOUTH)
-         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else if (male->orientation == Bird::ORIENTATION::NORTH)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         }
-         else 
-         {
-             male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return(true);
-   }
-   if (male->x < stonex)
-   {
-      if (male->orientation == Bird::ORIENTATION::EAST)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::SOUTH)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         }
-         else if (male->orientation == Bird::ORIENTATION::NORTH)
-         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else 
-         {
-             male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return(true);
-   }
-   if (male->y > stoney)
-   {
-      if (male->orientation == Bird::ORIENTATION::NORTH)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::EAST)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         }
-         else if (male->orientation == Bird::ORIENTATION::WEST)
-         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else 
-         {
-             male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return(true);
-   }
-   if (male->y < stoney)
-   {
-      if (male->orientation == Bird::ORIENTATION::SOUTH)
-      {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
-      }
-      else
-      {
-         if (male->orientation == Bird::ORIENTATION::EAST)
-         {
-            male->response = Bird::RESPONSE::TURN_RIGHT;
-         }
-         else if (male->orientation == Bird::ORIENTATION::WEST)
-         {
-            male->response = Bird::RESPONSE::TURN_LEFT;
-         }
-         else 
-         {
-             male->response = Bird::RESPONSE::TURN_AROUND;
-         }
-      }
-      return true;
+       return true;
    }
    vector<int> responses;
    int r = Bird::RESPONSE::MOVE_FORWARD;

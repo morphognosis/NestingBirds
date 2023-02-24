@@ -492,7 +492,12 @@ Mona::Mediator::retireEnablings(bool force)
    {
       enabling = *enablingItr;
       enabling->age++;
-      if (force || (enabling->age > 1))
+      int maxage = 1;
+      if (((Motor*)response)->x != -1)
+      {
+          maxage = mona->MAX_MOVEMENT_RESPONSE_PATH_LENGTH;
+      }
+      if (force || (enabling->age > maxage))
       {
          enablingItr     = responseEnablings.enablings.erase(enablingItr);
          baseEnablement += enabling->value;

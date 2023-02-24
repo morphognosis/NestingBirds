@@ -26,14 +26,14 @@ Male::Male() : Bird(MALE)
 
     // Motors:
     Mona::Motor* doNothing = brain->newMotor();
-    Mona::Motor* eat = brain->newMotor();
-    Mona::Motor* get = brain->newMotor();
-    Mona::Motor* put = brain->newMotor();
-    Mona::Motor* toss = brain->newMotor();
     Mona::Motor* move = brain->newMovementMotor(Mona::MOVEMENT_TYPE::MOVE_FORWARD);
     Mona::Motor* turnRight = brain->newMovementMotor(Mona::MOVEMENT_TYPE::TURN_RIGHT);
     Mona::Motor* turnLeft = brain->newMovementMotor(Mona::MOVEMENT_TYPE::TURN_LEFT);
     Mona::Motor* turnAround = brain->newMovementMotor(Mona::MOVEMENT_TYPE::TURN_AROUND);
+    Mona::Motor* eat = brain->newMotor();
+    Mona::Motor* get = brain->newMotor();
+    Mona::Motor* put = brain->newMotor();
+    Mona::Motor* toss = brain->newMotor();
     Mona::Motor* stateOn = brain->newMotor();
     Mona::Motor* stateOff = brain->newMotor();
     Mona::Motor* giveMouse = brain->newMotor();

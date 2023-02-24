@@ -42,21 +42,34 @@ Mona::learn()
             // Is event still recent enough to form a new mediator?
             if (learningEvent->neuron->type == MOTOR)
             {
-               k = n;
+                // Place motor?
+                Motor* motor = (Motor*)(learningEvent->neuron);
+                if (motor->x != -1)
+                {
+                    k = -1;
+                }
+                else {
+                    k = n;
+                }
             }
             else
             {
                k = i;
             }
-            if ((int)(eventClock - learningEvent->end) <= maxLearningEffectEventIntervals[k])
+            if (k == -1)
+            {
+                if ((int)(eventClock - learningEvent->end) <= MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
+                {
+                    learningEventItr++;
+                    continue;
+                }
+            } else if ((int)(eventClock - learningEvent->end) <= maxLearningEffectEventIntervals[k])
             {
                learningEventItr++;
+               continue;
             }
-            else
-            {
                learningEventItr = learningEvents[i].erase(learningEventItr);
                delete learningEvent;
-            }
          }
          else
          {
@@ -577,11 +590,7 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
                        {
                            Motor* notifyMotor = (Motor*)notify->mediator->response;
                            Motor* motor = (Motor*)mediator->response;
-                           if (notifyMotor->response == motor->response &&
-                               notifyMotor->x == motor->x && notifyMotor->y == motor->y)
-                           {
-                               return true;
-                           }
+                           return motor->isDuplicate(notifyMotor);
                        }
                    }
                }
@@ -627,11 +636,7 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
                        {
                            Motor* notifyMotor = (Motor*)notify->mediator->response;
                            Motor* motor = (Motor*)mediator->response;
-                           if (notifyMotor->response == motor->response &&
-                               notifyMotor->x == motor->x && notifyMotor->y == motor->y)
-                           {
-                               return true;
-                           }
+                           return motor->isDuplicate(notifyMotor);
                        }
                    }                     
                }

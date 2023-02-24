@@ -99,15 +99,15 @@ public:
    class RESPONSE
    {
 public:
-      static const int DO_NOTHING    = 0;
-      static const int EAT_MOUSE           = 1;
-      static const int GET_OBJECT           = 2;
-      static const int PUT_OBJECT           = 3;
-      static const int TOSS_OBJECT          = 4;
-      static const int MOVE_FORWARD          = 5;
-      static const int TURN_RIGHT    = 6;
-      static const int TURN_LEFT     = 7;
-      static const int TURN_AROUND = 8;
+    static const int DO_NOTHING = 0;
+        static const int MOVE_FORWARD = 1;
+        static const int TURN_RIGHT = 2;
+        static const int TURN_LEFT = 3;
+        static const int TURN_AROUND = 4;
+      static const int EAT_MOUSE           = 5;
+      static const int GET_OBJECT           = 6;
+      static const int PUT_OBJECT           = 7;
+      static const int TOSS_OBJECT          = 8;
       static const int STATE_ON      = 9;
       static const int STATE_OFF     = 10;
       static const int NUM_RESPONSES = 11;

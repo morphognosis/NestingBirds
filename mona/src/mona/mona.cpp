@@ -858,43 +858,52 @@ void Mona::Receptor::print(FILE *out)
 Mona::Motor *
 Mona::newMotor()
 {
-   Motor *m = new Motor(-1, this);
-   assert(m != NULL);
-   m->id = idDispenser;
+   Motor *motor = new Motor(-1, this);
+   assert(motor != NULL);
+   motor->id = idDispenser;
    idDispenser++;
-   m->creationTime = eventClock;
-   motors.push_back(m);
+   motor->creationTime = eventClock;
+   motors.push_back(motor);
    responsePotentials.push_back(0.0);
    numResponses++;
-   return(m);
+   return(motor);
 }
 
 // Create movement motor and add to network.
 Mona::Motor*
 Mona::newMovementMotor(int movementType)
 {
-    Motor* m = new Motor(movementType, this);
-    assert(m != NULL);
-    m->id = idDispenser;
+    Motor* motor = new Motor(movementType, this);
+    assert(motor != NULL);
+    motor->id = idDispenser;
     idDispenser++;
-    m->creationTime = eventClock;
-    motors.push_back(m);
+    motor->creationTime = eventClock;
+    motors.push_back(motor);
     responsePotentials.push_back(0.0);
     numResponses++;
-    return(m);
+    return(motor);
 }
 
 // Create place motor and add to network.
 Mona::Motor*
 Mona::newPlaceMotor(int x, int y)
 {
-    Motor* m = new Motor(x, y, this);
-    assert(m != NULL);
-    m->id = idDispenser;
+    Motor* motor;
+    for (int i = 0, j = placeMotors.size(); i < j; i++)
+    {
+        motor = placeMotors[i];
+        if (motor->x == x && motor->y == y)
+        {
+            return motor;
+        }
+    }
+    motor = new Motor(x, y, this);
+    assert(motor != NULL);
+    motor->id = idDispenser;
     idDispenser++;
-    m->creationTime = eventClock;
-    placeMotors.push_back(m);
-    return(m);
+    motor->creationTime = eventClock;
+    placeMotors.push_back(motor);
+    return(motor);
 }
 
 // Motor constructor.
@@ -924,6 +933,107 @@ Mona::Motor::~Motor()
    clear();
 }
 
+// Set response to move to place coordinates.
+void Mona::Motor::placeResponse()
+{
+    response = gotoPlace(mona->orientation, mona->X, mona->Y, x, y);
+}
+
+// Get response from current to target. 
+int Mona::Motor::gotoPlace(int orientation, int fromX, int fromY, int toX, int toY)
+{
+    if (fromX > toX)
+    {
+        if (orientation == Mona::ORIENTATION::WEST)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::SOUTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else if (orientation == Mona::ORIENTATION::NORTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+        return(true);
+    }
+    if (fromX < toX)
+    {
+        if (orientation == Mona::ORIENTATION::EAST)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::SOUTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else if (orientation == Mona::ORIENTATION::NORTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else
+            {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+        return(true);
+    }
+    if (fromY > toY)
+    {
+        if (orientation == Mona::ORIENTATION::NORTH)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::EAST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else if (orientation == Mona::ORIENTATION::WEST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else
+            {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+        return(true);
+    }
+    if (fromY < toY)
+    {
+        if (orientation == Mona::ORIENTATION::SOUTH)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::EAST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else if (orientation == Mona::ORIENTATION::WEST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else
+            {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+    }
+    return Mona::MOVEMENT_TYPE::DO_NOTHING;
+}
 
 // Is given motor a duplicate of this?
 bool Mona::Motor::isDuplicate(Motor *motor)
@@ -1709,7 +1819,7 @@ Mona::deleteNeuron(Neuron *neuron)
       break;
 
    case MOTOR:
-       if (((Motor*)neuron)->response != -1)
+       if (((Motor*)neuron)->x == -1)
        {
            for (int i = 0, j = (int)motors.size(); i < j; i++)
            {
