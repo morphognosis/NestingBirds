@@ -143,27 +143,6 @@ Mona::respond()
            motor->firingStrength = 0.0;
        }
    }
-   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
-   {
-       motor = placeMotors[i];
-       if (motor->response == response)
-       {
-           motor->firingStrength = 1.0;
-#ifdef MONA_TRACE
-           if (traceRespond)
-           {
-               printf("Motor firing: %llu\n", motor->id);
-           }
-#endif
-#ifdef MONA_TRACKING
-           motor->tracker.fire = true;
-#endif
-       }
-       else {
-           motor->firingStrength = 0.0;
-       }
-       motor->response = -1;
-   }
 
 #ifdef MONA_TRACE
    if (traceRespond)
@@ -171,12 +150,6 @@ Mona::respond()
       printf("Response = %d\n", response);
    }
 #endif
-
-   // Update need based on response.
-   for (int i = 0; i < numNeeds; i++)
-   {
-      homeostats[i]->responseUpdate();
-   }
 }
 
 // Get response potential.

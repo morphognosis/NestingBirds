@@ -66,24 +66,24 @@ Female::Female() : Bird(FEMALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    int wantMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, RESPONSE::WANT_MOUSE, MOUSE_NEED);
+    int wantMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, wantMouse, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE);
-    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, Bird::RESPONSE::EAT_MOUSE, MOUSE_NEED);
+    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, foodMode, eat, MOUSE_NEED);
 
     // Stone goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE);
-    int wantStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, RESPONSE::WANT_STONE, STONE_NEED);
+    int wantStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, wantStone, STONE_NEED);
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE);
-    int putStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, Bird::RESPONSE::PUT_OBJECT, STONE_NEED);
+    int putStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, nestMode, put, STONE_NEED);
 
     // Lay egg goals.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
@@ -97,7 +97,7 @@ Female::Female() : Bird(FEMALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
-    int broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, nestMode, Bird::RESPONSE::DO_NOTHING, BROOD_EGG_NEED);
+    int broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, nestMode, doNothing, BROOD_EGG_NEED);
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;

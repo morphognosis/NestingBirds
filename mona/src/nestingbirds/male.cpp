@@ -51,13 +51,13 @@ Male::Male() : Bird(MALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE);
-    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, Bird::RESPONSE::EAT_MOUSE, MOUSE_NEED);
+    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, eat, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE,
         MATE_PROXIMITY_PRESENT, 1.0, DONT_CARE);
-    int giveMouseGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, 0, Male::RESPONSE::GIVE_MOUSE, FEMALE_MOUSE_NEED);
+    int giveMouseGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, 0, giveMouse, FEMALE_MOUSE_NEED);
  
     // Stone goals.
     loadSensors(sensors, (Mona::SENSOR)LOCALE::DESERT, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -65,13 +65,13 @@ Male::Male() : Bird(MALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE);
-    int getStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, Bird::RESPONSE::GET_OBJECT, STONE_NEED);
+    int getStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, get, STONE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE,
         MATE_PROXIMITY_PRESENT, DONT_CARE, 1.0);
-    int giveStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, 0, Male::RESPONSE::GIVE_STONE, FEMALE_STONE_NEED);
+    int giveStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, 0, giveStone, FEMALE_STONE_NEED);
 
     // Attend female goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -79,7 +79,7 @@ Male::Male() : Bird(MALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         MATE_PROXIMITY_PRESENT, DONT_CARE, DONT_CARE);
-    int attendFemaleGoal = brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, 0, Bird::RESPONSE::DO_NOTHING, ATTEND_FEMALE_NEED);
+    int attendFemaleGoal = brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, 0, doNothing, ATTEND_FEMALE_NEED);
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;
@@ -137,7 +137,7 @@ int Male::cycle()
    {
       brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
-   response = brain->cycle(brainSensors);
+   response = brain->cycle(brainSensors, orientation, x, y);
    return response;
 }
 

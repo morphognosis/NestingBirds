@@ -18,8 +18,54 @@ const Mona::ID Mona::NULL_ID = Homeostat::NULL_ID;
 
 // Behavior cycle.
 Mona::RESPONSE
+Mona::cycle(vector<Mona::SENSOR>& sensors, int orientation, int x, int y)
+{
+    bool first = false;
+    if (X == -1)
+    {
+        first = true;
+    }
+    X = x;
+    Y = y;
+    this->orientation = orientation;
+
+    // Fire place motors.
+    if (!first)
+    {
+        for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+        {
+            Motor* motor = placeMotors[i];
+            if (motor->x == X && motor->y == Y)
+            {
+                motor->firingStrength = 1.0;
+#ifdef MONA_TRACE
+                if (traceRespond)
+                {
+                    printf("Motor firing: %llu\n", motor->id);
+                }
+#endif
+#ifdef MONA_TRACKING
+                motor->tracker.fire = true;
+#endif
+            }
+            else {
+                motor->firingStrength = 0.0;
+            }
+        }
+    }
+
+    return cycle(sensors);
+}
+
+Mona::RESPONSE
 Mona::cycle(vector<Mona::SENSOR>& sensors)
 {
+    // Update need based on motor firing.
+    for (int i = 0; i < numNeeds; i++)
+    {
+        homeostats[i]->motorUpdate();
+    }
+
    // Input sensors.
    assert((int)sensors.size() == numSensors);
    this->sensors.clear();
@@ -447,10 +493,10 @@ Mona::printNeed(int index)
 
 // Add a goal for a need.
 int Mona::addGoal(int needIndex, vector<SENSOR>& sensors,
-                  SENSOR_MODE sensorMode, RESPONSE response, NEED goalValue)
+                  SENSOR_MODE sensorMode, Motor *motor, NEED goalValue)
 {
    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-   return(homeostats[needIndex]->addGoal(sensors, sensorMode, response, goalValue));
+   return(homeostats[needIndex]->addGoal(sensors, sensorMode, motor, goalValue));
 }
 
 
@@ -471,11 +517,10 @@ int Mona::addGoal(int needIndex, Mediator* mediator, NEED goalValue)
 
 // Find goal for need.
 int Mona::findGoal(int needIndex, vector<SENSOR>& sensors,
-                   SENSOR_MODE sensorMode, RESPONSE response)
+                   SENSOR_MODE sensorMode, Motor *motor)
 {
    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-   return(homeostats[needIndex]->findGoal(sensors, sensorMode,
-                                          response));
+   return(homeostats[needIndex]->findGoal(sensors, sensorMode, motor));
 }
 
 
@@ -499,11 +544,11 @@ int Mona::getNumGoals(int needIndex)
 // Get goal information for need.
 bool Mona::getGoalInfo(int needIndex, int goalIndex,
                        vector<SENSOR>& sensors, int& sensorMode,
-                       RESPONSE& response, NEED& goalValue, bool& enabled)
+                       Motor** motor, NEED& goalValue, bool& enabled)
 {
    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
    return(homeostats[needIndex]->getGoalInfo(goalIndex, sensors,
-                                             sensorMode, response, goalValue, enabled));
+                                             sensorMode, (void **)motor, goalValue, enabled));
 }
 
 // Get goal receptors for a need.
@@ -2515,7 +2560,7 @@ Mona::clear()
    movementCauses.clear();
    movementEffects.clear();
    orientation = ORIENTATION::NORTH;
-   X = Y = 0;
+   X = Y = -1;
    for (int i = 0, j = (int)homeostats.size(); i < j; i++)
    {
       delete homeostats[i];
@@ -2826,8 +2871,8 @@ Mona::printParms(FILE *out)
    fprintf(out, "<parameter>LEARNING_DECREASE_VELOCITY</parameter><value>%f</value>\n", LEARNING_DECREASE_VELOCITY);
    fprintf(out, "<parameter>LEARNING_INCREASE_VELOCITY</parameter><value>%f</value>\n", LEARNING_INCREASE_VELOCITY);
    fprintf(out, "<parameter>RESPONSE_RANDOMNESS</parameter><value>%f</value>\n", RESPONSE_RANDOMNESS);
-   fprintf(out, "<parameter>MIN_MOVEMENT_RESPONSE_PATH_LENGTH</parameter><value>%f</value>\n", MIN_MOVEMENT_RESPONSE_PATH_LENGTH);
-   fprintf(out, "<parameter>MAX_MOVEMENT_RESPONSE_PATH_LENGTH</parameter><value>%f</value>\n", MAX_MOVEMENT_RESPONSE_PATH_LENGTH);
+   fprintf(out, "<parameter>MIN_MOVEMENT_RESPONSE_PATH_LENGTH</parameter><value>%d</value>\n", MIN_MOVEMENT_RESPONSE_PATH_LENGTH);
+   fprintf(out, "<parameter>MAX_MOVEMENT_RESPONSE_PATH_LENGTH</parameter><value>%d</value>\n", MAX_MOVEMENT_RESPONSE_PATH_LENGTH);
    fprintf(out, "<parameter>UTILITY_ASYMPTOTE</parameter><value>%f</value>\n", UTILITY_ASYMPTOTE);
    fprintf(out, "<parameter>DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL</parameter><value>%d</value>\n", DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL);
    fprintf(out, "<parameter>DEFAULT_NUM_EFFECT_EVENT_INTERVALS</parameter><value>%d</value>\n", DEFAULT_NUM_EFFECT_EVENT_INTERVALS);

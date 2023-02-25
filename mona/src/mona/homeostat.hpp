@@ -37,7 +37,6 @@ public:
       SENSOR_MODE    sensorMode;
       vector<void *>  receptors;
       void *pendingReceptor;
-      RESPONSE       response;
       void           *motor;
       void           *mediator;
       NEED           goalValue;
@@ -84,9 +83,9 @@ public:
    void clearPeriodicNeed();
 
    // Add goal.
-   // Replace response and goal value of duplicate.
+   // Replace motor and goal value of duplicate.
    int addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
-               RESPONSE response, NEED goalValue);
+               void *motor, NEED goalValue);
    int addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                NEED goalValue);
    void addGoalReceptor(void* receptor);
@@ -95,7 +94,7 @@ public:
    // Find index of goal matching sensors, sensor mode
    // and response. Return -1 for no match.
    int findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
-                RESPONSE response);
+                void *motor);
 
    // Find index of goal matching sensors and sensor mode.
    // Return -1 for no match.
@@ -111,7 +110,7 @@ public:
 
    // Get goal information at index.
    bool getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
-                    SENSOR_MODE& sensorMode, RESPONSE& response,
+                    SENSOR_MODE& sensorMode, void** motor,
                     NEED& goalValue, bool& enabled);
 
    // Get receptors for goal at index.
@@ -146,8 +145,8 @@ public:
    // Update homeostat based on receptor.
    void receptorUpdate(void *neuron);
 
-   // Update homeostat based on response.
-   void responseUpdate();
+   // Update homeostat based on motor.
+   void motorUpdate();
 
    // Update homeostat based on mediator.
    void mediatorUpdate(void *mediator, double firingStrength);

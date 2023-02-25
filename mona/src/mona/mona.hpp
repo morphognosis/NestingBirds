@@ -197,19 +197,19 @@ public:
 
    // Goal management.
    int addGoal(int needIndex, vector<SENSOR>& sensors,
-               SENSOR_MODE sensorMode, RESPONSE response, NEED goalValue);
+               SENSOR_MODE sensorMode, Mona::Motor *motor, NEED goalValue);
    int addGoal(int needIndex, vector<SENSOR>& sensors,
                SENSOR_MODE sensorMode, NEED goalValue);
    int addGoal(int needIndex, Mediator* mediator, NEED goalValue);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
-                SENSOR_MODE sensorMode, RESPONSE response);
+                SENSOR_MODE sensorMode, Mona::Motor* motor);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
                 SENSOR_MODE sensorMode);
    int findGoal(int needIndex, Mediator *mediator);
    int getNumGoals(int needIndex);
    bool getGoalInfo(int needIndex, int goalIndex,
                     vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
-                    RESPONSE& response, NEED& goalValue, bool& enabled);
+                    Mona::Motor** motor, NEED& goalValue, bool& enabled);
    void getGoalReceptors(int needIndex, int goalIndex, vector<void*>& receptors);
    Motor* getGoalMotor(int needIndex, int goalIndex);
    Mediator* getGoalMediator(int needIndex, int goalIndex);
@@ -253,6 +253,7 @@ public:
 
    // Behavior cycle.
    RESPONSE cycle(vector<SENSOR>& sensors);
+   RESPONSE cycle(vector<SENSOR>& sensors, int orientation, int x, int y);
    void sense();
    void enable();
    void learn();
