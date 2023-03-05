@@ -58,10 +58,10 @@ public:
 #define FEMALE_DEFAULT_MOUSE_NEED    "0.3"
    static Mona::NEED MOUSE_NEED;
    static const int STONE_NEED_INDEX = 1;
-#define FEMALE_DEFAULT_STONE_NEED    "0.2"
+#define FEMALE_DEFAULT_STONE_NEED    "0.1"
    static Mona::NEED STONE_NEED;
    static const int LAY_EGG_NEED_INDEX = 2;
-#define FEMALE_DEFAULT_LAY_EGG_NEED      "0.1"
+#define FEMALE_DEFAULT_LAY_EGG_NEED      "0.2"
    static Mona::NEED LAY_EGG_NEED;
    static const int BROOD_EGG_NEED_INDEX = 3;
 #define FEMALE_DEFAULT_BROOD_EGG_NEED      "0.4"

@@ -61,15 +61,15 @@ Mona::learn()
                 if ((int)(eventClock - learningEvent->end) <= MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
                 {
                     learningEventItr++;
-                    continue;
                 }
             } else if ((int)(eventClock - learningEvent->end) <= maxLearningEffectEventIntervals[k])
             {
                learningEventItr++;
-               continue;
             }
-               learningEventItr = learningEvents[i].erase(learningEventItr);
-               delete learningEvent;
+            else {
+                learningEventItr = learningEvents[i].erase(learningEventItr);
+                delete learningEvent;
+            }
          }
          else
          {
@@ -563,7 +563,6 @@ Mona::generalizeMediator(GeneralizationEvent *generalizationEvent)
    }
 }
 
-
 // Is mediator a duplicate?
 bool Mona::isDuplicateMediator(Mediator *mediator)
 {
@@ -590,7 +589,10 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
                        {
                            Motor* notifyMotor = (Motor*)notify->mediator->response;
                            Motor* motor = (Motor*)mediator->response;
-                           return motor->isDuplicate(notifyMotor);
+                           if (motor->isDuplicate(notifyMotor))
+                           {
+                               return true;
+                           }
                        }
                    }
                }
@@ -636,7 +638,10 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
                        {
                            Motor* notifyMotor = (Motor*)notify->mediator->response;
                            Motor* motor = (Motor*)mediator->response;
-                           return motor->isDuplicate(notifyMotor);
+                           if (motor->isDuplicate(notifyMotor))
+                           {
+                               return true;
+                           }
                        }
                    }                     
                }

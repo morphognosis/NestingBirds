@@ -95,6 +95,9 @@ public:
    // Cycle.
    int cycle();
 
+   // Post-response.
+   void postResponse();
+
    // Load.
    void load(char* filename);
 

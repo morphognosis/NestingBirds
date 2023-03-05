@@ -22,14 +22,14 @@ extern int RANDOM_NUMBER_SEED;
 Male::Male() : Bird(MALE)
 {
     // Create Mona bird brain.
-    brain = new Mona(NUM_SENSORS, 0, NUM_NEEDS, RANDOM_NUMBER_SEED);
+    brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Motors:
     Mona::Motor* doNothing = brain->newMotor();
-    Mona::Motor* move = brain->newMovementMotor(Mona::MOVEMENT_TYPE::MOVE_FORWARD);
-    Mona::Motor* turnRight = brain->newMovementMotor(Mona::MOVEMENT_TYPE::TURN_RIGHT);
-    Mona::Motor* turnLeft = brain->newMovementMotor(Mona::MOVEMENT_TYPE::TURN_LEFT);
-    Mona::Motor* turnAround = brain->newMovementMotor(Mona::MOVEMENT_TYPE::TURN_AROUND);
+    Mona::Motor* move = brain->newMovementMotor(Bird::RESPONSE::MOVE_FORWARD);
+    Mona::Motor* turnRight = brain->newMovementMotor(Bird::RESPONSE::TURN_RIGHT);
+    Mona::Motor* turnLeft = brain->newMovementMotor(Bird::RESPONSE::TURN_LEFT);
+    Mona::Motor* turnAround = brain->newMovementMotor(Bird::RESPONSE::TURN_AROUND);
     Mona::Motor* eat = brain->newMotor();
     Mona::Motor* get = brain->newMotor();
     Mona::Motor* put = brain->newMotor();
@@ -49,29 +49,29 @@ Male::Male() : Bird(MALE)
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE,
+        DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE);
-    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, eat, MOUSE_NEED);
+    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE,
-        MATE_PROXIMITY_PRESENT, 1.0, DONT_CARE);
-    int giveMouseGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, 0, giveMouse, FEMALE_MOUSE_NEED);
- 
-    // Stone goals.
-    loadSensors(sensors, (Mona::SENSOR)LOCALE::DESERT, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE);
-    int getStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, get, STONE_NEED);
-    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        MATE_PROXIMITY_PRESENT, 0.0, DONT_CARE);
+    int giveMouseGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, 0, FEMALE_MOUSE_NEED);
+ 
+    // Stone goals.
+    loadSensors(sensors, (Mona::SENSOR)LOCALE::DESERT, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE,
-        MATE_PROXIMITY_PRESENT, DONT_CARE, 1.0);
-    int giveStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, 0, giveStone, FEMALE_STONE_NEED);
+        DONT_CARE, DONT_CARE, DONT_CARE);
+    int getStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, STONE_NEED);
+    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
+        MATE_PROXIMITY_PRESENT, DONT_CARE, 0.0);
+    int giveStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, 0, FEMALE_STONE_NEED);
 
     // Attend female goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -98,7 +98,7 @@ void Male::initNeeds()
 // Set male needs.
 void Male::setNeeds()
 {
-    if (food <= 0)
+    if (food == 0)
     {
         brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
     }
@@ -137,8 +137,14 @@ int Male::cycle()
    {
       brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
-   response = brain->cycle(brainSensors, orientation, x, y);
+   response = brain->cycle(brainSensors);
    return response;
+}
+
+// Post response.
+void Male::postResponse()
+{
+    brain->postResponse(orientation, x, y);
 }
 
 // Load.

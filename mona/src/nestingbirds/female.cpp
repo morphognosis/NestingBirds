@@ -21,7 +21,7 @@ extern int RANDOM_NUMBER_SEED;
 Female::Female() : Bird(FEMALE)
 {
     // Create Mona bird brain.
-    brain = new Mona(NUM_SENSORS, 0, NUM_NEEDS, RANDOM_NUMBER_SEED);
+    brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Install sensor modes: nest mode ignores hunger.
     vector<bool> mask;
@@ -54,7 +54,7 @@ Female::Female() : Bird(FEMALE)
     Mona::Motor* wantMouse = brain->newMotor();
     Mona::Motor* wantStone = brain->newMotor();
     Mona::Motor* layEgg = brain->newMotor();
-
+ 
     // Needs.
     initNeeds();
 
@@ -115,7 +115,7 @@ void Female::initNeeds()
 // Set female needs.
 void Female::setNeeds()
 {
-    if (food <= 0)
+    if (food == 0)
     {
         brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
     }

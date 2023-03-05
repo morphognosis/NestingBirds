@@ -7,7 +7,6 @@ void
 Mona::respond()
 {
    Motor              *motor;
-   RESPONSE_POTENTIAL max;
 
 #ifdef MONA_TRACE
    if (traceRespond)
@@ -44,8 +43,7 @@ Mona::respond()
    {
       if (responsePotentials[i] <= NEARLY_ZERO)
       {
-         responsePotentials[i] =
-            (random.RAND_PROB() * RESPONSE_RANDOMNESS);
+         responsePotentials[i] = (random.RAND_PROB() * RESPONSE_RANDOMNESS);
       }
    }
 
@@ -87,7 +85,8 @@ Mona::respond()
       // Select maximum response potential.
       bool first = true;
       int j = random.RAND_CHOICE(numResponses);
-      for (int i = response = 0, max = 0.0; i < numResponses; i++)
+      RESPONSE_POTENTIAL max = 0.0;
+      for (int i = response = 0; i < numResponses; i++)
       {
          if (first || (responsePotentials[j] > max))
          {
@@ -144,12 +143,69 @@ Mona::respond()
        }
    }
 
+   // Update need based on motor firing.
+   for (int i = 0; i < numNeeds; i++)
+   {
+       homeostats[i]->motorUpdate();
+   }
+
 #ifdef MONA_TRACE
    if (traceRespond)
    {
       printf("Response = %d\n", response);
    }
 #endif
+}
+
+// Post response.
+void Mona::postResponse(int orientation, int x, int y)
+{
+#ifdef MONA_TRACE
+    if (traceRespond)
+    {
+        printf("***Post response phase***\n");
+    }
+#endif
+
+    bool first = false;
+    if (X == -1)
+    {
+        first = true;
+    }
+    X = x;
+    Y = y;
+    this->orientation = orientation;
+
+    // Fire place motors.
+    if (!first)
+    {
+        for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+        {
+            Motor* motor = placeMotors[i];
+            if (motor->x == X && motor->y == Y)
+            {
+                motor->firingStrength = 1.0;
+#ifdef MONA_TRACE
+                if (traceRespond)
+                {
+                    printf("Place motor firing: %llu\n", motor->id);
+                }
+#endif
+#ifdef MONA_TRACKING
+                motor->tracker.fire = true;
+#endif
+            }
+            else {
+                motor->firingStrength = 0.0;
+            }
+        }
+    }
+
+    // Update need based on place motor firing.
+    for (int i = 0; i < numNeeds; i++)
+    {
+        homeostats[i]->placeMotorUpdate();
+    }
 }
 
 // Get response potential.

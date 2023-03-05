@@ -23,13 +23,11 @@ public:
    typedef unsigned long long   ID;
    typedef float                SENSOR;
    typedef int                  SENSOR_MODE;
-   typedef int                  RESPONSE;
    typedef double               NEED;
    static const ID NULL_ID;
-   enum { NULL_RESPONSE = 0x7fffffff };
 
    // Sensory-response goal.
-   // Environmental stimuli and response that produce need changes.
+   // Receptor sensory stimuli and motor response that produce need changes.
    class Goal
    {
 public:
@@ -38,6 +36,7 @@ public:
       vector<void *>  receptors;
       void *pendingReceptor;
       void           *motor;
+      int placeMotorResponseCount;
       void           *mediator;
       NEED           goalValue;
       bool           enabled;
@@ -92,7 +91,7 @@ public:
    int addGoalMediator(void *mediator, NEED goalValue);
 
    // Find index of goal matching sensors, sensor mode
-   // and response. Return -1 for no match.
+   // and motor. Return -1 for no match.
    int findGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                 void *motor);
 
@@ -145,8 +144,9 @@ public:
    // Update homeostat based on receptor.
    void receptorUpdate(void *neuron);
 
-   // Update homeostat based on motor.
+   // Update homeostat based on motor firing.
    void motorUpdate();
+   void placeMotorUpdate();
 
    // Update homeostat based on mediator.
    void mediatorUpdate(void *mediator, double firingStrength);

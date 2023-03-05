@@ -184,10 +184,6 @@ void init()
 // Step.
 void step()
 {
-   // Do responses in world.
-   doResponse(Bird::FEMALE);
-   doResponse(Bird::MALE);
-
    // Step mice.
    stepMice();
 
@@ -213,6 +209,9 @@ void step()
       printf("\n");
    }
 
+   // Do response in world.
+   doResponse(Bird::FEMALE);
+
    // Set male sensors.
    setSensors(Bird::MALE);
 
@@ -234,6 +233,12 @@ void step()
       male->print();
       printf("\n");
    }
+
+   // Do response in world.
+   doResponse(Bird::MALE);
+
+   // Post-response.
+   male->postResponse();
 }
 
 

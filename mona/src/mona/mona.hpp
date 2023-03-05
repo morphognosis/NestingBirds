@@ -67,18 +67,21 @@ public:
    typedef double                   UTILITY;
    typedef double                   WEIGHT;
    typedef unsigned long long       COUNTER;
+
    enum NEURON_TYPE
    {
       RECEPTOR,
       MOTOR,
       MEDIATOR
    };
+
    enum EVENT_TYPE
    {
       CAUSE_EVENT,
       RESPONSE_EVENT,
       EFFECT_EVENT
    };
+
    enum EVENT_OUTCOME
    {
       EXPIRE,
@@ -86,7 +89,7 @@ public:
    };
 
    static const ID NULL_ID;
-   enum { NULL_RESPONSE = Homeostat::NULL_RESPONSE };
+   enum { NULL_RESPONSE = 0x7fffffff };
    enum { DEFAULT_RANDOM_SEED = 4517 };
 
    // Print version.
@@ -94,8 +97,8 @@ public:
 
    // Construct/initialize.
    Mona();
-   Mona(int numSensors, int numResponses, int numNeeds,
-        RANDOM randomSeed = DEFAULT_RANDOM_SEED);
+   Mona(int numSensors, int numResponses, int numNeeds, RANDOM randomSeed);
+   Mona(int numSensors, int numNeeds, RANDOM randomSeed);
    void initParms();
    void initNet(int numSensors, int numResponses, int numNeeds,
                 RANDOM randomSeed = DEFAULT_RANDOM_SEED);
@@ -197,19 +200,19 @@ public:
 
    // Goal management.
    int addGoal(int needIndex, vector<SENSOR>& sensors,
-               SENSOR_MODE sensorMode, Mona::Motor *motor, NEED goalValue);
+       SENSOR_MODE sensorMode, Mona::Motor* motor, NEED goalValue);
    int addGoal(int needIndex, vector<SENSOR>& sensors,
-               SENSOR_MODE sensorMode, NEED goalValue);
+       SENSOR_MODE sensorMode, NEED goalValue);
    int addGoal(int needIndex, Mediator* mediator, NEED goalValue);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
-                SENSOR_MODE sensorMode, Mona::Motor* motor);
+       SENSOR_MODE sensorMode, Mona::Motor* motor);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
-                SENSOR_MODE sensorMode);
-   int findGoal(int needIndex, Mediator *mediator);
+       SENSOR_MODE sensorMode);
+   int findGoal(int needIndex, Mediator* mediator);
    int getNumGoals(int needIndex);
    bool getGoalInfo(int needIndex, int goalIndex,
-                    vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
-                    Mona::Motor** motor, NEED& goalValue, bool& enabled);
+       vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
+       Mona::Motor** motor, NEED& goalValue, bool& enabled);
    void getGoalReceptors(int needIndex, int goalIndex, vector<void*>& receptors);
    Motor* getGoalMotor(int needIndex, int goalIndex);
    Mediator* getGoalMediator(int needIndex, int goalIndex);
@@ -253,12 +256,12 @@ public:
 
    // Behavior cycle.
    RESPONSE cycle(vector<SENSOR>& sensors);
-   RESPONSE cycle(vector<SENSOR>& sensors, int orientation, int x, int y);
    void sense();
    void enable();
    void learn();
    void drive();
    void respond();
+   void postResponse(int orientation, int x, int y);
 
    // Cause event firing notifications.
    list<struct FiringNotify> causeFirings;
@@ -450,40 +453,40 @@ public:
    {
 public:
 
-      // Construct/destruct.
-      Motor(int movementType, Mona *mona);
-      Motor(int x, int y, Mona* mona);
-      ~Motor();
+    // Construct/destruct.
+    Motor(int movementType, Mona* mona);
+    Motor(int x, int y, Mona* mona);
+    ~Motor();
 
-      // Response.
-      RESPONSE response;
+    // Response.
+    RESPONSE response;
 
-      // Movement type.
-      int movementType;
+    // Movement type.
+    int movementType;
 
-      // Place coordinates.
-      // If these are non-zero, this is a place motor, 
-      // meaning that the response navigates to these coordinates.
-      int x, y;
+    // Place coordinates.
+    // If these are non-zero, this is a place motor, 
+    // meaning that the response navigates to these coordinates.
+    int x, y;
 
-      // Set response to move to place coordinates.
-      void placeResponse();
-      static int gotoPlace(int orientation, int fromX, int fromY, int toX, int toY);
+    // Set response to move to place coordinates.
+    void placeResponse();
+    static int gotoPlace(int orientation, int fromX, int fromY, int toX, int toY);
 
-      // Is given motor a duplicate of this?
-      bool isDuplicate(Motor *);
+    // Is given motor a duplicate of this?
+    bool isDuplicate(Motor*);
 
-      // Load motor.
-      void load(FILE *fp);
+    // Load motor.
+    void load(FILE* fp);
 
-      // Save motor.
-      void save(FILE *fp);
+    // Save motor.
+    void save(FILE* fp);
 
-      // Print motor.
-      void print(FILE *out = stdout);
+    // Print motor.
+    void print(FILE* out = stdout);
 
 #ifdef MONA_TRACKING
-      void print(TRACKING_FLAGS tracking, FILE *out = stdout);
+    void print(TRACKING_FLAGS tracking, FILE* out = stdout);
 #endif
    };
 
