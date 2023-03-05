@@ -18,4 +18,4 @@ bin: executables.
 
 Commands:
 
-nestingbirds: run nest-building birds program.
+nestingbirds: run nestingbirds program.
