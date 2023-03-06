@@ -40,7 +40,7 @@ public:
       static const int NUM_RESPONSES = 2;
 
       // Response to string.
-      static char *toString(int response)
+      static const char *toString(int response)
       {
          switch (response)
          {
@@ -60,7 +60,7 @@ public:
    // Food.
 #define MALE_DEFAULT_FOOD_DURATION    "200"
    static int FOOD_DURATION;
-#define MALE_DEFAULT_INITIAL_FOOD     MALE_DEFAULT_FOOD_DURATION
+#define MALE_DEFAULT_INITIAL_FOOD     "0"
    static int  INITIAL_FOOD;
    static bool RANDOMIZE_FOOD_LEVEL;
 

@@ -1,21 +1,7 @@
-﻿  fileio.cpp
-  gettime.cpp
-  log.cpp
-  md5.cpp
-  quaternion.cpp
-  random.cpp
-  RDtree.cpp
-  drive.cpp
-  enable.cpp
-  homeostat.cpp
+﻿  homeostat.cpp
   learn.cpp
   mona.cpp
   respond.cpp
   sense.cpp
-  bird.cpp
-  female.cpp
-  male.cpp
-  NestingBirds.cpp
   Generating Code...
-     Creating library Debug\nestingbirds.lib and object Debug\nestingbirds.exp
   nestingbirds.vcxproj -> C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\Debug\nestingbirds.exe

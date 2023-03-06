@@ -15,7 +15,7 @@ public:
    static const int STONE     = 3;
 
    // Object to string.
-   static char *toString(int object)
+   static const char *toString(int object)
    {
       switch (object)
       {

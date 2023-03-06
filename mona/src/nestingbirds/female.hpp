@@ -26,7 +26,7 @@ public:
       static const int NUM_RESPONSES = 3;
 
       // Response to string.
-      static char *toString(int response)
+      static const char *toString(int response)
       {
          switch (response)
          {

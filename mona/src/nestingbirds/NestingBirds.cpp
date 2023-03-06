@@ -184,8 +184,10 @@ void init()
 // Step.
 void step()
 {
+#ifdef STEP_MICE
    // Step mice.
    stepMice();
+#endif
 
    // Set female sensors.
    setSensors(Bird::FEMALE);

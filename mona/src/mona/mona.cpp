@@ -1107,7 +1107,7 @@ void Mona::Motor::print(FILE *out)
 #endif
 {
     fprintf(out, "<motor><id>%llu</id>", id);
-    if (response != -1)
+    if (x == -1)
     {
         fprintf(out, "<response>%d</response>", response);
 
@@ -2196,6 +2196,18 @@ Mona::load(FILE *fp)
          assert(notify->mediator != NULL);
          delete id;
       }
+   }
+   for (int i = 0, n = (int)placeMotors.size(); i < n; i++)
+   {
+       motor = placeMotors[i];
+       for (int j = 0, k = (int)motor->notifyList.size(); j < k; j++)
+       {
+           notify = motor->notifyList[j];
+           id = (ID*)(notify->mediator);
+           notify->mediator = (Mediator*)findByID(*id);
+           assert(notify->mediator != NULL);
+           delete id;
+       }
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
