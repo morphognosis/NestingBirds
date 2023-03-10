@@ -65,22 +65,31 @@ public:
    static bool RANDOMIZE_FOOD_LEVEL;
 
    // Needs.
-   static const int MOUSE_NEED_INDEX = 0;
+   static const int GOTO_FOREST_NEED_INDEX = 0;
+#define MALE_DEFAULT_GOTO_FOREST_NEED            "0.8"
+   static Mona::NEED GOTO_FOREST_NEED;
+   static const int FIND_MOUSE_NEED_INDEX = 1;
+#define MALE_DEFAULT_FIND_MOUSE_NEED            "0.7"
+   static Mona::NEED FIND_MOUSE_NEED;
+   static const int GET_MOUSE_NEED_INDEX = 2;
+#define MALE_DEFAULT_GET_MOUSE_NEED            "0.6"
+   static Mona::NEED GET_MOUSE_NEED;
+   static const int MOUSE_NEED_INDEX = 3;
 #define MALE_DEFAULT_MOUSE_NEED            "0.5"
    static Mona::NEED MOUSE_NEED;
-   static const int FEMALE_MOUSE_NEED_INDEX = 1;
+   static const int FEMALE_MOUSE_NEED_INDEX = 4;
 #define MALE_DEFAULT_FEMALE_MOUSE_NEED     "0.4"
    static Mona::NEED FEMALE_MOUSE_NEED;
-   static const int STONE_NEED_INDEX = 2;
+   static const int STONE_NEED_INDEX = 5;
 #define MALE_DEFAULT_STONE_NEED            "0.3"
    static Mona::NEED STONE_NEED;
-   static const int FEMALE_STONE_NEED_INDEX = 3;
+   static const int FEMALE_STONE_NEED_INDEX = 6;
 #define MALE_DEFAULT_FEMALE_STONE_NEED     "0.2"
    static Mona::NEED FEMALE_STONE_NEED;
-   static const int ATTEND_FEMALE_NEED_INDEX = 4;
+   static const int ATTEND_FEMALE_NEED_INDEX = 7;
 #define MALE_DEFAULT_ATTEND_FEMALE_NEED    "0.1"
    static Mona::NEED ATTEND_FEMALE_NEED;
-   static const int NUM_NEEDS = 5;
+   static const int NUM_NEEDS = 8;
 
    // Constructor.
    Male();

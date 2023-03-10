@@ -333,6 +333,11 @@ Mona::clearMotiveWork()
       neuron = (Neuron *)motors[i];
       neuron->clearMotiveWork();
    }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       neuron = (Neuron*)placeMotors[i];
+       neuron->clearMotiveWork();
+   }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
    {
@@ -371,6 +376,11 @@ Mona::setMotives()
    {
       neuron = (Neuron *)motors[i];
       neuron->setMotive();
+   }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       neuron = (Neuron*)placeMotors[i];
+       neuron->setMotive();
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)

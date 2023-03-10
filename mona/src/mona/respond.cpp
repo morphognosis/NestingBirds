@@ -166,19 +166,11 @@ void Mona::postResponse(int orientation, int x, int y)
         printf("***Post response phase***\n");
     }
 #endif
-
-    bool first = false;
-    if (X == -1)
-    {
-        first = true;
-    }
     X = x;
     Y = y;
     this->orientation = orientation;
 
     // Fire place motors.
-    if (!first)
-    {
         for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
         {
             Motor* motor = placeMotors[i];
@@ -199,7 +191,6 @@ void Mona::postResponse(int orientation, int x, int y)
                 motor->firingStrength = 0.0;
             }
         }
-    }
 
     // Update need based on place motor firing.
     for (int i = 0; i < numNeeds; i++)

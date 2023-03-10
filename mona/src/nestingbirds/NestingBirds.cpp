@@ -105,7 +105,7 @@ Male   *male;
 Female *female;
 
 // Probability of mouse movement.
-static double MOUSE_MOVE_PROBABILITY = 0.1;
+static double MOUSE_MOVE_PROBABILITY = 0.0;
 
 // Verbosity.
 bool Verbose = true;
@@ -184,10 +184,8 @@ void init()
 // Step.
 void step()
 {
-#ifdef STEP_MICE
    // Step mice.
    stepMice();
-#endif
 
    // Set female sensors.
    setSensors(Bird::FEMALE);

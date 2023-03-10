@@ -1009,7 +1009,7 @@ public:
 
          case MOTOR:
             ((Motor *)neuron)->print((TRACKING_FLAGS)0, out);
-            fprintf(false, false, out, "\n");
+            fprintf(out, "\n");
             break;
 
          case MEDIATOR:

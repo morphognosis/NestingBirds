@@ -230,36 +230,36 @@ Mona::createPlaceMediators()
 {
     for (int i = 0, j = sensorModes.size(); i < j; i++)
     {
-        Mediator *mediator = newMediator(INITIAL_ENABLEMENT);
-        mediator->addEvent(CAUSE_EVENT, movementCauses[i]->neuron);
-        mediator->addEvent(RESPONSE_EVENT, newPlaceMotor(X, Y));
-        mediator->addEvent(EFFECT_EVENT, movementEffects[i]->neuron);
-        mediator->updateGoalValue(movementCauses[i]->needs);
+            Mediator* mediator = newMediator(INITIAL_ENABLEMENT);
+            mediator->addEvent(CAUSE_EVENT, movementCauses[i]->neuron);
+            mediator->addEvent(RESPONSE_EVENT, newPlaceMotor(X, Y));
+            mediator->addEvent(EFFECT_EVENT, movementEffects[i]->neuron);
+            mediator->updateGoalValue(movementCauses[i]->needs);
 
-        // Duplicate?
-        if (isDuplicateMediator(mediator))
-        {
-            deleteNeuron(mediator);
-            continue;
-        }
+            // Duplicate?
+            if (isDuplicateMediator(mediator))
+            {
+                deleteNeuron(mediator);
+                continue;
+            }
 
-        // Make new mediator available for learning.
-        if ((mediator->level + 1) < (int)learningEvents.size())
-        {
-            mediator->causeBegin = movementCauses[i]->begin;
-            mediator->firingStrength = movementCauses[i]->firingStrength *
-                movementEffects[i]->firingStrength;
-            LearningEvent *learningEvent = new LearningEvent(mediator);
-            assert(learningEvent != NULL);
-            learningEvents[mediator->level + 1].push_back(learningEvent);
-        }
+            // Make new mediator available for learning.
+            if ((mediator->level + 1) < (int)learningEvents.size())
+            {
+                mediator->causeBegin = movementCauses[i]->begin;
+                mediator->firingStrength = movementCauses[i]->firingStrength *
+                    movementEffects[i]->firingStrength;
+                LearningEvent* learningEvent = new LearningEvent(mediator);
+                assert(learningEvent != NULL);
+                learningEvents[mediator->level + 1].push_back(learningEvent);
+            }
 
 #ifdef MONA_TRACE
-        if (traceLearn)
-        {
-            printf("Create place mediator:\n");
-            mediator->print();
-        }
+            if (traceLearn)
+            {
+                printf("Create place mediator:\n");
+                mediator->print();
+            }
 #endif
     }
 }

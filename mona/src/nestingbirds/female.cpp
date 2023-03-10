@@ -30,12 +30,6 @@ Female::Female() : Bird(FEMALE)
         true, true, true, true,
         true, false, true, true);
     brain->addSensorMode(mask);
-    loadMask(mask, true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true,
-        true, true, true, true,
-        true, true, true, true);
-    brain->addSensorMode(mask);
-    brain->delSensorMode(0);
     int nestMode = 0;
     int foodMode = 1;
 

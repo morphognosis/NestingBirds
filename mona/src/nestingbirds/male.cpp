@@ -10,6 +10,9 @@ int Male:: INITIAL_FOOD         = atoi(MALE_DEFAULT_INITIAL_FOOD);
 bool Male::RANDOMIZE_FOOD_LEVEL = false;
 
 // Needs.
+Mona::NEED Male::GOTO_FOREST_NEED = strtod(MALE_DEFAULT_GOTO_FOREST_NEED, 0);
+Mona::NEED Male::FIND_MOUSE_NEED = strtod(MALE_DEFAULT_FIND_MOUSE_NEED, 0);
+Mona::NEED Male::GET_MOUSE_NEED = strtod(MALE_DEFAULT_GET_MOUSE_NEED, 0);
 Mona::NEED Male::MOUSE_NEED         = strtod(MALE_DEFAULT_MOUSE_NEED, 0);
 Mona::NEED Male::FEMALE_MOUSE_NEED  = strtod(MALE_DEFAULT_FEMALE_MOUSE_NEED, 0);
 Mona::NEED Male::STONE_NEED         = strtod(MALE_DEFAULT_STONE_NEED, 0);
@@ -23,6 +26,16 @@ Male::Male() : Bird(MALE)
 {
     // Create Mona bird brain.
     brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
+
+    // Install sensor modes: nest mode ignores hunger.
+    vector<bool> mask;
+    loadMask(mask, true, false, false, false, false, false,
+        false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, true, false,
+        false, false, false);
+    brain->addSensorMode(mask);
+    int baseMode = 0;
+    int gotoMode = 1;
 
     // Motors:
     Mona::Motor* doNothing = brain->newMotor();
@@ -46,18 +59,24 @@ Male::Male() : Bird(MALE)
 
     // Food goals.
     vector<Mona::SENSOR> sensors;
+    loadSensors(sensors, LOCALE::FOREST, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, OBJECT::NO_OBJECT, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE);
+    int gotoForestGoal = brain->addGoal(GOTO_FOREST_NEED_INDEX, sensors, gotoMode, GOTO_FOREST_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE);
-    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
+    int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, baseMode, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
         MATE_PROXIMITY_PRESENT, 0.0, DONT_CARE);
-    int giveMouseGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, 0, FEMALE_MOUSE_NEED);
+    int giveMouseGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, baseMode, FEMALE_MOUSE_NEED);
  
     // Stone goals.
     loadSensors(sensors, (Mona::SENSOR)LOCALE::DESERT, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -65,13 +84,13 @@ Male::Male() : Bird(MALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE);
-    int getStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, STONE_NEED);
+    int getStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, baseMode, STONE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
         MATE_PROXIMITY_PRESENT, DONT_CARE, 0.0);
-    int giveStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, 0, FEMALE_STONE_NEED);
+    int giveStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, baseMode, FEMALE_STONE_NEED);
 
     // Attend female goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -79,7 +98,7 @@ Male::Male() : Bird(MALE)
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         MATE_PROXIMITY_PRESENT, DONT_CARE, DONT_CARE);
-    int attendFemaleGoal = brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, 0, doNothing, ATTEND_FEMALE_NEED);
+    int attendFemaleGoal = brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, baseMode, doNothing, ATTEND_FEMALE_NEED);
 
     // Set initial response.
     response = Bird::RESPONSE::DO_NOTHING;
@@ -88,6 +107,9 @@ Male::Male() : Bird(MALE)
 // Initialize male needs.
 void Male::initNeeds()
 {
+    brain->setNeed(GOTO_FOREST_NEED_INDEX, 0.0);
+    brain->setNeed(FIND_MOUSE_NEED_INDEX, 0.0);
+    brain->setNeed(GET_MOUSE_NEED_INDEX, 0.0);
     brain->setNeed(MOUSE_NEED_INDEX, 0.0);
     brain->setNeed(FEMALE_MOUSE_NEED_INDEX, 0.0);
     brain->setNeed(STONE_NEED_INDEX, 0.0);
@@ -100,7 +122,30 @@ void Male::setNeeds()
 {
     if (food == 0)
     {
-        brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
+        if (sensors[Male::HAS_OBJECT_SENSOR] != OBJECT::MOUSE &&
+            sensors[Male::CURRENT_OBJECT_SENSOR] != OBJECT::MOUSE &&
+            sensors[Male::CURRENT_LOCALE_SENSOR] != LOCALE::FOREST)
+        {
+            brain->setNeed(GOTO_FOREST_NEED_INDEX, GOTO_FOREST_NEED);
+        }
+        if (sensors[Male::HAS_OBJECT_SENSOR] != OBJECT::MOUSE &&
+            sensors[Male::CURRENT_OBJECT_SENSOR] != OBJECT::MOUSE &&
+            sensors[Male::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST)
+        {
+            brain->setNeed(FIND_MOUSE_NEED_INDEX, FIND_MOUSE_NEED);
+        }
+        if (sensors[Male::HAS_OBJECT_SENSOR] != OBJECT::MOUSE &&
+            sensors[Male::CURRENT_OBJECT_SENSOR] == OBJECT::MOUSE &&
+            sensors[Male::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST)
+        {
+            brain->setNeed(GET_MOUSE_NEED_INDEX, GET_MOUSE_NEED);
+        }
+        if (sensors[Male::HAS_OBJECT_SENSOR] == OBJECT::MOUSE &&
+            sensors[Male::CURRENT_OBJECT_SENSOR] == OBJECT::MOUSE &&
+            sensors[Male::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST)
+        {
+            brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
+        }
     }
 
     if (sensors[Male::WANT_MOUSE_SENSOR] == 1)
@@ -116,6 +161,9 @@ void Male::setNeeds()
 
     if (sensors[Bird::CURRENT_OBJECT_SENSOR] == OBJECT::EGG)
     {
+        brain->setNeed(GOTO_FOREST_NEED_INDEX, 0.0);
+        brain->setNeed(FIND_MOUSE_NEED_INDEX, 0.0);
+        brain->setNeed(GET_MOUSE_NEED_INDEX, 0.0);
         brain->setNeed(MOUSE_NEED_INDEX, 0.0);
         brain->setNeed(FEMALE_MOUSE_NEED_INDEX, 0.0);
         brain->setNeed(STONE_NEED_INDEX, 0.0);
@@ -313,6 +361,18 @@ void Male::printNeeds()
     {
         switch (i)
         {
+        case GOTO_FOREST_NEED_INDEX:
+            printf("[Go to forest: %f],", brain->getNeed(GOTO_FOREST_NEED_INDEX));
+            break;
+
+        case FIND_MOUSE_NEED_INDEX:
+            printf("[Find mouse: %f],", brain->getNeed(FIND_MOUSE_NEED_INDEX));
+            break;
+
+        case GET_MOUSE_NEED_INDEX:
+            printf("[Get mouse: %f],", brain->getNeed(GET_MOUSE_NEED_INDEX));
+            break;
+
         case MOUSE_NEED_INDEX:
             printf("[Mouse: %f],", brain->getNeed(MOUSE_NEED_INDEX));
             break;

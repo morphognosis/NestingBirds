@@ -2293,9 +2293,6 @@ Mona::load(FILE *fp)
        assert(learningEvent->neuron != NULL);
        delete id;
    }
-   FREAD_INT(&orientation, fp);
-   FREAD_INT(&X, fp);
-   FREAD_INT(&Y, fp);
    return(true);
 }
 
@@ -2509,9 +2506,6 @@ Mona::save(FILE *fp)
    {
        movementEffects[i]->save(fp);
    }
-   FWRITE_INT(&orientation, fp);
-   FWRITE_INT(&X, fp);
-   FWRITE_INT(&Y, fp);
    return(true);
 }
 
@@ -2955,6 +2949,11 @@ Mona::clearTracking()
    {
       motor = motors[i];
       motor->tracker.clear();
+   }
+   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   {
+       motor = placeMotors[i];
+       motor->tracker.clear();
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
