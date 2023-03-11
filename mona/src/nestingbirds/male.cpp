@@ -27,14 +27,16 @@ Male::Male() : Bird(MALE)
     // Create Mona bird brain.
     brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
-    // Install sensor modes: nest mode ignores hunger.
+    // Install sensor modes:
+    int baseMode = 0;
+
+    // Goto mode navigates to locale to obtain object.
     vector<bool> mask;
     loadMask(mask, true, false, false, false, false, false,
         false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, true, false,
         false, false, false);
     brain->addSensorMode(mask);
-    int baseMode = 0;
     int gotoMode = 1;
 
     // Motors:
@@ -65,12 +67,28 @@ Male::Male() : Bird(MALE)
         DONT_CARE, DONT_CARE, OBJECT::NO_OBJECT, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE);
     int gotoForestGoal = brain->addGoal(GOTO_FOREST_NEED_INDEX, sensors, gotoMode, GOTO_FOREST_NEED);
+
+    loadSensors(sensors, DONT_CARE, OBJECT::MOUSE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE);
+    int findMouseGoal = brain->addGoal(FIND_MOUSE_NEED_INDEX, sensors, baseMode, FIND_MOUSE_NEED);
+
+    loadSensors(sensors, DONT_CARE, OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE, DONT_CARE,
+        DONT_CARE, DONT_CARE, DONT_CARE);
+    int getMouseGoal = brain->addGoal(FIND_MOUSE_NEED_INDEX, sensors, baseMode, FIND_MOUSE_NEED);
+
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, 0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE);
     int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, baseMode, MOUSE_NEED);
+
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -120,6 +138,7 @@ void Male::initNeeds()
 // Set male needs.
 void Male::setNeeds()
 {
+    findMouseAttention = false;
     if (food == 0)
     {
         if (sensors[Male::HAS_OBJECT_SENSOR] != OBJECT::MOUSE &&
@@ -133,16 +152,14 @@ void Male::setNeeds()
             sensors[Male::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST)
         {
             brain->setNeed(FIND_MOUSE_NEED_INDEX, FIND_MOUSE_NEED);
+            findMouseAttention = true;
         }
         if (sensors[Male::HAS_OBJECT_SENSOR] != OBJECT::MOUSE &&
-            sensors[Male::CURRENT_OBJECT_SENSOR] == OBJECT::MOUSE &&
-            sensors[Male::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST)
+            sensors[Male::CURRENT_OBJECT_SENSOR] == OBJECT::MOUSE)
         {
             brain->setNeed(GET_MOUSE_NEED_INDEX, GET_MOUSE_NEED);
         }
-        if (sensors[Male::HAS_OBJECT_SENSOR] == OBJECT::MOUSE &&
-            sensors[Male::CURRENT_OBJECT_SENSOR] == OBJECT::MOUSE &&
-            sensors[Male::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST)
+        if (sensors[Male::HAS_OBJECT_SENSOR] == OBJECT::MOUSE)
         {
             brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
         }
@@ -181,9 +198,63 @@ void Male::setResponseOverride()
 int Male::cycle()
 {
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
-   for (int i = 0; i < NUM_SENSORS; i++)
+   
+   // Attend to single mouse.
+   if (findMouseAttention)
    {
-      brainSensors[i] = (Mona::SENSOR)sensors[i];
+       loadSensors(brainSensors, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+       vector<bool> mice;
+       for (int i = 1; i < 18; i = i + 2)
+       {
+           if (sensors[i] == OBJECT::MOUSE)
+           {
+               mice.push_back(true);
+           }
+           else {
+               mice.push_back(false);
+           }
+       }
+           // Mouse is present?
+           if (mice[0])
+           {
+               brainSensors[1] = 1.0;
+           }
+           else if (mice[3])
+           {
+               brainSensors[7] = 1.0;
+           }
+           else if (mice[7])
+           {
+               brainSensors[15] = 1.0;
+           }
+           else if (mice[5])
+           {
+               brainSensors[11] = 1.0;
+           }
+           else if (mice[2])
+           {
+               brainSensors[5] = 1.0;
+           }
+           else if (mice[4])
+           {
+               brainSensors[9] = 1.0;
+           }
+           else if (mice[6])
+           {
+               brainSensors[13] = 1.0;
+           }
+           else if (mice[8])
+           {
+               brainSensors[17] = 1.0;
+           }
+   }
+   else {
+       for (int i = 0; i < NUM_SENSORS; i++)
+       {
+           brainSensors[i] = (Mona::SENSOR)sensors[i];
+       }
    }
    response = brain->cycle(brainSensors);
    return response;

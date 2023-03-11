@@ -91,6 +91,9 @@ public:
    static Mona::NEED ATTEND_FEMALE_NEED;
    static const int NUM_NEEDS = 8;
 
+   // Find mouse attention.
+   bool findMouseAttention;
+
    // Constructor.
    Male();
 
