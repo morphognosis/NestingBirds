@@ -5,46 +5,127 @@
 #ifndef __FEMALE__
 #define __FEMALE__
 
-#include "bird.hpp"
+#include "object.hpp"
+#include "locale.hpp"
+#include "orientation.hpp"
 #include "../mona/mona.hpp"
 
-class Female : public Bird
+class Female
 {
 public:
 
-   // Sensors.
-   static const int NUM_SENSORS = Bird::NUM_SENSORS;
-   int              sensors[NUM_SENSORS];
+    // Sensors.
+    class CELL_SENSOR
+    {
+    public:
+        static const int NUM_SENSORS = 2;
+        int              locale;
+        int              object;
+    };
 
-   // Responses.
-   class RESPONSE
-   {
-public:
-      static const int WANT_MOUSE    = Bird::RESPONSE::NUM_RESPONSES;
-      static const int WANT_STONE    = WANT_MOUSE + 1;
-      static const int LAY_EGG       = WANT_STONE + 1;
-      static const int NUM_RESPONSES = 3;
+    // Bird senses current, left, front, right, and rear cells.
+    static const int NUM_CELL_SENSORS = 9;
+    static const int CURRENT_LOCALE_SENSOR = 0;
+    static const int CURRENT_OBJECT_SENSOR = 1;
+    static const int LEFT_LOCALE_SENSOR = 2;
+    static const int LEFT_OBJECT_SENSOR = 3;
+    static const int LEFT_FRONT_LOCALE_SENSOR = 4;
+    static const int LEFT_FRONT_OBJECT_SENSOR = 5;
+    static const int FRONT_LOCALE_SENSOR = 6;
+    static const int FRONT_OBJECT_SENSOR = 7;
+    static const int RIGHT_FRONT_LOCALE_SENSOR = 8;
+    static const int RIGHT_FRONT_OBJECT_SENSOR = 9;
+    static const int RIGHT_LOCALE_SENSOR = 10;
+    static const int RIGHT_OBJECT_SENSOR = 11;
+    static const int RIGHT_REAR_LOCALE_SENSOR = 12;
+    static const int RIGHT_REAR_OBJECT_SENSOR = 13;
+    static const int REAR_LOCALE_SENSOR = 14;
+    static const int REAR_OBJECT_SENSOR = 15;
+    static const int LEFT_REAR_LOCALE_SENSOR = 16;
+    static const int LEFT_REAR_OBJECT_SENSOR = 17;
 
-      // Response to string.
-      static const char *toString(int response)
-      {
-         switch (response)
-         {
-         case WANT_MOUSE:
-            return("WANT_MOUSE");
+    // State sensors.
+    static const int ORIENTATION_SENSOR = NUM_CELL_SENSORS * CELL_SENSOR::NUM_SENSORS;
+    static const int HUNGER_SENSOR = ORIENTATION_SENSOR + 1;
+    static const int HAS_OBJECT_SENSOR = HUNGER_SENSOR + 1;
+    static const int NUM_SENSORS = HAS_OBJECT_SENSOR + 1;
 
-         case WANT_STONE:
-            return("WANT_STONE");
+    // Sensors.
+    int              sensors[NUM_SENSORS];
 
-         case LAY_EGG:
-            return("LAY_EGG");
+    // State.
+    int x, y;
+    int orientation;
+    int food;
+    int hasObject;
 
-         default:
-            return(Bird::RESPONSE::toString(response));
-         }
-      }
-   };
-   int response;
+    // Responses.
+    class RESPONSE
+    {
+    public:
+        static const int DO_NOTHING = 0;
+        static const int MOVE_FORWARD = 1;
+        static const int TURN_RIGHT = 2;
+        static const int TURN_LEFT = 3;
+        static const int TURN_AROUND = 4;
+        static const int EAT_MOUSE = 5;
+        static const int GET_OBJECT = 6;
+        static const int PUT_OBJECT = 7;
+        static const int TOSS_OBJECT = 8;
+        static const int WANT_MOUSE = 9;
+        static const int WANT_STONE = 10;
+        static const int LAY_EGG = 11;
+        static const int NUM_RESPONSES = 12;
+
+        // Response to string.
+        static const char* toString(int response)
+        {
+            switch (response)
+            {
+            case DO_NOTHING:
+                return("DO_NOTHING");
+
+            case EAT_MOUSE:
+                return("EAT_MOUSE");
+
+            case GET_OBJECT:
+                return("GET_OBJECT");
+
+            case PUT_OBJECT:
+                return("PUT_OBJECT");
+
+            case TOSS_OBJECT:
+                return("TOSS_OBJECT");
+
+            case MOVE_FORWARD:
+                return("MOVE_FORWARD");
+
+            case TURN_RIGHT:
+                return("TURN_RIGHT");
+
+            case TURN_LEFT:
+                return("TURN_LEFT");
+
+            case TURN_AROUND:
+                return("TURN_AROUND");
+
+            case WANT_MOUSE:
+                return("WANT_MOUSE");
+
+            case WANT_STONE:
+                return("WANT_STONE");
+
+            case LAY_EGG:
+                return("LAY_EGG");
+
+            default:
+                return("Unknown response");
+            }
+        }
+    };
+
+    // Response.
+    int response;
 
    // Food.
 #define FEMALE_DEFAULT_FOOD_DURATION    "75"
@@ -68,6 +149,9 @@ public:
    static Mona::NEED BROOD_EGG_NEED;
    static const int NUM_NEEDS = 4;
 
+   // Brain.
+   Mona* brain;
+
    // Constructor.
    Female();
 
@@ -81,6 +165,9 @@ public:
    // Cycle.
    int cycle();
 
+   // Digest food.
+   void digest();
+
    // Load.
    void load(char *filename);
 
@@ -92,6 +179,9 @@ public:
 
    // Print sensors.
    void printSensors();
+
+   // Print state.
+   void printState();
 
    // Print needs.
    void printNeeds();
@@ -113,7 +203,7 @@ private:
         bool rearLocale, bool rearObject,
         bool leftRearLocale, bool leftRearObject,
         bool orientation, bool hunger,
-        bool hasObject, bool state);
+        bool hasObject);
 
     // Load sensors.
     void loadSensors(vector<Mona::SENSOR>& sensors,
@@ -127,6 +217,6 @@ private:
         Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
         Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
         Mona::SENSOR orientation, Mona::SENSOR hunger,
-        Mona::SENSOR hasObject, Mona::SENSOR state);
+        Mona::SENSOR hasObject);
 };
 #endif

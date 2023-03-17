@@ -25,8 +25,8 @@ const char *Usage =
    "      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" MALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
    "      [-maleMouseNeed <amount> (default=" MALE_DEFAULT_MOUSE_NEED ")]\n"
    "      [-maleFemaleMouseNeed <amount> (default=" MALE_DEFAULT_FEMALE_MOUSE_NEED ")]\n"
-   "      [-maleStoneNeed <amount> (default=" MALE_DEFAULT_STONE_NEED ")]\n"
    "      [-maleFemaleStoneNeed <amount> (default=" MALE_DEFAULT_FEMALE_STONE_NEED ")]\n"
+   "      [-maleAttendFemaleNeed <amount> (default=" MALE_DEFAULT_ATTEND_FEMALE_NEED ")]\n"
    "      [-femaleInitialFood <amount> (default=" FEMALE_DEFAULT_INITIAL_FOOD ")]\n"
    "      [-femaleFoodDuration <amount> (default" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
    "      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
@@ -40,6 +40,10 @@ const char *Usage =
    "Exit codes:\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
    "  0=success\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
    "  1=error\n";
+
+// Bird sex.
+static const int MALE = 0;
+static const int FEMALE = 1;
 
 // Testing vs. training.
 bool MaleTest;
@@ -84,6 +88,26 @@ const char WorldMap[WIDTH][HEIGHT] =
    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3, 0, 0, 0 }
 };
 
+// Bounds.
+int NEST_CENTER_X = WIDTH / 2;
+int NEST_CENTER_Y = (HEIGHT / 2) + 1;
+int NEST_MIN_X = NEST_CENTER_X - 1;
+int NEST_MAX_X = NEST_CENTER_X + 1;
+int NEST_MIN_Y = NEST_CENTER_Y - 1;
+int NEST_MAX_Y = NEST_CENTER_Y + 1;
+int FOREST_CENTER_X = -1;
+int FOREST_CENTER_Y = -1;
+int FOREST_MIN_X = -1;
+int FOREST_MAX_X = -1;
+int FOREST_MIN_Y = -1;
+int FOREST_MAX_Y = -1;
+int DESERT_CENTER_X = -1;
+int DESERT_CENTER_Y = -1;
+int DESERT_MIN_X = -1;
+int DESERT_MAX_X = -1;
+int DESERT_MIN_Y = -1;
+int DESERT_MAX_Y = -1;
+
 // Cell.
 class Cell
 {
@@ -120,6 +144,11 @@ void trainFemale();
 bool getMouse();
 bool getStone();
 bool returnToFemale();
+void doMaleResponse();
+void doFemaleResponse();
+void setMaleSensors();
+void    setFemaleSensors();
+int distance(int x1, int y1, int x2, int y2);
 
 // Initialize.
 void init()
@@ -142,42 +171,110 @@ void init()
          case 1:
             World[x][y].locale = LOCALE::FOREST;
             World[x][y].object = OBJECT::NO_OBJECT;
+            if (FOREST_MIN_X == -1 || x < FOREST_MIN_X)
+            {
+                FOREST_MIN_X = x;
+            }
+            if (FOREST_MAX_X == -1 || x > FOREST_MAX_X)
+            {
+                FOREST_MAX_X = x;
+            }
+            if (FOREST_MIN_Y == -1 || y < FOREST_MIN_Y)
+            {
+                FOREST_MIN_Y = y;
+            }
+            if (FOREST_MAX_Y == -1 || y > FOREST_MAX_Y)
+            {
+                FOREST_MAX_Y = y;
+            }
             break;
 
          case 2:
             World[x][y].locale = LOCALE::FOREST;
             World[x][y].object = OBJECT::MOUSE;
+            if (FOREST_MIN_X == -1 || x < FOREST_MIN_X)
+            {
+                FOREST_MIN_X = x;
+            }
+            if (FOREST_MAX_X == -1 || x > FOREST_MAX_X)
+            {
+                FOREST_MAX_X = x;
+            }
+            if (FOREST_MIN_Y == -1 || y < FOREST_MIN_Y)
+            {
+                FOREST_MIN_Y = y;
+            }
+            if (FOREST_MAX_Y == -1 || y > FOREST_MAX_Y)
+            {
+                FOREST_MAX_Y = y;
+            }
             break;
 
          case 3:
             World[x][y].locale = LOCALE::DESERT;
             World[x][y].object = OBJECT::NO_OBJECT;
+            if (DESERT_MIN_X == -1 || x < DESERT_MIN_X)
+            {
+                DESERT_MIN_X = x;
+            }
+            if (DESERT_MAX_X == -1 || x > DESERT_MAX_X)
+            {
+                DESERT_MAX_X = x;
+            }
+            if (DESERT_MIN_Y == -1 || y < DESERT_MIN_Y)
+            {
+                DESERT_MIN_Y = y;
+            }
+            if (DESERT_MAX_Y == -1 || y > DESERT_MAX_Y)
+            {
+                DESERT_MAX_Y = y;
+            }
             break;
 
          case 4:
             World[x][y].locale = LOCALE::DESERT;
             World[x][y].object = OBJECT::STONE;
+            if (DESERT_MIN_X == -1 || x < DESERT_MIN_X)
+            {
+                DESERT_MIN_X = x;
+            }
+            if (DESERT_MAX_X == -1 || x > DESERT_MAX_X)
+            {
+                DESERT_MAX_X = x;
+            }
+            if (DESERT_MIN_Y == -1 || y < DESERT_MIN_Y)
+            {
+                DESERT_MIN_Y = y;
+            }
+            if (DESERT_MAX_Y == -1 || y > DESERT_MAX_Y)
+            {
+                DESERT_MAX_Y = y;
+            }
             break;
          }
       }
    }
+   FOREST_CENTER_X = (FOREST_MIN_X + FOREST_MAX_X) / 2;
+   FOREST_CENTER_Y = (FOREST_MIN_Y + FOREST_MAX_Y) / 2;
+   DESERT_CENTER_X = (DESERT_MIN_X + DESERT_MAX_X) / 2;
+   DESERT_CENTER_Y = (DESERT_MIN_Y + DESERT_MAX_Y) / 2;
 
    // Create birds.
    female             = new Female();
    female->x          = WIDTH / 2;
    female->y          = HEIGHT / 2;
    female->food       = Female::INITIAL_FOOD;
-   female->response   = Bird::RESPONSE::DO_NOTHING;
+   female->response   = Female::RESPONSE::DO_NOTHING;
    male               = new Male();
    male->x            = WIDTH / 2;
    male->y            = HEIGHT / 2;
    male->food         = Male::INITIAL_FOOD;
-   male->response     = Bird::RESPONSE::DO_NOTHING;
+   male->response     = Male::RESPONSE::DO_NOTHING;
    FemaleWantMouse    = false;
    FemaleWantStone    = false;
    FemaleNestSequence = 0;
-   setSensors(Bird::FEMALE);
-   setSensors(Bird::MALE);
+   setSensors(FEMALE);
+   setSensors(MALE);
 }
 
 
@@ -188,12 +285,12 @@ void step()
    stepMice();
 
    // Set female sensors.
-   setSensors(Bird::FEMALE);
+   setSensors(FEMALE);
 
    // Train?
    if (!FemaleTest)
    {
-      train(Bird::FEMALE);
+      train(FEMALE);
    }
 
    // Set female needs.
@@ -210,15 +307,15 @@ void step()
    }
 
    // Do response in world.
-   doResponse(Bird::FEMALE);
+   doResponse(FEMALE);
 
    // Set male sensors.
-   setSensors(Bird::MALE);
+   setSensors(MALE);
 
    // Train?
    if (!MaleTest)
    {
-      train(Bird::MALE);
+      train(MALE);
    }
 
    // Set male needs.
@@ -235,7 +332,7 @@ void step()
    }
 
    // Do response in world.
-   doResponse(Bird::MALE);
+   doResponse(MALE);
 
    // Post-response.
    male->postResponse();
@@ -245,7 +342,7 @@ void step()
 // Train.
 void train(int gender)
 {
-   if (gender == Bird::MALE)
+   if (gender == MALE)
    {
       trainMale();
       male->setResponseOverride();
@@ -263,7 +360,7 @@ void trainMale()
 {
     if (World[male->x][male->y].object == OBJECT::EGG)
     {
-        male->response = Bird::RESPONSE::DO_NOTHING;
+        male->response = Male::RESPONSE::DO_NOTHING;
         return;
     }
 
@@ -281,16 +378,16 @@ bool getMouse()
     {
         if (male->hasObject == OBJECT::MOUSE)
         {
-            male->response = Bird::RESPONSE::EAT_MOUSE;
+            male->response = Male::RESPONSE::EAT_MOUSE;
             return(true);
         }
         if (male->hasObject == OBJECT::STONE)
         {
-            male->response = Bird::RESPONSE::TOSS_OBJECT;
+            male->response = Male::RESPONSE::TOSS_OBJECT;
             return(true);
         }
     }
-   if ((male->x == female->x) && (male->y == female->y))
+   if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
    {
        if (male->hasObject == OBJECT::MOUSE)
        {
@@ -298,7 +395,7 @@ bool getMouse()
            FemaleWantMouse = false;
            return(true);
        }
-       if (female->response == Female::RESPONSE::WANT_MOUSE)
+       else if (female->response == Female::RESPONSE::WANT_MOUSE)
       {
          FemaleWantMouse = true;
       }
@@ -307,6 +404,10 @@ bool getMouse()
               male->response = Male::RESPONSE::GIVE_STONE;
               FemaleWantStone = false;
               return(true);
+      }
+      else if (female->response == Female::RESPONSE::WANT_STONE)
+      {
+          FemaleWantStone = true;
       }
    }
    if (male->hasObject == OBJECT::MOUSE)
@@ -317,163 +418,34 @@ bool getMouse()
    {
        return false;
    }
-   if (World[male->x][male->y].object == OBJECT::MOUSE)
+   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
    {
-      male->response = Bird::RESPONSE::GET_OBJECT;
+      male->response = Male::RESPONSE::GET_OBJECT;
       return(true);
    }
-   if (male->sensors[Bird::LEFT_OBJECT_SENSOR] == OBJECT::MOUSE)
+   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::FRONT)
    {
-      male->response = Bird::RESPONSE::TURN_LEFT;
+       male->response = Male::RESPONSE::MOVE_FORWARD;
+       return(true);
+   }
+   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::REAR)
+   {
+       male->response = Male::RESPONSE::TURN_AROUND;
+       return(true);
+   }
+   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::LEFT)
+   {
+      male->response = Male::RESPONSE::TURN_LEFT;
       return(true);
    }
-   if (male->sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] == OBJECT::MOUSE)
+   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::RIGHT)
    {
-       male->response = Bird::RESPONSE::MOVE_FORWARD;
+       male->response = Male::RESPONSE::TURN_RIGHT;
        return(true);
    }
-   if (male->sensors[Bird::FRONT_OBJECT_SENSOR] == OBJECT::MOUSE)
-   {
-      male->response = Bird::RESPONSE::MOVE_FORWARD;
-      return(true);
-   }
-   if (male->sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] == OBJECT::MOUSE)
-   {
-      male->response = Bird::RESPONSE::MOVE_FORWARD;
-      return(true);
-   }
-   if (male->sensors[Bird::RIGHT_OBJECT_SENSOR] == OBJECT::MOUSE)
-   {
-       male->response = Bird::RESPONSE::TURN_RIGHT;
-       return(true);
-   }
-   if (male->sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] == OBJECT::MOUSE)
-   {
-       male->response = Bird::RESPONSE::TURN_AROUND;
-       return(true);
-   }
-   if (male->sensors[Bird::REAR_OBJECT_SENSOR] == OBJECT::MOUSE)
-   {
-       male->response = Bird::RESPONSE::TURN_AROUND;
-       return(true);
-   }
-   if (male->sensors[Bird::LEFT_REAR_OBJECT_SENSOR] == OBJECT::MOUSE)
-   {
-       male->response = Bird::RESPONSE::TURN_AROUND;
-       return(true);
-   }
-   if ((male->sensors[Bird::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::FRONT_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::REAR_LOCALE_SENSOR] == LOCALE::FOREST) ||
-       (male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] == LOCALE::FOREST))
-   {
-      if (male->sensors[Bird::CURRENT_LOCALE_SENSOR] == LOCALE::FOREST)
-      {
-         vector<int> responses;
-         if ((male->sensors[Bird::LEFT_LOCALE_SENSOR] != LOCALE::FOREST) &&
-             (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] != LOCALE::FOREST) &&
-             (male->sensors[Bird::FRONT_LOCALE_SENSOR] != LOCALE::FOREST) &&
-             (male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] != LOCALE::FOREST) &&
-             (male->sensors[Bird::RIGHT_LOCALE_SENSOR] != LOCALE::FOREST) &&
-             (male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] != LOCALE::FOREST) &&
-             (male->sensors[Bird::REAR_LOCALE_SENSOR] != LOCALE::FOREST) &&
-             (male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] != LOCALE::FOREST))
-         {
-            int r = Bird::RESPONSE::MOVE_FORWARD;
-            responses.push_back(r);
-            responses.push_back(r);
-            r = Bird::RESPONSE::TURN_LEFT;
-            responses.push_back(r);
-            r = Bird::RESPONSE::TURN_RIGHT;
-            responses.push_back(r);
-            r = Bird::RESPONSE::TURN_AROUND;
-            responses.push_back(r);
-         }
-         else
-         {
-            if (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] == LOCALE::FOREST ||
-                male->sensors[Bird::FRONT_LOCALE_SENSOR] == LOCALE::FOREST ||
-                male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] == LOCALE::FOREST)
-            {
-               int r = Bird::RESPONSE::MOVE_FORWARD;
-               responses.push_back(r);
-               responses.push_back(r);
-            }
-            if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::FOREST)
-            {
-               int r = Bird::RESPONSE::TURN_LEFT;
-               responses.push_back(r);
-            }
-            if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::FOREST)
-            {
-               int r = Bird::RESPONSE::TURN_RIGHT;
-               responses.push_back(r);
-            }
-            if (male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] == LOCALE::FOREST ||
-                male->sensors[Bird::REAR_LOCALE_SENSOR] == LOCALE::FOREST ||
-                male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] == LOCALE::FOREST)
-            {
-                int r = Bird::RESPONSE::TURN_AROUND;
-                responses.push_back(r);
-            }
-         }
-         male->response = responses[rand() % responses.size()];
-      }
-      else
-      {
-         vector<int> responses;
-         if (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] == LOCALE::FOREST ||
-             male->sensors[Bird::FRONT_LOCALE_SENSOR] == LOCALE::FOREST ||
-             male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] == LOCALE::FOREST)
-         {
-            int r = Bird::RESPONSE::MOVE_FORWARD;
-            responses.push_back(r);
-            responses.push_back(r);
-         }
-         if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::FOREST)
-         {
-            int r = Bird::RESPONSE::TURN_LEFT;
-            responses.push_back(r);
-         }
-         if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::FOREST)
-         {
-            int r = Bird::RESPONSE::TURN_RIGHT;
-            responses.push_back(r);
-         }
-         if (male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] == LOCALE::FOREST ||
-             male->sensors[Bird::REAR_LOCALE_SENSOR] == LOCALE::FOREST ||
-             male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] == LOCALE::FOREST)
-         {
-             int r = Bird::RESPONSE::TURN_AROUND;
-             responses.push_back(r);
-         }
-         male->response = responses[rand() % responses.size()];
-      }
-      return(true);
-   }
-   int mousex = 3;
-   int mousey = 5;
+   int mousex = FOREST_CENTER_X;
+   int mousey = FOREST_CENTER_Y;
    male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, mousex, mousey);
-   if (male->response != Bird::RESPONSE::DO_NOTHING)
-   {
-       return true;
-   }
-   vector<int> responses;
-   int r = Bird::RESPONSE::MOVE_FORWARD;
-   responses.push_back(r);
-   responses.push_back(r);
-   r = Bird::RESPONSE::TURN_LEFT;
-   responses.push_back(r);
-   r = Bird::RESPONSE::TURN_RIGHT;
-   responses.push_back(r);
-   r = Bird::RESPONSE::TURN_AROUND;
-   responses.push_back(r);
-   male->response = responses[rand() % responses.size()];
    return(true);
 }
 
@@ -481,7 +453,7 @@ bool getMouse()
 // Get stone.
 bool getStone()
 {
-   if ((male->x == female->x) && (male->y == female->y))
+   if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
    {
       if (female->response == Female::RESPONSE::WANT_STONE)
       {
@@ -494,7 +466,7 @@ bool getStone()
    }
    if (male->hasObject == OBJECT::STONE)
    {
-      if ((male->x == female->x) && (male->y == female->y))
+      if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
       {
          male->response  = Male::RESPONSE::GIVE_STONE;
          FemaleWantStone = false;
@@ -505,172 +477,34 @@ bool getStone()
          return(false);
       }
    }
-   if ((World[male->x][male->y].object == OBJECT::STONE) &&
-       (World[male->x][male->y].locale == LOCALE::DESERT))
+   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
    {
-      male->response = Bird::RESPONSE::GET_OBJECT;
+      male->response = Male::RESPONSE::GET_OBJECT;
       return(true);
    }
-   if ((male->sensors[Bird::LEFT_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::DESERT))
+   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::FRONT)
    {
-      male->response = Bird::RESPONSE::TURN_LEFT;
-      return(true);
-   }
-   if ((male->sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT))
-   {
-      male->response = Bird::RESPONSE::MOVE_FORWARD;
-      return(true);
-   }
-   if ((male->sensors[Bird::FRONT_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::FRONT_LOCALE_SENSOR] == LOCALE::DESERT))
-   {
-       male->response = Bird::RESPONSE::MOVE_FORWARD;
+       male->response = Male::RESPONSE::MOVE_FORWARD;
        return(true);
    }
-   if ((male->sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT))
+   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::REAR)
    {
-       male->response = Bird::RESPONSE::MOVE_FORWARD;
+       male->response = Male::RESPONSE::TURN_AROUND;
        return(true);
    }
-   if ((male->sensors[Bird::RIGHT_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::DESERT))
+   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::LEFT)
    {
-      male->response = Bird::RESPONSE::TURN_RIGHT;
-      return(true);
-   }
-   if ((male->sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] == LOCALE::DESERT))
-   {
-       male->response = Bird::RESPONSE::TURN_AROUND;
+       male->response = Male::RESPONSE::TURN_LEFT;
        return(true);
    }
-   if ((male->sensors[Bird::REAR_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::REAR_LOCALE_SENSOR] == LOCALE::DESERT))
+   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::RIGHT)
    {
-       male->response = Bird::RESPONSE::TURN_AROUND;
+       male->response = Male::RESPONSE::TURN_RIGHT;
        return(true);
    }
-   if ((male->sensors[Bird::LEFT_REAR_OBJECT_SENSOR] == OBJECT::STONE) &&
-       (male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] == LOCALE::DESERT))
-   {
-       male->response = Bird::RESPONSE::TURN_AROUND;
-       return(true);
-   }
-   if ((male->sensors[Bird::CURRENT_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::FRONT_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::REAR_LOCALE_SENSOR] == LOCALE::DESERT) ||
-       (male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] == LOCALE::DESERT))
-   {
-      if (male->sensors[Bird::CURRENT_LOCALE_SENSOR] == LOCALE::DESERT)
-      {
-         vector<int> responses;
-         if ((male->sensors[Bird::LEFT_LOCALE_SENSOR] != LOCALE::DESERT) &&
-             (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] != LOCALE::DESERT) &&
-             (male->sensors[Bird::FRONT_LOCALE_SENSOR] != LOCALE::DESERT) &&
-             (male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] != LOCALE::DESERT) &&
-             (male->sensors[Bird::RIGHT_LOCALE_SENSOR] != LOCALE::DESERT) &&
-             (male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] != LOCALE::DESERT) &&
-             (male->sensors[Bird::REAR_LOCALE_SENSOR] != LOCALE::DESERT) &&
-             (male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] != LOCALE::DESERT))
-         {
-             int r = Bird::RESPONSE::MOVE_FORWARD;
-             responses.push_back(r);
-             responses.push_back(r);
-             r = Bird::RESPONSE::TURN_LEFT;
-             responses.push_back(r);
-             r = Bird::RESPONSE::TURN_RIGHT;
-             responses.push_back(r);
-             r = Bird::RESPONSE::TURN_AROUND;
-             responses.push_back(r);
-         }
-         else
-         {
-             if (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT ||
-                 male->sensors[Bird::FRONT_LOCALE_SENSOR] == LOCALE::DESERT ||
-                 male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT)
-            {
-               int r = Bird::RESPONSE::MOVE_FORWARD;
-               responses.push_back(r);
-               responses.push_back(r);
-            }
-            if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::DESERT)
-            {
-               int r = Bird::RESPONSE::TURN_LEFT;
-               responses.push_back(r);
-            }
-            if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::DESERT)
-            {
-               int r = Bird::RESPONSE::TURN_RIGHT;
-               responses.push_back(r);
-            }
-            if (male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] == LOCALE::DESERT  ||
-                male->sensors[Bird::REAR_LOCALE_SENSOR] == LOCALE::DESERT  ||
-                male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] == LOCALE::DESERT)
-            {
-                int r = Bird::RESPONSE::TURN_AROUND;
-                responses.push_back(r);
-            }
-         }
-         male->response = responses[rand() % responses.size()];
-      }
-      else
-      {
-         vector<int> responses;
-         if (male->sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT ||
-             male->sensors[Bird::FRONT_LOCALE_SENSOR] == LOCALE::DESERT ||
-             male->sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] == LOCALE::DESERT)
-         {
-            int r = Bird::RESPONSE::MOVE_FORWARD;
-            responses.push_back(r);
-            responses.push_back(r);
-         }
-         if (male->sensors[Bird::LEFT_LOCALE_SENSOR] == LOCALE::DESERT)
-         {
-            int r = Bird::RESPONSE::TURN_LEFT;
-            responses.push_back(r);
-         }
-         if (male->sensors[Bird::RIGHT_LOCALE_SENSOR] == LOCALE::DESERT)
-         {
-            int r = Bird::RESPONSE::TURN_RIGHT;
-            responses.push_back(r);
-         }
-         if (male->sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] == LOCALE::DESERT ||
-             male->sensors[Bird::REAR_LOCALE_SENSOR] == LOCALE::DESERT ||
-             male->sensors[Bird::LEFT_REAR_LOCALE_SENSOR] == LOCALE::DESERT)
-         {
-             int r = Bird::RESPONSE::TURN_AROUND;
-             responses.push_back(r);
-         }
-         male->response = responses[rand() % responses.size()];
-      }
-      return(true);
-   }
-   int stonex = 14;
-   int stoney = 16;
+   int stonex = DESERT_CENTER_X;
+   int stoney = DESERT_CENTER_Y;
    male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, stonex, stoney);
-   if (male->response != Bird::RESPONSE::DO_NOTHING)
-   {
-       return true;
-   }
-   vector<int> responses;
-   int r = Bird::RESPONSE::MOVE_FORWARD;
-   responses.push_back(r);
-   responses.push_back(r);
-   r = Bird::RESPONSE::TURN_LEFT;
-   responses.push_back(r);
-   r = Bird::RESPONSE::TURN_RIGHT;
-   responses.push_back(r);
-   r = Bird::RESPONSE::TURN_AROUND;
-   responses.push_back(r);
-   male->response = responses[rand() % responses.size()];
    return(true);
 }
 
@@ -678,126 +512,122 @@ bool getStone()
 // Male returns to female.
 bool returnToFemale()
 {
-   switch (male->sensors[Male::MATE_PROXIMITY_SENSOR])
+   switch (male->sensors[Male::FEMALE_PROXIMITY_SENSOR])
    {
-   case Male::MATE_PROXIMITY_PRESENT:
-      male->response = Bird::RESPONSE::DO_NOTHING;
+   case Male::PROXIMITY::PRESENT:
+      male->response = Male::RESPONSE::DO_NOTHING;
       return(true);
 
-   case Male::MATE_PROXIMITY_LEFT:
-      male->response = Bird::RESPONSE::TURN_LEFT;
+   case Male::PROXIMITY::LEFT:
+      male->response = Male::RESPONSE::TURN_LEFT;
       break;
 
-   case Male::MATE_PROXIMITY_LEFT_FRONT:
-   case Male::MATE_PROXIMITY_FRONT:
-   case Male::MATE_PROXIMITY_RIGHT_FRONT:
-      male->response = Bird::RESPONSE::MOVE_FORWARD;
+   case Male::PROXIMITY::FRONT:
+       male->response = Male::RESPONSE::MOVE_FORWARD;
       break;
 
-   case Male::MATE_PROXIMITY_RIGHT:
-      male->response = Bird::RESPONSE::TURN_RIGHT;
+   case Male::PROXIMITY::RIGHT:
+      male->response = Male::RESPONSE::TURN_RIGHT;
       break;
 
-   case Male::MATE_PROXIMITY_RIGHT_REAR:
-   case Male::MATE_PROXIMITY_REAR:
-   case Male::MATE_PROXIMITY_LEFT_REAR:
-       male->response = Bird::RESPONSE::TURN_AROUND;
+   case Male::PROXIMITY::REAR:
+       male->response = Male::RESPONSE::TURN_AROUND;
        break;
 
-   case Male::MATE_PROXIMITY_UNKNOWN:
+   case Male::PROXIMITY::UNKNOWN:
       int centerx = WIDTH / 2;
       int centery = (HEIGHT / 2) + 1;
       if (male->x < centerx)
       {
-         if (male->orientation == Bird::ORIENTATION::EAST)
+         if (male->orientation == ORIENTATION::EAST)
          {
-            male->response = Bird::RESPONSE::MOVE_FORWARD;
+            male->response = Male::RESPONSE::MOVE_FORWARD;
          }
          else
          {
-            if (male->orientation == Bird::ORIENTATION::SOUTH)
+            if (male->orientation == ORIENTATION::SOUTH)
             {
-               male->response = Bird::RESPONSE::TURN_LEFT;
+               male->response = Male::RESPONSE::TURN_LEFT;
             }
-            else if (male->orientation == Bird::ORIENTATION::NORTH)
+            else if (male->orientation == ORIENTATION::NORTH)
             {
-               male->response = Bird::RESPONSE::TURN_RIGHT;
+               male->response = Male::RESPONSE::TURN_RIGHT;
             }
             else 
             {
-                male->response = Bird::RESPONSE::TURN_AROUND;
+                male->response = Male::RESPONSE::TURN_AROUND;
             }
          }
       }
       else if (male->x > centerx)
       {
-         if (male->orientation == Bird::ORIENTATION::WEST)
+         if (male->orientation == ORIENTATION::WEST)
          {
-            male->response = Bird::RESPONSE::MOVE_FORWARD;
+            male->response = Male::RESPONSE::MOVE_FORWARD;
          }
          else
          {
-            if (male->orientation == Bird::ORIENTATION::SOUTH)
+            if (male->orientation == ORIENTATION::SOUTH)
             {
-               male->response = Bird::RESPONSE::TURN_RIGHT;
+               male->response = Male::RESPONSE::TURN_RIGHT;
             }
-            else if (male->orientation == Bird::ORIENTATION::NORTH)
+            else if (male->orientation == ORIENTATION::NORTH)
             {
-               male->response = Bird::RESPONSE::TURN_LEFT;
+               male->response = Male::RESPONSE::TURN_LEFT;
             }
             else 
             {
-                male->response = Bird::RESPONSE::TURN_AROUND;
+                male->response = Male::RESPONSE::TURN_AROUND;
             }
          }
       }
       else if (male->y < centery)
       {
-         if (male->orientation == Bird::ORIENTATION::SOUTH)
+         if (male->orientation == ORIENTATION::SOUTH)
          {
-            male->response = Bird::RESPONSE::MOVE_FORWARD;
+            male->response = Male::RESPONSE::MOVE_FORWARD;
          }
          else
          {
-            if (male->orientation == Bird::ORIENTATION::EAST)
+            if (male->orientation == ORIENTATION::EAST)
             {
-               male->response = Bird::RESPONSE::TURN_RIGHT;
+               male->response = Male::RESPONSE::TURN_RIGHT;
             }
-            else if (male->orientation == Bird::ORIENTATION::WEST)
+            else if (male->orientation == ORIENTATION::WEST)
             {
-               male->response = Bird::RESPONSE::TURN_LEFT;
+               male->response = Male::RESPONSE::TURN_LEFT;
             }
             else 
             {
-                male->response = Bird::RESPONSE::TURN_AROUND;
+                male->response = Male::RESPONSE::TURN_AROUND;
             }
          }
       }
       else if (male->y > centery)
       {
-         if (male->orientation == Bird::ORIENTATION::NORTH)
+         if (male->orientation == ORIENTATION::NORTH)
          {
-            male->response = Bird::RESPONSE::MOVE_FORWARD;
+            male->response = Male::RESPONSE::MOVE_FORWARD;
          }
          else
          {
-            if (male->orientation == Bird::ORIENTATION::WEST)
+            if (male->orientation == ORIENTATION::WEST)
             {
-               male->response = Bird::RESPONSE::TURN_RIGHT;
+               male->response = Male::RESPONSE::TURN_RIGHT;
             }
-            else if (male->orientation == Bird::ORIENTATION::EAST)
+            else if (male->orientation == ORIENTATION::EAST)
             {
-               male->response = Bird::RESPONSE::TURN_LEFT;
+               male->response = Male::RESPONSE::TURN_LEFT;
             }
             else 
             {
-                male->response = Bird::RESPONSE::TURN_AROUND;
+                male->response = Male::RESPONSE::TURN_AROUND;
             }
          }
       }
       else
       {
-         male->response = Bird::RESPONSE::MOVE_FORWARD;
+         male->response = Male::RESPONSE::MOVE_FORWARD;
       }
       break;
    }
@@ -811,19 +641,19 @@ void trainFemale()
     // Brooding egg?
     if (World[female->x][female->y].object == OBJECT::EGG)
     {
-        female->response = Bird::RESPONSE::DO_NOTHING;
+        female->response = Female::RESPONSE::DO_NOTHING;
         return;
     }
 
     // Handle delivery.
       if (female->hasObject == OBJECT::MOUSE)
       {
-         female->response = Bird::RESPONSE::EAT_MOUSE;
+         female->response = Female::RESPONSE::EAT_MOUSE;
          return;
       }
       if (female->hasObject == OBJECT::STONE)
       { 
-          female->response = Bird::RESPONSE::PUT_OBJECT;
+          female->response = Female::RESPONSE::PUT_OBJECT;
           return;
       }
 
@@ -840,14 +670,14 @@ void trainFemale()
    case 0:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         if (female->orientation == Bird::ORIENTATION::WEST)
+         if (female->orientation == ORIENTATION::WEST)
          {
-            female->response = Bird::RESPONSE::MOVE_FORWARD;
+            female->response = Female::RESPONSE::MOVE_FORWARD;
             FemaleNestSequence++;
          }
          else
          {
-            female->response = Bird::RESPONSE::TURN_LEFT;
+            female->response = Female::RESPONSE::TURN_LEFT;
          }
       }
       else
@@ -859,14 +689,14 @@ void trainFemale()
    case 1:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         if (female->orientation == Bird::ORIENTATION::SOUTH)
+         if (female->orientation == ORIENTATION::SOUTH)
          {
-            female->response = Bird::RESPONSE::MOVE_FORWARD;
+            female->response = Female::RESPONSE::MOVE_FORWARD;
             FemaleNestSequence++;
          }
          else
          {
-            female->response = Bird::RESPONSE::TURN_LEFT;
+            female->response = Female::RESPONSE::TURN_LEFT;
          }
       }
       else
@@ -878,7 +708,7 @@ void trainFemale()
    case 2:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         female->response = Bird::RESPONSE::MOVE_FORWARD;
+         female->response = Female::RESPONSE::MOVE_FORWARD;
          FemaleNestSequence++;
       }
       else
@@ -890,14 +720,14 @@ void trainFemale()
    case 3:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         if (female->orientation == Bird::ORIENTATION::EAST)
+         if (female->orientation == ORIENTATION::EAST)
          {
-            female->response = Bird::RESPONSE::MOVE_FORWARD;
+            female->response = Female::RESPONSE::MOVE_FORWARD;
             FemaleNestSequence++;
          }
          else
          {
-            female->response = Bird::RESPONSE::TURN_LEFT;
+            female->response = Female::RESPONSE::TURN_LEFT;
          }
       }
       else
@@ -909,7 +739,7 @@ void trainFemale()
    case 4:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         female->response = Bird::RESPONSE::MOVE_FORWARD;
+         female->response = Female::RESPONSE::MOVE_FORWARD;
          FemaleNestSequence++;
       }
       else
@@ -921,14 +751,14 @@ void trainFemale()
    case 5:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         if (female->orientation == Bird::ORIENTATION::NORTH)
+         if (female->orientation == ORIENTATION::NORTH)
          {
-            female->response = Bird::RESPONSE::MOVE_FORWARD;
+            female->response = Female::RESPONSE::MOVE_FORWARD;
             FemaleNestSequence++;
          }
          else
          {
-            female->response = Bird::RESPONSE::TURN_LEFT;
+            female->response = Female::RESPONSE::TURN_LEFT;
          }
       }
       else
@@ -940,7 +770,7 @@ void trainFemale()
    case 6:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         female->response = Bird::RESPONSE::MOVE_FORWARD;
+         female->response = Female::RESPONSE::MOVE_FORWARD;
          FemaleNestSequence++;
       }
       else
@@ -952,14 +782,14 @@ void trainFemale()
    case 7:
       if (World[female->x][female->y].object == OBJECT::STONE)
       {
-         if (female->orientation == Bird::ORIENTATION::WEST)
+         if (female->orientation == ORIENTATION::WEST)
          {
-            female->response = Bird::RESPONSE::MOVE_FORWARD;
+            female->response = Female::RESPONSE::MOVE_FORWARD;
             FemaleNestSequence++;
          }
          else
          {
-            female->response = Bird::RESPONSE::TURN_LEFT;
+            female->response = Female::RESPONSE::TURN_LEFT;
          }
       }
       else
@@ -969,14 +799,14 @@ void trainFemale()
       break;
 
    case 8:
-         if (female->orientation == Bird::ORIENTATION::SOUTH)
+         if (female->orientation == ORIENTATION::SOUTH)
          {
-            female->response = Bird::RESPONSE::MOVE_FORWARD;
+            female->response = Female::RESPONSE::MOVE_FORWARD;
             FemaleNestSequence++;
          }
          else
          {
-            female->response = Bird::RESPONSE::TURN_LEFT;
+            female->response = Female::RESPONSE::TURN_LEFT;
          }
       break;
 
@@ -991,60 +821,921 @@ void trainFemale()
 }
 
 
+// Set bird sensors.
+void setSensors(int gender)
+{
+    if (gender == MALE)
+    {
+        setMaleSensors();
+    }
+    else {
+        setFemaleSensors();
+    }
+}
+
+// Set male sensors.
+void setMaleSensors()
+{
+    Male* bird = male;
+    int* sensors = male->sensors;
+
+    for (int i = 0; i < Male::NUM_SENSORS; i++)
+    {
+        sensors[i] = DONT_CARE;
+    }
+
+    // Set locale and object sensors.
+    sensors[Male::LOCALE_SENSOR] = World[bird->x][bird->y].locale;
+    sensors[Male::OBJECT_SENSOR] = World[bird->x][bird->y].object;
+
+    // Set mouse, stone, and female proximity sensors.
+    int mousex = -1;
+    int mousey = -1;
+    int mouseDist = -1;
+    int stonex = -1;
+    int stoney = -1;
+    int stoneDist = -1;
+    int femaleDist = -1;
+    for (int x = 0; x < WIDTH; x++)
+    {
+        for (int y = 0; y < HEIGHT; y++)
+        {
+            if (bird->x >= FOREST_MIN_X && bird->x <= FOREST_MAX_X &&
+                bird->y >= FOREST_MIN_Y && bird->y <= FOREST_MAX_Y)
+            {
+                if (World[x][y].object == OBJECT::MOUSE)
+                {
+                    int d = distance(x, y, bird->x, bird->y);
+                    if (mouseDist < 0 || d < mouseDist)
+                    {
+                        mouseDist = d;
+                        mousex = x;
+                        mousey = y;
+                    }
+                }
+            }
+            if (bird->x >= DESERT_MIN_X && bird->x <= DESERT_MAX_X &&
+                bird->y >= DESERT_MIN_Y && bird->y <= DESERT_MAX_Y)
+            {
+                if (World[x][y].locale == LOCALE::DESERT &&
+                    World[x][y].object == OBJECT::STONE)
+                {
+                    int d = distance(x, y, bird->x, bird->y);
+                    if (stoneDist < 0 || d < stoneDist)
+                    {
+                        stoneDist = d;
+                        stonex = x;
+                        stoney = y;
+                    }
+                }
+            }
+            if (bird->x >= NEST_MIN_X && bird->x <= NEST_MAX_X &&
+                bird->y >= NEST_MIN_Y && bird->y <= NEST_MAX_Y)
+            {
+                femaleDist = distance(female->x, female->y, bird->x, bird->y);
+            }
+        }
+    }
+    switch (bird->orientation)
+    {
+    case ORIENTATION::NORTH:
+        if (mouseDist >= 0)
+        {
+            if (mousex < bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+            }
+            else if (mousex > bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+            }
+            else {
+                if (mousey < bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+                }
+                else if (mousey > bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+                }
+                else {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (stoneDist >= 0)
+        {
+            if (stonex < bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+            }
+            else if (stonex > bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+            }
+            else {
+                if (stoney < bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+                }
+                else if (stoney > bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+                }
+                else {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (femaleDist >= 0)
+        {
+            if (female->x < bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+            }
+            else if (female->x > bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+            }
+            else {
+                if (female->y < bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+                }
+                else if (female->y > bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+                }
+                else {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        break;
+
+    case ORIENTATION::SOUTH:
+        if (mouseDist >= 0)
+        {
+            if (mousex < bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+            }
+            else if (mousex > bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+            }
+            else {
+                if (mousey < bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+                }
+                else if (mousey > bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+                }
+                else {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (stoneDist >= 0)
+        {
+            if (stonex < bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+            }
+            else if (stonex > bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+            }
+            else {
+                if (stoney < bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+                }
+                else if (stoney > bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+                }
+                else {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (femaleDist >= 0)
+        {
+            if (female->x < bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+            }
+            else if (female->x > bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+            }
+            else {
+                if (female->y < bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+                }
+                else if (female->y > bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+                }
+                else {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        break;
+
+    case ORIENTATION::EAST:
+        if (mouseDist >= 0)
+        {
+            if (mousex < bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            }
+            else if (mousex > bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+            }
+            else {
+                if (mousey < bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+                }
+                else if (mousey > bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+                }
+                else {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (stoneDist >= 0)
+        {
+            if (stonex < bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            }
+            else if (stonex > bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+            }
+            else {
+                if (stoney < bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+                }
+                else if (stoney > bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+                }
+                else {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (femaleDist >= 0)
+        {
+            if (female->x < bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            }
+            else if (female->x > bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+            }
+            else {
+                if (female->y < bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+                }
+                else if (female->y > bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+                }
+                else {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        break;
+
+    case ORIENTATION::WEST:
+        if (mouseDist >= 0)
+        {
+            if (mousex < bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+            }
+            else if (mousex > bird->x)
+            {
+                sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            }
+            else {
+                if (mousey < bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+                }
+                else if (mousey > bird->y)
+                {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+                }
+                else {
+                    sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (stoneDist >= 0)
+        {
+            if (stonex < bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+            }
+            else if (stonex > bird->x)
+            {
+                sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            }
+            else {
+                if (stoney < bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+                }
+                else if (stoney > bird->y)
+                {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+                }
+                else {
+                    sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        if (femaleDist >= 0)
+        {
+            if (female->x < bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+            }
+            else if (female->x > bird->x)
+            {
+                sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            }
+            else {
+                if (female->y < bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+                }
+                else if (female->y > bird->y)
+                {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+                }
+                else {
+                    sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+                }
+            }
+        }
+        else {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        break;
+    }
+
+    // Internal state.
+    sensors[Male::ORIENTATION_SENSOR] = bird->orientation;
+    if (bird->food > 0)
+    {
+        sensors[Male::HUNGER_SENSOR] = 0;
+    }
+    else {
+        sensors[Male::HUNGER_SENSOR] = 1;
+    }
+    sensors[Male::HAS_OBJECT_SENSOR] = bird->hasObject;
+
+    // Sense female wants.
+    sensors[Male::WANT_MOUSE_SENSOR] = 0;
+    sensors[Male::WANT_STONE_SENSOR] = 0;
+    if ((bird->x == female->x) && (bird->y == female->y))
+    {
+        switch (female->response)
+        {
+        case Female::RESPONSE::WANT_MOUSE:
+            sensors[Male::WANT_MOUSE_SENSOR] = 1;
+            break;
+
+        case Female::RESPONSE::WANT_STONE:
+            sensors[Male::WANT_STONE_SENSOR] = 1;
+            break;
+        }
+    }
+}
+
+// Set female sensors.
+void setFemaleSensors()
+{
+    Female* bird = female;
+    int* sensors = female->sensors;
+
+    for (int i = 0; i < Female::NUM_SENSORS; i++)
+    {
+        sensors[i] = DONT_CARE;
+    }
+
+    // Set locale and object sensors.
+    int x = -1;
+    int y = -1;
+    for (int i = 0; i < Female::NUM_CELL_SENSORS; i++)
+    {
+        switch (i)
+        {
+            // Current.
+        case 0:
+            sensors[Female::CURRENT_LOCALE_SENSOR] = World[bird->x][bird->y].locale;
+            sensors[Female::CURRENT_OBJECT_SENSOR] = World[bird->x][bird->y].object;
+            break;
+
+            // Left.
+        case 1:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->x > 0)
+                {
+                    sensors[Female::LEFT_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
+                    sensors[Female::LEFT_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
+                    x = bird->x - 1;
+                    y = bird->y;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->x < WIDTH - 1)
+                {
+                    sensors[Female::LEFT_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
+                    sensors[Female::LEFT_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
+                    x = bird->x + 1;
+                    y = bird->y;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->y > 0)
+                {
+                    sensors[Female::LEFT_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
+                    sensors[Female::LEFT_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
+                    x = bird->x;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::LEFT_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
+                    sensors[Female::LEFT_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
+                    x = bird->x;
+                    y = bird->y + 1;
+                }
+                break;
+            }
+            break;
+
+            // Left front.
+        case 2:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->x > 0 && bird->y > 0)
+                {
+                    sensors[Female::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                    sensors[Female::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                    x = bird->x - 1;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                    sensors[Female::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                    x = bird->x + 1;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->x < WIDTH - 1 && bird->y > 0)
+                {
+                    sensors[Female::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                    sensors[Female::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                    x = bird->x + 1;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->x > 0 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                    sensors[Female::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                    x = bird->x - 1;
+                    y = bird->y + 1;
+                }
+                break;
+            }
+            break;
+
+            // Front.
+        case 3:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->y > 0)
+                {
+                    sensors[Female::FRONT_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
+                    sensors[Female::FRONT_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
+                    x = bird->x;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::FRONT_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
+                    sensors[Female::FRONT_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
+                    x = bird->x;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->x < WIDTH - 1)
+                {
+                    sensors[Female::FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
+                    sensors[Female::FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
+                    x = bird->x + 1;
+                    y = bird->y;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->x > 0)
+                {
+                    sensors[Female::FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
+                    sensors[Female::FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
+                    x = bird->x - 1;
+                    y = bird->y;
+                }
+                break;
+            }
+            break;
+
+            // Right front.
+        case 4:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->x < WIDTH - 1 && bird->y > 0)
+                {
+                    sensors[Female::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                    sensors[Female::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                    x = bird->x + 1;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->x > 0 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                    sensors[Female::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                    x = bird->x - 1;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                    sensors[Female::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                    x = bird->x + 1;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->x > 0 && bird->y > 0)
+                {
+                    sensors[Female::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                    sensors[Female::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                    x = bird->x - 1;
+                    y = bird->y - 1;
+                }
+                break;
+            }
+            break;
+
+            // Right.
+        case 5:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->x < WIDTH - 1)
+                {
+                    sensors[Female::RIGHT_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
+                    sensors[Female::RIGHT_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
+                    x = bird->x + 1;
+                    y = bird->y;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->x > 0)
+                {
+                    sensors[Female::RIGHT_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
+                    sensors[Female::RIGHT_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
+                    x = bird->x - 1;
+                    y = bird->y;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::RIGHT_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
+                    sensors[Female::RIGHT_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
+                    x = bird->x;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->y > 0)
+                {
+                    sensors[Female::RIGHT_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
+                    sensors[Female::RIGHT_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
+                    x = bird->x;
+                    y = bird->y - 1;
+                }
+                break;
+            }
+            break;
+
+            // Right rear.
+        case 6:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                    sensors[Female::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                    x = bird->x + 1;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->x > 0 && bird->y > 0)
+                {
+                    sensors[Female::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                    sensors[Female::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                    x = bird->x - 1;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->x > 0 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                    sensors[Female::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                    x = bird->x - 1;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->x < WIDTH - 1 && bird->y > 0)
+                {
+                    sensors[Female::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                    sensors[Female::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                    x = bird->x + 1;
+                    y = bird->y - 1;
+                }
+                break;
+            }
+            break;
+
+            // Rear.
+        case 7:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::REAR_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
+                    sensors[Female::REAR_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
+                    x = bird->x;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->y > 0)
+                {
+                    sensors[Female::REAR_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
+                    sensors[Female::REAR_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
+                    x = bird->x;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->x > 0)
+                {
+                    sensors[Female::REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
+                    sensors[Female::REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
+                    x = bird->x - 1;
+                    y = bird->y;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->x < WIDTH - 1)
+                {
+                    sensors[Female::REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
+                    sensors[Female::REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
+                    x = bird->x + 1;
+                    y = bird->y;
+                }
+                break;
+            }
+            break;
+
+            // Left rear.
+        case 8:
+            x = -1;
+            y = -1;
+            switch (bird->orientation)
+            {
+            case ORIENTATION::NORTH:
+                if (bird->x > 0 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::LEFT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
+                    sensors[Female::LEFT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
+                    x = bird->x - 1;
+                    y = bird->y + 1;
+                }
+                break;
+
+            case ORIENTATION::SOUTH:
+                if (bird->x < WIDTH - 1 && bird->y > 0)
+                {
+                    sensors[Female::LEFT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
+                    sensors[Female::LEFT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
+                    x = bird->x + 1;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::EAST:
+                if (bird->x > 0 && bird->y > 0)
+                {
+                    sensors[Female::LEFT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
+                    sensors[Female::LEFT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
+                    x = bird->x - 1;
+                    y = bird->y - 1;
+                }
+                break;
+
+            case ORIENTATION::WEST:
+                if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
+                {
+                    sensors[Female::LEFT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
+                    sensors[Female::LEFT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
+                    x = bird->x + 1;
+                    y = bird->y + 1;
+                }
+                break;
+            }
+            break;
+        }
+    }
+
+    // Internal state.
+    sensors[Female::ORIENTATION_SENSOR] = bird->orientation;
+    if (bird->food > 0)
+    {
+        sensors[Female::HUNGER_SENSOR] = 0;
+    }
+    else {
+        sensors[Female::HUNGER_SENSOR] = 1;
+    }
+    sensors[Female::HAS_OBJECT_SENSOR] = bird->hasObject;
+}
+
+// City block distance.
+int distance(int x1, int y1, int x2, int y2)
+{
+    int xd = x1 - x2;
+    int yd = y1 - y2;
+    if (xd < 0.0) xd = -xd;
+    if (yd < 0.0) yd = -yd;
+    return xd + yd;
+}
+
 // Do bird response.
 void doResponse(int gender)
 {
-   int  d;
-   Bird *bird = (Bird *)male;
+    if (gender == MALE)
+    {
+        doMaleResponse();
+    }
+    else {
+        doFemaleResponse();
+    }
+}
 
-   if (gender == Bird::FEMALE)
-   {
-      bird = (Bird *)female;
-   }
+// Do male response.
+void doMaleResponse()
+{
+   Male* bird = male;
    Cell *cell    = &World[bird->x][bird->y];
-   int  response = male->response;
-   if (gender == Bird::FEMALE)
-   {
-      response = female->response;
-   }
+   int  response = bird->response;
 
-   if (response < Bird::RESPONSE::NUM_RESPONSES)
-   {
       switch (response)
       {
-      case Bird::RESPONSE::DO_NOTHING:
+      case Male::RESPONSE::DO_NOTHING:
          break;
 
-      case Bird::RESPONSE::EAT_MOUSE:
-         if (bird->hasObject == OBJECT::MOUSE)
-         {
-            if (gender == Bird::MALE)
-            {
-               if (Male::RANDOMIZE_FOOD_LEVEL && (Male::FOOD_DURATION > 0))
-               {
-                  male->food = rand() % (Male::FOOD_DURATION + 1);
-               }
-               else
-               {
-                  male->food = Male::FOOD_DURATION;
-               }
-            }
-            else
-            {
-               if (Female::RANDOMIZE_FOOD_LEVEL && (Female::FOOD_DURATION > 0))
-               {
-                  female->food = rand() % (Female::FOOD_DURATION + 1);
-               }
-               else
-               {
-                  female->food = Female::FOOD_DURATION;
-               }
-            }
-            bird->hasObject = OBJECT::NO_OBJECT;
-         }
+      case Male::RESPONSE::EAT_MOUSE:
+                if (bird->hasObject == OBJECT::MOUSE)
+                {
+                    if (Male::RANDOMIZE_FOOD_LEVEL && (Male::FOOD_DURATION > 0))
+                    {
+                        bird->food = rand() % (Male::FOOD_DURATION + 1);
+                    }
+                    else
+                    {
+                        bird->food = Male::FOOD_DURATION;
+                    }
+                    bird->hasObject = OBJECT::NO_OBJECT;
+                }
          break;
 
-      case Bird::RESPONSE::GET_OBJECT:
+      case Male::RESPONSE::GET_OBJECT:
          if (bird->hasObject == OBJECT::NO_OBJECT)
          {
             bird->hasObject = cell->object;
@@ -1052,7 +1743,7 @@ void doResponse(int gender)
          }
          break;
 
-      case Bird::RESPONSE::PUT_OBJECT:
+      case Male::RESPONSE::PUT_OBJECT:
          if (cell->object == OBJECT::NO_OBJECT)
          {
             cell->object    = bird->hasObject;
@@ -1060,7 +1751,7 @@ void doResponse(int gender)
          }
          break;
 
-      case Bird::RESPONSE::TOSS_OBJECT:
+      case Male::RESPONSE::TOSS_OBJECT:
          if (bird->hasObject == OBJECT::NO_OBJECT)
          {
             break;
@@ -1079,68 +1770,24 @@ void doResponse(int gender)
                      World[x][y].object = OBJECT::STONE;
                      break;
                  }
-             } 
-             bird->hasObject = OBJECT::NO_OBJECT;
-             break;
+             }
          }
 
-         // Object lands randomly nearby.
-         d = HEIGHT / 2;
-         if (d > WIDTH / 2)
-         {
-            d = WIDTH / 2;
-         }
-         for (int j = 5; j < d; j++)
-         {
-            int x = (int)(rand() % (long)j);
-            int y = (int)(rand() % (long)j);
-            if ((x == 0) && (y == 0))
-            {
-               continue;
-            }
-            if ((rand() % 2) == 0)
-            {
-               x = -x;
-            }
-            if ((rand() % 2) == 0)
-            {
-               y = -y;
-            }
-            x += bird->x;
-            if ((x < 0) || (x >= WIDTH))
-            {
-               continue;
-            }
-            y += bird->y;
-            if ((y < 0) || (y >= HEIGHT))
-            {
-               continue;
-            }
-            if (World[x][y].object == OBJECT::NO_OBJECT)
-            {
-               World[x][y].object = bird->hasObject;
-               bird->hasObject    = OBJECT::NO_OBJECT;
-               break;
-            }
-         }
-         if (bird->hasObject != OBJECT::NO_OBJECT)
-         {
-            // Vaporize object.
-            bird->hasObject = OBJECT::NO_OBJECT;
-         }
+         // Vaporize object.
+         bird->hasObject = OBJECT::NO_OBJECT;
          break;
 
-      case Bird::RESPONSE::MOVE_FORWARD:
+      case Male::RESPONSE::MOVE_FORWARD:
          switch (bird->orientation)
          {
-         case Bird::ORIENTATION::NORTH:
+         case ORIENTATION::NORTH:
             if (bird->y > 0)
             {
                bird->y--;
             }
             break;
 
-         case Bird::ORIENTATION::SOUTH:
+         case ORIENTATION::SOUTH:
             if (bird->y < HEIGHT - 1)
             {
                bird->y++;
@@ -1148,14 +1795,14 @@ void doResponse(int gender)
             break;
 
 
-         case Bird::ORIENTATION::EAST:
+         case ORIENTATION::EAST:
             if (bird->x < WIDTH - 1)
             {
                bird->x++;
             }
             break;
 
-         case Bird::ORIENTATION::WEST:
+         case ORIENTATION::WEST:
             if (bird->x > 0)
             {
                bird->x--;
@@ -1164,85 +1811,69 @@ void doResponse(int gender)
          }
          break;
 
-      case Bird::RESPONSE::TURN_RIGHT:
+      case Male::RESPONSE::TURN_RIGHT:
          switch (bird->orientation)
          {
-         case Bird::ORIENTATION::NORTH:
-            bird->orientation = Bird::ORIENTATION::EAST;
+         case ORIENTATION::NORTH:
+            bird->orientation = ORIENTATION::EAST;
             break;
 
-         case Bird::ORIENTATION::SOUTH:
-            bird->orientation = Bird::ORIENTATION::WEST;
+         case ORIENTATION::SOUTH:
+            bird->orientation = ORIENTATION::WEST;
             break;
 
-         case Bird::ORIENTATION::EAST:
-            bird->orientation = Bird::ORIENTATION::SOUTH;
+         case ORIENTATION::EAST:
+            bird->orientation = ORIENTATION::SOUTH;
             break;
 
-         case Bird::ORIENTATION::WEST:
-            bird->orientation = Bird::ORIENTATION::NORTH;
+         case ORIENTATION::WEST:
+            bird->orientation = ORIENTATION::NORTH;
             break;
          }
          break;
 
-      case Bird::RESPONSE::TURN_LEFT:
+      case Male::RESPONSE::TURN_LEFT:
          switch (bird->orientation)
          {
-         case Bird::ORIENTATION::NORTH:
-            bird->orientation = Bird::ORIENTATION::WEST;
+         case ORIENTATION::NORTH:
+            bird->orientation = ORIENTATION::WEST;
             break;
 
-         case Bird::ORIENTATION::SOUTH:
-            bird->orientation = Bird::ORIENTATION::EAST;
+         case ORIENTATION::SOUTH:
+            bird->orientation = ORIENTATION::EAST;
             break;
 
-         case Bird::ORIENTATION::EAST:
-            bird->orientation = Bird::ORIENTATION::NORTH;
+         case ORIENTATION::EAST:
+            bird->orientation = ORIENTATION::NORTH;
             break;
 
-         case Bird::ORIENTATION::WEST:
-            bird->orientation = Bird::ORIENTATION::SOUTH;
+         case ORIENTATION::WEST:
+            bird->orientation = ORIENTATION::SOUTH;
             break;
          }
          break;
 
-      case Bird::RESPONSE::TURN_AROUND:
+      case Male::RESPONSE::TURN_AROUND:
           switch (bird->orientation)
           {
-          case Bird::ORIENTATION::NORTH:
-              bird->orientation = Bird::ORIENTATION::SOUTH;
+          case ORIENTATION::NORTH:
+              bird->orientation = ORIENTATION::SOUTH;
               break;
 
-          case Bird::ORIENTATION::SOUTH:
-              bird->orientation = Bird::ORIENTATION::NORTH;
+          case ORIENTATION::SOUTH:
+              bird->orientation = ORIENTATION::NORTH;
               break;
 
-          case Bird::ORIENTATION::EAST:
-              bird->orientation = Bird::ORIENTATION::WEST;
+          case ORIENTATION::EAST:
+              bird->orientation = ORIENTATION::WEST;
               break;
 
-          case Bird::ORIENTATION::WEST:
-              bird->orientation = Bird::ORIENTATION::EAST;
+          case ORIENTATION::WEST:
+              bird->orientation = ORIENTATION::EAST;
               break;
           }
           break;
-
-      case Bird::RESPONSE::STATE_OFF:
-         bird->state = 0;
-         break;
-
-      case Bird::RESPONSE::STATE_ON:
-         bird->state = 1;
-         break;
-      }
-   }
-   else
-   {
-      // Gender-specific response.
-      if (gender == Bird::MALE)
-      {
-         switch (male->response)
-         {
+ 
          case Male::RESPONSE::GIVE_MOUSE:
                if ((male->hasObject == OBJECT::MOUSE) && (female->hasObject == OBJECT::NO_OBJECT))
                {
@@ -1265,588 +1896,193 @@ void doResponse(int gender)
                }
             break;
          }
-      }
-      else
-      {
-         // Female response.
-         switch (female->response)
-         {
-         case Female::RESPONSE::WANT_MOUSE:
-            break;
-
-         case Female::RESPONSE::WANT_STONE:
-            break;
-
-         case Female::RESPONSE::LAY_EGG:
-               if (cell->object == OBJECT::NO_OBJECT)
-               {
-                  cell->object = OBJECT::EGG;
-               }
-            break;
-         }
-      }
-   }
 
    // Digest food.
    bird->digest();
 }
 
-
-// Set bird sensors.
-void setSensors(int gender)
+// Do female response.
+void doFemaleResponse()
 {
-   Bird *bird;
-   int  *sensors;
+    Female* bird = female;
+    Cell* cell = &World[bird->x][bird->y];
+    int  response = bird->response;
 
-   if (gender == Bird::FEMALE)
-   {
-      bird    = female;
-      sensors = female->sensors;
-      for (int i = 0; i < Female::NUM_SENSORS; i++)
-      {
-          sensors[i] = DONT_CARE;
-      }
-   }
-   else
-   {
-      bird    = male;
-      sensors = male->sensors;
-      for (int i = 0; i < Male::NUM_SENSORS; i++)
-      {
-          sensors[i] = DONT_CARE;
-      }
-   }
+    switch (response)
+    {
+    case Female::RESPONSE::DO_NOTHING:
+        break;
 
-   // Set locale, object, and mate proximity sensors.
-   if (gender == Bird::MALE)
-   {
-       sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_UNKNOWN;
-   }
-   int x = -1;
-   int y = -1;
-   for (int i = 0; i < Bird::NUM_CELL_SENSORS; i++)
-   {
-      switch (i)
-      {
-      // Current.
-      case 0:
-         sensors[Bird::CURRENT_LOCALE_SENSOR] = World[bird->x][bird->y].locale;
-         sensors[Bird::CURRENT_OBJECT_SENSOR] = World[bird->x][bird->y].object;
-         if (gender == Bird::MALE)
-         {
-            if ((female->x == male->x) && (female->y == male->y))
+    case Female::RESPONSE::EAT_MOUSE:
+        if (bird->hasObject == OBJECT::MOUSE)
+        {
+            if (Female::RANDOMIZE_FOOD_LEVEL && (Female::FOOD_DURATION > 0))
             {
-                sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_PRESENT;
+                bird->food = rand() % (Female::FOOD_DURATION + 1);
             }
-         }
-         break;
-
-      // Left.
-      case 1:
-         x = -1;
-         y = -1;
-         switch (bird->orientation)
-         {
-         case Bird::ORIENTATION::NORTH:
-            if (bird->x > 0)
+            else
             {
-               sensors[Bird::LEFT_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
-               sensors[Bird::LEFT_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
-               x = bird->x - 1;
-               y = bird->y;
+                bird->food = Female::FOOD_DURATION;
             }
+            bird->hasObject = OBJECT::NO_OBJECT;
+        }
+        break;
+
+    case Female::RESPONSE::GET_OBJECT:
+        if (bird->hasObject == OBJECT::NO_OBJECT)
+        {
+            bird->hasObject = cell->object;
+            cell->object = OBJECT::NO_OBJECT;
+        }
+        break;
+
+    case Female::RESPONSE::PUT_OBJECT:
+        if (cell->object == OBJECT::NO_OBJECT)
+        {
+            cell->object = bird->hasObject;
+            bird->hasObject = OBJECT::NO_OBJECT;
+        }
+        break;
+
+    case Female::RESPONSE::TOSS_OBJECT:
+        if (bird->hasObject == OBJECT::NO_OBJECT)
+        {
             break;
+        }
 
-         case Bird::ORIENTATION::SOUTH:
-            if (bird->x < WIDTH - 1)
+        // Stone tossed back to desert.
+        if (bird->hasObject == OBJECT::STONE)
+        {
+            for (int j = 0; j < 20; j++)
             {
-               sensors[Bird::LEFT_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
-               sensors[Bird::LEFT_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
-               x = bird->x + 1;
-               y = bird->y;
+                int x = (int)(rand() % (long)13) + 8;
+                int y = (int)(rand() % (long)7) + 13;
+                if (World[x][y].locale == LOCALE::DESERT &&
+                    World[x][y].object == OBJECT::NO_OBJECT)
+                {
+                    World[x][y].object = OBJECT::STONE;
+                    break;
+                }
             }
-            break;
+        }
 
-         case Bird::ORIENTATION::EAST:
+            // Vaporize object.
+            bird->hasObject = OBJECT::NO_OBJECT;
+        break;
+
+    case Female::RESPONSE::MOVE_FORWARD:
+        switch (bird->orientation)
+        {
+        case ORIENTATION::NORTH:
             if (bird->y > 0)
             {
-               sensors[Bird::LEFT_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
-               sensors[Bird::LEFT_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
-               x = bird->x;
-               y = bird->y - 1;
+                bird->y--;
             }
             break;
 
-         case Bird::ORIENTATION::WEST:
+        case ORIENTATION::SOUTH:
             if (bird->y < HEIGHT - 1)
             {
-               sensors[Bird::LEFT_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
-               sensors[Bird::LEFT_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
-               x = bird->x;
-               y = bird->y + 1;
-            }
-            break;
-         }
-         if (gender == Bird::MALE)
-         {
-            if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-            {
-               if ((female->x == x) && (female->y == y))
-               {
-                  sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_LEFT;
-               }
-            }
-         }
-         break;
-
-      // Left front.
-      case 2:
-          x = -1;
-          y = -1;
-          switch (bird->orientation)
-          {
-          case Bird::ORIENTATION::NORTH:
-              if (bird->x > 0 && bird->y > 0)
-              {
-                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
-                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
-                  x = bird->x - 1;
-                  y = bird->y - 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::SOUTH:
-              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
-                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
-                  x = bird->x + 1;
-                  y = bird->y + 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::EAST:
-              if (bird->x < WIDTH - 1 && bird->y > 0)
-              {
-                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
-                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
-                  x = bird->x + 1;
-                  y = bird->y - 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::WEST:
-              if (bird->x > 0 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::LEFT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
-                  sensors[Bird::LEFT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
-                  x = bird->x - 1;
-                  y = bird->y + 1;
-              }
-              break;
-          }
-          if (gender == Bird::MALE)
-          {
-              if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-              {
-                  if ((female->x == x) && (female->y == y))
-                  {
-                      sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_LEFT_FRONT;
-                  }
-              }
-          }
-          break;
-
-      // Front.
-      case 3:
-         x = -1;
-         y = -1;
-         switch (bird->orientation)
-         {
-         case Bird::ORIENTATION::NORTH:
-            if (bird->y > 0)
-            {
-               sensors[Bird::FRONT_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
-               sensors[Bird::FRONT_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
-               x = bird->x;
-               y = bird->y - 1;
+                bird->y++;
             }
             break;
 
-         case Bird::ORIENTATION::SOUTH:
-            if (bird->y < HEIGHT - 1)
-            {
-               sensors[Bird::FRONT_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
-               sensors[Bird::FRONT_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
-               x = bird->x;
-               y = bird->y + 1;
-            }
-            break;
 
-         case Bird::ORIENTATION::EAST:
+        case ORIENTATION::EAST:
             if (bird->x < WIDTH - 1)
             {
-               sensors[Bird::FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
-               sensors[Bird::FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
-               x = bird->x + 1;
-               y = bird->y;
+                bird->x++;
             }
             break;
 
-         case Bird::ORIENTATION::WEST:
+        case ORIENTATION::WEST:
             if (bird->x > 0)
             {
-               sensors[Bird::FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
-               sensors[Bird::FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
-               x = bird->x - 1;
-               y = bird->y;
+                bird->x--;
             }
             break;
-         }
-         if (gender == Bird::MALE)
-         {
-             if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-             {
-                 if ((female->x == x) && (female->y == y))
-                 {
-                     sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_FRONT;
-                 }
-             }
-         }
-         break;
+        }
+        break;
 
-      // Right front.
-      case 4:
-          x = -1;
-          y = -1;
-          switch (bird->orientation)
-          {
-          case Bird::ORIENTATION::NORTH:
-              if (bird->x < WIDTH - 1 && bird->y > 0)
-              {
-                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
-                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
-                  x = bird->x + 1;
-                  y = bird->y - 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::SOUTH:
-              if (bird->x > 0 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
-                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
-                  x = bird->x - 1;
-                  y = bird->y + 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::EAST:
-              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
-                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
-                  x = bird->x + 1;
-                  y = bird->y + 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::WEST:
-              if (bird->x > 0 && bird->y > 0)
-              {
-                  sensors[Bird::RIGHT_FRONT_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
-                  sensors[Bird::RIGHT_FRONT_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
-                  x = bird->x - 1;
-                  y = bird->y - 1;
-              }
-              break;
-          }
-          if (gender == Bird::MALE)
-          {
-              if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-              {
-                  if ((female->x == x) && (female->y == y))
-                  {
-                      sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_RIGHT_FRONT;
-                  }
-              }
-          }
-          break;
-
-      // Right.
-      case 5:
-         x = -1;
-         y = -1;
-         switch (bird->orientation)
-         {
-         case Bird::ORIENTATION::NORTH:
-            if (bird->x < WIDTH - 1)
-            {
-               sensors[Bird::RIGHT_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
-               sensors[Bird::RIGHT_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
-               x = bird->x + 1;
-               y = bird->y;
-            }
+    case Female::RESPONSE::TURN_RIGHT:
+        switch (bird->orientation)
+        {
+        case ORIENTATION::NORTH:
+            bird->orientation = ORIENTATION::EAST;
             break;
 
-         case Bird::ORIENTATION::SOUTH:
-            if (bird->x > 0)
-            {
-               sensors[Bird::RIGHT_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
-               sensors[Bird::RIGHT_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
-               x = bird->x - 1;
-               y = bird->y;
-            }
+        case ORIENTATION::SOUTH:
+            bird->orientation = ORIENTATION::WEST;
             break;
 
-         case Bird::ORIENTATION::EAST:
-            if (bird->y < HEIGHT - 1)
-            {
-               sensors[Bird::RIGHT_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
-               sensors[Bird::RIGHT_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
-               x = bird->x;
-               y = bird->y + 1;
-            }
+        case ORIENTATION::EAST:
+            bird->orientation = ORIENTATION::SOUTH;
             break;
 
-         case Bird::ORIENTATION::WEST:
-            if (bird->y > 0)
-            {
-               sensors[Bird::RIGHT_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
-               sensors[Bird::RIGHT_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
-               x = bird->x;
-               y = bird->y - 1;
-            }
+        case ORIENTATION::WEST:
+            bird->orientation = ORIENTATION::NORTH;
             break;
-         }
-         if (gender == Bird::MALE)
-         {
-             if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-             {
-                 if ((female->x == x) && (female->y == y))
-                 {
-                     sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_RIGHT;
-                 }
-             }
-         }
-         break;
+        }
+        break;
 
-      // Right rear.
-      case 6:
-          x = -1;
-          y = -1;
-          switch (bird->orientation)
-          {
-          case Bird::ORIENTATION::NORTH:
-              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
-                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
-                  x = bird->x + 1;
-                  y = bird->y + 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::SOUTH:
-              if (bird->x > 0 && bird->y > 0)
-              {
-                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
-                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
-                  x = bird->x - 1;
-                  y = bird->y - 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::EAST:
-              if (bird->x > 0 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
-                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
-                  x = bird->x - 1;
-                  y = bird->y + 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::WEST:
-              if (bird->x < WIDTH - 1 && bird->y > 0)
-              {
-                  sensors[Bird::RIGHT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
-                  sensors[Bird::RIGHT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
-                  x = bird->x + 1;
-                  y = bird->y - 1;
-              }
-              break;
-          }
-          if (gender == Bird::MALE)
-          {
-              if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-              {
-                  if ((female->x == x) && (female->y == y))
-                  {
-                      sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_RIGHT_REAR;
-                  }
-              }
-          }
-          break;
-
-      // Rear.
-      case 7:
-          x = -1;
-          y = -1;
-          switch (bird->orientation)
-          {
-          case Bird::ORIENTATION::NORTH:
-              if (bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::REAR_LOCALE_SENSOR] = World[bird->x][bird->y + 1].locale;
-                  sensors[Bird::REAR_OBJECT_SENSOR] = World[bird->x][bird->y + 1].object;
-                  x = bird->x;
-                  y = bird->y + 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::SOUTH:
-              if (bird->y > 0)
-              {
-                  sensors[Bird::REAR_LOCALE_SENSOR] = World[bird->x][bird->y - 1].locale;
-                  sensors[Bird::REAR_OBJECT_SENSOR] = World[bird->x][bird->y - 1].object;
-                  x = bird->x;
-                  y = bird->y - 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::EAST:
-              if (bird->x > 0)
-              {
-                  sensors[Bird::REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y].locale;
-                  sensors[Bird::REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y].object;
-                  x = bird->x - 1;
-                  y = bird->y;
-              }
-              break;
-
-          case Bird::ORIENTATION::WEST:
-              if (bird->x < WIDTH - 1)
-              {
-                  sensors[Bird::REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y].locale;
-                  sensors[Bird::REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y].object;
-                  x = bird->x + 1;
-                  y = bird->y;
-              }
-              break;
-          }
-          if (gender == Bird::MALE)
-          {
-              if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-              {
-                  if ((female->x == x) && (female->y == y))
-                  {
-                      sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_REAR;
-                  }
-              }
-          }
-          break;
-
-      // Left rear.
-      case 8:
-          x = -1;
-          y = -1;
-          switch (bird->orientation)
-          {
-          case Bird::ORIENTATION::NORTH:
-              if (bird->x > 0 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y + 1].locale;
-                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y + 1].object;
-                  x = bird->x - 1;
-                  y = bird->y + 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::SOUTH:
-              if (bird->x < WIDTH - 1 && bird->y > 0)
-              {
-                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y - 1].locale;
-                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y - 1].object;
-                  x = bird->x + 1;
-                  y = bird->y - 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::EAST:
-              if (bird->x > 0 && bird->y > 0)
-              {
-                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x - 1][bird->y - 1].locale;
-                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x - 1][bird->y - 1].object;
-                  x = bird->x - 1;
-                  y = bird->y - 1;
-              }
-              break;
-
-          case Bird::ORIENTATION::WEST:
-              if (bird->x < WIDTH - 1 && bird->y < HEIGHT - 1)
-              {
-                  sensors[Bird::LEFT_REAR_LOCALE_SENSOR] = World[bird->x + 1][bird->y + 1].locale;
-                  sensors[Bird::LEFT_REAR_OBJECT_SENSOR] = World[bird->x + 1][bird->y + 1].object;
-                  x = bird->x + 1;
-                  y = bird->y + 1;
-              }
-              break;
-          }
-          if (gender == Bird::MALE)
-          {
-              if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-              {
-                  if ((female->x == x) && (female->y == y))
-                  {
-                      sensors[Male::MATE_PROXIMITY_SENSOR] = Male::MATE_PROXIMITY_LEFT_REAR;
-                  }
-              }
-          }
-          break;
-      }
-   }
-
-   // Internal state.
-   sensors[Bird::ORIENTATION_SENSOR] = bird->orientation;
-   if (bird->food > 0)
-   {
-       sensors[Bird::HUNGER_SENSOR] = 0;
-   } else {
-       sensors[Bird::HUNGER_SENSOR] = 1;
-   }
-   sensors[Bird::HAS_OBJECT_SENSOR] = bird->hasObject;
-   sensors[Bird::STATE_SENSOR] = bird->state;
-
-   // Male senses female want?
-   if (gender == Bird::MALE)
-   {
-      sensors[Male::WANT_MOUSE_SENSOR] = 0;
-      sensors[Male::WANT_STONE_SENSOR] = 0;
-      if ((bird->x == female->x) && (bird->y == female->y))
-      {
-         switch (female->response)
-         {
-         case Female::RESPONSE::WANT_MOUSE:
-            sensors[Male::WANT_MOUSE_SENSOR] = 1;
+    case Female::RESPONSE::TURN_LEFT:
+        switch (bird->orientation)
+        {
+        case ORIENTATION::NORTH:
+            bird->orientation = ORIENTATION::WEST;
             break;
 
-         case Female::RESPONSE::WANT_STONE:
-            sensors[Male::WANT_STONE_SENSOR] = 1;
+        case ORIENTATION::SOUTH:
+            bird->orientation = ORIENTATION::EAST;
             break;
-         }
-      }
-   }
-}
 
+        case ORIENTATION::EAST:
+            bird->orientation = ORIENTATION::NORTH;
+            break;
 
-// Euclidean distance.
-static double distance(double x1, double y1, double x2, double y2)
-{
-   double xd = x1 - x2;
-   double yd = y1 - y2;
+        case ORIENTATION::WEST:
+            bird->orientation = ORIENTATION::SOUTH;
+            break;
+        }
+        break;
 
-   return(sqrt((xd * xd) + (yd * yd)));
+    case Female::RESPONSE::TURN_AROUND:
+        switch (bird->orientation)
+        {
+        case ORIENTATION::NORTH:
+            bird->orientation = ORIENTATION::SOUTH;
+            break;
+
+        case ORIENTATION::SOUTH:
+            bird->orientation = ORIENTATION::NORTH;
+            break;
+
+        case ORIENTATION::EAST:
+            bird->orientation = ORIENTATION::WEST;
+            break;
+
+        case ORIENTATION::WEST:
+            bird->orientation = ORIENTATION::EAST;
+            break;
+        }
+        break;
+
+       case Female::RESPONSE::WANT_MOUSE:
+           break;
+
+       case Female::RESPONSE::WANT_STONE:
+           break;
+
+       case Female::RESPONSE::LAY_EGG:
+           if (cell->object == OBJECT::NO_OBJECT)
+           {
+               cell->object = OBJECT::EGG;
+           }
+           break;
+       }
+
+   // Digest food.
+   bird->digest();
 }
 
 // Move mice in forest.
@@ -1857,7 +2093,7 @@ void stepMice()
       for (int y = (rand() % HEIGHT), y2 = 0; y2 < HEIGHT; y = (y + 1) % HEIGHT, y2++)
       {
          if ((World[x][y].object == OBJECT::MOUSE) &&
-             ((male->x != x) || (male->y != y) || (male->response != Bird::RESPONSE::GET_OBJECT)) &&
+             ((male->x != x) || (male->y != y) || (male->response != Male::RESPONSE::GET_OBJECT)) &&
              ((((double)((long)rand()) / (double)(((long)RAND_MAX) + 1))) < MOUSE_MOVE_PROBABILITY))
          {
             bool move = false;
@@ -2107,19 +2343,19 @@ int main(int argc, char *args[])
          }
          continue;
       }
-      if (strcmp(args[i], "-maleStoneNeed") == 0)
+      if (strcmp(args[i], "-maleAttendFemaleNeed") == 0)
       {
          i++;
          if (i >= argc)
          {
-            fprintf(stderr, "Invalid maleStoneNeed option\n");
+            fprintf(stderr, "Invalid maleAttendFemaleNeed option\n");
             fprintf(stderr, Usage);
             exit(1);
          }
-         Male::STONE_NEED = strtod(args[i], 0);
-         if (Male::STONE_NEED < 0.0)
+         Male::ATTEND_FEMALE_NEED = strtod(args[i], 0);
+         if (Male::ATTEND_FEMALE_NEED < 0.0)
          {
-            fprintf(stderr, "Invalid maleStoneNeed option\n");
+            fprintf(stderr, "Invalid maleAttendFemaleNeed option\n");
             fprintf(stderr, Usage);
             exit(1);
          }

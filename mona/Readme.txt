@@ -1,5 +1,8 @@
 Nesting birds with the Mona neural network.
 
+Mona 6.0 includes an implemenation of place neurons, in the form of specialized motor neurons,
+which allow improved spatial navigation.
+
 To build:
 
 UNIX:

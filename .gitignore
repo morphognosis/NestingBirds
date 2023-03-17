@@ -3,4 +3,7 @@
 /mona/src/nestingbirds/Debug/
 /mona/src/nestingbirds/Release/
 /mona/src/nestingbirds/nestingbirds.vcxproj.user
+/mona/src/common/*.o
+/mona/src/mona/*.o
+/mona/src/nestingbirds/*.o
 

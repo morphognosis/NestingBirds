@@ -60,13 +60,13 @@
     <ClInclude Include="..\common\vector.hpp">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="bird.hpp">
-      <Filter>nestingbirds</Filter>
-    </ClInclude>
     <ClInclude Include="locale.hpp">
       <Filter>nestingbirds</Filter>
     </ClInclude>
     <ClInclude Include="object.hpp">
+      <Filter>nestingbirds</Filter>
+    </ClInclude>
+    <ClInclude Include="orientation.hpp">
       <Filter>nestingbirds</Filter>
     </ClInclude>
   </ItemGroup>
@@ -120,9 +120,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="NestingBirds.cpp">
-      <Filter>nestingbirds</Filter>
-    </ClCompile>
-    <ClCompile Include="bird.cpp">
       <Filter>nestingbirds</Filter>
     </ClCompile>
   </ItemGroup>

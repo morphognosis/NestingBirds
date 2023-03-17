@@ -33,11 +33,11 @@
     <ClInclude Include="..\mona\homeostat.hpp" />
     <ClInclude Include="..\mona\mona-aux.hpp" />
     <ClInclude Include="..\mona\mona.hpp" />
-    <ClInclude Include="bird.hpp" />
     <ClInclude Include="female.hpp" />
     <ClInclude Include="locale.hpp" />
     <ClInclude Include="male.hpp" />
     <ClInclude Include="object.hpp" />
+    <ClInclude Include="orientation.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\fileio.cpp" />
@@ -54,7 +54,6 @@
     <ClCompile Include="..\mona\mona.cpp" />
     <ClCompile Include="..\mona\respond.cpp" />
     <ClCompile Include="..\mona\sense.cpp" />
-    <ClCompile Include="bird.cpp" />
     <ClCompile Include="female.cpp" />
     <ClCompile Include="male.cpp" />
     <ClCompile Include="NestingBirds.cpp" />

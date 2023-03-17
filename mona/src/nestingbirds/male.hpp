@@ -5,57 +5,136 @@
 #ifndef __MALE__
 #define __MALE__
 
-#include "bird.hpp"
+#include "object.hpp"
+#include "locale.hpp"
+#include "orientation.hpp"
 #include "../mona/mona.hpp"
 
-class Male : public Bird
+class Male
 {
 public:
 
-    // Mate proximity.
-    static const int MATE_PROXIMITY_UNKNOWN = 0;
-    static const int MATE_PROXIMITY_PRESENT = 1;
-    static const int MATE_PROXIMITY_LEFT = 2;
-    static const int MATE_PROXIMITY_LEFT_FRONT = 3;
-    static const int MATE_PROXIMITY_FRONT = 4;
-    static const int MATE_PROXIMITY_RIGHT_FRONT = 5;
-    static const int MATE_PROXIMITY_RIGHT = 6;
-    static const int MATE_PROXIMITY_RIGHT_REAR = 7;
-    static const int MATE_PROXIMITY_REAR = 8;
-    static const int MATE_PROXIMITY_LEFT_REAR = 9;
+    // Proximity.
+    class PROXIMITY
+    {
+    public:
+        static const int UNKNOWN = 0;
+        static const int PRESENT = 1;
+        static const int LEFT = 2;
+        static const int FRONT = 3;
+        static const int RIGHT = 4;
+        static const int REAR = 5;
 
-   // Sensors.
-   static const int MATE_PROXIMITY_SENSOR = Bird::NUM_SENSORS;
-   static const int WANT_MOUSE_SENSOR = Bird::NUM_SENSORS + 1;
-   static const int WANT_STONE_SENSOR = Bird::NUM_SENSORS + 2;
-   static const int NUM_SENSORS       = Bird::NUM_SENSORS + 3;
-   int              sensors[NUM_SENSORS];
+        // Proximity to string.
+        static const char* toString(int proximity)
+        {
+            switch (proximity)
+            {
 
-   // Responses.
-   class RESPONSE
-   {
-public:
-      static const int GIVE_MOUSE    = Bird::RESPONSE::NUM_RESPONSES;
-      static const int GIVE_STONE    = GIVE_MOUSE + 1;
-      static const int NUM_RESPONSES = 2;
+            case PRESENT:
+                return("PRESENT");
 
-      // Response to string.
-      static const char *toString(int response)
-      {
-         switch (response)
-         {
-         case GIVE_MOUSE:
-            return("GIVE_MOUSE");
+            case LEFT:
+                return("LEFT");
 
-         case GIVE_STONE:
-            return("GIVE_STONE");
+            case FRONT:
+                return("FRONT");
 
-         default:
-            return(Bird::RESPONSE::toString(response));
-         }
-      }
-   };
-   int response;
+            case RIGHT:
+                return("RIGHT");
+
+            case REAR:
+                return("REAR");
+
+            default:
+                return("UNKNOWN");
+            }
+        }
+    };
+
+    // Sensors.
+    static const int LOCALE_SENSOR = 0;
+    static const int OBJECT_SENSOR = 1;
+    static const int MOUSE_PROXIMITY_SENSOR = 2;
+    static const int STONE_PROXIMITY_SENSOR = 3;
+    static const int FEMALE_PROXIMITY_SENSOR = 4;
+    static const int ORIENTATION_SENSOR = 5;
+    static const int HUNGER_SENSOR = 6;
+    static const int HAS_OBJECT_SENSOR = 7;
+    static const int WANT_MOUSE_SENSOR = 8;
+    static const int WANT_STONE_SENSOR = 9;
+    static const int NUM_SENSORS = 10;
+    int              sensors[NUM_SENSORS];
+
+    // State.
+    int x, y;
+    int orientation;
+    int food;
+    int hasObject;
+
+    // Responses.
+    class RESPONSE
+    {
+    public:
+        static const int DO_NOTHING = 0;
+        static const int MOVE_FORWARD = 1;
+        static const int TURN_RIGHT = 2;
+        static const int TURN_LEFT = 3;
+        static const int TURN_AROUND = 4;
+        static const int EAT_MOUSE = 5;
+        static const int GET_OBJECT = 6;
+        static const int PUT_OBJECT = 7;
+        static const int TOSS_OBJECT = 8;
+        static const int GIVE_MOUSE = 9;
+        static const int GIVE_STONE = 10;
+        static const int NUM_RESPONSES = 11;
+
+        // Response to string.
+        static const char* toString(int response)
+        {
+            switch (response)
+            {
+            case DO_NOTHING:
+                return("DO_NOTHING");
+
+            case EAT_MOUSE:
+                return("EAT_MOUSE");
+
+            case GET_OBJECT:
+                return("GET_OBJECT");
+
+            case PUT_OBJECT:
+                return("PUT_OBJECT");
+
+            case TOSS_OBJECT:
+                return("TOSS_OBJECT");
+
+            case MOVE_FORWARD:
+                return("MOVE_FORWARD");
+
+            case TURN_RIGHT:
+                return("TURN_RIGHT");
+
+            case TURN_LEFT:
+                return("TURN_LEFT");
+
+            case TURN_AROUND:
+                return("TURN_AROUND");
+
+            case GIVE_MOUSE:
+                return("GIVE_MOUSE");
+
+            case GIVE_STONE:
+                return("GIVE_STONE");
+
+            default:
+                return("Unknown response");
+            }
+        }
+    };
+
+    // Response.
+    int response;
 
    // Food.
 #define MALE_DEFAULT_FOOD_DURATION    "200"
@@ -65,34 +144,22 @@ public:
    static bool RANDOMIZE_FOOD_LEVEL;
 
    // Needs.
-   static const int GOTO_FOREST_NEED_INDEX = 0;
-#define MALE_DEFAULT_GOTO_FOREST_NEED            "0.8"
-   static Mona::NEED GOTO_FOREST_NEED;
-   static const int FIND_MOUSE_NEED_INDEX = 1;
-#define MALE_DEFAULT_FIND_MOUSE_NEED            "0.7"
-   static Mona::NEED FIND_MOUSE_NEED;
-   static const int GET_MOUSE_NEED_INDEX = 2;
-#define MALE_DEFAULT_GET_MOUSE_NEED            "0.6"
-   static Mona::NEED GET_MOUSE_NEED;
-   static const int MOUSE_NEED_INDEX = 3;
-#define MALE_DEFAULT_MOUSE_NEED            "0.5"
+   static const int MOUSE_NEED_INDEX = 0;
+#define MALE_DEFAULT_MOUSE_NEED    "0.4"
    static Mona::NEED MOUSE_NEED;
-   static const int FEMALE_MOUSE_NEED_INDEX = 4;
-#define MALE_DEFAULT_FEMALE_MOUSE_NEED     "0.4"
+   static const int FEMALE_MOUSE_NEED_INDEX = 1;
+#define MALE_DEFAULT_FEMALE_MOUSE_NEED    "0.3"
    static Mona::NEED FEMALE_MOUSE_NEED;
-   static const int STONE_NEED_INDEX = 5;
-#define MALE_DEFAULT_STONE_NEED            "0.3"
-   static Mona::NEED STONE_NEED;
-   static const int FEMALE_STONE_NEED_INDEX = 6;
-#define MALE_DEFAULT_FEMALE_STONE_NEED     "0.2"
+   static const int FEMALE_STONE_NEED_INDEX = 2;
+#define MALE_DEFAULT_FEMALE_STONE_NEED    "0.2"
    static Mona::NEED FEMALE_STONE_NEED;
-   static const int ATTEND_FEMALE_NEED_INDEX = 7;
-#define MALE_DEFAULT_ATTEND_FEMALE_NEED    "0.1"
+   static const int ATTEND_FEMALE_NEED_INDEX = 3;
+#define MALE_DEFAULT_ATTEND_FEMALE_NEED      "0.1"
    static Mona::NEED ATTEND_FEMALE_NEED;
-   static const int NUM_NEEDS = 8;
+   static const int NUM_NEEDS = 4;
 
-   // Find mouse attention.
-   bool findMouseAttention;
+   // Brain.
+   Mona* brain;
 
    // Constructor.
    Male();
@@ -110,6 +177,9 @@ public:
    // Post-response.
    void postResponse();
 
+   // Digest food.
+   void digest();
+
    // Load.
    void load(char* filename);
 
@@ -122,6 +192,9 @@ public:
    // Print sensors.
    void printSensors();
 
+   // Print state.
+   void printState();
+
    // Print needs.
    void printNeeds();
 
@@ -129,35 +202,19 @@ public:
    void printResponse();
 
 private:
-
+ 
     // Load mask.
     void loadMask(vector<bool>& mask,
         bool currentLocale, bool currentObject,
-        bool leftLocale, bool leftObject,
-        bool leftFrontLocale, bool leftFrontObject,
-        bool frontLocale, bool frontObject,
-        bool rightFrontLocale, bool rightFrontObject,
-        bool rightLocale, bool rightObject,
-        bool rightRearLocale, bool rightRearObject,
-        bool rearLocale, bool rearObject,
-        bool leftRearLocale, bool leftRearObject,
+        bool mouseProximity, bool stoneProximity, bool femaleProximity,
         bool orientation, bool hunger,
-        bool hasObject, bool state,
-        bool mateProximity, bool wantMouse, bool wantStone);
+        bool hasObject, bool wantMouse, bool wantStone);
 
     // Load sensors.
     void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
-        Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
-        Mona::SENSOR leftFrontLocale, Mona::SENSOR leftFrontObject,
-        Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
-        Mona::SENSOR rightFrontLocale, Mona::SENSOR rightFrontObject,
-        Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
-        Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
-        Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
-        Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
+        Mona::SENSOR mouseProximity, Mona::SENSOR stoneProximity, Mona::SENSOR femaleProximity,
         Mona::SENSOR orientation, Mona::SENSOR hunger,
-        Mona::SENSOR hasObject, Mona::SENSOR state,
-        Mona::SENSOR mateProximity, Mona::SENSOR wantMouse, Mona::SENSOR wantStone);
+        Mona::SENSOR hasObject, Mona::SENSOR wantMouse, Mona::SENSOR wantStone);
 };
 #endif
