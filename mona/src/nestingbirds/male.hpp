@@ -54,16 +54,14 @@ public:
 
     // Sensors.
     static const int LOCALE_SENSOR = 0;
-    static const int OBJECT_SENSOR = 1;
-    static const int MOUSE_PROXIMITY_SENSOR = 2;
-    static const int STONE_PROXIMITY_SENSOR = 3;
-    static const int FEMALE_PROXIMITY_SENSOR = 4;
-    static const int ORIENTATION_SENSOR = 5;
-    static const int HUNGER_SENSOR = 6;
-    static const int HAS_OBJECT_SENSOR = 7;
-    static const int WANT_MOUSE_SENSOR = 8;
-    static const int WANT_STONE_SENSOR = 9;
-    static const int NUM_SENSORS = 10;
+    static const int MOUSE_PROXIMITY_SENSOR = 1;
+    static const int STONE_PROXIMITY_SENSOR = 2;
+    static const int FEMALE_PROXIMITY_SENSOR = 3;
+    static const int HUNGER_SENSOR = 4;
+    static const int HAS_OBJECT_SENSOR = 5;
+    static const int WANT_MOUSE_SENSOR = 6;
+    static const int WANT_STONE_SENSOR = 7;
+    static const int NUM_SENSORS = 8;
     int              sensors[NUM_SENSORS];
 
     // State.
@@ -205,16 +203,16 @@ private:
  
     // Load mask.
     void loadMask(vector<bool>& mask,
-        bool currentLocale, bool currentObject,
+        bool currentLocale,
         bool mouseProximity, bool stoneProximity, bool femaleProximity,
-        bool orientation, bool hunger,
-        bool hasObject, bool wantMouse, bool wantStone);
+        bool hunger, bool hasObject,
+        bool wantMouse, bool wantStone);
 
     // Load sensors.
     void loadSensors(vector<Mona::SENSOR>& sensors,
-        Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
+        Mona::SENSOR currentLocale,
         Mona::SENSOR mouseProximity, Mona::SENSOR stoneProximity, Mona::SENSOR femaleProximity,
-        Mona::SENSOR orientation, Mona::SENSOR hunger,
-        Mona::SENSOR hasObject, Mona::SENSOR wantMouse, Mona::SENSOR wantStone);
+        Mona::SENSOR hunger, Mona::SENSOR hasObject,
+        Mona::SENSOR wantMouse, Mona::SENSOR wantStone);
 };
 #endif

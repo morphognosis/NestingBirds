@@ -194,8 +194,7 @@ Mona::learn()
          learningEvent = *learningEventItr;
          if ((learningEvent->end == eventClock) &&
              ((learningEvent->neuron->type == MEDIATOR) ||
-              ((learningEvent->neuron->type == RECEPTOR) &&
-               (((Receptor *)learningEvent->neuron)->sensorMode == 0))))
+              ((learningEvent->neuron->type == RECEPTOR))))
          {
             createMediator(learningEvent);
          }
@@ -323,6 +322,10 @@ Mona::createMediator(LearningEvent *effectEvent)
           continue;
       }
       if (causeEvent->end >= effectEvent->begin)
+      {
+          continue;
+      }
+      if (level == 0 && ((Receptor*)causeEvent->neuron)->sensorMode != ((Receptor*)effectEvent->neuron)->sensorMode)
       {
           continue;
       }

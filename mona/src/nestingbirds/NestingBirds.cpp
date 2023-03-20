@@ -296,7 +296,7 @@ void step()
    // Set female needs.
    female->setNeeds();
 
-   // Cycle female.
+   // Cycle female
    female->cycle();
 
    if (Verbose)
@@ -326,7 +326,7 @@ void step()
 
    if (Verbose)
    {
-      printf("Male: Location: [%d,%d], ", male->x, male->y);
+      printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
       male->print();
       printf("\n");
    }
@@ -844,9 +844,8 @@ void setMaleSensors()
         sensors[i] = DONT_CARE;
     }
 
-    // Set locale and object sensors.
+    // Set locale sensor.
     sensors[Male::LOCALE_SENSOR] = World[bird->x][bird->y].locale;
-    sensors[Male::OBJECT_SENSOR] = World[bird->x][bird->y].object;
 
     // Set mouse, stone, and female proximity sensors.
     int mousex = -1;
@@ -1236,7 +1235,6 @@ void setMaleSensors()
     }
 
     // Internal state.
-    sensors[Male::ORIENTATION_SENSOR] = bird->orientation;
     if (bird->food > 0)
     {
         sensors[Male::HUNGER_SENSOR] = 0;
