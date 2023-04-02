@@ -36,7 +36,6 @@ public:
       vector<void *>  receptors;
       void *pendingReceptor;
       void           *motor;
-      int placeMotorResponseCount;
       void           *mediator;
       NEED           goalValue;
       bool           enabled;
@@ -146,7 +145,6 @@ public:
 
    // Update homeostat based on motor firing.
    void motorUpdate();
-   void placeMotorUpdate();
 
    // Update homeostat based on mediator.
    void mediatorUpdate(void *mediator, double firingStrength);

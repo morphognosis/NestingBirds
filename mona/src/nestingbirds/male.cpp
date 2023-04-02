@@ -41,6 +41,8 @@ Male::Male()
     Mona::Motor* toss = brain->newMotor();
     Mona::Motor* giveMouse = brain->newMotor();
     Mona::Motor* giveStone = brain->newMotor();
+    Mona::Motor* fly = brain->newMovementMotor(Mona::MOVEMENT_TYPE::BEGIN);
+    Mona::Motor* alight = brain->newMovementMotor(Mona::MOVEMENT_TYPE::END);
 
     // Needs.
     initNeeds();
@@ -56,7 +58,7 @@ Male::Male()
     brain->addSensorMode(mask);
     int hungerMode = 0;
 
-    // Hunger sensor mode to obtain mouse for male.
+    // Attend female mode.
     loadMask(mask, true, false, false, true, false, false, false, false);
     brain->addSensorMode(mask);
     int attendFemaleMode = 1;
@@ -124,14 +126,8 @@ int Male::cycle()
        {
            brainSensors[i] = (Mona::SENSOR)sensors[i];
        }
-   response = brain->cycle(brainSensors);
+   response = brain->cycle(brainSensors, orientation, x, y);
    return response;
-}
-
-// Post response.
-void Male::postResponse()
-{
-    brain->postResponse(orientation, x, y);
 }
 
 // Digest food.

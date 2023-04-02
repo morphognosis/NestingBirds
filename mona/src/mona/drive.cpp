@@ -69,7 +69,7 @@ Mona::drive()
       {
          motiveAccum.init(needs);
          motiveAccum.accumGoals(receptor->goals);
-         if (motiveAccum.getValue() != 0.0)
+         if (motiveAccum.getValue() >= MIN_DRIVE_MOTIVE)
          {
             motiveAccum.init(needs);
             clearMotiveWork();
@@ -89,7 +89,7 @@ Mona::drive()
       {
          motiveAccum.init(needs);
          motiveAccum.accumGoals(motor->goals);
-         if (motiveAccum.getValue() != 0.0)
+         if (motiveAccum.getValue() >= MIN_DRIVE_MOTIVE)
          {
             motiveAccum.init(needs);
             motiveAccum.init(needs);
@@ -110,7 +110,7 @@ Mona::drive()
        {
            motiveAccum.init(needs);
            motiveAccum.accumGoals(motor->goals);
-           if (motiveAccum.getValue() != 0.0)
+           if (motiveAccum.getValue() >= MIN_DRIVE_MOTIVE)
            {
                motiveAccum.init(needs);
                motiveAccum.init(needs);
@@ -135,7 +135,7 @@ Mona::drive()
          {
             motiveAccum.init(needs);
             motiveAccum.accumGoals(mediator->goals);
-            if (motiveAccum.getValue() != 0.0)
+            if (motiveAccum.getValue() >= MIN_DRIVE_MOTIVE)
             {
                motiveAccum.init(needs);
                clearMotiveWork();
@@ -521,6 +521,7 @@ Mona::Neuron::drive(MotiveAccum motiveAccum)
    // Accumulate motive.
    // Store greater motive except for attenuated "pain".
    m = motiveAccum.getValue();
+   if (m < mona->MIN_DRIVE_MOTIVE) return;
    if (!motiveWorkValid ||
        ((m >= NEARLY_ZERO) && ((m - motiveWork.getValue()) > NEARLY_ZERO)))
    {
@@ -543,7 +544,18 @@ Mona::Neuron::drive(MotiveAccum motiveAccum)
 #ifdef MONA_TRACE
    if (mona->traceDrive)
    {
-      printf("Drive %llu, motive=%f\n", id, m);
+       switch (type)
+       {
+       case RECEPTOR:
+           printf("Drive receptor id=%llu, motive=%f\n", id, m);
+           break;
+       case MOTOR:
+           printf("Drive motor id=%llu, motive=%f\n", id, m);
+           break;
+       case MEDIATOR:
+           printf("Drive mediator id=%llu, motive=%f\n", id, m);
+           break;
+      }
    }
 #endif
 
@@ -619,6 +631,7 @@ Mona::Mediator::driveCause(MotiveAccum motiveAccum)
    // Accumulate motive.
    // Store greater motive except for attenuated "pain".
    m = motiveAccum.getValue();
+   if (m < mona->MIN_DRIVE_MOTIVE) return;
    if (!motiveWorkValid ||
        ((m >= NEARLY_ZERO) && ((m - motiveWork.getValue()) > NEARLY_ZERO)))
    {

@@ -118,6 +118,7 @@ public:
    ENABLEMENT MIN_ENABLEMENT;
    ENABLEMENT INITIAL_ENABLEMENT;
    WEIGHT     DRIVE_ATTENUATION;
+   WEIGHT MIN_DRIVE_MOTIVE;
    WEIGHT     FIRING_STRENGTH_LEARNING_DAMPER;
    WEIGHT     LEARNING_DECREASE_VELOCITY;
    WEIGHT     LEARNING_INCREASE_VELOCITY;
@@ -181,9 +182,14 @@ public:
    bool               overrideResponseConditional(RESPONSE, RESPONSE_POTENTIAL);
    void clearResponseOverride();
    Motor *findMotorByResponse(RESPONSE response);
-   int movementResponsePathLength;
-   vector<LearningEvent*> movementCauses;
-   vector<LearningEvent*> movementEffects;
+   bool movementLearningPathActive;
+   int movementLearningPathLength;
+   vector<LearningEvent*> movementLearningCauses;
+   vector<LearningEvent*> movementLearningEffects;
+   void resetMovementLearningPath();
+   int movementBeginResponse;
+   int movementEndResponse;
+   Motor *activePlaceMotor;
 
    // Needs.
    int                 numNeeds;
@@ -256,12 +262,12 @@ public:
 
    // Behavior cycle.
    RESPONSE cycle(vector<SENSOR>& sensors);
+   RESPONSE cycle(vector<SENSOR>& sensors, int orientation, int x, int y);
    void sense();
    void enable();
    void learn();
    void drive();
    void respond();
-   void postResponse(int orientation, int x, int y);
 
    // Cause event firing notifications.
    list<struct FiringNotify> causeFirings;
@@ -465,9 +471,10 @@ public:
     int movementType;
 
     // Place coordinates.
-    // If these are non-zero, this is a place motor, 
+    // If these are non-negative, this is a place motor, 
     // meaning that the response navigates to these coordinates.
-    int x, y;
+    int x, y; 
+    bool isPlaceMotor() { return x >= 0;  }
 
     // Set response to move to place coordinates.
     void placeResponse();
@@ -578,12 +585,14 @@ public:
    vector<Motor*> placeMotors;
    list<Mediator *>   mediators;
 
-   // Place.
-
    // Movement type.
    class MOVEMENT_TYPE
    {
    public:
+       // Movement markers.
+       static const int NONE = -1;
+       static const int BEGIN = -2;
+       static const int END = -3;
        static const int DO_NOTHING = 0;
        static const int MOVE_FORWARD = 1;
        static const int TURN_RIGHT = 2;

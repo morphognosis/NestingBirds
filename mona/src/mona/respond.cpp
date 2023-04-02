@@ -6,7 +6,7 @@
 void
 Mona::respond()
 {
-   Motor              *motor;
+   Motor              *motor, *maxMotiveMotor;
 
 #ifdef MONA_TRACE
    if (traceRespond)
@@ -16,6 +16,8 @@ Mona::respond()
 #endif
 
    // Determine response that leads to place motor coordinates.
+   assert(placeMotors.size() == 0 ||
+       (movementBeginResponse != -1 && movementEndResponse != -1));
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
        motor = placeMotors[i];
@@ -27,15 +29,52 @@ Mona::respond()
    {
       responsePotentials[i] = 0.0;
    }
+   maxMotiveMotor = NULL;
    for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
       motor = motors[i];
+      motor->firingStrength = 0.0;
       responsePotentials[motor->response] += motor->motive;
+      if (motor->motive > 0.0)
+      {
+          if (maxMotiveMotor == NULL || motor->motive > maxMotiveMotor->motive)
+          {
+              maxMotiveMotor = motor;
+          }
+      }
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
        motor = placeMotors[i];
+       motor->firingStrength = 0.0;
        responsePotentials[motor->response] += motor->motive;
+       if (motor->motive > 0.0)
+       {
+           if (maxMotiveMotor == NULL)
+           {
+               maxMotiveMotor = motor;
+           }
+           else if (motor->motive > maxMotiveMotor->motive)
+           {
+               maxMotiveMotor = motor;
+           }
+           else if (motor->motive == maxMotiveMotor->motive)
+           {
+               if (motor->isPlaceMotor())
+               {
+                   if (maxMotiveMotor->isPlaceMotor())
+                   {
+                       if (random.RAND_CHOICE(2))
+                       {
+                           maxMotiveMotor = motor;
+                       }
+                   }
+                   else {
+                       maxMotiveMotor = motor;
+                   }
+               }
+           }
+       }
    }
 
    // Incorporate minimal randomness.
@@ -105,6 +144,8 @@ Mona::respond()
    // Response overridden?
    if (responseOverride != NULL_RESPONSE)
    {
+       activePlaceMotor = maxMotiveMotor = NULL;
+
       // Conditional override?
       if (responseOverridePotential >= 0.0)
       {
@@ -119,6 +160,34 @@ Mona::respond()
       }
       responseOverride          = NULL_RESPONSE;
       responseOverridePotential = -1.0;
+   }
+
+   // Place motor execution.
+   if (activePlaceMotor != NULL)
+   {
+       response = activePlaceMotor->response;
+       if (activePlaceMotor->response == movementEndResponse)
+       {
+           activePlaceMotor->firingStrength = 1.0;
+#ifdef MONA_TRACE
+           if (traceRespond)
+           {
+               printf("Place motor firing: %llu\n", activePlaceMotor->id);
+           }
+#endif
+#ifdef MONA_TRACKING
+           activePlaceMotor->tracker.fire = true;
+#endif
+           activePlaceMotor = NULL;
+       }
+   }
+   else {
+       if (maxMotiveMotor != NULL && maxMotiveMotor->isPlaceMotor() &&
+           maxMotiveMotor->response == movementBeginResponse)
+       {
+           response = movementBeginResponse;
+           activePlaceMotor = maxMotiveMotor;
+       }
    }
 
    // Fire responding motor.
@@ -138,9 +207,6 @@ Mona::respond()
            motor->tracker.fire = true;
 #endif
        }
-       else {
-           motor->firingStrength = 0.0;
-       }
    }
 
    // Update need based on motor firing.
@@ -152,51 +218,15 @@ Mona::respond()
 #ifdef MONA_TRACE
    if (traceRespond)
    {
+       printf("Response potentials:\n");
+       for (int i = 0; i < numResponses; i++)
+       {
+          printf("%f ", responsePotentials[i]);
+       }
+       printf("\n");
       printf("Response = %d\n", response);
    }
 #endif
-}
-
-// Post response.
-void Mona::postResponse(int orientation, int x, int y)
-{
-#ifdef MONA_TRACE
-    if (traceRespond)
-    {
-        printf("***Post response phase***\n");
-    }
-#endif
-    X = x;
-    Y = y;
-    this->orientation = orientation;
-
-    // Fire place motors.
-        for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
-        {
-            Motor* motor = placeMotors[i];
-            if (motor->x == X && motor->y == Y)
-            {
-                motor->firingStrength = 1.0;
-#ifdef MONA_TRACE
-                if (traceRespond)
-                {
-                    printf("Place motor firing: %llu\n", motor->id);
-                }
-#endif
-#ifdef MONA_TRACKING
-                motor->tracker.fire = true;
-#endif
-            }
-            else {
-                motor->firingStrength = 0.0;
-            }
-        }
-
-    // Update need based on place motor firing.
-    for (int i = 0; i < numNeeds; i++)
-    {
-        homeostats[i]->placeMotorUpdate();
-    }
 }
 
 // Get response potential.
@@ -271,3 +301,145 @@ Mona::Motor *Mona::findMotorByResponse(RESPONSE response)
    }
    return(NULL);
 }
+
+// Set response to move to place location.
+void Mona::Motor::placeResponse()
+{
+    if (mona->activePlaceMotor == this)
+    {
+            if (mona->X != x || mona->Y != y)
+            {
+                response = gotoPlace(mona->orientation, mona->X, mona->Y, x, y);
+            }
+            else {
+                response = mona->movementEndResponse;
+            }
+    }
+    else {
+        response = mona->movementBeginResponse;
+    }
+}
+
+// Get response from current to target. 
+int Mona::Motor::gotoPlace(int orientation, int fromX, int fromY, int toX, int toY)
+{
+    if (fromX > toX)
+    {
+        if (orientation == Mona::ORIENTATION::WEST)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::SOUTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else if (orientation == Mona::ORIENTATION::NORTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+        return(true);
+    }
+    if (fromX < toX)
+    {
+        if (orientation == Mona::ORIENTATION::EAST)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::SOUTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else if (orientation == Mona::ORIENTATION::NORTH)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else
+            {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+        return(true);
+    }
+    if (fromY > toY)
+    {
+        if (orientation == Mona::ORIENTATION::NORTH)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::EAST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else if (orientation == Mona::ORIENTATION::WEST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else
+            {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+        return(true);
+    }
+    if (fromY < toY)
+    {
+        if (orientation == Mona::ORIENTATION::SOUTH)
+        {
+            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+        }
+        else
+        {
+            if (orientation == Mona::ORIENTATION::EAST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
+            }
+            else if (orientation == Mona::ORIENTATION::WEST)
+            {
+                return Mona::MOVEMENT_TYPE::TURN_LEFT;
+            }
+            else
+            {
+                return Mona::MOVEMENT_TYPE::TURN_AROUND;
+            }
+        }
+    }
+    return Mona::MOVEMENT_TYPE::DO_NOTHING;
+}
+
+// Is given motor a duplicate of this?
+bool Mona::Motor::isDuplicate(Motor* motor)
+{
+    if (!isPlaceMotor())
+    {
+        if (!motor->isPlaceMotor())
+        {
+            if (response == motor->response)
+            {
+                assert(movementType == motor->movementType);
+                return(true);
+            }
+        }
+    }
+    else {
+        if (motor->isPlaceMotor())
+        {
+            if (x == motor->x && y == motor->y)
+            {
+                assert(movementType == motor->movementType);
+                return(true);
+            }
+        }
+    }
+    return false;
+}
+

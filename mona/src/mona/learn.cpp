@@ -44,7 +44,7 @@ Mona::learn()
             {
                 // Place motor?
                 Motor* motor = (Motor*)(learningEvent->neuron);
-                if (motor->x != -1)
+                if (motor->isPlaceMotor())
                 {
                     k = -1;
                 }
@@ -80,8 +80,7 @@ Mona::learn()
    }
 
    // Time-stamp and store significant events.
-   vector<LearningEvent*> movementEvents;
-   movementEvents.resize(sensorModes.size());
+   movementLearningEffects.resize(sensorModes.size());
    for (int i = 0, j = (int)receptors.size(); i < j; i++)
    {
       receptor = receptors[i];
@@ -90,86 +89,76 @@ Mona::learn()
          learningEvent = new LearningEvent(receptor);
          assert(learningEvent != NULL);
          learningEvents[0].push_back(learningEvent);
-         movementEvents[receptor->sensorMode] = new LearningEvent(receptor);
+         movementLearningEffects[receptor->sensorMode] = new LearningEvent(receptor);
       }
-   }
-   bool newMovementCause = false;
-   vector<LearningEvent*> tmpMovementEffects;
-   if (movementCauses.size() == 0)
-   {
-       for (int i = 0, j = sensorModes.size(); i < j; i++)
-       { 
-           movementCauses.push_back(movementEvents[i]);
-       }
-       newMovementCause = true;
-   }
-   else {
-       for (int i = 0, j = sensorModes.size(); i < j; i++)
-       {
-           tmpMovementEffects.push_back(movementEvents[i]);
-       }
    }
    Motor* movementMotor = NULL;
    for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
-      motor = motors[i];
-      if (motor->firingStrength > NEARLY_ZERO)
-      {
-         learningEvent = new LearningEvent(motor);
-         assert(learningEvent != NULL);
-         learningEvents[0].push_back(learningEvent);
-         movementMotor = motor;
-      }
-   }
-   if (!newMovementCause)
-   {
-       if (movementMotor->movementType != -1)
+       motor = motors[i];
+       if (motor->firingStrength > NEARLY_ZERO)
        {
-           if (movementResponsePathLength < MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
+           learningEvent = new LearningEvent(motor);
+           assert(learningEvent != NULL);
+           learningEvents[0].push_back(learningEvent);
+           movementMotor = motor;
+       }
+   }
+
+   // Create movement mediators.
+   if (movementLearningCauses.size() == 0)
+   {
+       resetMovementLearningPath();
+   }
+   else
+   {
+       switch (movementMotor->movementType)
+       {
+       case MOVEMENT_TYPE::BEGIN:
+           if (movementLearningPathActive)
            {
-               for (int i = 0, j = movementEffects.size(); i < j; i++)
-               {
-                   delete movementEffects[i];
-               }
-               movementEffects.clear();
-               for (int i = 0, j = sensorModes.size(); i < j; i++)
-               {
-                   movementEffects.push_back(tmpMovementEffects[i]);
-               }
-               movementResponsePathLength++;
+               resetMovementLearningPath();
            }
            else {
-               movementResponsePathLength = 0;
-               for (int i = 0, j = movementCauses.size(); i < j; i++)
+               movementLearningPathActive = true;
+               for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
                {
-                   delete movementCauses[i];
+                   delete movementLearningEffects[i];
                }
-               movementCauses.clear();
-               for (int i = 0, j = movementEffects.size(); i < j; i++)
-               {
-                   delete movementEffects[i];
-               }
-               movementEffects.clear();
+               movementLearningEffects.clear();
            }
-       }
-       else {
-           if (movementResponsePathLength >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH)
+           break;
+       case MOVEMENT_TYPE::END:
+           if (movementLearningPathActive)
            {
-               createPlaceMediators();
+               if (movementLearningPathLength >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH)
+               {
+                   createPlaceMediators();
+               }
            }
-               movementResponsePathLength = 0;
-               for (int i = 0, j = movementCauses.size(); i < j; i++)
+           resetMovementLearningPath();
+           break;
+       case MOVEMENT_TYPE::NONE:
+           resetMovementLearningPath();
+           break;
+       default:
+           if (movementLearningPathLength < MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
+           {
+               for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
                {
-                   delete movementCauses[i];
+                   delete movementLearningEffects[i];
                }
-               movementCauses.clear();
-               for (int i = 0, j = movementEffects.size(); i < j; i++)
-               {
-                   delete movementEffects[i];
-               }
-               movementEffects.clear();
+               movementLearningEffects.clear();
+               movementLearningPathLength++;
+           }
+           else {
+               resetMovementLearningPath();
+           }
+           break;
        }
    }
+
+   // Create new mediators based on potential effect events.
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
    {
@@ -184,30 +173,28 @@ Mona::learn()
          }
       }
    }
+       for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
+       {
+           for (learningEventItr = learningEvents[i].begin();
+               learningEventItr != learningEvents[i].end(); learningEventItr++)
+           {
+               learningEvent = *learningEventItr;
+               if ((learningEvent->end == eventClock) &&
+                   ((learningEvent->neuron->type == MEDIATOR) ||
+                       ((learningEvent->neuron->type == RECEPTOR))))
+               {
+                   createMediator(learningEvent);
+               }
+           }
+       }
 
-   // Create new mediators based on potential effect events.
-   for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
-   {
-      for (learningEventItr = learningEvents[i].begin();
-           learningEventItr != learningEvents[i].end(); learningEventItr++)
-      {
-         learningEvent = *learningEventItr;
-         if ((learningEvent->end == eventClock) &&
-             ((learningEvent->neuron->type == MEDIATOR) ||
-              ((learningEvent->neuron->type == RECEPTOR))))
-         {
-            createMediator(learningEvent);
-         }
-      }
-   }
-
-   // Create mediators with generalized receptor effects.
-   for (int i = 0, j = (int)generalizationEvents.size(); i < j; i++)
-   {
-      generalizeMediator(generalizationEvents[i]);
-      delete generalizationEvents[i];
-   }
-   generalizationEvents.clear();
+       // Create mediators with generalized receptor effects.
+       for (int i = 0, j = (int)generalizationEvents.size(); i < j; i++)
+       {
+           generalizeMediator(generalizationEvents[i]);
+           delete generalizationEvents[i];
+       }
+       generalizationEvents.clear();
 
    // Delete excess mediators.
    while ((int)mediators.size() > MAX_MEDIATORS)
@@ -230,10 +217,10 @@ Mona::createPlaceMediators()
     for (int i = 0, j = sensorModes.size(); i < j; i++)
     {
             Mediator* mediator = newMediator(INITIAL_ENABLEMENT);
-            mediator->addEvent(CAUSE_EVENT, movementCauses[i]->neuron);
+            mediator->addEvent(CAUSE_EVENT, movementLearningCauses[i]->neuron);
             mediator->addEvent(RESPONSE_EVENT, newPlaceMotor(X, Y));
-            mediator->addEvent(EFFECT_EVENT, movementEffects[i]->neuron);
-            mediator->updateGoalValue(movementCauses[i]->needs);
+            mediator->addEvent(EFFECT_EVENT, movementLearningEffects[i]->neuron);
+            mediator->updateGoalValue(movementLearningCauses[i]->needs);
 
             // Duplicate?
             if (isDuplicateMediator(mediator))
@@ -245,9 +232,9 @@ Mona::createPlaceMediators()
             // Make new mediator available for learning.
             if ((mediator->level + 1) < (int)learningEvents.size())
             {
-                mediator->causeBegin = movementCauses[i]->begin;
-                mediator->firingStrength = movementCauses[i]->firingStrength *
-                    movementEffects[i]->firingStrength;
+                mediator->causeBegin = movementLearningCauses[i]->begin;
+                mediator->firingStrength = movementLearningCauses[i]->firingStrength *
+                    movementLearningEffects[i]->firingStrength;
                 LearningEvent* learningEvent = new LearningEvent(mediator);
                 assert(learningEvent != NULL);
                 learningEvents[mediator->level + 1].push_back(learningEvent);
@@ -400,7 +387,13 @@ Mona::createMediator(LearningEvent *effectEvent)
                    (responseEvent->firingStrength > NEARLY_ZERO) &&
                    (responseEvent->end == causeEvent->end + 1))
                {
-                   tmpVector.push_back(responseEvent);
+                   Motor* motor = (Motor*)(responseEvent->neuron);
+                   if (!motor->isPlaceMotor() &&
+                       motor->response != movementBeginResponse &&
+                       motor->response != movementEndResponse)
+                   {
+                       tmpVector.push_back(responseEvent);
+                   }
                }
            }
            if (tmpVector.size() == 0)
@@ -731,17 +724,17 @@ void Mona::clearWorkingMemory()
       }
       learningEvents[i].clear();
    }
-   movementResponsePathLength = 0;
-   for (int i = 0, j = movementCauses.size(); i < j; i++)
+   movementLearningPathLength = 0;
+   for (int i = 0, j = movementLearningCauses.size(); i < j; i++)
    {
-       delete movementCauses[i];
+       delete movementLearningCauses[i];
    }
-   movementCauses.clear();
-   for (int i = 0, j = movementEffects.size(); i < j; i++)
+   movementLearningCauses.clear();
+   for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
    {
-       delete movementEffects[i];
+       delete movementLearningEffects[i];
    }
-   movementEffects.clear();
+   movementLearningEffects.clear();
 }
 
 
@@ -779,4 +772,21 @@ void Mona::clearLongTermMemory()
       mediator = *mediatorItr;
       mediators.push_back(mediator);
    }
+}
+
+// Reset movement response path.
+void Mona::resetMovementLearningPath()
+{
+    movementLearningPathLength = 0;
+    for (int i = 0, j = movementLearningCauses.size(); i < j; i++)
+    {
+        delete movementLearningCauses[i];
+    }
+    movementLearningCauses.clear();
+    for (int i = 0, j = sensorModes.size(); i < j; i++)
+    {
+        movementLearningCauses.push_back(movementLearningEffects[i]);
+    }
+    movementLearningEffects.clear();
+    movementLearningPathActive = false;
 }

@@ -42,6 +42,14 @@ Mona::cycle(vector<Mona::SENSOR>& sensors)
    return(response);
 }
 
+Mona::RESPONSE
+Mona::cycle(vector<Mona::SENSOR>& sensors, int orientation, int x, int y)
+{
+    X = x;
+    Y = y;
+    this->orientation = orientation;
+    return cycle(sensors);
+}
 
 // Construct empty network.
 Mona::Mona()
@@ -76,6 +84,7 @@ void Mona::initParms()
    INITIAL_ENABLEMENT = 0.95;
    assert(INITIAL_ENABLEMENT >= MIN_ENABLEMENT);
    DRIVE_ATTENUATION = 0.0;
+   MIN_DRIVE_MOTIVE = 0.01;
    FIRING_STRENGTH_LEARNING_DAMPER = 0.1;
    LEARNING_DECREASE_VELOCITY      = 0.9;
    LEARNING_INCREASE_VELOCITY      = 0.1;
@@ -865,7 +874,7 @@ void Mona::Receptor::print(FILE *out)
 Mona::Motor*
 Mona::newMotor()
 {
-    Motor* motor = new Motor(-1, this);
+    Motor* motor = new Motor(MOVEMENT_TYPE::NONE, this);
     assert(motor != NULL);
     motor->id = idDispenser;
     idDispenser++;
@@ -888,6 +897,16 @@ Mona::newMovementMotor(int movementType)
     motors.push_back(motor);
     responsePotentials.push_back(0.0);
     numResponses++;
+    if (movementType == MOVEMENT_TYPE::BEGIN)
+    {
+        assert(movementBeginResponse == -1);
+        movementBeginResponse = numResponses - 1;
+    }
+    if (movementType == MOVEMENT_TYPE::END)
+    {
+        assert(movementEndResponse == -1);
+        movementEndResponse = numResponses - 1;
+    }
     return(motor);
 }
 
@@ -895,6 +914,7 @@ Mona::newMovementMotor(int movementType)
 Mona::Motor*
 Mona::newPlaceMotor(int x, int y)
 {
+    assert(movementBeginResponse != -1 && movementEndResponse != -1);
     Motor* motor;
     for (int i = 0, j = placeMotors.size(); i < j; i++)
     {
@@ -923,13 +943,13 @@ Mona::Motor::Motor(int movementType, Mona* mona)
     x = y = -1;
 }
 
-// Motor place constructor.
+// Place motor constructor.
 Mona::Motor::Motor(int x, int y, Mona* mona)
 {
     init(mona);
     type = MOTOR;
     response = -1;
-    movementType = -1;
+    movementType = MOVEMENT_TYPE::NONE;
     this->x = x;
     this->y = y;
 }
@@ -938,135 +958,6 @@ Mona::Motor::Motor(int x, int y, Mona* mona)
 Mona::Motor::~Motor()
 {
    clear();
-}
-
-// Set response to move to place coordinates.
-void Mona::Motor::placeResponse()
-{
-    response = gotoPlace(mona->orientation, mona->X, mona->Y, x, y);
-}
-
-// Get response from current to target. 
-int Mona::Motor::gotoPlace(int orientation, int fromX, int fromY, int toX, int toY)
-{
-    if (fromX > toX)
-    {
-        if (orientation == Mona::ORIENTATION::WEST)
-        {
-            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
-        }
-        else
-        {
-            if (orientation == Mona::ORIENTATION::SOUTH)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
-            }
-            else if (orientation == Mona::ORIENTATION::NORTH)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_LEFT;
-            }
-            else {
-                return Mona::MOVEMENT_TYPE::TURN_AROUND;
-            }
-        }
-        return(true);
-    }
-    if (fromX < toX)
-    {
-        if (orientation == Mona::ORIENTATION::EAST)
-        {
-            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
-        }
-        else
-        {
-            if (orientation == Mona::ORIENTATION::SOUTH)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_LEFT;
-            }
-            else if (orientation == Mona::ORIENTATION::NORTH)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
-            }
-            else
-            {
-                return Mona::MOVEMENT_TYPE::TURN_AROUND;
-            }
-        }
-        return(true);
-    }
-    if (fromY > toY)
-    {
-        if (orientation == Mona::ORIENTATION::NORTH)
-        {
-            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
-        }
-        else
-        {
-            if (orientation == Mona::ORIENTATION::EAST)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_LEFT;
-            }
-            else if (orientation == Mona::ORIENTATION::WEST)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
-            }
-            else
-            {
-                return Mona::MOVEMENT_TYPE::TURN_AROUND;
-            }
-        }
-        return(true);
-    }
-    if (fromY < toY)
-    {
-        if (orientation == Mona::ORIENTATION::SOUTH)
-        {
-            return Mona::MOVEMENT_TYPE::MOVE_FORWARD;
-        }
-        else
-        {
-            if (orientation == Mona::ORIENTATION::EAST)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_RIGHT;
-            }
-            else if (orientation == Mona::ORIENTATION::WEST)
-            {
-                return Mona::MOVEMENT_TYPE::TURN_LEFT;
-            }
-            else
-            {
-                return Mona::MOVEMENT_TYPE::TURN_AROUND;
-            }
-        }
-    }
-    return Mona::MOVEMENT_TYPE::DO_NOTHING;
-}
-
-// Is given motor a duplicate of this?
-bool Mona::Motor::isDuplicate(Motor* motor)
-{
-    if (x == -1)
-    {
-        if (motor->x == -1)
-        {
-            if (response == motor->response)
-            {
-                assert(movementType == motor->movementType);
-                return(true);
-            }
-        }
-    }
-    else {
-        if (motor->x != -1)
-        {
-            if (x == motor->x && y == motor->y)
-            {
-                assert(movementType == motor->movementType);
-                return(true);
-            }
-        }
-    }
-    return false;
 }
 
 // Load motor.
@@ -1107,15 +998,21 @@ void Mona::Motor::print(FILE *out)
 #endif
 {
     fprintf(out, "<motor><id>%llu</id>", id);
-    if (x == -1)
+    if (!isPlaceMotor())
     {
         fprintf(out, "<response>%d</response>", response);
 
-        if (movementType != -1)
+        if (movementType != MOVEMENT_TYPE::NONE)
         {
             fprintf(out, "<movement_type>");
             switch (movementType)
             {
+            case MOVEMENT_TYPE::BEGIN:
+                fprintf(out, "BEGIN");
+                break;
+            case MOVEMENT_TYPE::END:
+                fprintf(out, "END");
+                break;
             case MOVEMENT_TYPE::MOVE_FORWARD:
                 fprintf(out, "MOVE_FORWARD");
                 break;
@@ -1839,7 +1736,7 @@ Mona::deleteNeuron(Neuron *neuron)
       break;
 
    case MOTOR:
-       if (((Motor*)neuron)->x == -1)
+       if (!((Motor*)neuron)->isPlaceMotor())
        {
            for (int i = 0, j = (int)motors.size(); i < j; i++)
            {
@@ -2018,6 +1915,7 @@ Mona::load(FILE *fp)
    FREAD_DOUBLE(&MIN_ENABLEMENT, fp);
    FREAD_DOUBLE(&INITIAL_ENABLEMENT, fp);
    FREAD_DOUBLE(&DRIVE_ATTENUATION, fp);
+   FREAD_DOUBLE(&MIN_DRIVE_MOTIVE, fp);
    FREAD_DOUBLE(&FIRING_STRENGTH_LEARNING_DAMPER, fp);
    FREAD_DOUBLE(&LEARNING_DECREASE_VELOCITY, fp);
    FREAD_DOUBLE(&LEARNING_INCREASE_VELOCITY, fp);
@@ -2265,37 +2163,10 @@ Mona::load(FILE *fp)
                    Mona::Receptor::loadClient);
       sensorCentroids.push_back(rdTree);
    }
-   FREAD_INT(&movementResponsePathLength, fp);
-   movementCauses.clear();
-   int j;
-   FREAD_INT(&j, fp);
-   for (int i = 0; i < j; i++)
-   {
-       learningEvent = new LearningEvent();
-       assert(learningEvent != NULL);
-       learningEvent->load(fp);
-       movementCauses.push_back(learningEvent);
-       id = (ID*)(learningEvent->neuron);
-       learningEvent->neuron = findByID(*id);
-       assert(learningEvent->neuron != NULL);
-       delete id;
-   }
-   movementEffects.clear();
-   FREAD_INT(&j, fp);
-   for (int i = 0; i < j; i++)
-   {
-       learningEvent = new LearningEvent();
-       assert(learningEvent != NULL);
-       learningEvent->load(fp);
-       movementEffects.push_back(learningEvent);
-       id = (ID*)(learningEvent->neuron);
-       learningEvent->neuron = findByID(*id);
-       assert(learningEvent->neuron != NULL);
-       delete id;
-   }
+   FREAD_INT(&movementBeginResponse, fp);
+   FREAD_INT(&movementEndResponse, fp);
    return(true);
 }
-
 
 // Find neuron by id.
 Mona::Neuron *
@@ -2385,6 +2256,7 @@ Mona::save(FILE *fp)
    FWRITE_DOUBLE(&MIN_ENABLEMENT, fp);
    FWRITE_DOUBLE(&INITIAL_ENABLEMENT, fp);
    FWRITE_DOUBLE(&DRIVE_ATTENUATION, fp);
+   FWRITE_DOUBLE(&MIN_DRIVE_MOTIVE, fp);
    FWRITE_DOUBLE(&FIRING_STRENGTH_LEARNING_DAMPER, fp);
    FWRITE_DOUBLE(&LEARNING_DECREASE_VELOCITY, fp);
    FWRITE_DOUBLE(&LEARNING_INCREASE_VELOCITY, fp);
@@ -2493,19 +2365,8 @@ Mona::save(FILE *fp)
       sensorCentroids[i]->save(fp, Mona::Receptor::savePattern,
                                Mona::Receptor::saveClient);
    }
-   FWRITE_INT(&movementResponsePathLength, fp);
-   j = (int)movementCauses.size();
-   FWRITE_INT(&j, fp);
-   for (int i = 0; i < j; i++)
-   {
-       movementCauses[i]->save(fp);
-   }
-   j = (int)movementEffects.size();
-   FWRITE_INT(&j, fp);
-   for (int i = 0; i < j; i++)
-   {
-       movementEffects[i]->save(fp);
-   }
+   FWRITE_INT(&movementBeginResponse, fp);
+   FWRITE_INT(&movementEndResponse, fp);
    return(true);
 }
 
@@ -2553,9 +2414,13 @@ Mona::clear()
    }
    placeMotors.clear();
    numResponses = 0;
-   movementResponsePathLength = 0;
-   movementCauses.clear();
-   movementEffects.clear();
+   movementLearningPathActive = false;
+   movementLearningPathLength = 0;
+   movementLearningCauses.clear();
+   movementLearningEffects.clear();
+   movementBeginResponse = -1;
+   movementEndResponse = -1;
+   activePlaceMotor = NULL;
    orientation = ORIENTATION::NORTH;
    X = Y = -1;
    for (int i = 0, j = (int)homeostats.size(); i < j; i++)
@@ -2864,6 +2729,7 @@ Mona::printParms(FILE *out)
    fprintf(out, "<parameter>MIN_ENABLEMENT</parameter><value>%f</value>\n", MIN_ENABLEMENT);
    fprintf(out, "<parameter>INITIAL_ENABLEMENT</parameter><value>%f</value>\n", INITIAL_ENABLEMENT);
    fprintf(out, "<parameter>DRIVE_ATTENUATION</parameter><value>%f</value>\n", DRIVE_ATTENUATION);
+   fprintf(out, "<parameter>MIN_DRIVE_MOTIVE</parameter><value>%f</value>\n", MIN_DRIVE_MOTIVE);
    fprintf(out, "<parameter>FIRING_STRENGTH_LEARNING_DAMPER</parameter><value>%f</value>\n", FIRING_STRENGTH_LEARNING_DAMPER);
    fprintf(out, "<parameter>LEARNING_DECREASE_VELOCITY</parameter><value>%f</value>\n", LEARNING_DECREASE_VELOCITY);
    fprintf(out, "<parameter>LEARNING_INCREASE_VELOCITY</parameter><value>%f</value>\n", LEARNING_INCREASE_VELOCITY);

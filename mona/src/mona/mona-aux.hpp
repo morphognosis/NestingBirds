@@ -965,6 +965,10 @@ public:
       needs.clear();
    }
 
+   ~LearningEvent()
+   {
+       needs.clear();
+   }
 
    // Load.
    void load(FILE *fp)

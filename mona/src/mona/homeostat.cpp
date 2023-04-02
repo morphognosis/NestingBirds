@@ -74,7 +74,6 @@ int Homeostat::addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
       goal.sensorMode = sensorMode;
       goal.pendingReceptor = NULL;
       goal.motor = motor;
-      goal.placeMotorResponseCount = 0;
       if (goal.motor != NULL)
       {
          ((Mona::Motor *)goal.motor)->goals.setValue(needIndex, 0.0);
@@ -140,11 +139,14 @@ void Homeostat::addGoalReceptor(void* receptor)
     ((Mona::Receptor*)receptor)->goals.setValue(needIndex, 0.0);
     for (int i = 0, n = (int)goals.size(); i < n; i++)
     {
-        if (goalSuperset(i, ((Mona::Receptor*)receptor)->centroid))
+        if (goals[i].sensorMode == ((Mona::Receptor*)receptor)->sensorMode)
         {
-            NEED value = ((Mona::Receptor*)receptor)->goals.getValue(needIndex);
-            ((Mona::Receptor*)receptor)->goals.setValue(needIndex, value + goals[i].goalValue);
-            goals[i].receptors.push_back(receptor);
+            if (goalSuperset(i, ((Mona::Receptor*)receptor)->centroid))
+            {
+                NEED value = ((Mona::Receptor*)receptor)->goals.getValue(needIndex);
+                ((Mona::Receptor*)receptor)->goals.setValue(needIndex, value + goals[i].goalValue);
+                goals[i].receptors.push_back(receptor);
+            }
         }
     }
 }
@@ -162,7 +164,6 @@ int Homeostat::addGoalMediator(void* mediator, NEED goalValue)
         goal.sensorMode = 0;
         goal.pendingReceptor = NULL;
         goal.motor = NULL;
-        goal.placeMotorResponseCount = 0;
         goal.mediator = mediator;
         ((Mona::Mediator*)goal.mediator)->goals.setValue(needIndex, goalValue);
         goal.goalValue = goalValue;
@@ -433,7 +434,6 @@ void Homeostat::receptorUpdate(void *receptor)
                }
                else {
                    goals[i].pendingReceptor = receptor;
-                   goals[i].placeMotorResponseCount = 0;
                    NEED value = ((Mona::Receptor*)receptor)->goals.getValue(needIndex);
                    ((Mona::Receptor*)receptor)->goals.setValue(needIndex, value - goals[i].goalValue);
                    value = ((Mona::Motor*)goals[i].motor)->goals.getValue(needIndex);
@@ -453,22 +453,22 @@ void Homeostat::motorUpdate()
       if (goals[i].pendingReceptor != NULL)
       {
               Mona::Motor* motor = (Mona::Motor*)goals[i].motor;
-              if (motor->x == -1)
+              if (motor->firingStrength > 0.0)
               {
-                  if (motor->firingStrength > 0.0)
+                  need -= goals[i].goalValue;
+                  if (need < 0.0)
                   {
-                      need -= goals[i].goalValue;
-                      if (need < 0.0)
-                      {
-                          need = 0.0;
-                      }
+                      need = 0.0;
                   }
-                  Mona::Receptor* receptor = (Mona::Receptor*)goals[i].pendingReceptor;
-                  NEED value = receptor->goals.getValue(needIndex);
-                  receptor->goals.setValue(needIndex, value + goals[i].goalValue);
-                  motor->goals.setValue(needIndex, 0.0);
               }
-              goals[i].pendingReceptor = NULL;
+            if (!motor->isPlaceMotor() || motor->firingStrength > 0.0)
+            {
+                Mona::Receptor* receptor = (Mona::Receptor*)goals[i].pendingReceptor;
+                NEED value = receptor->goals.getValue(needIndex);
+                receptor->goals.setValue(needIndex, value + goals[i].goalValue);
+                motor->goals.setValue(needIndex, 0.0);
+                goals[i].pendingReceptor = NULL;
+            }
       }
    }
 
@@ -482,39 +482,6 @@ void Homeostat::motorUpdate()
          need      = periodicNeed;
       }
    }
-}
-
-// Update homeostat based on place motor firing.
-void Homeostat::placeMotorUpdate()
-{
-    for (int i = 0, j = (int)goals.size(); i < j; i++)
-    {
-        if (goals[i].pendingReceptor != NULL)
-        {
-            Mona::Motor* motor = (Mona::Motor*)goals[i].motor;
-                if (motor->x != -1)
-                {
-                    if (motor->firingStrength > 0.0)
-                    {
-                        need -= goals[i].goalValue;
-                        if (need < 0.0)
-                        {
-                            need = 0.0;
-                        }
-                    }
-                    goals[i].placeMotorResponseCount++;
-                    if (motor->firingStrength > 0.0 || goals[i].placeMotorResponseCount >= mona->MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
-                    {
-                        Mona::Receptor* receptor = (Mona::Receptor*)goals[i].pendingReceptor;
-                        NEED value = receptor->goals.getValue(needIndex);
-                        receptor->goals.setValue(needIndex, value + goals[i].goalValue);
-                        motor->goals.setValue(needIndex, 0.0);
-                        goals[i].pendingReceptor = NULL;
-                        goals[i].placeMotorResponseCount = 0;
-                    }
-                }
-        }
-    }
 }
 
 // Update homeostat based on mediator.
