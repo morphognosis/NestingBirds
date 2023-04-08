@@ -145,9 +145,11 @@ void stepMice();
 void train(int);
 void trainMale();
 void trainFemale();
+bool doNeeds();
+bool flyToPlace();
 bool getMouse();
 bool getStone();
-bool returnToFemale();
+bool goToFemale();
 void doMaleResponse();
 void doFemaleResponse();
 void setMaleSensors();
@@ -369,15 +371,35 @@ void trainMale()
         return;
     }
 
-      if (!getMouse() && !getStone())
-      {
-         returnToFemale();
-      }
+    // Train tasks.
+    if (flyToPlace())
+    {
+        if (!doNeeds())
+        {
+            if (FemaleWantStone)
+            {
+                if (getStone())
+                {
+                    goToFemale();
+                }
+            }
+            else if (male->food == 0 || FemaleWantMouse)
+            {
+                if (getMouse())
+                {
+                    goToFemale();
+                }
+            }
+            else {
+                goToFemale();
+            }
+        }
+    }
 }
 
-
-// Get mouse.
-bool getMouse()
+// Fly to a place.
+// Return true when flight completed.
+bool flyToPlace()
 {
     if (MaleFlyingToForest)
     {
@@ -387,228 +409,164 @@ bool getMouse()
             MaleFlyingToForest = false;
             male->response = Male::RESPONSE::ALIGHT;
         }
+        return false;
+    }
+    if (MaleFlyingToDesert)
+    {
+        male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, DESERT_CENTER_X, DESERT_CENTER_Y);
+        if (male->response == Male::RESPONSE::DO_NOTHING)
+        {
+            MaleFlyingToDesert = false;
+            male->response = Male::RESPONSE::ALIGHT;
+        }
+        return false;
+    }
+    if (MaleFlyingToNest)
+    {
+        male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, NEST_CENTER_X, NEST_CENTER_Y);
+        if (male->response == Male::RESPONSE::DO_NOTHING)
+        {
+            MaleFlyingToNest = false;
+            male->response = Male::RESPONSE::ALIGHT;
+        }
+        return false;
+    }
+    return true;
+}
+
+// Do need actions.
+// Return true when response taken.
+bool doNeeds()
+{
+    bool response = false;
+    if (male->food == 0 && male->hasObject == OBJECT::MOUSE)
+    {
+        male->response = Male::RESPONSE::EAT_MOUSE;
+        response = true;
+    }
+    else {
+        if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
+        {
+            if (male->hasObject == OBJECT::MOUSE)
+            {
+                male->response = Male::RESPONSE::GIVE_MOUSE;
+                FemaleWantMouse = false;
+                response = true;
+            }
+            else if (female->response == Female::RESPONSE::WANT_MOUSE)
+            {
+                FemaleWantMouse = true;
+            }
+            if (male->hasObject == OBJECT::STONE)
+            {
+                male->response = Male::RESPONSE::GIVE_STONE;
+                FemaleWantStone = false;
+                response = true;
+            }
+            else if (male->food > 0 && female->response == Female::RESPONSE::WANT_STONE)
+            {
+                FemaleWantStone = true;
+            }
+        }
+    }
+    return response;
+}
+
+// Get mouse.
+// Return true when have mouse.
+bool getMouse()
+{
+    if (male->hasObject == OBJECT::MOUSE)
+    {
         return true;
     }
-    if (male->food == 0)
-    {
-        if (male->hasObject == OBJECT::MOUSE)
-        {
-            male->response = Male::RESPONSE::EAT_MOUSE;
-            return(true);
-        }
-        if (male->hasObject == OBJECT::STONE)
-        {
-            male->response = Male::RESPONSE::TOSS_OBJECT;
-            return(true);
-        }
-    }
-   if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
+   switch (male->sensors[Male::MOUSE_PROXIMITY_SENSOR])
    {
-       if (male->hasObject == OBJECT::MOUSE)
-       {
-           male->response = Male::RESPONSE::GIVE_MOUSE;
-           FemaleWantMouse = false;
-           return(true);
-       }
-       else if (female->response == Female::RESPONSE::WANT_MOUSE)
-      {
-         FemaleWantMouse = true;
-      }
-      if (male->hasObject == OBJECT::STONE)
-      {
-              male->response = Male::RESPONSE::GIVE_STONE;
-              FemaleWantStone = false;
-              return(true);
-      }
-      else if (female->response == Female::RESPONSE::WANT_STONE)
-      {
-          FemaleWantStone = true;
-      }
-   }
-   if (male->hasObject == OBJECT::MOUSE)
-   {
-       return false;
-   }
-   if (male->food > 0 && !FemaleWantMouse)
-   {
-       return false;
-   }
-   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
-   {
-      male->response = Male::RESPONSE::GET_OBJECT;
-      return(true);
-   }
-   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::FRONT)
-   {
+   case Male::PROXIMITY::PRESENT:
+       male->response = Male::RESPONSE::GET_OBJECT;
+       break;
+   case Male::PROXIMITY::FRONT:
        male->response = Male::RESPONSE::MOVE_FORWARD;
-       return(true);
-   }
-   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::REAR)
-   {
+       break;
+   case Male::PROXIMITY::REAR:
        male->response = Male::RESPONSE::TURN_AROUND;
-       return(true);
-   }
-   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::LEFT)
-   {
-      male->response = Male::RESPONSE::TURN_LEFT;
-      return(true);
-   }
-   if (male->sensors[Male::MOUSE_PROXIMITY_SENSOR] == Male::PROXIMITY::RIGHT)
-   {
+       break;
+   case Male::PROXIMITY::LEFT:
+       male->response = Male::RESPONSE::TURN_LEFT;
+       break;
+   case Male::PROXIMITY::RIGHT:
        male->response = Male::RESPONSE::TURN_RIGHT;
-       return(true);
+       break;
+   case Male::PROXIMITY::UNKNOWN:
+       MaleFlyingToForest = true;
+       male->response = Male::RESPONSE::FLY;
+       break;
    }
-   MaleFlyingToForest = true;
-   male->response = Male::RESPONSE::FLY;
-   return(true);
+   return(false);
 }
 
 
 // Get stone.
+// Return true when have stone.
 bool getStone()
 {
-    if (MaleFlyingToDesert)
+    if (male->hasObject == OBJECT::STONE)
     {
-        if (male->food == 0 && male->sensors[Male::LOCALE_SENSOR] == LOCALE::PLAIN)
-        {
-            MaleFlyingToDesert = false;
-            MaleFlyingToForest = true;
-            male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, FOREST_CENTER_X, FOREST_CENTER_Y);
-            if (male->response == Male::RESPONSE::DO_NOTHING)
-            {
-                MaleFlyingToForest = false;
-                male->response = Male::RESPONSE::ALIGHT;
-            }
-        }
-        else {
-            male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, DESERT_CENTER_X, DESERT_CENTER_Y);
-            if (male->response == Male::RESPONSE::DO_NOTHING)
-            {
-                MaleFlyingToDesert = false;
-                male->response = Male::RESPONSE::ALIGHT;
-            }
-        }
         return true;
     }
-   if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
+   switch (male->sensors[Male::STONE_PROXIMITY_SENSOR])
    {
-      if (female->response == Female::RESPONSE::WANT_STONE)
-      {
-         FemaleWantStone = true;
-      }
-   }
-   if (FemaleWantMouse || !FemaleWantStone)
-   {
-      return(false);
-   }
-   if (male->hasObject == OBJECT::STONE)
-   {
-      if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
-      {
-         male->response  = Male::RESPONSE::GIVE_STONE;
-         FemaleWantStone = false;
-         return(true);
-      }
-      else
-      {
-         return(false);
-      }
-   }
-   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
-   {
-      male->response = Male::RESPONSE::GET_OBJECT;
-      return(true);
-   }
-   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::FRONT)
-   {
+   case Male::PROXIMITY::PRESENT:
+       male->response = Male::RESPONSE::GET_OBJECT;
+       break;
+   case Male::PROXIMITY::FRONT:
        male->response = Male::RESPONSE::MOVE_FORWARD;
-       return(true);
-   }
-   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::REAR)
-   {
+       break;
+   case Male::PROXIMITY::REAR:
        male->response = Male::RESPONSE::TURN_AROUND;
-       return(true);
-   }
-   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::LEFT)
-   {
+       break;
+   case Male::PROXIMITY::LEFT:
        male->response = Male::RESPONSE::TURN_LEFT;
-       return(true);
-   }
-   if (male->sensors[Male::STONE_PROXIMITY_SENSOR] == Male::PROXIMITY::RIGHT)
-   {
+       break;
+   case Male::PROXIMITY::RIGHT:
        male->response = Male::RESPONSE::TURN_RIGHT;
-       return(true);
+       break;
+   case Male::PROXIMITY::UNKNOWN:
+       MaleFlyingToDesert = true;
+       male->response = Male::RESPONSE::FLY;
+       break;
    }
-   MaleFlyingToDesert = true;
-   male->response = Male::RESPONSE::FLY;   
-   return(true);
+   return(false);
 }
 
 
-// Male returns to female.
-bool returnToFemale()
+// Male goes to female.
+// Return true when female present.
+bool goToFemale()
 {
-    if (MaleFlyingToNest)
-    {
-        if (male->food == 0 && male->sensors[Male::LOCALE_SENSOR] == LOCALE::PLAIN)
-        {
-            MaleFlyingToNest = false;
-            MaleFlyingToForest = true;
-            if (male->hasObject == OBJECT::MOUSE)
-            {
-                male->response = Male::RESPONSE::EAT_MOUSE;
-            }
-            else if (male->hasObject == OBJECT::STONE)
-            {
-                male->response = Male::RESPONSE::TOSS_OBJECT;
-            }
-            else {
-                male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, FOREST_CENTER_X, FOREST_CENTER_Y);
-                if (male->response == Male::RESPONSE::DO_NOTHING)
-                {
-                    MaleFlyingToForest = false;
-                    male->response = Male::RESPONSE::ALIGHT;
-                }
-            }
-        }
-        else {
-            male->response = Mona::Motor::gotoPlace(male->orientation, male->x, male->y, NEST_CENTER_X, NEST_CENTER_Y);
-            if (male->response == Male::RESPONSE::DO_NOTHING)
-            {
-                MaleFlyingToNest = false;
-                male->response = Male::RESPONSE::ALIGHT;
-            }
-        }
-        return true;
-    }
    switch (male->sensors[Male::FEMALE_PROXIMITY_SENSOR])
    {
    case Male::PROXIMITY::PRESENT:
       male->response = Male::RESPONSE::DO_NOTHING;
-      break;
-
+      return true;
    case Male::PROXIMITY::LEFT:
       male->response = Male::RESPONSE::TURN_LEFT;
       break;
-
    case Male::PROXIMITY::FRONT:
        male->response = Male::RESPONSE::MOVE_FORWARD;
       break;
-
    case Male::PROXIMITY::RIGHT:
       male->response = Male::RESPONSE::TURN_RIGHT;
       break;
-
    case Male::PROXIMITY::REAR:
        male->response = Male::RESPONSE::TURN_AROUND;
        break;
-
    case Male::PROXIMITY::UNKNOWN:
        MaleFlyingToNest = true;
        male->response = Male::RESPONSE::FLY;
        break;
    }
-   return(true);
+   return(false);
 }
 
 

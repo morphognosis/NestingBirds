@@ -387,13 +387,7 @@ Mona::createMediator(LearningEvent *effectEvent)
                    (responseEvent->firingStrength > NEARLY_ZERO) &&
                    (responseEvent->end == causeEvent->end + 1))
                {
-                   Motor* motor = (Motor*)(responseEvent->neuron);
-                   if (!motor->isPlaceMotor() &&
-                       motor->response != movementBeginResponse &&
-                       motor->response != movementEndResponse)
-                   {
                        tmpVector.push_back(responseEvent);
-                   }
                }
            }
            if (tmpVector.size() == 0)
@@ -402,6 +396,7 @@ Mona::createMediator(LearningEvent *effectEvent)
            }
            responseEvent = tmpVector[random.RAND_CHOICE((int)tmpVector.size())];
        }
+       if (responseEvent)
 
        // Create the mediator.
        mediator = newMediator(INITIAL_ENABLEMENT);

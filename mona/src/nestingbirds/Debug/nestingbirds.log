@@ -1,10 +1,6 @@
-﻿  drive.cpp
-  learn.cpp
-  mona.cpp
-  respond.cpp
-  sense.cpp
+﻿  respond.cpp
   NestingBirds.cpp
+  female.cpp
   male.cpp
   Generating Code...
-     Creating library Debug\nestingbirds.lib and object Debug\nestingbirds.exp
   nestingbirds.vcxproj -> C:\Users\Tom Portegys\Documents\research\AI\Morphognosis\NestingBirds\mona\src\nestingbirds\Debug\nestingbirds.exe

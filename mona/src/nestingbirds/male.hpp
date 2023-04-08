@@ -69,6 +69,7 @@ public:
     int orientation;
     int food;
     int hasObject;
+    bool flying;
 
     // Responses.
     class RESPONSE
@@ -145,19 +146,19 @@ public:
    // Food.
 #define MALE_DEFAULT_FOOD_DURATION    "200"
    static int FOOD_DURATION;
-#define MALE_DEFAULT_INITIAL_FOOD     "0"
+#define MALE_DEFAULT_INITIAL_FOOD     "200"
    static int  INITIAL_FOOD;
    static bool RANDOMIZE_FOOD_LEVEL;
 
    // Needs.
    static const int MOUSE_NEED_INDEX = 0;
-#define MALE_DEFAULT_MOUSE_NEED    "0.4"
+#define MALE_DEFAULT_MOUSE_NEED    "0.3"
    static Mona::NEED MOUSE_NEED;
    static const int FEMALE_MOUSE_NEED_INDEX = 1;
-#define MALE_DEFAULT_FEMALE_MOUSE_NEED    "0.3"
+#define MALE_DEFAULT_FEMALE_MOUSE_NEED    "0.2"
    static Mona::NEED FEMALE_MOUSE_NEED;
    static const int FEMALE_STONE_NEED_INDEX = 2;
-#define MALE_DEFAULT_FEMALE_STONE_NEED    "0.2"
+#define MALE_DEFAULT_FEMALE_STONE_NEED    "0.4"
    static Mona::NEED FEMALE_STONE_NEED;
    static const int ATTEND_FEMALE_NEED_INDEX = 3;
 #define MALE_DEFAULT_ATTEND_FEMALE_NEED      "0.1"

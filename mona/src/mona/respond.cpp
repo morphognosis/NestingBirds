@@ -30,22 +30,45 @@ Mona::respond()
       responsePotentials[i] = 0.0;
    }
    maxMotiveMotor = NULL;
-   for (int i = 0, j = (int)motors.size(); i < j; i++)
+   int n = (int)motors.size();
+   int j = 0;
+   if (n > 0)
    {
-      motor = motors[i];
+       j = random.RAND_CHOICE(n);
+   }
+   for (int i = 0; i < n; i++, j = (j + 1) % n)
+   {
+      motor = motors[j];
       motor->firingStrength = 0.0;
       responsePotentials[motor->response] += motor->motive;
       if (motor->motive > 0.0)
       {
-          if (maxMotiveMotor == NULL || motor->motive > maxMotiveMotor->motive)
+          if (maxMotiveMotor == NULL)
           {
               maxMotiveMotor = motor;
           }
+          else if (motor->motive > maxMotiveMotor->motive)
+          {
+              maxMotiveMotor = motor;
+          }
+          else if (motor->motive == maxMotiveMotor->motive)
+          {
+              if (random.RAND_CHOICE(2))
+              {
+                  maxMotiveMotor = motor;
+              }
+          }
       }
    }
-   for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+   n = (int)placeMotors.size();
+   j = 0;
+   if (n > 0)
    {
-       motor = placeMotors[i];
+       j = random.RAND_CHOICE(n);
+   }
+   for (int i = 0; i < n; i++, j = (j + 1) % n)
+   {
+       motor = placeMotors[j];
        motor->firingStrength = 0.0;
        responsePotentials[motor->response] += motor->motive;
        if (motor->motive > 0.0)
@@ -60,8 +83,6 @@ Mona::respond()
            }
            else if (motor->motive == maxMotiveMotor->motive)
            {
-               if (motor->isPlaceMotor())
-               {
                    if (maxMotiveMotor->isPlaceMotor())
                    {
                        if (random.RAND_CHOICE(2))
@@ -72,7 +93,6 @@ Mona::respond()
                    else {
                        maxMotiveMotor = motor;
                    }
-               }
            }
        }
    }
@@ -191,23 +211,23 @@ Mona::respond()
    }
 
    // Fire responding motor.
-   for (int i = 0, j = (int)motors.size(); i < j; i++)
-   {
-       motor = motors[i];
-       if (motor->response == response)
+       for (int i = 0, j = (int)motors.size(); i < j; i++)
        {
-           motor->firingStrength = 1.0;
-#ifdef MONA_TRACE
-           if (traceRespond)
+           motor = motors[i];
+           if (motor->response == response)
            {
-               printf("Motor firing: %llu\n", motor->id);
-           }
+               motor->firingStrength = 1.0;
+#ifdef MONA_TRACE
+               if (traceRespond)
+               {
+                   printf("Motor firing: %llu\n", motor->id);
+               }
 #endif
 #ifdef MONA_TRACKING
-           motor->tracker.fire = true;
+               motor->tracker.fire = true;
 #endif
+           }
        }
-   }
 
    // Update need based on motor firing.
    for (int i = 0; i < numNeeds; i++)
