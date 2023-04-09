@@ -102,15 +102,6 @@ void Mona::initParms()
    LEARN_MEDIATOR_GOAL_VALUE = false;
    LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL = 2;
    LEARN_RECEPTOR_GOAL_VALUE           = false;
-
-   // Initialize effect event intervals.
-   initEffectEventIntervals();
-
-   // Initialize the maximum learning effect event intervals.
-   initMaxLearningEffectEventIntervals();
-
-   // Audit the default effect event intervals.
-   assert(auditDefaultEffectEventIntervals());
 }
 
 
@@ -279,6 +270,12 @@ bool Mona::auditDefaultEffectEventIntervals()
 void Mona::initNet(int numSensors, int numResponses, int numNeeds,
                    RANDOM randomSeed)
 {
+    // Initialize effect event intervals.
+    initEffectEventIntervals();
+
+    // Initialize the maximum learning effect event intervals.
+    initMaxLearningEffectEventIntervals();
+
    // Sanity checks.
    assert(numSensors > 0);
    assert(numResponses >= 0);
@@ -288,6 +285,7 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
           MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL);
    assert((int)effectEventIntervals.size() == MAX_MEDIATOR_LEVEL + 1);
    assert((int)maxLearningEffectEventIntervals.size() == MAX_MEDIATOR_LEVEL + 1);
+   assert(auditDefaultEffectEventIntervals());
 
    // Clear network.
    clear();

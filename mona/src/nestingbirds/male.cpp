@@ -28,9 +28,9 @@ Male::Male()
     flying = false;
 
     // Create Mona bird brain.
-    brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
-    brain->MAX_MEDIATORS = 1000;
+    brain = new Mona();
     brain->MAX_MEDIATOR_LEVEL = 0;
+    brain->initNet(NUM_SENSORS, 0, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
     // Motors:
     Mona::Motor* doNothing = brain->newMotor();

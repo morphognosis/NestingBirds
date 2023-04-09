@@ -98,14 +98,19 @@ Mona::learn()
        motor = motors[i];
        if (motor->firingStrength > NEARLY_ZERO)
        {
-           learningEvent = new LearningEvent(motor);
-           assert(learningEvent != NULL);
-           learningEvents[0].push_back(learningEvent);
            movementMotor = motor;
+           if (motor->movementType != MOVEMENT_TYPE::BEGIN &&
+               motor->movementType != MOVEMENT_TYPE::END &&
+               !movementLearningPathActive)
+           {
+               learningEvent = new LearningEvent(motor);
+               assert(learningEvent != NULL);
+               learningEvents[0].push_back(learningEvent);
+           }
        }
    }
 
-   // Create movement mediators.
+   // Create movement mediators that use place motors.
    if (movementLearningCauses.size() == 0)
    {
        resetMovementLearningPath();
@@ -396,7 +401,6 @@ Mona::createMediator(LearningEvent *effectEvent)
            }
            responseEvent = tmpVector[random.RAND_CHOICE((int)tmpVector.size())];
        }
-       if (responseEvent)
 
        // Create the mediator.
        mediator = newMediator(INITIAL_ENABLEMENT);
