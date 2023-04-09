@@ -29,6 +29,8 @@ Male::Male()
 
     // Create Mona bird brain.
     brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
+    brain->MAX_MEDIATORS = 1000;
+    brain->MAX_MEDIATOR_LEVEL = 0;
 
     // Motors:
     Mona::Motor* doNothing = brain->newMotor();
@@ -55,22 +57,22 @@ Male::Male()
 
     // Hunger sensor mode to obtain mouse for male.
     vector<bool> mask;
-    loadMask(mask, true, true, false, false, true, true, false, false);
+    loadMask(mask, true, true, false, false, true, true, true, false, false);
     brain->addSensorMode(mask);
     int hungerMode = 0;
 
     // Attend female mode.
-    loadMask(mask, false, false, false, true, false, false, false, false);
+    loadMask(mask, false, false, false, true, false, false, true, false, false);
     brain->addSensorMode(mask);
     int attendFemaleMode = 1;
 
     // Female hunger sensor mode to obtain mouse for female.
-    loadMask(mask, true, true, false, true, false, true, true, false);
+    loadMask(mask, true, true, false, true, false, true, true, true, false);
     brain->addSensorMode(mask);
     int femaleHungerMode = 2;
 
     // Female want stone sensor mode to obtain stone for female.
-    loadMask(mask, true, false, true, true, false, true, false, true);
+    loadMask(mask, true, false, true, true, false, true, true, false, true);
     brain->addSensorMode(mask);
     int femaleStoneMode = 3;
 
@@ -79,22 +81,22 @@ Male::Male()
     // Hunger goal.
     vector<Mona::SENSOR> sensors;
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE);
+        0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
     int hungerGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, hungerMode, MOUSE_NEED);
 
     // Attend female goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE);
+        DONT_CARE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
     int attendFemaleGoal = brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, attendFemaleMode, ATTEND_FEMALE_NEED);
 
     // Female hunger goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-        DONT_CARE, DONT_CARE, 0.0, DONT_CARE);
+        DONT_CARE, DONT_CARE, 0.0, 0.0, DONT_CARE);
     int femaleHungerGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, femaleHungerMode, FEMALE_MOUSE_NEED);
 
     // Female want stone goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-        DONT_CARE, DONT_CARE, DONT_CARE, 0.0);
+        DONT_CARE, DONT_CARE, 0.0, DONT_CARE, 0.0);
     int femaleStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, femaleStoneMode, FEMALE_STONE_NEED);
 
     // Set initial response.
@@ -114,21 +116,26 @@ void Male::initNeeds()
 // Set male needs.
 void Male::setNeeds()
 {
-    if (food == 0)
+    if (!flying && sensors[FEMALE_PROXIMITY_SENSOR] == 1)
     {
-        brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
+        if (brain->getNeed(MOUSE_NEED_INDEX) == 0.0 &&
+            brain->getNeed(FEMALE_MOUSE_NEED_INDEX) == 0.0 &&
+            brain->getNeed(FEMALE_STONE_NEED_INDEX) == 0.0)
+        {
+            if (food == 0)
+            {
+                brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
+            }
+            else if (sensors[Male::WANT_MOUSE_SENSOR] == 1)
+            {
+                brain->setNeed(FEMALE_MOUSE_NEED_INDEX, FEMALE_MOUSE_NEED);
+            }
+            else if (sensors[Male::WANT_STONE_SENSOR] == 1)
+            {
+                brain->setNeed(FEMALE_MOUSE_NEED_INDEX, FEMALE_MOUSE_NEED);
+            }
+        }
     }
-
-    if (!flying && sensors[Male::WANT_MOUSE_SENSOR] == 1)
-    {
-        brain->setNeed(FEMALE_MOUSE_NEED_INDEX, FEMALE_MOUSE_NEED);
-    }
-
-    if (!flying && food > 0 && sensors[Male::WANT_STONE_SENSOR] == 1)
-    {
-        brain->setNeed(FEMALE_STONE_NEED_INDEX, FEMALE_STONE_NEED);
-    }
-
     brain->setNeed(ATTEND_FEMALE_NEED_INDEX, ATTEND_FEMALE_NEED);
 }
 
@@ -245,6 +252,13 @@ void Male::printState()
 {
     printf("Food: %d", food);
     printf(", Has_object: %s", OBJECT::toString(hasObject));
+    if (sensors[FLYING_SENSOR])
+    {
+        printf(", Flying: true");
+    }
+    else {
+        printf(", Flying: false");
+    }
 }
 
 // Print needs.
@@ -283,7 +297,7 @@ void Male::printResponse()
 void Male::loadMask(vector<bool>& mask,
     bool currentLocale,
     bool mouseProximity, bool stoneProximity, bool femaleProximity,
-    bool hunger, bool hasObject,
+    bool hunger, bool hasObject, bool flying,
     bool wantMouse, bool wantStone)
 {
     mask.clear();
@@ -293,6 +307,7 @@ void Male::loadMask(vector<bool>& mask,
     mask.push_back(femaleProximity);
     mask.push_back(hunger);
     mask.push_back(hasObject);
+    mask.push_back(flying);
     mask.push_back(wantMouse);
     mask.push_back(wantStone);
 }
@@ -301,7 +316,7 @@ void Male::loadMask(vector<bool>& mask,
 void Male::loadSensors(vector<Mona::SENSOR>& sensors,
     Mona::SENSOR currentLocale,
     Mona::SENSOR mouseProximity, Mona::SENSOR stoneProximity, Mona::SENSOR femaleProximity,
-    Mona::SENSOR hunger, Mona::SENSOR hasObject,
+    Mona::SENSOR hunger, Mona::SENSOR hasObject, Mona::SENSOR flying, 
     Mona::SENSOR wantMouse, Mona::SENSOR wantStone)
 {
     sensors.clear();
@@ -311,6 +326,7 @@ void Male::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(femaleProximity);
     sensors.push_back(hunger);
     sensors.push_back(hasObject);
+    sensors.push_back(flying);
     sensors.push_back(wantMouse);
     sensors.push_back(wantStone);
 }

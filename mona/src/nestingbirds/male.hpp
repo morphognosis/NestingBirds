@@ -59,9 +59,10 @@ public:
     static const int FEMALE_PROXIMITY_SENSOR = 3;
     static const int HUNGER_SENSOR = 4;
     static const int HAS_OBJECT_SENSOR = 5;
-    static const int WANT_MOUSE_SENSOR = 6;
-    static const int WANT_STONE_SENSOR = 7;
-    static const int NUM_SENSORS = 8;
+    static const int FLYING_SENSOR = 6;
+    static const int WANT_MOUSE_SENSOR = 7;
+    static const int WANT_STONE_SENSOR = 8;
+    static const int NUM_SENSORS = 9;
     int              sensors[NUM_SENSORS];
 
     // State.
@@ -146,7 +147,7 @@ public:
    // Food.
 #define MALE_DEFAULT_FOOD_DURATION    "200"
    static int FOOD_DURATION;
-#define MALE_DEFAULT_INITIAL_FOOD     "200"
+#define MALE_DEFAULT_INITIAL_FOOD     "0"
    static int  INITIAL_FOOD;
    static bool RANDOMIZE_FOOD_LEVEL;
 
@@ -211,14 +212,14 @@ private:
     void loadMask(vector<bool>& mask,
         bool currentLocale,
         bool mouseProximity, bool stoneProximity, bool femaleProximity,
-        bool hunger, bool hasObject,
+        bool hunger, bool hasObject, bool flying,
         bool wantMouse, bool wantStone);
 
     // Load sensors.
     void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale,
         Mona::SENSOR mouseProximity, Mona::SENSOR stoneProximity, Mona::SENSOR femaleProximity,
-        Mona::SENSOR hunger, Mona::SENSOR hasObject,
+        Mona::SENSOR hunger, Mona::SENSOR hasObject, Mona::SENSOR flying,
         Mona::SENSOR wantMouse, Mona::SENSOR wantStone);
 };
 #endif

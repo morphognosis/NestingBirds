@@ -453,7 +453,7 @@ bool doNeeds()
                 FemaleWantMouse = false;
                 response = true;
             }
-            else if (female->response == Female::RESPONSE::WANT_MOUSE)
+            else if (male->food > 0 && female->response == Female::RESPONSE::WANT_MOUSE)
             {
                 FemaleWantMouse = true;
             }
@@ -1187,6 +1187,15 @@ void setMaleSensors()
     if (bird->hasObject == OBJECT::STONE)
     {
         sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+    }
+
+    // Flying sensor.
+    if (bird->flying)
+    {
+        sensors[Male::FLYING_SENSOR] = 1;
+    }
+    else {
+        sensors[Male::FLYING_SENSOR] = 0;
     }
 
     // Sense female wants.
