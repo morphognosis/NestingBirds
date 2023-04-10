@@ -132,7 +132,7 @@ void Male::setNeeds()
             }
             else if (sensors[Male::WANT_STONE_SENSOR] == 1)
             {
-                brain->setNeed(FEMALE_MOUSE_NEED_INDEX, FEMALE_MOUSE_NEED);
+                brain->setNeed(FEMALE_STONE_NEED_INDEX, FEMALE_STONE_NEED);
             }
         }
     }
@@ -155,6 +155,17 @@ int Male::cycle()
            brainSensors[i] = (Mona::SENSOR)sensors[i];
        }
    response = brain->cycle(brainSensors, orientation, x, y);
+
+   // Set random response to do nothing.
+   if (brain->getNeed(MOUSE_NEED_INDEX) == 0.0 &&
+       brain->getNeed(FEMALE_MOUSE_NEED_INDEX) == 0.0 &&
+       brain->getNeed(FEMALE_STONE_NEED_INDEX) == 0.0 &&
+       brain->getNeed(FEMALE_STONE_NEED_INDEX) == 0.0 &&
+       brain->getNeed(ATTEND_FEMALE_NEED_INDEX) == 0.0)
+   {
+       response = brain->response = RESPONSE::DO_NOTHING;
+   }
+
    if (response == RESPONSE::FLY)
    {
        flying = true;

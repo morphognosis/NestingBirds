@@ -130,7 +130,7 @@ public:
    // Food.
 #define FEMALE_DEFAULT_FOOD_DURATION    "100"
    static int FOOD_DURATION;
-#define FEMALE_DEFAULT_INITIAL_FOOD     "100"
+#define FEMALE_DEFAULT_INITIAL_FOOD     "0"
    static int  INITIAL_FOOD;
    static bool RANDOMIZE_FOOD_LEVEL;
 
