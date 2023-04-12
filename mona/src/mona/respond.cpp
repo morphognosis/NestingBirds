@@ -40,7 +40,10 @@ Mona::respond()
    {
       motor = motors[j];
       motor->firingStrength = 0.0;
-      responsePotentials[motor->response] += motor->motive;
+      if (motor->motive > responsePotentials[motor->response])
+      {
+          responsePotentials[motor->response] = motor->motive;
+      }
       if (motor->motive > 0.0)
       {
           if (maxMotiveMotor == NULL)
@@ -70,7 +73,10 @@ Mona::respond()
    {
        motor = placeMotors[j];
        motor->firingStrength = 0.0;
-       responsePotentials[motor->response] += motor->motive;
+       if (motor->motive > responsePotentials[motor->response])
+       {
+           responsePotentials[motor->response] = motor->motive;
+       }
        if (motor->motive > 0.0)
        {
            if (maxMotiveMotor == NULL)
