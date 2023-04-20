@@ -110,13 +110,11 @@ void Female::setNeeds()
     {
         brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
     }
-
-    if (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::NO_OBJECT)
+    else if (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::NO_OBJECT)
     {
         brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
     }
-
-    if (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::EGG)
+    else if (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::EGG)
     {
         brain->setNeed(MOUSE_NEED_INDEX, 0.0);
         brain->setNeed(STONE_NEED_INDEX, 0.0);

@@ -371,12 +371,6 @@ void train(int gender)
 // Train male.
 void trainMale()
 {
-    if (World[male->x][male->y].object == OBJECT::EGG)
-    {
-        male->response = Male::RESPONSE::DO_NOTHING;
-        return;
-    }
-
     // Set wants from male needs.
     MaleWantsMouse = false;
     MaleWantsFemale = false;
@@ -595,13 +589,6 @@ bool goToFemale()
 // Train female.
 void trainFemale()
 {
-    // Brooding egg?
-    if (World[female->x][female->y].object == OBJECT::EGG)
-    {
-        female->response = Female::RESPONSE::DO_NOTHING;
-        return;
-    }
-
     // Handle delivery.
       if (female->hasObject == OBJECT::MOUSE)
       {
@@ -618,6 +605,13 @@ void trainFemale()
    if (female->food == 0)
    {
            female->response = Female::RESPONSE::WANT_MOUSE;
+       return;
+   }
+
+   // Brooding egg?
+   if (World[female->x][female->y].object == OBJECT::EGG)
+   {
+       female->response = Female::RESPONSE::DO_NOTHING;
        return;
    }
 
