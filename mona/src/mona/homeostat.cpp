@@ -10,6 +10,7 @@ Homeostat::Homeostat()
    need         = 0.0;
    needIndex    = 0;
    needDelta    = 0.0;
+   defaultNeed = 0.0;
    mona         = NULL;
    periodicNeed = 0.0;
    frequency    = 0;
@@ -22,6 +23,7 @@ Homeostat::Homeostat(int needIndex, Mona *mona)
    need            = 0.0;
    this->needIndex = needIndex;
    needDelta       = 0.0;
+   defaultNeed = 0.0;
    this->mona      = mona;
    periodicNeed    = 0.0;
    frequency       = 0;
@@ -35,6 +37,11 @@ Homeostat::~Homeostat()
    goals.clear();
 }
 
+// Set default need.
+void Homeostat::setDefaultNeed()
+{
+    need = defaultNeed;
+}
 
 // Set periodic need.
 void Homeostat::setPeriodicNeed(int frequency, NEED need)
@@ -532,6 +539,7 @@ void Homeostat::load(FILE *fp)
    FREAD_DOUBLE(&need, fp);
    FREAD_INT(&needIndex, fp);
    FREAD_DOUBLE(&needDelta, fp);
+   FREAD_DOUBLE(&defaultNeed, fp);
    FREAD_DOUBLE(&periodicNeed, fp);
    FREAD_INT(&frequency, fp);
    FREAD_INT(&freqTimer, fp);
@@ -601,6 +609,7 @@ void Homeostat::save(FILE *fp)
    FWRITE_DOUBLE(&need, fp);
    FWRITE_INT(&needIndex, fp);
    FWRITE_DOUBLE(&needDelta, fp);
+   FWRITE_DOUBLE(&defaultNeed, fp);
    FWRITE_DOUBLE(&periodicNeed, fp);
    FWRITE_INT(&frequency, fp);
    FWRITE_INT(&freqTimer, fp);
@@ -647,6 +656,7 @@ void Homeostat::print(FILE *out)
    fprintf(out, "<need>%f</need>", need);
    fprintf(out, "<needIndex>%d</needIndex>", needIndex);
    fprintf(out, "<needDelta>%f</needDelta>", needDelta);
+   fprintf(out, "<defaultNeed>%f</defaultNeed>", defaultNeed);
    fprintf(out, "<periodicNeed>%f</periodicNeed>", periodicNeed);
    fprintf(out, "<frequency>%d</frequency>", frequency);
    fprintf(out, "<sensory_response_goals>");

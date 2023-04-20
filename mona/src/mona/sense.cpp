@@ -411,11 +411,25 @@ void Mona::Receptor::addGoals()
 void Mona::Receptor::updateNeeds()
 {
     // Update homeostats.
+    bool defaultNeed = true;
     for (int i = 0; i < mona->numNeeds; i++)
     {
         if (goals.getValue(i) != 0.0)
         {
             mona->homeostats[i]->receptorUpdate(this);
+        }
+        if (mona->homeostats[i]->getNeed() > 0.0)
+        {
+            defaultNeed = false;
+        }
+    }
+
+    // Set default needs.
+    if (defaultNeed)
+    {
+        for (int i = 0; i < mona->numNeeds; i++)
+        {
+            mona->homeostats[i]->setDefaultNeed();
         }
     }
 }

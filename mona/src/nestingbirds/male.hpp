@@ -52,16 +52,49 @@ public:
         }
     };
 
+    // Goal.
+    class GOAL
+    {
+    public:
+        static const int EAT_MOUSE = 0;
+        static const int MOUSE_FOR_FEMALE = 1;
+        static const int STONE_FOR_FEMALE = 2;
+        static const int ATTEND_FEMALE = 3;
+
+        // Goal to string.
+        static const char* toString(int goal)
+        {
+            switch (goal)
+            {
+
+            case EAT_MOUSE:
+                return("EAT_MOUSE");
+
+            case MOUSE_FOR_FEMALE:
+                return("MOUSE_FOR_FEMALE");
+
+            case STONE_FOR_FEMALE:
+                return("STONE_FOR_FEMALE");
+
+            case ATTEND_FEMALE:
+                return("ATTEND_FEMALE");
+
+            default:
+                return("UNKNOWN");
+            }
+        }
+    };
+
     // Sensors.
     static const int LOCALE_SENSOR = 0;
     static const int MOUSE_PROXIMITY_SENSOR = 1;
     static const int STONE_PROXIMITY_SENSOR = 2;
     static const int FEMALE_PROXIMITY_SENSOR = 3;
-    static const int HUNGER_SENSOR = 4;
+    static const int GOAL_SENSOR = 4;
     static const int HAS_OBJECT_SENSOR = 5;
     static const int FLYING_SENSOR = 6;
-    static const int WANT_MOUSE_SENSOR = 7;
-    static const int WANT_STONE_SENSOR = 8;
+    static const int FEMALE_WANTS_MOUSE_SENSOR = 7;
+    static const int FEMALE_WANTS_STONE_SENSOR = 8;
     static const int NUM_SENSORS = 9;
     int              sensors[NUM_SENSORS];
 
@@ -69,8 +102,10 @@ public:
     int x, y;
     int orientation;
     int food;
+    int goal;
     int hasObject;
     bool flying;
+    bool trainFlying;
 
     // Responses.
     class RESPONSE
@@ -153,21 +188,24 @@ public:
 
    // Needs.
    static const int MOUSE_NEED_INDEX = 0;
-#define MALE_DEFAULT_MOUSE_NEED    "0.3"
+#define MALE_DEFAULT_MOUSE_NEED    "1.0"
    static Mona::NEED MOUSE_NEED;
    static const int FEMALE_MOUSE_NEED_INDEX = 1;
-#define MALE_DEFAULT_FEMALE_MOUSE_NEED    "0.2"
+#define MALE_DEFAULT_FEMALE_MOUSE_NEED    "1.0"
    static Mona::NEED FEMALE_MOUSE_NEED;
    static const int FEMALE_STONE_NEED_INDEX = 2;
-#define MALE_DEFAULT_FEMALE_STONE_NEED    "0.4"
+#define MALE_DEFAULT_FEMALE_STONE_NEED    "1.0"
    static Mona::NEED FEMALE_STONE_NEED;
    static const int ATTEND_FEMALE_NEED_INDEX = 3;
-#define MALE_DEFAULT_ATTEND_FEMALE_NEED      "0.1"
+#define MALE_DEFAULT_ATTEND_FEMALE_NEED      "1.0"
    static Mona::NEED ATTEND_FEMALE_NEED;
    static const int NUM_NEEDS = 4;
 
    // Brain.
    Mona* brain;
+
+   // Verbosity.
+   bool Verbose;
 
    // Constructor.
    Male();
@@ -196,9 +234,6 @@ public:
 
    // Print sensors.
    void printSensors();
-
-   // Print state.
-   void printState();
 
    // Print needs.
    void printNeeds();

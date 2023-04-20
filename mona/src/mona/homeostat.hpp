@@ -44,6 +44,7 @@ public:
    NEED         need;
    int          needIndex;
    NEED         needDelta;
+   NEED defaultNeed;
    Mona         *mona;
    NEED         periodicNeed;
    int          frequency;
@@ -75,6 +76,16 @@ public:
       this->need = need;
    }
 
+   // Set need with default.
+   inline void setNeed(NEED need, NEED defaultNeed)
+   {
+       needDelta = need - this->need;
+       this->need = need;
+       this->defaultNeed = defaultNeed;
+   }
+
+   // Set default need.
+   void setDefaultNeed();
 
    // Set periodic need.
    void setPeriodicNeed(int frequency, NEED need);

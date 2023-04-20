@@ -147,14 +147,20 @@ Mona::learn()
            resetMovementLearningPath();
            break;
        default:
-           if (movementLearningPathLength < MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
+           if (movementLearningPathActive)
            {
-               for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
+               if (movementLearningPathLength < MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
                {
-                   delete movementLearningEffects[i];
+                   for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
+                   {
+                       delete movementLearningEffects[i];
+                   }
+                   movementLearningEffects.clear();
+                   movementLearningPathLength++;
                }
-               movementLearningEffects.clear();
-               movementLearningPathLength++;
+               else {
+                   resetMovementLearningPath();
+               }
            }
            else {
                resetMovementLearningPath();

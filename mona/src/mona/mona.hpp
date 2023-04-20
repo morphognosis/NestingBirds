@@ -198,6 +198,7 @@ public:
    // Need management.
    NEED getNeed(int index);
    void setNeed(int index, NEED value);
+   void setNeed(int index, NEED value, NEED defaultValue);
    void inflateNeed(int index);
    void setPeriodicNeed(int needIndex,
                         int frequency, NEED periodicNeed);

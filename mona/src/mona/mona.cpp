@@ -84,7 +84,7 @@ void Mona::initParms()
    INITIAL_ENABLEMENT = 0.95;
    assert(INITIAL_ENABLEMENT >= MIN_ENABLEMENT);
    DRIVE_ATTENUATION = 0.0;
-   MIN_DRIVE_MOTIVE = 0.01;
+   MIN_DRIVE_MOTIVE = 0.0;
    FIRING_STRENGTH_LEARNING_DAMPER = 0.1;
    LEARNING_DECREASE_VELOCITY      = 0.9;
    LEARNING_INCREASE_VELOCITY      = 0.1;
@@ -387,6 +387,14 @@ Mona::setNeed(int index, NEED value)
    homeostats[index]->setNeed(value);
 }
 
+// Set need with default value.
+// Value must be in [0,1] interval.
+void
+Mona::setNeed(int index, NEED value, NEED defaultValue)
+{
+    assert(value >= 0.0 && value <= 1.0);
+    homeostats[index]->setNeed(value, defaultValue);
+}
 
 // Inflate need to maximum value.
 void

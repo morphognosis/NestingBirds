@@ -28,7 +28,7 @@ const char *Usage =
    "      [-maleFemaleStoneNeed <amount> (default=" MALE_DEFAULT_FEMALE_STONE_NEED ")]\n"
    "      [-maleAttendFemaleNeed <amount> (default=" MALE_DEFAULT_ATTEND_FEMALE_NEED ")]\n"
    "      [-femaleInitialFood <amount> (default=" FEMALE_DEFAULT_INITIAL_FOOD ")]\n"
-   "      [-femaleFoodDuration <amount> (default" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
+   "      [-femaleFoodDuration <amount> (default=" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
    "      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
    "      [-femaleMouseNeed <amount> (default=" FEMALE_DEFAULT_MOUSE_NEED ")]\n"
    "      [-femaleStoneNeed <amount> (default=" FEMALE_DEFAULT_STONE_NEED ")]\n"
@@ -57,8 +57,10 @@ bool MaleFlying;
 bool MaleFlyingToForest;
 bool MaleFlyingToDesert;
 bool MaleFlyingToNest;
-bool FemaleWantMouse;
-bool FemaleWantStone;
+bool MaleWantsMouse;
+bool MaleWantsFemale;
+bool FemaleWantsMouse;
+bool FemaleWantsStone;
 int  FemaleNestSequence;
 
 // Save/load file names.
@@ -133,7 +135,7 @@ Male   *male;
 Female *female;
 
 // Probability of mouse movement.
-static double MOUSE_MOVE_PROBABILITY = 0.0;
+static double MOUSE_MOVE_PROBABILITY = 0.1;
 
 // Verbosity.
 bool Verbose = true;
@@ -145,7 +147,7 @@ void stepMice();
 void train(int);
 void trainMale();
 void trainFemale();
-bool doNeeds();
+bool doWants();
 bool flyToPlace();
 bool getMouse();
 bool getStone();
@@ -267,21 +269,29 @@ void init()
 
    // Create birds.
    female             = new Female();
+   female->Verbose = Verbose;
    female->x          = WIDTH / 2;
    female->y          = HEIGHT / 2;
    female->food       = Female::INITIAL_FOOD;
    female->response   = Female::RESPONSE::DO_NOTHING;
    male               = new Male();
+   male->Verbose = Verbose;
    male->x            = WIDTH / 2;
    male->y            = HEIGHT / 2;
    male->food         = Male::INITIAL_FOOD;
+   if (male->food == 0)
+   {
+       male->goal = Male::GOAL::EAT_MOUSE;
+   }
    male->response     = Male::RESPONSE::DO_NOTHING;
    MaleFlying = false;
    MaleFlyingToForest = false;
    MaleFlyingToDesert = false;
    MaleFlyingToNest = false;
-   FemaleWantMouse    = false;
-   FemaleWantStone    = false;
+   MaleWantsMouse = false;
+   MaleWantsFemale = false;
+   FemaleWantsMouse    = false;
+   FemaleWantsStone    = false;
    FemaleNestSequence = 0;
    setSensors(FEMALE);
    setSensors(MALE);
@@ -297,24 +307,22 @@ void step()
    // Set female sensors.
    setSensors(FEMALE);
 
+   // Set female needs.
+   female->setNeeds();
+
+   if (Verbose)
+   {
+       printf("Female: Location: [%d,%d], ", female->x, female->y);
+   }
+
    // Train?
    if (!FemaleTest)
    {
       train(FEMALE);
    }
 
-   // Set female needs.
-   female->setNeeds();
-
    // Cycle female
    female->cycle();
-
-   if (Verbose)
-   {
-      printf("Female: Location: [%d,%d], ", female->x, female->y);
-      female->print();
-      printf("\n");
-   }
 
    // Do response in world.
    doResponse(FEMALE);
@@ -322,23 +330,21 @@ void step()
    // Set male sensors.
    setSensors(MALE);
 
-   // Train?
-   if (!MaleTest)
-   {
-      train(MALE);
-   }
-
    // Set male needs.
    male->setNeeds();
+
+   if (Verbose)
+   {
+       printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
+   }
 
    // Cycle male.
    male->cycle();
 
-   if (Verbose)
+   // Train?
+   if (!MaleTest)
    {
-      printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
-      male->print();
-      printf("\n");
+       train(MALE);
    }
 
    // Do response in world.
@@ -371,26 +377,55 @@ void trainMale()
         return;
     }
 
-    // Train tasks.
+    // Set wants from male needs.
+    MaleWantsMouse = false;
+    MaleWantsFemale = false;
+    FemaleWantsMouse = false;
+    FemaleWantsStone = false;
+    if (male->brain->getNeed(Male::MOUSE_NEED_INDEX) > 0.0)
+    {
+        MaleWantsMouse = true;
+    }
+    else if (male->brain->getNeed(Male::FEMALE_MOUSE_NEED_INDEX) > 0.0)
+    {
+        FemaleWantsMouse = true;
+    }
+    else if (male->brain->getNeed(Male::FEMALE_STONE_NEED_INDEX) > 0.0)
+    {
+        FemaleWantsStone = true;
+    }
+    else {
+        MaleWantsFemale = true;
+    }
+
+    // Get training response.
     if (flyToPlace())
     {
-        if (!doNeeds())
+        if (!doWants())
         {
-            if (FemaleWantStone)
-            {
-                if (getStone())
-                {
-                    goToFemale();
-                }
-            }
-            else if (male->food == 0 || FemaleWantMouse)
+            if (MaleWantsMouse)
             {
                 if (getMouse())
                 {
                     goToFemale();
                 }
             }
-            else {
+            else if (FemaleWantsMouse)
+            {
+                if (getMouse())
+                {
+                    goToFemale();
+                }
+            }
+            else if (FemaleWantsStone)
+            {
+                if (getStone())
+                {
+                    goToFemale();
+                }
+            }
+            else
+            {
                 goToFemale();
             }
         }
@@ -434,42 +469,29 @@ bool flyToPlace()
     return true;
 }
 
-// Do need actions.
+// Do want actions.
 // Return true when response taken.
-bool doNeeds()
+bool doWants()
 {
-    bool response = false;
-    if (male->food == 0 && male->hasObject == OBJECT::MOUSE)
+    if (MaleWantsMouse && male->hasObject == OBJECT::MOUSE)
     {
         male->response = Male::RESPONSE::EAT_MOUSE;
-        response = true;
+        return true;
     }
-    else {
         if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
         {
-            if (male->hasObject == OBJECT::MOUSE)
+            if (FemaleWantsMouse && male->hasObject == OBJECT::MOUSE)
             {
                 male->response = Male::RESPONSE::GIVE_MOUSE;
-                FemaleWantMouse = false;
-                response = true;
+                return true;
             }
-            else if (male->food > 0 && female->response == Female::RESPONSE::WANT_MOUSE)
-            {
-                FemaleWantMouse = true;
-            }
-            if (male->hasObject == OBJECT::STONE)
+            if (FemaleWantsStone && male->hasObject == OBJECT::STONE)
             {
                 male->response = Male::RESPONSE::GIVE_STONE;
-                FemaleWantStone = false;
-                response = true;
-            }
-            else if (male->food > 0 && female->response == Female::RESPONSE::WANT_STONE)
-            {
-                FemaleWantStone = true;
+                return true;
             }
         }
-    }
-    return response;
+    return false;
 }
 
 // Get mouse.
@@ -1169,14 +1191,10 @@ void setMaleSensors()
         break;
     }
 
-    // Internal state.
-    if (bird->food > 0)
-    {
-        sensors[Male::HUNGER_SENSOR] = 0;
-    }
-    else {
-        sensors[Male::HUNGER_SENSOR] = 1;
-    }
+    // Goal.
+    sensors[Male::GOAL_SENSOR] = bird->goal;
+
+    // Has object.
     sensors[Male::HAS_OBJECT_SENSOR] = bird->hasObject;
 
     // If have mouse/stone, proximity is not needed.
@@ -1189,7 +1207,7 @@ void setMaleSensors()
         sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
     }
 
-    // Flying sensor.
+    // Flying?
     if (bird->flying)
     {
         sensors[Male::FLYING_SENSOR] = 1;
@@ -1199,18 +1217,18 @@ void setMaleSensors()
     }
 
     // Sense female wants.
-    sensors[Male::WANT_MOUSE_SENSOR] = 0;
-    sensors[Male::WANT_STONE_SENSOR] = 0;
+    sensors[Male::FEMALE_WANTS_MOUSE_SENSOR] = 0;
+    sensors[Male::FEMALE_WANTS_STONE_SENSOR] = 0;
     if ((bird->x == female->x) && (bird->y == female->y))
     {
         switch (female->response)
         {
         case Female::RESPONSE::WANT_MOUSE:
-            sensors[Male::WANT_MOUSE_SENSOR] = 1;
+            sensors[Male::FEMALE_WANTS_MOUSE_SENSOR] = 1;
             break;
 
         case Female::RESPONSE::WANT_STONE:
-            sensors[Male::WANT_STONE_SENSOR] = 1;
+            sensors[Male::FEMALE_WANTS_STONE_SENSOR] = 1;
             break;
         }
     }
@@ -1684,6 +1702,12 @@ void doMaleResponse()
                         bird->food = Male::FOOD_DURATION;
                     }
                     bird->hasObject = OBJECT::NO_OBJECT;
+                    if (bird->food > 0)
+                    {
+                        bird->goal = Male::GOAL::ATTEND_FEMALE;
+                        bird->brain->setNeed(Male::MOUSE_NEED_INDEX, 0.0);
+                        bird->brain->setNeed(Male::ATTEND_FEMALE_NEED_INDEX, Male::ATTEND_FEMALE_NEED);
+                    }
                 }
          break;
 

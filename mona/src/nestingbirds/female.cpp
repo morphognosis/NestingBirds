@@ -25,6 +25,7 @@ Female::Female()
     orientation = ORIENTATION::NORTH;
     food = 0;
     hasObject = OBJECT::NO_OBJECT;
+    Verbose = false;
 
     // Create Mona bird brain.
     brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
@@ -133,12 +134,31 @@ void Female::setResponseOverride()
 // Cycle female.
 int Female::cycle()
 {
+    if (Verbose)
+    {
+        printf("Sensors: ");
+        printSensors();
+        printf(", Food: %d, ", food);
+        printf("Needs: [Input: ");
+        printNeeds();
+    }
+
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
    for (int i = 0; i < NUM_SENSORS; i++)
    {
       brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
    response = brain->cycle(brainSensors);
+
+   if (Verbose)
+   {
+       printf(", Output: ");
+       printNeeds();
+       printf("], Response: ");
+       printResponse();
+       printf("\n");
+   }
+
    return response;
 }
 
@@ -180,26 +200,22 @@ void Female::save(char *filename)
 // Print female.
 void Female::print()
 {
-    printf("Sensors: [");
+    printf("Sensors: ");
     printSensors();
-    printf("], ");
-    printState();
-    printf("], "),
-    printf("Needs: [");
+    printf(", Food: %d, ", food);
+    printf("Needs: ");
     printNeeds();
-    printf("], ");
-    printf("Response: ");
+    printf(", Response: ");
     printResponse();
 }
 
 // Print sensors.
 void Female::printSensors()
 {
-   printf("[Cell sensors: ");
+   printf("[Cell sensors: [");
 
    for (int i = 0; i < NUM_CELL_SENSORS; i++)
    {
-      printf("[");
       switch (i)
       {
       case 0:
@@ -238,50 +254,54 @@ void Female::printSensors()
           printf("Left rear: ");
           break;
       }
-      printf("%s", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
-      printf(",");
-      printf("%s", OBJECT::toString(sensors[(i * CELL_SENSOR::NUM_SENSORS)+1]));
-      printf("]");
+      printf("[Locale: %s", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
+      printf(", ");
+      printf("Object: %s]", OBJECT::toString(sensors[(i * CELL_SENSOR::NUM_SENSORS)+1]));
       if (i < NUM_CELL_SENSORS - 1)
       {
-         printf(",");
+         printf(", ");
       }
    }
    printf("]");
-}
-
-// Print state.
-void Female::printState()
-{
-    printf("Orientation: %s", ORIENTATION::toString(orientation));
-    printf(", Food: %d", food);
-    printf(", Has_object: %s", OBJECT::toString(hasObject));
+   printf(", Orientation: %s", ORIENTATION::toString(orientation));
+   printf(", Hunger: ");
+   if (food == 0)
+   {
+       printf("true");
+   }
+   else {
+       printf("false");
+   }
+   printf(", Has_object: %s", OBJECT::toString(hasObject));
+   printf("]");
 }
 
 // Print needs.
 void Female::printNeeds()
 {
+    printf("[");
     for (int i = 0; i < NUM_NEEDS; i++)
     {
         switch (i)
         {
         case MOUSE_NEED_INDEX:
-            printf("[Mouse: %f],", brain->getNeed(MOUSE_NEED_INDEX));
+            printf("Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
             break;
 
         case STONE_NEED_INDEX:
-            printf("[Stone: %f],", brain->getNeed(STONE_NEED_INDEX));
+            printf("Stone: %f, ", brain->getNeed(STONE_NEED_INDEX));
             break;
 
         case LAY_EGG_NEED_INDEX:
-            printf("[Lay egg: %f],", brain->getNeed(LAY_EGG_NEED_INDEX));
+            printf("Lay egg: %f, ", brain->getNeed(LAY_EGG_NEED_INDEX));
             break;
 
         case BROOD_EGG_NEED_INDEX:
-            printf("[Brood egg: %f]", brain->getNeed(BROOD_EGG_NEED_INDEX));
+            printf("Brood egg: %f", brain->getNeed(BROOD_EGG_NEED_INDEX));
             break;
         }
     }
+    printf("]");
 }
 
 // Print response.

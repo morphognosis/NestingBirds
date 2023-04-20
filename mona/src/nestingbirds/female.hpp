@@ -152,6 +152,9 @@ public:
    // Brain.
    Mona* brain;
 
+   // Verbosity.
+   bool Verbose;
+
    // Constructor.
    Female();
 
@@ -179,9 +182,6 @@ public:
 
    // Print sensors.
    void printSensors();
-
-   // Print state.
-   void printState();
 
    // Print needs.
    void printNeeds();

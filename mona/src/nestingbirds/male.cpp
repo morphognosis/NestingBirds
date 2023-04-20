@@ -24,8 +24,11 @@ Male::Male()
     x = y = 0;
     orientation = ORIENTATION::NORTH;
     food = 0;
+    goal = GOAL::ATTEND_FEMALE;
     hasObject = OBJECT::NO_OBJECT;
     flying = false;
+    trainFlying = false;
+    Verbose = false;
 
     // Create Mona bird brain.
     brain = new Mona();
@@ -50,54 +53,34 @@ Male::Male()
     // Needs.
     initNeeds();
 
-    // Sensor modes:
-    
-    // Remove base sensor mode.
-    brain->sensorModes.erase(brain->sensorModes.begin());
-
-    // Hunger sensor mode to obtain mouse for male.
-    vector<bool> mask;
-    loadMask(mask, true, true, false, false, true, true, true, false, false);
-    brain->addSensorMode(mask);
-    int hungerMode = 0;
-
-    // Attend female mode.
-    loadMask(mask, false, false, false, true, false, false, true, false, false);
-    brain->addSensorMode(mask);
-    int attendFemaleMode = 1;
-
-    // Female hunger sensor mode to obtain mouse for female.
-    loadMask(mask, true, true, false, true, false, true, true, true, false);
-    brain->addSensorMode(mask);
-    int femaleHungerMode = 2;
-
-    // Female want stone sensor mode to obtain stone for female.
-    loadMask(mask, true, false, true, true, false, true, true, false, true);
-    brain->addSensorMode(mask);
-    int femaleStoneMode = 3;
-
     // Goals:
-
-    // Hunger goal.
+ 
+    // Hunger goals.
     vector<Mona::SENSOR> sensors;
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        0.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
-    int hungerGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, hungerMode, MOUSE_NEED);
+        1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
+    brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
+    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        2.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
+    brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
+    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+        3.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
+    brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
 
     // Attend female goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
         DONT_CARE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
-    int attendFemaleGoal = brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, attendFemaleMode, ATTEND_FEMALE_NEED);
+    brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, 0, ATTEND_FEMALE_NEED);
 
     // Female hunger goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-        DONT_CARE, DONT_CARE, 0.0, 0.0, DONT_CARE);
-    int femaleHungerGoal = brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, femaleHungerMode, FEMALE_MOUSE_NEED);
+        DONT_CARE, DONT_CARE, 0.0, 0.0, 0.0);
+    brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, 0, FEMALE_MOUSE_NEED);
 
     // Female want stone goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-        DONT_CARE, DONT_CARE, 0.0, DONT_CARE, 0.0);
-    int femaleStoneGoal = brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, femaleStoneMode, FEMALE_STONE_NEED);
+        DONT_CARE, DONT_CARE, 0.0, 0.0, 0.0);
+    brain->addGoal(FEMALE_STONE_NEED_INDEX, sensors, 0, FEMALE_STONE_NEED);
 
     // Set initial response.
     response = RESPONSE::DO_NOTHING;
@@ -110,7 +93,7 @@ void Male::initNeeds()
     brain->setNeed(FEMALE_MOUSE_NEED_INDEX, 0.0);
     brain->setNeed(FEMALE_STONE_NEED_INDEX, 0.0);
     brain->setNeed(FEMALE_STONE_NEED_INDEX, 0.0);
-    brain->setNeed(ATTEND_FEMALE_NEED_INDEX, ATTEND_FEMALE_NEED);
+    brain->setNeed(ATTEND_FEMALE_NEED_INDEX, 0.0, ATTEND_FEMALE_NEED);
 }
 
 // Set male needs.
@@ -126,28 +109,92 @@ void Male::setNeeds()
             {
                 brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
             }
-            else if (sensors[Male::WANT_MOUSE_SENSOR] == 1)
+            else if (sensors[Male::FEMALE_WANTS_MOUSE_SENSOR] == 1)
             {
                 brain->setNeed(FEMALE_MOUSE_NEED_INDEX, FEMALE_MOUSE_NEED);
             }
-            else if (sensors[Male::WANT_STONE_SENSOR] == 1)
+            else if (sensors[Male::FEMALE_WANTS_STONE_SENSOR] == 1)
             {
                 brain->setNeed(FEMALE_STONE_NEED_INDEX, FEMALE_STONE_NEED);
             }
         }
     }
-    brain->setNeed(ATTEND_FEMALE_NEED_INDEX, ATTEND_FEMALE_NEED);
+    if (brain->getNeed(MOUSE_NEED_INDEX) > 0.0)
+    {
+        goal = GOAL::EAT_MOUSE;
+    }
+    else if (brain->getNeed(FEMALE_MOUSE_NEED_INDEX) > 0.0)
+    {
+        goal = GOAL::MOUSE_FOR_FEMALE;
+    }
+    else if (brain->getNeed(FEMALE_STONE_NEED_INDEX) > 0.0)
+    {
+        goal = GOAL::STONE_FOR_FEMALE;
+    }
+    else {
+        goal = GOAL::ATTEND_FEMALE;
+    }
+    sensors[Male::GOAL_SENSOR] = goal;
 }
 
 // Set response override.
 void Male::setResponseOverride()
 {
-    brain->responseOverride = response;
+    if (response != brain->response)
+    {
+        for (int i = 0, j = (int)brain->motors.size(); i < j; i++)
+        {
+            Mona::Motor *motor = brain->motors[i];
+            if (motor->response == response)
+            {
+                motor->firingStrength = 1.0;
+            }
+            else {
+                motor->firingStrength = 0.0;
+            }
+        }
+        brain->activePlaceMotor = NULL;
+        for (int i = 0, j = (int)brain->placeMotors.size(); i < j; i++)
+        {
+            Mona::Motor* motor = brain->placeMotors[i];
+            motor->firingStrength = 0.0;
+        }
+        brain->response = response;
+    }
+    if (response == RESPONSE::FLY)
+    {
+        trainFlying = true;
+    }
+    else if (response == RESPONSE::ALIGHT)
+    {
+        trainFlying = false;
+    }
+    flying = trainFlying;
+    if (Verbose)
+    {
+        printf("Male training response: %s, flying=", RESPONSE::toString(response));
+        if (flying)
+        {
+            printf("true\n");
+        }
+        else {
+            printf("false\n");
+        }
+    }
 }
 
 // Cycle male.
 int Male::cycle()
 {
+    if (Verbose)
+    {
+        printf("Sensors: ");
+        printSensors();
+        printf(", Food: %d, ", food);
+        printf("Needs: [Input: ");
+        printNeeds();
+    }
+
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
   
        for (int i = 0; i < NUM_SENSORS; i++)
@@ -155,17 +202,6 @@ int Male::cycle()
            brainSensors[i] = (Mona::SENSOR)sensors[i];
        }
    response = brain->cycle(brainSensors, orientation, x, y);
-
-   // Set random response to do nothing.
-   if (brain->getNeed(MOUSE_NEED_INDEX) == 0.0 &&
-       brain->getNeed(FEMALE_MOUSE_NEED_INDEX) == 0.0 &&
-       brain->getNeed(FEMALE_STONE_NEED_INDEX) == 0.0 &&
-       brain->getNeed(FEMALE_STONE_NEED_INDEX) == 0.0 &&
-       brain->getNeed(ATTEND_FEMALE_NEED_INDEX) == 0.0)
-   {
-       response = brain->response = RESPONSE::DO_NOTHING;
-   }
-
    if (response == RESPONSE::FLY)
    {
        flying = true;
@@ -174,6 +210,16 @@ int Male::cycle()
    {
        flying = false;
    }
+
+   if (Verbose)
+   {
+       printf(", Output: ");
+       printNeeds();
+       printf("], Response: ");
+       printResponse();
+       printf("\n");
+   }
+
    return response;
 }
 
@@ -215,21 +261,19 @@ void Male::save(char* filename)
 // Print male.
 void Male::print()
 {
-    printf("Sensors: [");
+    printf("Sensors: ");
     printSensors();
-    printf("], ");
-    printState();
-    printf("], "),
-    printf("Needs: [");
+    printf(", Food: %d, ", food);
+    printf("Needs: ");
     printNeeds();
-    printf("], ");
-    printf("Response: ");
+    printf(", Response: ");
     printResponse();
 }
 
 // Print sensors.
 void Male::printSensors()
 {
+    printf("[");
    printf("Locale: ");
       printf("%s", LOCALE::toString(sensors[LOCALE_SENSOR]));
       printf(", Mouse proximity: ");
@@ -238,8 +282,21 @@ void Male::printSensors()
       printf("%s", PROXIMITY::toString(sensors[STONE_PROXIMITY_SENSOR]));
       printf(", Female proximity: ");
    printf("%s", PROXIMITY::toString(sensors[FEMALE_PROXIMITY_SENSOR]));
-   printf(", Want mouse sensor: ");
-   if (sensors[WANT_MOUSE_SENSOR] == 1)
+   printf(", Goal: ");
+   printf("%s", GOAL::toString(sensors[GOAL_SENSOR]));
+   printf(", Has object: ");
+   printf("%s", OBJECT::toString(sensors[HAS_OBJECT_SENSOR]));
+   printf(", Flying: ");
+   if (sensors[FLYING_SENSOR] == 1)
+   {
+       printf("true");
+   }
+   else
+   {
+       printf("false");
+   }
+   printf(", Female wants mouse: ");
+   if (sensors[FEMALE_WANTS_MOUSE_SENSOR] == 1)
    {
       printf("true");
    }
@@ -247,8 +304,8 @@ void Male::printSensors()
    {
       printf("false");
    }
-   printf(", Want stone sensor: ");
-   if (sensors[WANT_STONE_SENSOR] == 1)
+   printf(", Female wants stone: ");
+   if (sensors[FEMALE_WANTS_STONE_SENSOR] == 1)
    {
       printf("true");
    }
@@ -256,46 +313,35 @@ void Male::printSensors()
    {
       printf("false");
    }
-}
-
-// Print state.
-void Male::printState()
-{
-    printf("Food: %d", food);
-    printf(", Has_object: %s", OBJECT::toString(hasObject));
-    if (sensors[FLYING_SENSOR])
-    {
-        printf(", Flying: true");
-    }
-    else {
-        printf(", Flying: false");
-    }
+   printf("]");
 }
 
 // Print needs.
 void Male::printNeeds()
 {
+    printf("[");
     for (int i = 0; i < NUM_NEEDS; i++)
     {
         switch (i)
         {
         case MOUSE_NEED_INDEX:
-            printf("[Mouse: %f],", brain->getNeed(MOUSE_NEED_INDEX));
+            printf("Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
             break;
 
         case FEMALE_MOUSE_NEED_INDEX:
-            printf("[Female mouse: %f],", brain->getNeed(FEMALE_MOUSE_NEED_INDEX));
+            printf("Female mouse: %f, ", brain->getNeed(FEMALE_MOUSE_NEED_INDEX));
             break;
 
         case FEMALE_STONE_NEED_INDEX:
-            printf("[Female stone: %f],", brain->getNeed(FEMALE_STONE_NEED_INDEX));
+            printf("Female stone: %f, ", brain->getNeed(FEMALE_STONE_NEED_INDEX));
             break;
 
         case ATTEND_FEMALE_NEED_INDEX:
-            printf("[Attend female: %f]", brain->getNeed(ATTEND_FEMALE_NEED_INDEX));
+            printf("Attend female: %f", brain->getNeed(ATTEND_FEMALE_NEED_INDEX));
             break;
         }
     }
+    printf("]");
 }
 
 // Print response.
