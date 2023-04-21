@@ -42,14 +42,16 @@ Mona::cycle(vector<Mona::SENSOR>& sensors)
    return(response);
 }
 
+
 Mona::RESPONSE
 Mona::cycle(vector<Mona::SENSOR>& sensors, int orientation, int x, int y)
 {
-    X = x;
-    Y = y;
-    this->orientation = orientation;
-    return cycle(sensors);
+   X = x;
+   Y = y;
+   this->orientation = orientation;
+   return(cycle(sensors));
 }
+
 
 // Construct empty network.
 Mona::Mona()
@@ -68,13 +70,15 @@ Mona::Mona(int numSensors, int numResponses, int numNeeds,
    initNet(numSensors, numResponses, numNeeds, randomSeed);
 }
 
+
 // Construct network with responses added later.
 Mona::Mona(int numSensors, int numNeeds, RANDOM randomSeed)
 {
-    clearVars();
-    initParms();
-    initNet(numSensors, 0, numNeeds, randomSeed);
+   clearVars();
+   initParms();
+   initNet(numSensors, 0, numNeeds, randomSeed);
 }
+
 
 // Initialize parameters.
 void Mona::initParms()
@@ -84,11 +88,11 @@ void Mona::initParms()
    INITIAL_ENABLEMENT = 0.95;
    assert(INITIAL_ENABLEMENT >= MIN_ENABLEMENT);
    DRIVE_ATTENUATION = 0.0;
-   MIN_DRIVE_MOTIVE = 0.0;
-   FIRING_STRENGTH_LEARNING_DAMPER = 0.1;
-   LEARNING_DECREASE_VELOCITY      = 0.9;
-   LEARNING_INCREASE_VELOCITY      = 0.1;
-   RESPONSE_RANDOMNESS             = 0.0;
+   MIN_DRIVE_MOTIVE  = 0.0;
+   FIRING_STRENGTH_LEARNING_DAMPER   = 0.1;
+   LEARNING_DECREASE_VELOCITY        = 0.9;
+   LEARNING_INCREASE_VELOCITY        = 0.1;
+   RESPONSE_RANDOMNESS               = 0.0;
    MIN_MOVEMENT_RESPONSE_PATH_LENGTH = 5;
    MAX_MOVEMENT_RESPONSE_PATH_LENGTH = 50;
    UTILITY_ASYMPTOTE = 10.0;
@@ -98,8 +102,8 @@ void Mona::initParms()
    MAX_MEDIATOR_LEVEL = 1;
    MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL   = 2;
    MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL = 3;
-   SENSOR_RESOLUTION = 0.0f;
-   LEARN_MEDIATOR_GOAL_VALUE = false;
+   SENSOR_RESOLUTION                   = 0.0f;
+   LEARN_MEDIATOR_GOAL_VALUE           = false;
    LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL = 2;
    LEARN_RECEPTOR_GOAL_VALUE           = false;
 }
@@ -270,11 +274,11 @@ bool Mona::auditDefaultEffectEventIntervals()
 void Mona::initNet(int numSensors, int numResponses, int numNeeds,
                    RANDOM randomSeed)
 {
-    // Initialize effect event intervals.
-    initEffectEventIntervals();
+   // Initialize effect event intervals.
+   initEffectEventIntervals();
 
-    // Initialize the maximum learning effect event intervals.
-    initMaxLearningEffectEventIntervals();
+   // Initialize the maximum learning effect event intervals.
+   initMaxLearningEffectEventIntervals();
 
    // Sanity checks.
    assert(numSensors > 0);
@@ -310,7 +314,7 @@ void Mona::initNet(int numSensors, int numResponses, int numNeeds,
    vector<bool> sensorMask;
    for (int i = 0; i < numSensors; i++)
    {
-       sensorMask.push_back(true);
+      sensorMask.push_back(true);
    }
    addSensorMode(sensorMask);
 
@@ -387,14 +391,16 @@ Mona::setNeed(int index, NEED value)
    homeostats[index]->setNeed(value);
 }
 
+
 // Set need with default value.
 // Value must be in [0,1] interval.
 void
 Mona::setNeed(int index, NEED value, NEED defaultValue)
 {
-    assert(value >= 0.0 && value <= 1.0);
-    homeostats[index]->setNeed(value, defaultValue);
+   assert(value >= 0.0 && value <= 1.0);
+   homeostats[index]->setNeed(value, defaultValue);
 }
+
 
 // Inflate need to maximum value.
 void
@@ -471,108 +477,114 @@ Mona::printNeed(int index)
 
 // Add a goal for a need.
 int Mona::addGoal(int needIndex, vector<SENSOR>& sensors,
-    SENSOR_MODE sensorMode, Motor* motor, NEED goalValue)
+                  SENSOR_MODE sensorMode, Motor *motor, NEED goalValue)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->addGoal(sensors, sensorMode, motor, goalValue));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->addGoal(sensors, sensorMode, motor, goalValue));
 }
 
 
 // Add a goal for a need.
 int Mona::addGoal(int needIndex, vector<SENSOR>& sensors,
-    SENSOR_MODE sensorMode, NEED goalValue)
+                  SENSOR_MODE sensorMode, NEED goalValue)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->addGoal(sensors, sensorMode, goalValue));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->addGoal(sensors, sensorMode, goalValue));
 }
+
 
 // Add goal for mediator.
-int Mona::addGoal(int needIndex, Mediator* mediator, NEED goalValue)
+int Mona::addGoal(int needIndex, Mediator *mediator, NEED goalValue)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->addGoalMediator(mediator, goalValue));
-}
-
-// Find goal for need.
-int Mona::findGoal(int needIndex, vector<SENSOR>& sensors,
-    SENSOR_MODE sensorMode, Motor* motor)
-{
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->findGoal(sensors, sensorMode, motor));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->addGoalMediator(mediator, goalValue));
 }
 
 
 // Find goal for need.
 int Mona::findGoal(int needIndex, vector<SENSOR>& sensors,
-    SENSOR_MODE sensorMode)
+                   SENSOR_MODE sensorMode, Motor *motor)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->findGoal(sensors, sensorMode));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->findGoal(sensors, sensorMode, motor));
+}
+
+
+// Find goal for need.
+int Mona::findGoal(int needIndex, vector<SENSOR>& sensors,
+                   SENSOR_MODE sensorMode)
+{
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->findGoal(sensors, sensorMode));
 }
 
 
 // Get number of goals for need.
 int Mona::getNumGoals(int needIndex)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return((int)homeostats[needIndex]->goals.size());
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return((int)homeostats[needIndex]->goals.size());
 }
 
 
 // Get goal information for need.
 bool Mona::getGoalInfo(int needIndex, int goalIndex,
-    vector<SENSOR>& sensors, int& sensorMode,
-    Motor** motor, NEED& goalValue, bool& enabled)
+                       vector<SENSOR>& sensors, int& sensorMode,
+                       Motor **motor, NEED& goalValue, bool& enabled)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->getGoalInfo(goalIndex, sensors,
-        sensorMode, (void**)motor, goalValue, enabled));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->getGoalInfo(goalIndex, sensors,
+                                             sensorMode, (void **)motor, goalValue, enabled));
 }
+
 
 // Get goal receptors for a need.
-void Mona::getGoalReceptors(int needIndex, int goalIndex, vector<void*>& receptors)
+void Mona::getGoalReceptors(int needIndex, int goalIndex, vector<void *>& receptors)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    homeostats[needIndex]->getGoalReceptors(goalIndex, receptors);
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   homeostats[needIndex]->getGoalReceptors(goalIndex, receptors);
 }
 
+
 // Get goal motor for a need.
-Mona::Motor* Mona::getGoalMotor(int needIndex, int goalIndex)
+Mona::Motor *Mona::getGoalMotor(int needIndex, int goalIndex)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return((Mona::Motor*)homeostats[needIndex]->getGoalMotor(goalIndex));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return((Mona::Motor *)homeostats[needIndex]->getGoalMotor(goalIndex));
 }
+
 
 // Is goal for need enabled?
 bool Mona::isGoalEnabled(int needIndex, int goalIndex)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->isGoalEnabled(goalIndex));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->isGoalEnabled(goalIndex));
 }
 
 
 // Enable goal for need.
 bool Mona::enableGoal(int needIndex, int goalIndex)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->enableGoal(goalIndex));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->enableGoal(goalIndex));
 }
 
 
 // Disable goal for need.
 bool Mona::disableGoal(int needIndex, int goalIndex)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->disableGoal(goalIndex));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->disableGoal(goalIndex));
 }
 
 
 // Remove goal for need.
 bool Mona::removeGoal(int needIndex, int goalIndex)
 {
-    assert(needIndex >= 0 && needIndex < (int)homeostats.size());
-    return(homeostats[needIndex]->removeGoal(goalIndex));
+   assert(needIndex >= 0 && needIndex < (int)homeostats.size());
+   return(homeostats[needIndex]->removeGoal(goalIndex));
 }
+
 
 // Initialize neuron.
 void
@@ -633,7 +645,7 @@ Mona::Neuron::hasParentInstinct()
 // Load neuron.
 void Mona::Neuron::load(FILE *fp)
 {
-    int i, j;
+   int           i, j;
    struct Notify *notify;
 
    clear();
@@ -877,88 +889,95 @@ void Mona::Receptor::print(FILE *out)
 
 
 // Create motor and add to network.
-Mona::Motor*
+Mona::Motor *
 Mona::newMotor()
 {
-    Motor* motor = new Motor(MOVEMENT_TYPE::NONE, this);
-    assert(motor != NULL);
-    motor->id = idDispenser;
-    idDispenser++;
-    motor->creationTime = eventClock;
-    motors.push_back(motor);
-    responsePotentials.push_back(0.0);
-    numResponses++;
-    return(motor);
+   Motor *motor = new Motor(MOVEMENT_TYPE::NONE, this);
+
+   assert(motor != NULL);
+   motor->id = idDispenser;
+   idDispenser++;
+   motor->creationTime = eventClock;
+   motors.push_back(motor);
+   responsePotentials.push_back(0.0);
+   numResponses++;
+   return(motor);
 }
+
 
 // Create movement motor and add to network.
-Mona::Motor*
+Mona::Motor *
 Mona::newMovementMotor(int movementType)
 {
-    Motor* motor = new Motor(movementType, this);
-    assert(motor != NULL);
-    motor->id = idDispenser;
-    idDispenser++;
-    motor->creationTime = eventClock;
-    motors.push_back(motor);
-    responsePotentials.push_back(0.0);
-    numResponses++;
-    if (movementType == MOVEMENT_TYPE::BEGIN)
-    {
-        assert(movementBeginResponse == -1);
-        movementBeginResponse = numResponses - 1;
-    }
-    if (movementType == MOVEMENT_TYPE::END)
-    {
-        assert(movementEndResponse == -1);
-        movementEndResponse = numResponses - 1;
-    }
-    return(motor);
+   Motor *motor = new Motor(movementType, this);
+
+   assert(motor != NULL);
+   motor->id = idDispenser;
+   idDispenser++;
+   motor->creationTime = eventClock;
+   motors.push_back(motor);
+   responsePotentials.push_back(0.0);
+   numResponses++;
+   if (movementType == MOVEMENT_TYPE::BEGIN)
+   {
+      assert(movementBeginResponse == -1);
+      movementBeginResponse = numResponses - 1;
+   }
+   if (movementType == MOVEMENT_TYPE::END)
+   {
+      assert(movementEndResponse == -1);
+      movementEndResponse = numResponses - 1;
+   }
+   return(motor);
 }
+
 
 // Create place motor and add to network.
-Mona::Motor*
+Mona::Motor *
 Mona::newPlaceMotor(int x, int y)
 {
-    assert(movementBeginResponse != -1 && movementEndResponse != -1);
-    Motor* motor;
-    for (int i = 0, j = placeMotors.size(); i < j; i++)
-    {
-        motor = placeMotors[i];
-        if (motor->x == x && motor->y == y)
-        {
-            return motor;
-        }
-    }
-    motor = new Motor(x, y, this);
-    assert(motor != NULL);
-    motor->id = idDispenser;
-    idDispenser++;
-    motor->creationTime = eventClock;
-    placeMotors.push_back(motor);
-    return(motor);
+   assert(movementBeginResponse != -1 && movementEndResponse != -1);
+   Motor *motor;
+   for (int i = 0, j = placeMotors.size(); i < j; i++)
+   {
+      motor = placeMotors[i];
+      if ((motor->x == x) && (motor->y == y))
+      {
+         return(motor);
+      }
+   }
+   motor = new Motor(x, y, this);
+   assert(motor != NULL);
+   motor->id = idDispenser;
+   idDispenser++;
+   motor->creationTime = eventClock;
+   placeMotors.push_back(motor);
+   return(motor);
 }
+
 
 // Motor constructor.
-Mona::Motor::Motor(int movementType, Mona* mona)
+Mona::Motor::Motor(int movementType, Mona *mona)
 {
-    init(mona);
-    type = MOTOR;
-    response = mona->motors.size();
-    this->movementType = movementType;
-    x = y = -1;
+   init(mona);
+   type               = MOTOR;
+   response           = mona->motors.size();
+   this->movementType = movementType;
+   x = y = -1;
 }
 
+
 // Place motor constructor.
-Mona::Motor::Motor(int x, int y, Mona* mona)
+Mona::Motor::Motor(int x, int y, Mona *mona)
 {
-    init(mona);
-    type = MOTOR;
-    response = -1;
-    movementType = MOVEMENT_TYPE::NONE;
-    this->x = x;
-    this->y = y;
+   init(mona);
+   type         = MOTOR;
+   response     = -1;
+   movementType = MOVEMENT_TYPE::NONE;
+   this->x      = x;
+   this->y      = y;
 }
+
 
 // Motor destructor.
 Mona::Motor::~Motor()
@@ -966,15 +985,16 @@ Mona::Motor::~Motor()
    clear();
 }
 
+
 // Load motor.
 void Mona::Motor::load(FILE *fp)
 {
-    clear();
-    ((Neuron*)this)->load(fp);
-    FREAD_INT(&response, fp);
-    FREAD_INT(&movementType, fp);
-    FREAD_INT(&x, fp);
-    FREAD_INT(&y, fp);
+   clear();
+   ((Neuron *)this)->load(fp);
+   FREAD_INT(&response, fp);
+   FREAD_INT(&movementType, fp);
+   FREAD_INT(&x, fp);
+   FREAD_INT(&y, fp);
 }
 
 
@@ -982,11 +1002,11 @@ void Mona::Motor::load(FILE *fp)
 // When changing format increment FORMAT in mona.hpp
 void Mona::Motor::save(FILE *fp)
 {
-    ((Neuron*)this)->save(fp);
-    FWRITE_INT(&response, fp);
-    FWRITE_INT(&movementType, fp);
-    FWRITE_INT(&x, fp);
-    FWRITE_INT(&y, fp);
+   ((Neuron *)this)->save(fp);
+   FWRITE_INT(&response, fp);
+   FWRITE_INT(&movementType, fp);
+   FWRITE_INT(&x, fp);
+   FWRITE_INT(&y, fp);
 }
 
 
@@ -1003,41 +1023,47 @@ void Mona::Motor::print(TRACKING_FLAGS tracking, FILE *out)
 void Mona::Motor::print(FILE *out)
 #endif
 {
-    fprintf(out, "<motor><id>%llu</id>", id);
-    if (!isPlaceMotor())
-    {
-        fprintf(out, "<response>%d</response>", response);
+   fprintf(out, "<motor><id>%llu</id>", id);
+   if (!isPlaceMotor())
+   {
+      fprintf(out, "<response>%d</response>", response);
 
-        if (movementType != MOVEMENT_TYPE::NONE)
-        {
-            fprintf(out, "<movement_type>");
-            switch (movementType)
-            {
-            case MOVEMENT_TYPE::BEGIN:
-                fprintf(out, "BEGIN");
-                break;
-            case MOVEMENT_TYPE::END:
-                fprintf(out, "END");
-                break;
-            case MOVEMENT_TYPE::MOVE_FORWARD:
-                fprintf(out, "MOVE_FORWARD");
-                break;
-            case MOVEMENT_TYPE::TURN_RIGHT:
-                fprintf(out, "TURN_RIGHT");
-                break;
-            case MOVEMENT_TYPE::TURN_LEFT:
-                fprintf(out, "TURN_LEFT");
-                break;
-            case MOVEMENT_TYPE::TURN_AROUND:
-                fprintf(out, "TURN_AROUND");
-                break;
-            }
-            fprintf(out, "</movement_type>");
-        }
-    }
-    else {
-        fprintf(out, "<x>%d</x><y>%d</y>", x, y);
-    }
+      if (movementType != MOVEMENT_TYPE::NONE)
+      {
+         fprintf(out, "<movement_type>");
+         switch (movementType)
+         {
+         case MOVEMENT_TYPE::BEGIN:
+            fprintf(out, "BEGIN");
+            break;
+
+         case MOVEMENT_TYPE::END:
+            fprintf(out, "END");
+            break;
+
+         case MOVEMENT_TYPE::MOVE_FORWARD:
+            fprintf(out, "MOVE_FORWARD");
+            break;
+
+         case MOVEMENT_TYPE::TURN_RIGHT:
+            fprintf(out, "TURN_RIGHT");
+            break;
+
+         case MOVEMENT_TYPE::TURN_LEFT:
+            fprintf(out, "TURN_LEFT");
+            break;
+
+         case MOVEMENT_TYPE::TURN_AROUND:
+            fprintf(out, "TURN_AROUND");
+            break;
+         }
+         fprintf(out, "</movement_type>");
+      }
+   }
+   else
+   {
+      fprintf(out, "<x>%d</x><y>%d</y>", x, y);
+   }
    fprintf(out, "<goals>");
    goals.print(out);
    fprintf(out, "</goals>");
@@ -1301,7 +1327,8 @@ bool Mona::Mediator::isDuplicate(Mediator *mediator)
 // Load mediator.
 void Mona::Mediator::load(FILE *fp)
 {
-    int i;
+   int i;
+
    clear();
    ((Neuron *)this)->load(fp);
    FREAD_INT(&level, fp);
@@ -1742,27 +1769,28 @@ Mona::deleteNeuron(Neuron *neuron)
       break;
 
    case MOTOR:
-       if (!((Motor*)neuron)->isPlaceMotor())
-       {
-           for (int i = 0, j = (int)motors.size(); i < j; i++)
-           {
-               if (motors[i] == (Motor*)neuron)
-               {
-                   motors.erase(motors.begin() + i);
-                   break;
-               }
-           }
-       }
-       else {
-           for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
-           {
-               if (placeMotors[i] == (Motor*)neuron)
-               {
-                   placeMotors.erase(placeMotors.begin() + i);
-                   break;
-               }
-           }
-       }
+      if (!((Motor *)neuron)->isPlaceMotor())
+      {
+         for (int i = 0, j = (int)motors.size(); i < j; i++)
+         {
+            if (motors[i] == (Motor *)neuron)
+            {
+               motors.erase(motors.begin() + i);
+               break;
+            }
+         }
+      }
+      else
+      {
+         for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
+         {
+            if (placeMotors[i] == (Motor *)neuron)
+            {
+               placeMotors.erase(placeMotors.begin() + i);
+               break;
+            }
+         }
+      }
       for (int i = 0, j = (int)homeostats.size(); i < j; i++)
       {
          homeostats[i]->removeNeuron(neuron);
@@ -1774,7 +1802,7 @@ Mona::deleteNeuron(Neuron *neuron)
       mediators.remove((Mediator *)neuron);
       for (int i = 0, j = (int)homeostats.size(); i < j; i++)
       {
-          homeostats[i]->removeNeuron(neuron);
+         homeostats[i]->removeNeuron(neuron);
       }
       delete (Mediator *)neuron;
       break;
@@ -1942,7 +1970,7 @@ Mona::load(FILE *fp)
    effectEventIntervals.resize(MAX_MEDIATOR_LEVEL + 1);
    for (int i = 0; i <= MAX_MEDIATOR_LEVEL; i++)
    {
-       int k;
+      int k;
       FREAD_INT(&k, fp);
       effectEventIntervals[i].resize(k);
       for (int j = 0; j < k; j++)
@@ -1994,7 +2022,7 @@ Mona::load(FILE *fp)
    int n = (int)learningEvents.size();
    for (int i = 0; i < n; i++)
    {
-       int j = 0;
+      int j = 0;
       FREAD_INT(&j, fp);
       for (int k = 0; k < j; k++)
       {
@@ -2024,10 +2052,10 @@ Mona::load(FILE *fp)
    FREAD_INT(&n2, fp);
    for (int i = 0; i < n2; i++)
    {
-       motor = new Motor(-1, this);
-       assert(motor != NULL);
-       motor->load(fp);
-       motors.push_back(motor);
+      motor = new Motor(-1, this);
+      assert(motor != NULL);
+      motor->load(fp);
+      motors.push_back(motor);
       if (motor->id > idDispenser)
       {
          idDispenser = motor->id + 1;
@@ -2038,14 +2066,14 @@ Mona::load(FILE *fp)
    FREAD_INT(&n2, fp);
    for (int i = 0; i < n2; i++)
    {
-       motor = new Motor(0, 0, this);
-       assert(motor != NULL);
-       motor->load(fp);
-       placeMotors.push_back(motor);
-       if (motor->id > idDispenser)
-       {
-           idDispenser = motor->id + 1;
-       }
+      motor = new Motor(0, 0, this);
+      assert(motor != NULL);
+      motor->load(fp);
+      placeMotors.push_back(motor);
+      if (motor->id > idDispenser)
+      {
+         idDispenser = motor->id + 1;
+      }
    }
    mediators.clear();
    n2 = 0;
@@ -2103,15 +2131,15 @@ Mona::load(FILE *fp)
    }
    for (int i = 0, n = (int)placeMotors.size(); i < n; i++)
    {
-       motor = placeMotors[i];
-       for (int j = 0, k = (int)motor->notifyList.size(); j < k; j++)
-       {
-           notify = motor->notifyList[j];
-           id = (ID*)(notify->mediator);
-           notify->mediator = (Mediator*)findByID(*id);
-           assert(notify->mediator != NULL);
-           delete id;
-       }
+      motor = placeMotors[i];
+      for (int j = 0, k = (int)motor->notifyList.size(); j < k; j++)
+      {
+         notify           = motor->notifyList[j];
+         id               = (ID *)(notify->mediator);
+         notify->mediator = (Mediator *)findByID(*id);
+         assert(notify->mediator != NULL);
+         delete id;
+      }
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -2174,6 +2202,7 @@ Mona::load(FILE *fp)
    return(true);
 }
 
+
 // Find neuron by id.
 Mona::Neuron *
 Mona::findByID(ID id)
@@ -2202,11 +2231,11 @@ Mona::findByID(ID id)
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       motor = placeMotors[i];
-       if (motor->id == id)
-       {
-           return((Neuron*)motor);
-       }
+      motor = placeMotors[i];
+      if (motor->id == id)
+      {
+         return((Neuron *)motor);
+      }
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -2349,8 +2378,8 @@ Mona::save(FILE *fp)
    FWRITE_INT(&n2, fp);
    for (int i = 0; i < n2; i++)
    {
-       motor = placeMotors[i];
-       motor->save(fp);
+      motor = placeMotors[i];
+      motor->save(fp);
    }
    int n = (int)mediators.size();
    FWRITE_INT(&n, fp);
@@ -2415,8 +2444,8 @@ Mona::clear()
    motors.clear();
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       motor = placeMotors[i];
-       delete motor;
+      motor = placeMotors[i];
+      delete motor;
    }
    placeMotors.clear();
    numResponses = 0;
@@ -2425,9 +2454,9 @@ Mona::clear()
    movementLearningCauses.clear();
    movementLearningEffects.clear();
    movementBeginResponse = -1;
-   movementEndResponse = -1;
-   activePlaceMotor = NULL;
-   orientation = ORIENTATION::NORTH;
+   movementEndResponse   = -1;
+   activePlaceMotor      = NULL;
+   orientation           = ORIENTATION::NORTH;
    X = Y = -1;
    for (int i = 0, j = (int)homeostats.size(); i < j; i++)
    {
@@ -2565,7 +2594,7 @@ Mona::print(bool brief, FILE *out)
 #ifdef MONA_TRACKING
    if (tracking & TRACK_DRIVE)
    {
-       int i = 0;
+      int i = 0;
       for (int j = (int)motors.size(); i < j; i++)
       {
          driveMotor = motors[i];
@@ -2658,18 +2687,18 @@ Mona::print(bool brief, FILE *out)
    fprintf(out, "<place_motors>\n");
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       motor = placeMotors[i];
+      motor = placeMotors[i];
 #ifdef MONA_TRACKING
-       if (((tracking & TRACK_FIRE) && motor->tracker.fire) ||
-           ((tracking & TRACK_ENABLE) && motor->tracker.enable) ||
-           ((tracking & TRACK_DRIVE) && motor->tracker.drive))
-       {
-           motor->print(tracking, out);
-           fprintf(out, "\n");
-       }
+      if (((tracking & TRACK_FIRE) && motor->tracker.fire) ||
+          ((tracking & TRACK_ENABLE) && motor->tracker.enable) ||
+          ((tracking & TRACK_DRIVE) && motor->tracker.drive))
+      {
+         motor->print(tracking, out);
+         fprintf(out, "\n");
+      }
 #else
-       motor->print(out);
-       fprintf(out, "\n");
+      motor->print(out);
+      fprintf(out, "\n");
 #endif
    }
    fprintf(out, "</place_motors>\n");
@@ -2694,18 +2723,21 @@ Mona::print(bool brief, FILE *out)
    switch (orientation)
    {
    case ORIENTATION::NORTH:
-       fprintf(out, "NORTH");
-       break;
+      fprintf(out, "NORTH");
+      break;
+
    case ORIENTATION::SOUTH:
-       fprintf(out, "SOUTH");
-       break;
+      fprintf(out, "SOUTH");
+      break;
+
    case ORIENTATION::EAST:
-       fprintf(out, "EAST");
-       break;
+      fprintf(out, "EAST");
+      break;
+
    case ORIENTATION::WEST:
-       fprintf(out, "WEST");
-       break;
-    }
+      fprintf(out, "WEST");
+      break;
+   }
    fprintf(out, "</orientation>\n");
    fprintf(out, "<X>%d</X>\n", X);
    fprintf(out, "<Y>%d</Y>\n", Y);
@@ -2720,8 +2752,10 @@ Mona::print(bool brief, FILE *out)
          neuron->tracker.motive = 0.0;
       }
    }
- }
+}
 #endif
+
+
    fprintf(out, "</network>\n");
    fflush(out);
 }
@@ -2752,11 +2786,11 @@ Mona::printParms(FILE *out)
    fprintf(out, "<parameter>SENSOR_RESOLUTION</parameter><value>%f</value>\n", SENSOR_RESOLUTION);
    if (LEARN_MEDIATOR_GOAL_VALUE)
    {
-       fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE</parameter><value>true</value>\n");
+      fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE</parameter><value>true</value>\n");
    }
    else
    {
-       fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE</parameter><value>false</value>\n");
+      fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE</parameter><value>false</value>\n");
    }
    fprintf(out, "<parameter>LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL</parameter><value>%d</value>\n", LEARN_MEDIATOR_GOAL_VALUE_MIN_LEVEL);
    if (LEARN_RECEPTOR_GOAL_VALUE)
@@ -2824,8 +2858,8 @@ Mona::clearTracking()
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       motor = placeMotors[i];
-       motor->tracker.clear();
+      motor = placeMotors[i];
+      motor->tracker.clear();
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -2834,4 +2868,6 @@ Mona::clearTracking()
       mediator->tracker.clear();
    }
 }
+
+
 #endif

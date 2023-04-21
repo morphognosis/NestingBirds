@@ -33,8 +33,8 @@ public:
 public:
       vector<SENSOR> sensors;
       SENSOR_MODE    sensorMode;
-      vector<void *>  receptors;
-      void *pendingReceptor;
+      vector<void *> receptors;
+      void           *pendingReceptor;
       void           *motor;
       void           *mediator;
       NEED           goalValue;
@@ -44,7 +44,7 @@ public:
    NEED         need;
    int          needIndex;
    NEED         needDelta;
-   NEED defaultNeed;
+   NEED         defaultNeed;
    Mona         *mona;
    NEED         periodicNeed;
    int          frequency;
@@ -76,13 +76,15 @@ public:
       this->need = need;
    }
 
+
    // Set need with default.
    inline void setNeed(NEED need, NEED defaultNeed)
    {
-       needDelta = need - this->need;
-       this->need = need;
-       this->defaultNeed = defaultNeed;
+      needDelta         = need - this->need;
+      this->need        = need;
+      this->defaultNeed = defaultNeed;
    }
+
 
    // Set default need.
    void setDefaultNeed();
@@ -97,7 +99,7 @@ public:
                void *motor, NEED goalValue);
    int addGoal(vector<SENSOR>& sensors, SENSOR_MODE sensorMode,
                NEED goalValue);
-   void addGoalReceptor(void* receptor);
+   void addGoalReceptor(void *receptor);
    int addGoalMediator(void *mediator, NEED goalValue);
 
    // Find index of goal matching sensors, sensor mode
@@ -111,7 +113,7 @@ public:
 
    // Find goal matching receptor.
    // Return false for not found.
-   bool findGoalReceptor(void* receptor);
+   bool findGoalReceptor(void *receptor);
 
    // Find index of goal matching mediator.
    // Return -1 for no match.
@@ -119,17 +121,17 @@ public:
 
    // Get goal information at index.
    bool getGoalInfo(int goalIndex, vector<SENSOR>& sensors,
-                    SENSOR_MODE& sensorMode, void** motor,
+                    SENSOR_MODE& sensorMode, void **motor,
                     NEED& goalValue, bool& enabled);
 
    // Get receptors for goal at index.
-   void getGoalReceptors(int goalIndex, vector<void *> &receptors);
+   void getGoalReceptors(int goalIndex, vector<void *>& receptors);
 
    // Get motor for goal at index.
    void *getGoalMotor(int goalIndex);
 
    // Get mediator for goal at index.
-   void* getGoalMediator(int goalIndex);
+   void *getGoalMediator(int goalIndex);
 
    // Is goal enabled?
    bool isGoalEnabled(int goalIndex);
@@ -172,7 +174,7 @@ public:
    void print(FILE *out = stdout);
 
 private:
-    // Is goal superset of sensors?
-    bool goalSuperset(int goalIndex, vector<SENSOR>& sensors);
+   // Is goal superset of sensors?
+   bool goalSuperset(int goalIndex, vector<SENSOR>& sensors);
 };
 #endif

@@ -198,6 +198,7 @@ public:
    inline void load(FILE *fp)
    {
       int i, j;
+
       values.clear();
       FREAD_INT(&i, fp);
       values.resize(i);

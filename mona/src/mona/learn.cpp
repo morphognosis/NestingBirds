@@ -42,15 +42,16 @@ Mona::learn()
             // Is event still recent enough to form a new mediator?
             if (learningEvent->neuron->type == MOTOR)
             {
-                // Place motor?
-                Motor* motor = (Motor*)(learningEvent->neuron);
-                if (motor->isPlaceMotor())
-                {
-                    k = -1;
-                }
-                else {
-                    k = n;
-                }
+               // Place motor?
+               Motor *motor = (Motor *)(learningEvent->neuron);
+               if (motor->isPlaceMotor())
+               {
+                  k = -1;
+               }
+               else
+               {
+                  k = n;
+               }
             }
             else
             {
@@ -58,17 +59,19 @@ Mona::learn()
             }
             if (k == -1)
             {
-                if ((int)(eventClock - learningEvent->end) <= MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
-                {
-                    learningEventItr++;
-                }
-            } else if ((int)(eventClock - learningEvent->end) <= maxLearningEffectEventIntervals[k])
+               if ((int)(eventClock - learningEvent->end) <= MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
+               {
+                  learningEventItr++;
+               }
+            }
+            else if ((int)(eventClock - learningEvent->end) <= maxLearningEffectEventIntervals[k])
             {
                learningEventItr++;
             }
-            else {
-                learningEventItr = learningEvents[i].erase(learningEventItr);
-                delete learningEvent;
+            else
+            {
+               learningEventItr = learningEvents[i].erase(learningEventItr);
+               delete learningEvent;
             }
          }
          else
@@ -92,81 +95,87 @@ Mona::learn()
          movementLearningEffects[receptor->sensorMode] = new LearningEvent(receptor);
       }
    }
-   Motor* movementMotor = NULL;
+   Motor *movementMotor = NULL;
    for (int i = 0, j = (int)motors.size(); i < j; i++)
    {
-       motor = motors[i];
-       if (motor->firingStrength > NEARLY_ZERO)
-       {
-           movementMotor = motor;
-           if (motor->movementType != MOVEMENT_TYPE::BEGIN &&
-               motor->movementType != MOVEMENT_TYPE::END &&
-               !movementLearningPathActive)
-           {
-               learningEvent = new LearningEvent(motor);
-               assert(learningEvent != NULL);
-               learningEvents[0].push_back(learningEvent);
-           }
-       }
+      motor = motors[i];
+      if (motor->firingStrength > NEARLY_ZERO)
+      {
+         movementMotor = motor;
+         if ((motor->movementType != MOVEMENT_TYPE::BEGIN) &&
+             (motor->movementType != MOVEMENT_TYPE::END) &&
+             !movementLearningPathActive)
+         {
+            learningEvent = new LearningEvent(motor);
+            assert(learningEvent != NULL);
+            learningEvents[0].push_back(learningEvent);
+         }
+      }
    }
 
    // Create movement mediators that use place motors.
    if (movementLearningCauses.size() == 0)
    {
-       resetMovementLearningPath();
+      resetMovementLearningPath();
    }
    else
    {
-       switch (movementMotor->movementType)
-       {
-       case MOVEMENT_TYPE::BEGIN:
-           if (movementLearningPathActive)
-           {
-               resetMovementLearningPath();
-           }
-           else {
-               movementLearningPathActive = true;
+      switch (movementMotor->movementType)
+      {
+      case MOVEMENT_TYPE::BEGIN:
+         if (movementLearningPathActive)
+         {
+            resetMovementLearningPath();
+         }
+         else
+         {
+            movementLearningPathActive = true;
+            for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
+            {
+               delete movementLearningEffects[i];
+            }
+            movementLearningEffects.clear();
+         }
+         break;
+
+      case MOVEMENT_TYPE::END:
+         if (movementLearningPathActive)
+         {
+            if (movementLearningPathLength >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH)
+            {
+               createPlaceMediators();
+            }
+         }
+         resetMovementLearningPath();
+         break;
+
+      case MOVEMENT_TYPE::NONE:
+         resetMovementLearningPath();
+         break;
+
+      default:
+         if (movementLearningPathActive)
+         {
+            if (movementLearningPathLength < MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
+            {
                for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
                {
-                   delete movementLearningEffects[i];
+                  delete movementLearningEffects[i];
                }
                movementLearningEffects.clear();
-           }
-           break;
-       case MOVEMENT_TYPE::END:
-           if (movementLearningPathActive)
-           {
-               if (movementLearningPathLength >= MIN_MOVEMENT_RESPONSE_PATH_LENGTH)
-               {
-                   createPlaceMediators();
-               }
-           }
-           resetMovementLearningPath();
-           break;
-       case MOVEMENT_TYPE::NONE:
-           resetMovementLearningPath();
-           break;
-       default:
-           if (movementLearningPathActive)
-           {
-               if (movementLearningPathLength < MAX_MOVEMENT_RESPONSE_PATH_LENGTH)
-               {
-                   for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
-                   {
-                       delete movementLearningEffects[i];
-                   }
-                   movementLearningEffects.clear();
-                   movementLearningPathLength++;
-               }
-               else {
-                   resetMovementLearningPath();
-               }
-           }
-           else {
+               movementLearningPathLength++;
+            }
+            else
+            {
                resetMovementLearningPath();
-           }
-           break;
-       }
+            }
+         }
+         else
+         {
+            resetMovementLearningPath();
+         }
+         break;
+      }
    }
 
    // Create new mediators based on potential effect events.
@@ -184,28 +193,28 @@ Mona::learn()
          }
       }
    }
-       for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
-       {
-           for (learningEventItr = learningEvents[i].begin();
-               learningEventItr != learningEvents[i].end(); learningEventItr++)
-           {
-               learningEvent = *learningEventItr;
-               if ((learningEvent->end == eventClock) &&
-                   ((learningEvent->neuron->type == MEDIATOR) ||
-                       ((learningEvent->neuron->type == RECEPTOR))))
-               {
-                   createMediator(learningEvent);
-               }
-           }
-       }
+   for (int i = 0, j = (int)learningEvents.size(); i < j; i++)
+   {
+      for (learningEventItr = learningEvents[i].begin();
+           learningEventItr != learningEvents[i].end(); learningEventItr++)
+      {
+         learningEvent = *learningEventItr;
+         if ((learningEvent->end == eventClock) &&
+             ((learningEvent->neuron->type == MEDIATOR) ||
+              ((learningEvent->neuron->type == RECEPTOR))))
+         {
+            createMediator(learningEvent);
+         }
+      }
+   }
 
-       // Create mediators with generalized receptor effects.
-       for (int i = 0, j = (int)generalizationEvents.size(); i < j; i++)
-       {
-           generalizeMediator(generalizationEvents[i]);
-           delete generalizationEvents[i];
-       }
-       generalizationEvents.clear();
+   // Create mediators with generalized receptor effects.
+   for (int i = 0, j = (int)generalizationEvents.size(); i < j; i++)
+   {
+      generalizeMediator(generalizationEvents[i]);
+      delete generalizationEvents[i];
+   }
+   generalizationEvents.clear();
 
    // Delete excess mediators.
    while ((int)mediators.size() > MAX_MEDIATORS)
@@ -221,45 +230,47 @@ Mona::learn()
    eventClock++;
 }
 
+
 // Create place mediators.
 void
 Mona::createPlaceMediators()
 {
-    for (int i = 0, j = sensorModes.size(); i < j; i++)
-    {
-            Mediator* mediator = newMediator(INITIAL_ENABLEMENT);
-            mediator->addEvent(CAUSE_EVENT, movementLearningCauses[i]->neuron);
-            mediator->addEvent(RESPONSE_EVENT, newPlaceMotor(X, Y));
-            mediator->addEvent(EFFECT_EVENT, movementLearningEffects[i]->neuron);
-            mediator->updateGoalValue(movementLearningCauses[i]->needs);
+   for (int i = 0, j = sensorModes.size(); i < j; i++)
+   {
+      Mediator *mediator = newMediator(INITIAL_ENABLEMENT);
+      mediator->addEvent(CAUSE_EVENT, movementLearningCauses[i]->neuron);
+      mediator->addEvent(RESPONSE_EVENT, newPlaceMotor(X, Y));
+      mediator->addEvent(EFFECT_EVENT, movementLearningEffects[i]->neuron);
+      mediator->updateGoalValue(movementLearningCauses[i]->needs);
 
-            // Duplicate?
-            if (isDuplicateMediator(mediator))
-            {
-                deleteNeuron(mediator);
-                continue;
-            }
+      // Duplicate?
+      if (isDuplicateMediator(mediator))
+      {
+         deleteNeuron(mediator);
+         continue;
+      }
 
-            // Make new mediator available for learning.
-            if ((mediator->level + 1) < (int)learningEvents.size())
-            {
-                mediator->causeBegin = movementLearningCauses[i]->begin;
-                mediator->firingStrength = movementLearningCauses[i]->firingStrength *
-                    movementLearningEffects[i]->firingStrength;
-                LearningEvent* learningEvent = new LearningEvent(mediator);
-                assert(learningEvent != NULL);
-                learningEvents[mediator->level + 1].push_back(learningEvent);
-            }
+      // Make new mediator available for learning.
+      if ((mediator->level + 1) < (int)learningEvents.size())
+      {
+         mediator->causeBegin     = movementLearningCauses[i]->begin;
+         mediator->firingStrength = movementLearningCauses[i]->firingStrength *
+                                    movementLearningEffects[i]->firingStrength;
+         LearningEvent *learningEvent = new LearningEvent(mediator);
+         assert(learningEvent != NULL);
+         learningEvents[mediator->level + 1].push_back(learningEvent);
+      }
 
 #ifdef MONA_TRACE
-            if (traceLearn)
-            {
-                printf("Create place mediator:\n");
-                mediator->print();
-            }
+      if (traceLearn)
+      {
+         printf("Create place mediator:\n");
+         mediator->print();
+      }
 #endif
-    }
+   }
 }
+
 
 // Create new mediators for given effect.
 void
@@ -317,29 +328,29 @@ Mona::createMediator(LearningEvent *effectEvent)
       }
       if (causeEvent->neuron->type == MOTOR)
       {
-          continue;
+         continue;
       }
       if (causeEvent->end >= effectEvent->begin)
       {
-          continue;
+         continue;
       }
-      if (level == 0 && ((Receptor*)causeEvent->neuron)->sensorMode != ((Receptor*)effectEvent->neuron)->sensorMode)
+      if ((level == 0) && (((Receptor *)causeEvent->neuron)->sensorMode != ((Receptor *)effectEvent->neuron)->sensorMode))
       {
-          continue;
+         continue;
       }
 
       // The cause and effect must have equal response-equippage status.
-      if ((level == 0) || (((Mediator*)causeEvent->neuron)->response != NULL))
+      if ((level == 0) || (((Mediator *)causeEvent->neuron)->response != NULL))
       {
-          causeRespEq = true;
+         causeRespEq = true;
       }
       else
       {
-          causeRespEq = false;
+         causeRespEq = false;
       }
       if (causeRespEq != effectRespEq)
       {
-          continue;
+         continue;
       }
 
       // Save candidate.
@@ -350,73 +361,73 @@ Mona::createMediator(LearningEvent *effectEvent)
    // Choose causes and create mediators.
    while (true)
    {
-       // Make a weighted probabilistic pick of a candidate.
-       chooseProb = random.RAND_INTERVAL(0.0, accumProb);
-       PROBABILITY p = 0.0;
-       int i = 0;
-       for (int j = (int)candidates.size(); i < j; i++)
-       {
-           if (candidates[i] == NULL)
-           {
-               continue;
-           }
-           p += candidates[i]->probability;
-           if (chooseProb <= p)
-           {
-               break;
-           }
-       }
-       if (i == (int)candidates.size())
-       {
-           break;
-       }
-       causeEvent = candidates[i];
-       accumProb -= causeEvent->probability;
-       candidates[i] = NULL;
+      // Make a weighted probabilistic pick of a candidate.
+      chooseProb = random.RAND_INTERVAL(0.0, accumProb);
+      PROBABILITY p = 0.0;
+      int         i = 0;
+      for (int j = (int)candidates.size(); i < j; i++)
+      {
+         if (candidates[i] == NULL)
+         {
+            continue;
+         }
+         p += candidates[i]->probability;
+         if (chooseProb <= p)
+         {
+            break;
+         }
+      }
+      if (i == (int)candidates.size())
+      {
+         break;
+      }
+      causeEvent    = candidates[i];
+      accumProb    -= causeEvent->probability;
+      candidates[i] = NULL;
 
-       // Make a probabilistic decision to create mediator.
-       if (!random.RAND_CHANCE(effectEvent->probability *
-           causeEvent->probability))
-       {
-           continue;
-       }
+      // Make a probabilistic decision to create mediator.
+      if (!random.RAND_CHANCE(effectEvent->probability *
+                              causeEvent->probability))
+      {
+         continue;
+      }
 
-       // Add a response?
-       // The components must also be response-equipped.
-       responseEvent = NULL;
-       if ((level < MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL) ||
-           (effectRespEq &&
-               (level <= MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL) &&
-               random.RAND_BOOL()))
-       {
-           tmpVector.clear();
-           for (responseEventItr = learningEvents[0].begin();
-               responseEventItr != learningEvents[0].end(); responseEventItr++)
-           {
-               responseEvent = *responseEventItr;
-               if ((responseEvent->neuron->type == MOTOR) &&
-                   (responseEvent->firingStrength > NEARLY_ZERO) &&
-                   (responseEvent->end == causeEvent->end + 1))
-               {
-                       tmpVector.push_back(responseEvent);
-               }
-           }
-           if (tmpVector.size() == 0)
-           {
-               continue;
-           }
-           responseEvent = tmpVector[random.RAND_CHOICE((int)tmpVector.size())];
-       }
+      // Add a response?
+      // The components must also be response-equipped.
+      responseEvent = NULL;
+      if ((level < MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL) ||
+          (effectRespEq &&
+           (level <= MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL) &&
+           random.RAND_BOOL()))
+      {
+         tmpVector.clear();
+         for (responseEventItr = learningEvents[0].begin();
+              responseEventItr != learningEvents[0].end(); responseEventItr++)
+         {
+            responseEvent = *responseEventItr;
+            if ((responseEvent->neuron->type == MOTOR) &&
+                (responseEvent->firingStrength > NEARLY_ZERO) &&
+                (responseEvent->end == causeEvent->end + 1))
+            {
+               tmpVector.push_back(responseEvent);
+            }
+         }
+         if (tmpVector.size() == 0)
+         {
+            continue;
+         }
+         responseEvent = tmpVector[random.RAND_CHOICE((int)tmpVector.size())];
+      }
 
-       // Create the mediator.
-       mediator = newMediator(INITIAL_ENABLEMENT);
-       mediator->addEvent(CAUSE_EVENT, causeEvent->neuron);
-       if (responseEvent != NULL)
-       {
-           mediator->addEvent(RESPONSE_EVENT, responseEvent->neuron);
-       }
-       mediator->addEvent(EFFECT_EVENT, effectEvent->neuron);
-       mediator->updateGoalValue(causeEvent->needs);
+      // Create the mediator.
+      mediator = newMediator(INITIAL_ENABLEMENT);
+      mediator->addEvent(CAUSE_EVENT, causeEvent->neuron);
+      if (responseEvent != NULL)
+      {
+         mediator->addEvent(RESPONSE_EVENT, responseEvent->neuron);
+      }
+      mediator->addEvent(EFFECT_EVENT, effectEvent->neuron);
+      mediator->updateGoalValue(causeEvent->needs);
 
       // Duplicate?
       if (isDuplicateMediator(mediator))
@@ -498,7 +509,7 @@ Mona::generalizeMediator(GeneralizationEvent *generalizationEvent)
    {
       // Make a weighted probabilistic pick of a candidate.
       chooseProb = random.RAND_INTERVAL(0.0, accumProb);
-      p = 0.0;
+      p          = 0.0;
       int i = 0;
       for (int j = (int)candidates.size(); i < j; i++)
       {
@@ -564,6 +575,7 @@ Mona::generalizeMediator(GeneralizationEvent *generalizationEvent)
    }
 }
 
+
 // Is mediator a duplicate?
 bool Mona::isDuplicateMediator(Mediator *mediator)
 {
@@ -581,21 +593,22 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
             {
                if (notify->mediator->effect == mediator->effect)
                {
-                   if (notify->mediator->response == mediator->response)
-                   {
-                       return true;
-                   }
-                   else {
-                       if (notify->mediator->response != NULL && mediator->response != NULL)
-                       {
-                           Motor* notifyMotor = (Motor*)notify->mediator->response;
-                           Motor* motor = (Motor*)mediator->response;
-                           if (motor->isDuplicate(notifyMotor))
-                           {
-                               return true;
-                           }
-                       }
-                   }
+                  if (notify->mediator->response == mediator->response)
+                  {
+                     return(true);
+                  }
+                  else
+                  {
+                     if ((notify->mediator->response != NULL) && (mediator->response != NULL))
+                     {
+                        Motor *notifyMotor = (Motor *)notify->mediator->response;
+                        Motor *motor       = (Motor *)mediator->response;
+                        if (motor->isDuplicate(notifyMotor))
+                        {
+                           return(true);
+                        }
+                     }
+                  }
                }
             }
          }
@@ -630,21 +643,22 @@ bool Mona::isDuplicateMediator(Mediator *mediator)
             {
                if (notify->mediator->cause == mediator->cause)
                {
-                   if (notify->mediator->response == mediator->response)
-                   {
-                       return true;
-                   }
-                   else {
-                       if (notify->mediator->response != NULL && mediator->response != NULL)
-                       {
-                           Motor* notifyMotor = (Motor*)notify->mediator->response;
-                           Motor* motor = (Motor*)mediator->response;
-                           if (motor->isDuplicate(notifyMotor))
-                           {
-                               return true;
-                           }
-                       }
-                   }                     
+                  if (notify->mediator->response == mediator->response)
+                  {
+                     return(true);
+                  }
+                  else
+                  {
+                     if ((notify->mediator->response != NULL) && (mediator->response != NULL))
+                     {
+                        Motor *notifyMotor = (Motor *)notify->mediator->response;
+                        Motor *motor       = (Motor *)mediator->response;
+                        if (motor->isDuplicate(notifyMotor))
+                        {
+                           return(true);
+                        }
+                     }
+                  }
                }
             }
          }
@@ -701,11 +715,11 @@ void Mona::clearWorkingMemory()
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       motor = placeMotors[i];
-       motor->firingStrength = 0.0;
-       motor->motive = 0.0;
+      motor = placeMotors[i];
+      motor->firingStrength = 0.0;
+      motor->motive         = 0.0;
 #ifdef MONA_TRACKING
-       motor->tracker.clear();
+      motor->tracker.clear();
 #endif
    }
    for (mediatorItr = mediators.begin();
@@ -732,12 +746,12 @@ void Mona::clearWorkingMemory()
    movementLearningPathLength = 0;
    for (int i = 0, j = movementLearningCauses.size(); i < j; i++)
    {
-       delete movementLearningCauses[i];
+      delete movementLearningCauses[i];
    }
    movementLearningCauses.clear();
    for (int i = 0, j = movementLearningEffects.size(); i < j; i++)
    {
-       delete movementLearningEffects[i];
+      delete movementLearningEffects[i];
    }
    movementLearningEffects.clear();
 }
@@ -779,19 +793,20 @@ void Mona::clearLongTermMemory()
    }
 }
 
+
 // Reset movement response path.
 void Mona::resetMovementLearningPath()
 {
-    movementLearningPathLength = 0;
-    for (int i = 0, j = movementLearningCauses.size(); i < j; i++)
-    {
-        delete movementLearningCauses[i];
-    }
-    movementLearningCauses.clear();
-    for (int i = 0, j = sensorModes.size(); i < j; i++)
-    {
-        movementLearningCauses.push_back(movementLearningEffects[i]);
-    }
-    movementLearningEffects.clear();
-    movementLearningPathActive = false;
+   movementLearningPathLength = 0;
+   for (int i = 0, j = movementLearningCauses.size(); i < j; i++)
+   {
+      delete movementLearningCauses[i];
+   }
+   movementLearningCauses.clear();
+   for (int i = 0, j = sensorModes.size(); i < j; i++)
+   {
+      movementLearningCauses.push_back(movementLearningEffects[i]);
+   }
+   movementLearningEffects.clear();
+   movementLearningPathActive = false;
 }

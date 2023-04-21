@@ -70,7 +70,7 @@ Mona::sense()
       {
          for (int i = 0, n = (int)oldReceptorSet.size(); i < n; i++)
          {
-             int j, k;
+            int j, k;
             for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
             {
                if (oldReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
@@ -97,7 +97,7 @@ Mona::sense()
       }
       for (int i = 0, n = (int)newReceptorSet.size(); i < n; i++)
       {
-          int j, k;
+         int j, k;
          for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
          {
             if (newReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
@@ -137,7 +137,7 @@ Mona::sense()
       // Add goals to new receptor?
       if (addReceptor)
       {
-          receptor->addGoals();
+         receptor->addGoals();
       }
 
       // Update needs.
@@ -373,66 +373,71 @@ int Mona::addSensorMode(vector<bool>& sensorMask)
    return(addSensorMode(sensorMask, SENSOR_RESOLUTION));
 }
 
+
 // Delete sensor mode.
 bool Mona::delSensorMode(int mode)
 {
-    // Must delete modes before cycling.
-    if ((int)receptors.size() > 0)
-    {
-        return(false);
-    }
+   // Must delete modes before cycling.
+   if ((int)receptors.size() > 0)
+   {
+      return(false);
+   }
 
-    // Mode exists?
-    if ((int)sensorModes.size() <= mode)
-    {
-        return(false);
-    }
+   // Mode exists?
+   if ((int)sensorModes.size() <= mode)
+   {
+      return(false);
+   }
 
-    // Delete mode.
-    sensorModes.erase(sensorModes.begin() + mode);
+   // Delete mode.
+   sensorModes.erase(sensorModes.begin() + mode);
 
-    // Delete centroid.
-    sensorCentroids.erase(sensorCentroids.begin() + mode);
+   // Delete centroid.
+   sensorCentroids.erase(sensorCentroids.begin() + mode);
 
-    return(true);
+   return(true);
 }
+
 
 // Add goals.
 void Mona::Receptor::addGoals()
 {
-    // Add receptor to homeostats.
-    for (int i = 0; i < mona->numNeeds; i++)
-    {
-        mona->homeostats[i]->addGoalReceptor(this);
-    }
+   // Add receptor to homeostats.
+   for (int i = 0; i < mona->numNeeds; i++)
+   {
+      mona->homeostats[i]->addGoalReceptor(this);
+   }
 }
+
 
 // Update needs.
 void Mona::Receptor::updateNeeds()
 {
-    // Update homeostats.
-    bool defaultNeed = true;
-    for (int i = 0; i < mona->numNeeds; i++)
-    {
-        if (goals.getValue(i) != 0.0)
-        {
-            mona->homeostats[i]->receptorUpdate(this);
-        }
-        if (mona->homeostats[i]->getNeed() > 0.0)
-        {
-            defaultNeed = false;
-        }
-    }
+   // Update homeostats.
+   bool defaultNeed = true;
 
-    // Set default needs.
-    if (defaultNeed)
-    {
-        for (int i = 0; i < mona->numNeeds; i++)
-        {
-            mona->homeostats[i]->setDefaultNeed();
-        }
-    }
+   for (int i = 0; i < mona->numNeeds; i++)
+   {
+      if (goals.getValue(i) != 0.0)
+      {
+         mona->homeostats[i]->receptorUpdate(this);
+      }
+      if (mona->homeostats[i]->getNeed() > 0.0)
+      {
+         defaultNeed = false;
+      }
+   }
+
+   // Set default needs.
+   if (defaultNeed)
+   {
+      for (int i = 0; i < mona->numNeeds; i++)
+      {
+         mona->homeostats[i]->setDefaultNeed();
+      }
+   }
 }
+
 
 // Update goal values.
 void Mona::Receptor::updateGoalValues()

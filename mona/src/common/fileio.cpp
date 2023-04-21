@@ -214,6 +214,7 @@ int myfreadShort(short *s, FILE *fp)
 {
    short v;
    int   ret = fscanf(fp, "%hd", &v);
+
    *s = v;
    return(ret);
 }
@@ -222,6 +223,7 @@ int myfreadShort(short *s, FILE *fp)
 int myfwriteShort(short *s, FILE *fp)
 {
    short v;
+
    v = *s;
    return(fprintf(fp, "%hd\n", v));
 }
@@ -255,6 +257,7 @@ int myfreadFloat(float *f, FILE *fp)
 {
    char buf[100];
    int  ret = fscanf(fp, "%s", buf);
+
    *f = (float)atof(buf);
    return(ret);
 }
@@ -270,6 +273,7 @@ int myfreadDouble(double *d, FILE *fp)
 {
    char buf[100];
    int  ret = fscanf(fp, "%s", buf);
+
    *d = strtod(buf, NULL);
    return(ret);
 }
@@ -285,6 +289,7 @@ int myfreadBool(bool *b, FILE *fp)
 {
    int v;
    int ret = fscanf(fp, "%d", &v);
+
    if (v == 1)
    {
       *b = true;
@@ -314,6 +319,7 @@ int myfreadChar(unsigned char *c, FILE *fp)
 {
    char buf[10];
    int  ret = fscanf(fp, "%s", buf);
+
    *c = buf[0];
    return(ret);
 }
@@ -329,6 +335,7 @@ int myfreadBytes(unsigned char *bytes, int size, FILE *fp)
 {
    int           len  = (2 * size) + 1;
    unsigned char *buf = new unsigned char[len];
+
    assert(buf != NULL);
    int ret = fscanf(fp, "%s", buf);
    int i, j, d1, d2;
@@ -363,6 +370,7 @@ int myfwriteBytes(unsigned char *bytes, int size, FILE *fp)
 {
    int  len  = (2 * size) + 1;
    char *buf = new char[len];
+
    assert(buf != NULL);
    for (int i = 0; i < size; i++)
    {
@@ -379,6 +387,7 @@ int myfreadString(char *str, int size, FILE *fp)
 {
    // String is delimited by double quotes.
    char c;
+
    while (true)
    {
       c = fgetc(fp);

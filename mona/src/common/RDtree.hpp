@@ -37,7 +37,7 @@
  * using relative distances is presented. The search is conducted to find patterns
  * which are nearest neighbors of a given test pattern. The structure
  * of the tree is such that the search time is proportional to the distance between
- * the test pattern and its nearest neighbor, since a larger tree, which can be 
+ * the test pattern and its nearest neighbor, since a larger tree, which can be
  * expected on average to contain closer neighbors, can be searched faster than a
  * smaller tree.
  */

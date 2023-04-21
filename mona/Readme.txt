@@ -24,7 +24,6 @@ Commands:
 nestingbirds: run nestingbirds program.
 
 Usage:
-
     nestingbirds
       -trainMale <male save file name> | -testMale <male load file name>
       -trainFemale <female save file name> | -testFemale <female load file name>
@@ -39,10 +38,10 @@ Usage:
       [-femaleInitialFood <amount> (default=0)]
       [-femaleFoodDuration <amount> (default=100)]
       [-femaleRandomizeFoodLevel (food level probabilistically increases 0-100 upon eating food)]
-      [-femaleMouseNeed <amount> (default=0.3)]
-      [-femaleStoneNeed <amount> (default=0.1)]
-      [-femaleLayEggNeed <amount> (default=0.2)]
-      [-femaleBroodEggNeed <amount> (default=0.4)]
+      [-femaleMouseNeed <amount> (default=0.2)]
+      [-femaleLayEggNeed <amount> (default=0.1)]
+      [-femaleBroodEggNeed <amount> (default=0.3)]
       [-verbose <true | false> (default=true)]
       [-randomSeed <seed> (default=4517)]
       [-version]
+    

@@ -35,7 +35,7 @@ extern const char *MonaVersion;
 // MONA_TRACE: use with run-time tracing flags below for execution flow trace.
 // MONA_TRACKING: use with dump and print options for firing, enabling and drive
 // event tracking.
-#define MONA_TRACE 1
+#define MONA_TRACE    1
 
 #ifdef WIN32
 #define PUBLIC_API    __declspec(dllexport)
@@ -118,13 +118,13 @@ public:
    ENABLEMENT MIN_ENABLEMENT;
    ENABLEMENT INITIAL_ENABLEMENT;
    WEIGHT     DRIVE_ATTENUATION;
-   WEIGHT MIN_DRIVE_MOTIVE;
+   WEIGHT     MIN_DRIVE_MOTIVE;
    WEIGHT     FIRING_STRENGTH_LEARNING_DAMPER;
    WEIGHT     LEARNING_DECREASE_VELOCITY;
    WEIGHT     LEARNING_INCREASE_VELOCITY;
    WEIGHT     RESPONSE_RANDOMNESS;
-   int MIN_MOVEMENT_RESPONSE_PATH_LENGTH;
-   int MAX_MOVEMENT_RESPONSE_PATH_LENGTH;
+   int        MIN_MOVEMENT_RESPONSE_PATH_LENGTH;
+   int        MAX_MOVEMENT_RESPONSE_PATH_LENGTH;
    WEIGHT     UTILITY_ASYMPTOTE;
    int        DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL;
    int        DEFAULT_NUM_EFFECT_EVENT_INTERVALS;
@@ -182,13 +182,15 @@ public:
    bool               overrideResponseConditional(RESPONSE, RESPONSE_POTENTIAL);
    void clearResponseOverride();
    Motor *findMotorByResponse(RESPONSE response);
+
    bool movementLearningPathActive;
-   int movementLearningPathLength;
-   vector<LearningEvent*> movementLearningCauses;
-   vector<LearningEvent*> movementLearningEffects;
+   int  movementLearningPathLength;
+   vector<LearningEvent *> movementLearningCauses;
+   vector<LearningEvent *> movementLearningEffects;
    void resetMovementLearningPath();
-   int movementBeginResponse;
-   int movementEndResponse;
+
+   int   movementBeginResponse;
+   int   movementEndResponse;
    Motor *activePlaceMotor;
 
    // Needs.
@@ -207,22 +209,22 @@ public:
 
    // Goal management.
    int addGoal(int needIndex, vector<SENSOR>& sensors,
-       SENSOR_MODE sensorMode, Mona::Motor* motor, NEED goalValue);
+               SENSOR_MODE sensorMode, Mona::Motor *motor, NEED goalValue);
    int addGoal(int needIndex, vector<SENSOR>& sensors,
-       SENSOR_MODE sensorMode, NEED goalValue);
-   int addGoal(int needIndex, Mediator* mediator, NEED goalValue);
+               SENSOR_MODE sensorMode, NEED goalValue);
+   int addGoal(int needIndex, Mediator *mediator, NEED goalValue);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
-       SENSOR_MODE sensorMode, Mona::Motor* motor);
+                SENSOR_MODE sensorMode, Mona::Motor *motor);
    int findGoal(int needIndex, vector<SENSOR>& sensors,
-       SENSOR_MODE sensorMode);
-   int findGoal(int needIndex, Mediator* mediator);
+                SENSOR_MODE sensorMode);
+   int findGoal(int needIndex, Mediator *mediator);
    int getNumGoals(int needIndex);
    bool getGoalInfo(int needIndex, int goalIndex,
-       vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
-       Mona::Motor** motor, NEED& goalValue, bool& enabled);
-   void getGoalReceptors(int needIndex, int goalIndex, vector<void*>& receptors);
-   Motor* getGoalMotor(int needIndex, int goalIndex);
-   Mediator* getGoalMediator(int needIndex, int goalIndex);
+                    vector<SENSOR>& sensors, SENSOR_MODE& sensorMode,
+                    Mona::Motor **motor, NEED& goalValue, bool& enabled);
+   void getGoalReceptors(int needIndex, int goalIndex, vector<void *>& receptors);
+   Motor *getGoalMotor(int needIndex, int goalIndex);
+   Mediator *getGoalMediator(int needIndex, int goalIndex);
    bool isGoalEnabled(int needIndex, int goalIndex);
    bool enableGoal(int needIndex, int goalIndex);
    bool disableGoal(int needIndex, int goalIndex);
@@ -460,41 +462,41 @@ public:
    {
 public:
 
-    // Construct/destruct.
-    Motor(int movementType, Mona* mona);
-    Motor(int x, int y, Mona* mona);
-    ~Motor();
+      // Construct/destruct.
+      Motor(int movementType, Mona *mona);
+      Motor(int x, int y, Mona *mona);
+      ~Motor();
 
-    // Response.
-    RESPONSE response;
+      // Response.
+      RESPONSE response;
 
-    // Movement type.
-    int movementType;
+      // Movement type.
+      int movementType;
 
-    // Place coordinates.
-    // If these are non-negative, this is a place motor, 
-    // meaning that the response navigates to these coordinates.
-    int x, y; 
-    bool isPlaceMotor() { return x >= 0;  }
+      // Place coordinates.
+      // If these are non-negative, this is a place motor,
+      // meaning that the response navigates to these coordinates.
+      int x, y;
+      bool isPlaceMotor() { return(x >= 0);  }
 
-    // Set response to move to place coordinates.
-    void placeResponse();
-    static int gotoPlace(int orientation, int fromX, int fromY, int toX, int toY);
+      // Set response to move to place coordinates.
+      void placeResponse();
+      static int gotoPlace(int orientation, int fromX, int fromY, int toX, int toY);
 
-    // Is given motor a duplicate of this?
-    bool isDuplicate(Motor*);
+      // Is given motor a duplicate of this?
+      bool isDuplicate(Motor *);
 
-    // Load motor.
-    void load(FILE* fp);
+      // Load motor.
+      void load(FILE *fp);
 
-    // Save motor.
-    void save(FILE* fp);
+      // Save motor.
+      void save(FILE *fp);
 
-    // Print motor.
-    void print(FILE* out = stdout);
+      // Print motor.
+      void print(FILE *out = stdout);
 
 #ifdef MONA_TRACKING
-    void print(TRACKING_FLAGS tracking, FILE* out = stdout);
+      void print(TRACKING_FLAGS tracking, FILE *out = stdout);
 #endif
    };
 
@@ -583,32 +585,32 @@ public:
    // Network.
    vector<Receptor *> receptors;
    vector<Motor *>    motors;
-   vector<Motor*> placeMotors;
+   vector<Motor *>    placeMotors;
    list<Mediator *>   mediators;
 
    // Movement type.
    class MOVEMENT_TYPE
    {
-   public:
-       // Movement markers.
-       static const int NONE = -1;
-       static const int BEGIN = -2;
-       static const int END = -3;
-       static const int DO_NOTHING = 0;
-       static const int MOVE_FORWARD = 1;
-       static const int TURN_RIGHT = 2;
-       static const int TURN_LEFT = 3;
-       static const int TURN_AROUND = 4;
+public:
+      // Movement markers.
+      static const int NONE         = -1;
+      static const int BEGIN        = -2;
+      static const int END          = -3;
+      static const int DO_NOTHING   = 0;
+      static const int MOVE_FORWARD = 1;
+      static const int TURN_RIGHT   = 2;
+      static const int TURN_LEFT    = 3;
+      static const int TURN_AROUND  = 4;
    };
 
    // Orientation.
    class ORIENTATION
    {
-   public:
-       static const int NORTH = 0;
-       static const int SOUTH = 1;
-       static const int EAST = 2;
-       static const int WEST = 3;
+public:
+      static const int NORTH = 0;
+      static const int SOUTH = 1;
+      static const int EAST  = 2;
+      static const int WEST  = 3;
    };
    int orientation;
    int X, Y;
@@ -616,8 +618,8 @@ public:
    // Add/delete neurons to/from network.
    Receptor *newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode);
    Motor *newMotor();
-   Motor* newMovementMotor(int movementType);
-   Motor* newPlaceMotor(int x, int y);
+   Motor *newMovementMotor(int movementType);
+   Motor *newPlaceMotor(int x, int y);
    Mediator *newMediator(ENABLEMENT enablement);
    void deleteNeuron(Neuron *);
 

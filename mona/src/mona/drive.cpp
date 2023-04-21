@@ -51,8 +51,8 @@ Mona::drive()
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       neuron = (Neuron*)placeMotors[i];
-       neuron->initDrive(needs);
+      neuron = (Neuron *)placeMotors[i];
+      neuron->initDrive(needs);
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -105,23 +105,23 @@ Mona::drive()
 
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       motor = placeMotors[i];
-       if (motor->goals.getValue() != 0.0)
-       {
-           motiveAccum.init(needs);
-           motiveAccum.accumGoals(motor->goals);
-           if (motiveAccum.getValue() >= MIN_DRIVE_MOTIVE)
-           {
-               motiveAccum.init(needs);
-               motiveAccum.init(needs);
-               clearMotiveWork();
+      motor = placeMotors[i];
+      if (motor->goals.getValue() != 0.0)
+      {
+         motiveAccum.init(needs);
+         motiveAccum.accumGoals(motor->goals);
+         if (motiveAccum.getValue() >= MIN_DRIVE_MOTIVE)
+         {
+            motiveAccum.init(needs);
+            motiveAccum.init(needs);
+            clearMotiveWork();
 #ifdef MONA_TRACKING
-               motiveAccum.drivers.clear();
+            motiveAccum.drivers.clear();
 #endif
-               motor->drive(motiveAccum);
-               setMotives();
-           }
-       }
+            motor->drive(motiveAccum);
+            setMotives();
+         }
+      }
    }
 
    for (mediatorItr = mediators.begin();
@@ -335,8 +335,8 @@ Mona::clearMotiveWork()
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       neuron = (Neuron*)placeMotors[i];
-       neuron->clearMotiveWork();
+      neuron = (Neuron *)placeMotors[i];
+      neuron->clearMotiveWork();
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -379,8 +379,8 @@ Mona::setMotives()
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       neuron = (Neuron*)placeMotors[i];
-       neuron->setMotive();
+      neuron = (Neuron *)placeMotors[i];
+      neuron->setMotive();
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -396,6 +396,7 @@ void
 Mona::Neuron::setMotive()
 {
    MOTIVE m = motiveWork.getValue();
+
    if (!motiveValid || (motive < m))
    {
       motiveValid = true;
@@ -426,7 +427,7 @@ Mona::Neuron::accumMotiveTracking()
       }
       else
       {
-          int k = -1;
+         int k = -1;
          for (int j = 0, n2 = (int)tracker.motiveWorkPaths.size(); j < n2; j++)
          {
             if (tracker.motiveWorkPaths[i].motive > tracker.motivePaths[j].motive)
@@ -468,8 +469,8 @@ Mona::finalizeMotives()
    }
    for (int i = 0, j = (int)placeMotors.size(); i < j; i++)
    {
-       neuron = (Neuron*)placeMotors[i];
-       neuron->finalizeMotive();
+      neuron = (Neuron *)placeMotors[i];
+      neuron->finalizeMotive();
    }
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)
@@ -521,7 +522,10 @@ Mona::Neuron::drive(MotiveAccum motiveAccum)
    // Accumulate motive.
    // Store greater motive except for attenuated "pain".
    m = motiveAccum.getValue();
-   if (m < mona->MIN_DRIVE_MOTIVE) return;
+   if (m < mona->MIN_DRIVE_MOTIVE)
+   {
+      return;
+   }
    if (!motiveWorkValid ||
        ((m >= NEARLY_ZERO) && ((m - motiveWork.getValue()) > NEARLY_ZERO)))
    {
@@ -544,17 +548,19 @@ Mona::Neuron::drive(MotiveAccum motiveAccum)
 #ifdef MONA_TRACE
    if (mona->traceDrive)
    {
-       switch (type)
-       {
-       case RECEPTOR:
-           printf("Drive receptor id=%llu, motive=%f\n", id, m);
-           break;
-       case MOTOR:
-           printf("Drive motor id=%llu, motive=%f\n", id, m);
-           break;
-       case MEDIATOR:
-           printf("Drive mediator id=%llu, motive=%f\n", id, m);
-           break;
+      switch (type)
+      {
+      case RECEPTOR:
+         printf("Drive receptor id=%llu, motive=%f\n", id, m);
+         break;
+
+      case MOTOR:
+         printf("Drive motor id=%llu, motive=%f\n", id, m);
+         break;
+
+      case MEDIATOR:
+         printf("Drive mediator id=%llu, motive=%f\n", id, m);
+         break;
       }
    }
 #endif
@@ -631,7 +637,10 @@ Mona::Mediator::driveCause(MotiveAccum motiveAccum)
    // Accumulate motive.
    // Store greater motive except for attenuated "pain".
    m = motiveAccum.getValue();
-   if (m < mona->MIN_DRIVE_MOTIVE) return;
+   if (m < mona->MIN_DRIVE_MOTIVE)
+   {
+      return;
+   }
    if (!motiveWorkValid ||
        ((m >= NEARLY_ZERO) && ((m - motiveWork.getValue()) > NEARLY_ZERO)))
    {
@@ -735,7 +744,7 @@ Mona::Neuron::trackMotive(MotiveAccum& in, MotiveAccum& out)
    }
    else
    {
-       int k = -1;
+      int k = -1;
       for (int i = 0, j = (int)tracker.motiveWorkPaths.size(); i < j; i++)
       {
          if (d.motiveWork.getValue() > tracker.motiveWorkPaths[i].motiveWork.getValue())
