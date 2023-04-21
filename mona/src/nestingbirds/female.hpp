@@ -23,6 +23,35 @@ public:
         int              object;
     };
 
+    // Goal.
+    class GOAL
+    {
+    public:
+        static const int EAT_MOUSE = 0;
+        static const int LAY_EGG = 1;
+        static const int BROOD_EGG = 2;
+
+        // Goal to string.
+        static const char* toString(int goal)
+        {
+            switch (goal)
+            {
+
+            case EAT_MOUSE:
+                return("EAT_MOUSE");
+
+            case LAY_EGG:
+                return("LAY_EGG");
+
+            case BROOD_EGG:
+                return("BROOD_EGG");
+
+            default:
+                return("UNKNOWN");
+            }
+        }
+    };
+
     // Bird senses current, left, front, right, and rear cells.
     static const int NUM_CELL_SENSORS = 9;
     static const int CURRENT_LOCALE_SENSOR = 0;
@@ -46,8 +75,8 @@ public:
 
     // State sensors.
     static const int ORIENTATION_SENSOR = NUM_CELL_SENSORS * CELL_SENSOR::NUM_SENSORS;
-    static const int HUNGER_SENSOR = ORIENTATION_SENSOR + 1;
-    static const int HAS_OBJECT_SENSOR = HUNGER_SENSOR + 1;
+    static const int GOAL_SENSOR = ORIENTATION_SENSOR + 1;
+    static const int HAS_OBJECT_SENSOR = GOAL_SENSOR + 1;
     static const int NUM_SENSORS = HAS_OBJECT_SENSOR + 1;
 
     // Sensors.
@@ -57,6 +86,7 @@ public:
     int x, y;
     int orientation;
     int food;
+    int goal;
     int hasObject;
 
     // Responses.
@@ -138,16 +168,13 @@ public:
    static const int MOUSE_NEED_INDEX = 0;
 #define FEMALE_DEFAULT_MOUSE_NEED    "0.3"
    static Mona::NEED MOUSE_NEED;
-   static const int STONE_NEED_INDEX = 1;
-#define FEMALE_DEFAULT_STONE_NEED    "0.1"
-   static Mona::NEED STONE_NEED;
-   static const int LAY_EGG_NEED_INDEX = 2;
+   static const int LAY_EGG_NEED_INDEX = 1;
 #define FEMALE_DEFAULT_LAY_EGG_NEED      "0.2"
    static Mona::NEED LAY_EGG_NEED;
-   static const int BROOD_EGG_NEED_INDEX = 3;
+   static const int BROOD_EGG_NEED_INDEX = 2;
 #define FEMALE_DEFAULT_BROOD_EGG_NEED      "0.4"
    static Mona::NEED BROOD_EGG_NEED;
-   static const int NUM_NEEDS = 4;
+   static const int NUM_NEEDS = 3;
 
    // Brain.
    Mona* brain;
@@ -202,7 +229,7 @@ private:
         bool rightRearLocale, bool rightRearObject,
         bool rearLocale, bool rearObject,
         bool leftRearLocale, bool leftRearObject,
-        bool orientation, bool hunger,
+        bool orientation, bool goal,
         bool hasObject);
 
     // Load sensors.
@@ -216,7 +243,7 @@ private:
         Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
         Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
         Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
-        Mona::SENSOR orientation, Mona::SENSOR hunger,
+        Mona::SENSOR orientation, Mona::SENSOR goal,
         Mona::SENSOR hasObject);
 };
 #endif

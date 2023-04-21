@@ -247,14 +247,14 @@ private:
     void loadMask(vector<bool>& mask,
         bool currentLocale,
         bool mouseProximity, bool stoneProximity, bool femaleProximity,
-        bool hunger, bool hasObject, bool flying,
+        bool goal, bool hasObject, bool flying,
         bool wantMouse, bool wantStone);
 
     // Load sensors.
     void loadSensors(vector<Mona::SENSOR>& sensors,
         Mona::SENSOR currentLocale,
         Mona::SENSOR mouseProximity, Mona::SENSOR stoneProximity, Mona::SENSOR femaleProximity,
-        Mona::SENSOR hunger, Mona::SENSOR hasObject, Mona::SENSOR flying,
+        Mona::SENSOR goal, Mona::SENSOR hasObject, Mona::SENSOR flying,
         Mona::SENSOR wantMouse, Mona::SENSOR wantStone);
 };
 #endif

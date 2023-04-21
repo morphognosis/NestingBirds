@@ -55,16 +55,16 @@ Male::Male()
 
     // Goals:
  
-    // Hunger goals.
+    // Food goals.
     vector<Mona::SENSOR> sensors;
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        1.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
+        (Mona::SENSOR)GOAL::MOUSE_FOR_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
     brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        2.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
+        (Mona::SENSOR)GOAL::STONE_FOR_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
     brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        3.0, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
+        (Mona::SENSOR)GOAL::ATTEND_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
     brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
 
     // Attend female goal.
@@ -72,7 +72,7 @@ Male::Male()
         DONT_CARE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
     brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, 0, ATTEND_FEMALE_NEED);
 
-    // Female hunger goal.
+    // Female want mouse goal.
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
         DONT_CARE, DONT_CARE, 0.0, 0.0, 0.0);
     brain->addGoal(FEMALE_MOUSE_NEED_INDEX, sensors, 0, FEMALE_MOUSE_NEED);
@@ -191,7 +191,7 @@ int Male::cycle()
         printf("Sensors: ");
         printSensors();
         printf(", Food: %d, ", food);
-        printf("Needs: [Input: ");
+        printf("Needs: ");
         printNeeds();
     }
 
@@ -213,9 +213,7 @@ int Male::cycle()
 
    if (Verbose)
    {
-       printf(", Output: ");
-       printNeeds();
-       printf("], Response: ");
+       printf(", Response: ");
        printResponse();
        printf("\n");
    }
@@ -354,7 +352,7 @@ void Male::printResponse()
 void Male::loadMask(vector<bool>& mask,
     bool currentLocale,
     bool mouseProximity, bool stoneProximity, bool femaleProximity,
-    bool hunger, bool hasObject, bool flying,
+    bool goal, bool hasObject, bool flying,
     bool wantMouse, bool wantStone)
 {
     mask.clear();
@@ -362,7 +360,7 @@ void Male::loadMask(vector<bool>& mask,
     mask.push_back(mouseProximity);
     mask.push_back(stoneProximity);
     mask.push_back(femaleProximity);
-    mask.push_back(hunger);
+    mask.push_back(goal);
     mask.push_back(hasObject);
     mask.push_back(flying);
     mask.push_back(wantMouse);
@@ -373,7 +371,7 @@ void Male::loadMask(vector<bool>& mask,
 void Male::loadSensors(vector<Mona::SENSOR>& sensors,
     Mona::SENSOR currentLocale,
     Mona::SENSOR mouseProximity, Mona::SENSOR stoneProximity, Mona::SENSOR femaleProximity,
-    Mona::SENSOR hunger, Mona::SENSOR hasObject, Mona::SENSOR flying, 
+    Mona::SENSOR goal, Mona::SENSOR hasObject, Mona::SENSOR flying, 
     Mona::SENSOR wantMouse, Mona::SENSOR wantStone)
 {
     sensors.clear();
@@ -381,7 +379,7 @@ void Male::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(mouseProximity);
     sensors.push_back(stoneProximity);
     sensors.push_back(femaleProximity);
-    sensors.push_back(hunger);
+    sensors.push_back(goal);
     sensors.push_back(hasObject);
     sensors.push_back(flying);
     sensors.push_back(wantMouse);

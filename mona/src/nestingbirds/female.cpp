@@ -11,7 +11,6 @@ bool Female::RANDOMIZE_FOOD_LEVEL = false;
 
 // Needs.
 Mona::NEED Female::MOUSE_NEED = strtod(FEMALE_DEFAULT_MOUSE_NEED, 0);
-Mona::NEED Female::STONE_NEED = strtod(FEMALE_DEFAULT_STONE_NEED, 0);
 Mona::NEED Female::LAY_EGG_NEED   = strtod(FEMALE_DEFAULT_LAY_EGG_NEED, 0);
 Mona::NEED Female::BROOD_EGG_NEED = strtod(FEMALE_DEFAULT_BROOD_EGG_NEED, 0);
 
@@ -24,6 +23,7 @@ Female::Female()
     x = y = 0;
     orientation = ORIENTATION::NORTH;
     food = 0;
+    goal = GOAL::EAT_MOUSE;
     hasObject = OBJECT::NO_OBJECT;
     Verbose = false;
 
@@ -54,40 +54,27 @@ Female::Female()
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::NO_OBJECT);
+        DONT_CARE, (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::NO_OBJECT);
     int wantMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, wantMouse, MOUSE_NEED);
 
     loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, 1.0, (Mona::SENSOR)OBJECT::MOUSE);
+        DONT_CARE, (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::MOUSE);
     int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, eat, MOUSE_NEED);
 
-    // Stone goals.
-    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT);
-    int wantStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, wantStone, STONE_NEED);
-
-    loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::NO_OBJECT, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE);
-    int putStoneGoal = brain->addGoal(STONE_NEED_INDEX, sensors, 0, put, STONE_NEED);
-
-    // Lay egg goals.
+    // Lay egg goal.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
         DONT_CARE, (Mona::SENSOR)OBJECT::STONE, DONT_CARE, (Mona::SENSOR)OBJECT::STONE,
-        (Mona::SENSOR)ORIENTATION::SOUTH, DONT_CARE, DONT_CARE);
+        (Mona::SENSOR)ORIENTATION::SOUTH, (Mona::SENSOR)GOAL::BROOD_EGG, DONT_CARE);
     int layEggGoal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, LAY_EGG_NEED);
 
-    // Brooding on egg.
+    // Brooding egg.
     loadSensors(sensors, DONT_CARE, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
         DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-        DONT_CARE, DONT_CARE, DONT_CARE);
+        DONT_CARE, (Mona::SENSOR)GOAL::BROOD_EGG, DONT_CARE);
     int broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, 0, doNothing, BROOD_EGG_NEED);
 
     // Set initial response.
@@ -98,7 +85,6 @@ Female::Female()
 void Female::initNeeds()
 {
     brain->setNeed(MOUSE_NEED_INDEX, 0.0);
-    brain->setNeed(STONE_NEED_INDEX, 0.0);
     brain->setNeed(LAY_EGG_NEED_INDEX, LAY_EGG_NEED);
     brain->setNeed(BROOD_EGG_NEED_INDEX, 0.0);
 }
@@ -110,17 +96,20 @@ void Female::setNeeds()
     {
         brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
     }
-    else if (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::NO_OBJECT)
-    {
-        brain->setNeed(STONE_NEED_INDEX, STONE_NEED);
-    }
     else if (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::EGG)
     {
         brain->setNeed(MOUSE_NEED_INDEX, 0.0);
-        brain->setNeed(STONE_NEED_INDEX, 0.0);
         brain->setNeed(LAY_EGG_NEED_INDEX, 0.0);
         brain->setNeed(BROOD_EGG_NEED_INDEX, BROOD_EGG_NEED);
     }
+    for (int i = 0; i < NUM_NEEDS; i++)
+    {
+        if (i == 0 || brain->getNeed(i) > brain->getNeed(goal))
+        {
+            goal = i;
+        }
+    }
+    sensors[Female::GOAL_SENSOR] = goal;
 }
 
 // Set response override.
@@ -137,7 +126,7 @@ int Female::cycle()
         printf("Sensors: ");
         printSensors();
         printf(", Food: %d, ", food);
-        printf("Needs: [Input: ");
+        printf("Needs: ");
         printNeeds();
     }
 
@@ -150,9 +139,7 @@ int Female::cycle()
 
    if (Verbose)
    {
-       printf(", Output: ");
-       printNeeds();
-       printf("], Response: ");
+       printf(", Response: ");
        printResponse();
        printf("\n");
    }
@@ -262,14 +249,8 @@ void Female::printSensors()
    }
    printf("]");
    printf(", Orientation: %s", ORIENTATION::toString(orientation));
-   printf(", Hunger: ");
-   if (food == 0)
-   {
-       printf("true");
-   }
-   else {
-       printf("false");
-   }
+   printf(", Goal: ");
+   printf("%s", GOAL::toString(sensors[GOAL_SENSOR]));
    printf(", Has_object: %s", OBJECT::toString(hasObject));
    printf("]");
 }
@@ -284,10 +265,6 @@ void Female::printNeeds()
         {
         case MOUSE_NEED_INDEX:
             printf("Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
-            break;
-
-        case STONE_NEED_INDEX:
-            printf("Stone: %f, ", brain->getNeed(STONE_NEED_INDEX));
             break;
 
         case LAY_EGG_NEED_INDEX:
@@ -320,7 +297,7 @@ void Female::loadMask(vector<bool>& mask,
     bool rightRearLocale, bool rightRearObject,
     bool rearLocale, bool rearObject,
     bool leftRearLocale, bool leftRearObject,
-    bool orientation, bool hunger,
+    bool orientation, bool goal,
     bool hasObject)
 {
     mask.clear();
@@ -343,7 +320,7 @@ void Female::loadMask(vector<bool>& mask,
     mask.push_back(leftRearLocale);
     mask.push_back(leftRearObject);
     mask.push_back(orientation);
-    mask.push_back(hunger);
+    mask.push_back(goal);
     mask.push_back(hasObject);
 }
 
@@ -358,7 +335,7 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
     Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
     Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
-    Mona::SENSOR orientation, Mona::SENSOR hunger,
+    Mona::SENSOR orientation, Mona::SENSOR goal,
     Mona::SENSOR hasObject)
 {
     sensors.clear();
@@ -381,6 +358,6 @@ void Female::loadSensors(vector<Mona::SENSOR>& sensors,
     sensors.push_back(leftRearLocale);
     sensors.push_back(leftRearObject);
     sensors.push_back(orientation);
-    sensors.push_back(hunger);
+    sensors.push_back(goal);
     sensors.push_back(hasObject);
 }

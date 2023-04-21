@@ -31,7 +31,6 @@ const char *Usage =
    "      [-femaleFoodDuration <amount> (default=" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
    "      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
    "      [-femaleMouseNeed <amount> (default=" FEMALE_DEFAULT_MOUSE_NEED ")]\n"
-   "      [-femaleStoneNeed <amount> (default=" FEMALE_DEFAULT_STONE_NEED ")]\n"
    "      [-femaleLayEggNeed <amount> (default=" FEMALE_DEFAULT_LAY_EGG_NEED ")]\n"
    "      [-femaleBroodEggNeed <amount> (default=" FEMALE_DEFAULT_BROOD_EGG_NEED ")]\n"
    "      [-verbose <true | false> (default=true)]\n"
@@ -273,6 +272,10 @@ void init()
    female->x          = WIDTH / 2;
    female->y          = HEIGHT / 2;
    female->food       = Female::INITIAL_FOOD;
+   if (female->food == 0)
+   {
+       female->goal = Female::GOAL::EAT_MOUSE;
+   }
    female->response   = Female::RESPONSE::DO_NOTHING;
    male               = new Male();
    male->Verbose = Verbose;
@@ -1640,13 +1643,7 @@ void setFemaleSensors()
 
     // Internal state.
     sensors[Female::ORIENTATION_SENSOR] = bird->orientation;
-    if (bird->food > 0)
-    {
-        sensors[Female::HUNGER_SENSOR] = 0;
-    }
-    else {
-        sensors[Female::HUNGER_SENSOR] = 1;
-    }
+    sensors[Female::GOAL_SENSOR] = bird->goal;
     sensors[Female::HAS_OBJECT_SENSOR] = bird->hasObject;
 }
 
@@ -1695,13 +1692,13 @@ void doMaleResponse()
                     {
                         bird->food = Male::FOOD_DURATION;
                     }
-                    bird->hasObject = OBJECT::NO_OBJECT;
                     if (bird->food > 0)
                     {
                         bird->goal = Male::GOAL::ATTEND_FEMALE;
                         bird->brain->setNeed(Male::MOUSE_NEED_INDEX, 0.0);
                         bird->brain->setNeed(Male::ATTEND_FEMALE_NEED_INDEX, Male::ATTEND_FEMALE_NEED);
                     }
+                    bird->hasObject = OBJECT::NO_OBJECT;
                 }
          break;
 
@@ -2417,24 +2414,6 @@ int main(int argc, char *args[])
          }
          continue;
       }
-      if (strcmp(args[i], "-femaleStoneNeed") == 0)
-      {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid femaleStoneNeed option\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         Female::STONE_NEED = strtod(args[i], 0);
-         if (Female::STONE_NEED < 0.0)
-         {
-            fprintf(stderr, "Invalid femaleStoneNeed option\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         continue;
-      }
       if (strcmp(args[i], "-femaleLayEggNeed") == 0)
       {
          i++;
@@ -2516,7 +2495,8 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-version") == 0)
       {
-         printf("Nesting birds version = %s\n", VERSION);
+         printf("Nesting birds version %s\n", VERSION);
+         Mona::printVersion(stdout);
          exit(0);
       }
       if ((strcmp(args[i], "-help") == 0) || (strcmp(args[i], "-h") == 0) || (strcmp(args[i], "-?") == 0))
