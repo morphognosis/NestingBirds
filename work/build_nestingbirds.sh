@@ -9,3 +9,5 @@ cp ../res/images/stone.gif morphognosis/nestingbirds
 cp ../res/images/mouse.gif morphognosis/nestingbirds
 cp ../src/main/python/nestingbirds_nn.py .
 jar cvfm ../bin/nestingbirds.jar nestingbirds.mf morphognosis nestingbirds_nn.py
+(cd ../src/main/mona;make)
+

@@ -2,22 +2,19 @@
 
 Abstract:
 
-An animal behavior problem in the form of a game is proposed that involves two cooperating birds, a male and female. 
-The female builds a nest
-into which she lays an egg. The male's job is to forage in a forest for food for both himself and the
-female. In addition, the male must fetch stones from a nearby desert for the female to use as nesting material. 
-The game is complete when the nest is built and an egg is laid in it. The game can be run in three modes: manual
-(user-supplied responses), "auto pilot" (self-playing), and using the bird's brain (supplied by a player).
+An animal behavior problem is proposed that involves two cooperating birds, a male and female.
+The female builds a nest into which she lays an egg. The male's job is to forage in a forest for food for both himself
+and the female. In addition, the male must fetch stones from a nearby desert for the female to use as nesting material.
+Their task is complete when the nest is built and an egg is laid in it. It can be run in three modes: manual
+(user-supplied responses), "auto pilot" (self-playing), and using the Mona neural network. See src/main/mona/Readme.txt.
 
-Some preliminary results are included using an LSTM (Long-short term memory) recurrent network.
-
-See: 
+See:
 <br>http://tom.portegys.com/research.html#nestingbirds
 <br>http://tom.portegys.com/research.html#mona2
 
 Import Eclipse project, build and run with scripts in the work directory.
 
-Build nestingbirds.jar in bin directory:
+Build nestingbirds.jar and nestingbirds executable in bin directory:
 <pre>build_nestingbirds.sh, build_nestingbirds.bat</pre>
 
 Run graphical interface:
@@ -64,6 +61,8 @@ Exit codes:
   0=success
   1=error
 </pre>
+
+Dataset preparation for external training and testing:
 
 To create 3 dataset files (\<gender\>\_dataset\_\<run\>.csv) example:
 <pre>run_nestingbirds_batch.sh -steps 1000 -runs 3 -writeMaleDataset -writeFemaleDataset</pre>
