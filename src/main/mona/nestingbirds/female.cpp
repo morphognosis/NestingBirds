@@ -127,11 +127,7 @@ int Female::cycle()
 {
    if (Verbose)
    {
-      printf("Sensors: ");
-      printSensors();
-      printf(", Food: %d, ", food);
-      printf("Needs: ");
-      printNeeds();
+      printState();
    }
 
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
@@ -143,7 +139,7 @@ int Female::cycle()
 
    if (Verbose)
    {
-      printf(", Response: ");
+      printf(", ");
       printResponse();
       printf("\n");
    }
@@ -192,54 +188,50 @@ void Female::save(char *filename)
 }
 
 
-// Print female.
-void Female::print()
+// Print state.
+void Female::printState(FILE *fp)
 {
-   printf("Sensors: ");
-   printSensors();
-   printf(", Food: %d, ", food);
-   printf("Needs: ");
-   printNeeds();
-   printf(", Response: ");
-   printResponse();
+   printSensors(fp);
+   fprintf(fp, ", Food: %d, ", food);
+   printNeeds(fp);
 }
 
 
 // Print sensors.
-void Female::printSensors()
+void Female::printSensors(FILE *fp)
 {
-   printf("[Cell sensors: [");
+   fprintf(fp, "Sensors: [Cell sensors: [");
 
    for (int i = 0; i < NUM_CELL_SENSORS; i++)
    {
       switch (i)
       {
       case 0:
-         printf("Current: ");
+         fprintf(fp, "Current: ");
          break;
 
       case 1:
-         printf("Left: ");
+         fprintf(fp, "Left: ");
          break;
 
       case 2:
-         printf("Left front: ");
+         fprintf(fp, "Left front: ");
          break;
 
       case 3:
-         printf("Front: ");
+         fprintf(fp, "Front: ");
          break;
 
       case 4:
-         printf("Right front: ");
+         fprintf(fp, "Right front: ");
          break;
 
       case 5:
-         printf("Right: ");
+         fprintf(fp, "Right: ");
          break;
 
       case 6:
-         printf("Right rear: ");
+         fprintf(fp, "Right rear: ");
          break;
 
       case 7:
@@ -247,44 +239,44 @@ void Female::printSensors()
          break;
 
       case 8:
-         printf("Left rear: ");
+         fprintf(fp, "Left rear: ");
          break;
       }
-      printf("[Locale: %s", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
-      printf(", ");
-      printf("Object: %s]", OBJECT::toString(sensors[(i *CELL_SENSOR::NUM_SENSORS)+1]));
+      fprintf(fp, "[Locale: %s", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
+      fprintf(fp, ", ");
+      fprintf(fp, "Object: %s]", OBJECT::toString(sensors[(i *CELL_SENSOR::NUM_SENSORS)+1]));
       if (i < NUM_CELL_SENSORS - 1)
       {
-         printf(", ");
+         fprintf(fp, ", ");
       }
    }
-   printf("]");
-   printf(", Orientation: %s", ORIENTATION::toString(orientation));
-   printf(", Goal: ");
-   printf("%s", GOAL::toString(sensors[GOAL_SENSOR]));
-   printf(", Has_object: %s", OBJECT::toString(hasObject));
-   printf("]");
+   fprintf(fp, "]");
+   fprintf(fp, ", Orientation: %s", ORIENTATION::toString(orientation));
+   fprintf(fp, ", Goal: ");
+   fprintf(fp, "%s", GOAL::toString(sensors[GOAL_SENSOR]));
+   fprintf(fp, ", Has_object: %s", OBJECT::toString(hasObject));
+   fprintf(fp, "]");
 }
 
 
 // Print needs.
-void Female::printNeeds()
+void Female::printNeeds(FILE *fp)
 {
-   printf("[");
+   fprintf(fp, "Needs: [");
    for (int i = 0; i < NUM_NEEDS; i++)
    {
       switch (i)
       {
       case MOUSE_NEED_INDEX:
-         printf("Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
+         fprintf(fp, "Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
          break;
 
       case LAY_EGG_NEED_INDEX:
-         printf("Lay egg: %f, ", brain->getNeed(LAY_EGG_NEED_INDEX));
+         fprintf(fp, "Lay egg: %f, ", brain->getNeed(LAY_EGG_NEED_INDEX));
          break;
 
       case BROOD_EGG_NEED_INDEX:
-         printf("Brood egg: %f", brain->getNeed(BROOD_EGG_NEED_INDEX));
+         fprintf(fp, "Brood egg: %f", brain->getNeed(BROOD_EGG_NEED_INDEX));
          break;
       }
    }
@@ -293,9 +285,9 @@ void Female::printNeeds()
 
 
 // Print response.
-void Female::printResponse()
+void Female::printResponse(FILE *fp)
 {
-   printf(RESPONSE::toString(response));
+   fprintf(fp, "Response: %s", RESPONSE::toString(response));
 }
 
 

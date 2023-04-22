@@ -227,17 +227,17 @@ public:
    // Save.
    void save(char *filename);
 
-   // Print.
-   void print();
+   // Print state.
+   void printState(FILE *fp=stdout);
 
    // Print sensors.
-   void printSensors();
+   void printSensors(FILE* fp = stdout);
 
    // Print needs.
-   void printNeeds();
+   void printNeeds(FILE* fp = stdout);
 
    // Print response.
-   void printResponse();
+   void printResponse(FILE* fp = stdout);
 
 private:
 

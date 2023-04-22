@@ -7,7 +7,7 @@ cp ../res/images/cactus.gif morphognosis/nestingbirds
 cp ../res/images/tree.gif morphognosis/nestingbirds
 cp ../res/images/stone.gif morphognosis/nestingbirds
 cp ../res/images/mouse.gif morphognosis/nestingbirds
-cp ../src/main/python/nestingbirds_nn.py .
+cp ../src/main/nn/nestingbirds_nn.py .
 jar cvfm ../bin/nestingbirds.jar nestingbirds.mf morphognosis nestingbirds_nn.py
 (cd ../src/main/mona;make)
 

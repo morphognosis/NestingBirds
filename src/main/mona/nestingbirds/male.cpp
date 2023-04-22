@@ -195,11 +195,7 @@ int Male::cycle()
 {
    if (Verbose)
    {
-      printf("Sensors: ");
-      printSensors();
-      printf(", Food: %d, ", food);
-      printf("Needs: ");
-      printNeeds();
+      printState();
    }
 
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
@@ -220,7 +216,7 @@ int Male::cycle()
 
    if (Verbose)
    {
-      printf(", Response: ");
+      printf(", ");
       printResponse();
       printf("\n");
    }
@@ -269,99 +265,96 @@ void Male::save(char *filename)
 }
 
 
-// Print male.
-void Male::print()
+// Print state.
+void Male::printState(FILE *fp)
 {
-   printf("Sensors: ");
-   printSensors();
-   printf(", Food: %d, ", food);
-   printf("Needs: ");
-   printNeeds();
-   printf(", Response: ");
-   printResponse();
+   printSensors(fp);
+   fprintf(fp, ", Food: %d, ", food);
+   printNeeds(fp);
+   printResponse(fp);
 }
 
 
 // Print sensors.
-void Male::printSensors()
+void Male::printSensors(FILE *fp)
 {
-   printf("[");
-   printf("Locale: ");
-   printf("%s", LOCALE::toString(sensors[LOCALE_SENSOR]));
-   printf(", Mouse proximity: ");
-   printf("%s", PROXIMITY::toString(sensors[MOUSE_PROXIMITY_SENSOR]));
-   printf(", Stone proximity: ");
-   printf("%s", PROXIMITY::toString(sensors[STONE_PROXIMITY_SENSOR]));
-   printf(", Female proximity: ");
-   printf("%s", PROXIMITY::toString(sensors[FEMALE_PROXIMITY_SENSOR]));
-   printf(", Goal: ");
-   printf("%s", GOAL::toString(sensors[GOAL_SENSOR]));
-   printf(", Has object: ");
-   printf("%s", OBJECT::toString(sensors[HAS_OBJECT_SENSOR]));
-   printf(", Flying: ");
+   fprintf(fp, "Sensors: [");
+   fprintf(fp, "Locale: ");
+   fprintf(fp, "%s", LOCALE::toString(sensors[LOCALE_SENSOR]));
+   fprintf(fp, ", Mouse proximity: ");
+   fprintf(fp, "%s", PROXIMITY::toString(sensors[MOUSE_PROXIMITY_SENSOR]));
+   fprintf(fp, ", Stone proximity: ");
+   fprintf(fp, "%s", PROXIMITY::toString(sensors[STONE_PROXIMITY_SENSOR]));
+   fprintf(fp, ", Female proximity: ");
+   fprintf(fp, "%s", PROXIMITY::toString(sensors[FEMALE_PROXIMITY_SENSOR]));
+   fprintf(fp, ", Goal: ");
+   fprintf(fp, "%s", GOAL::toString(sensors[GOAL_SENSOR]));
+   fprintf(fp, ", Has object: ");
+   fprintf(fp, "%s", OBJECT::toString(sensors[HAS_OBJECT_SENSOR]));
+   fprintf(fp, ", Flying: ");
    if (sensors[FLYING_SENSOR] == 1)
    {
-      printf("true");
+       fprintf(fp, "true");
    }
    else
    {
-      printf("false");
+       fprintf(fp, "false");
    }
-   printf(", Female wants mouse: ");
+   fprintf(fp, ", Female wants mouse: ");
    if (sensors[FEMALE_WANTS_MOUSE_SENSOR] == 1)
    {
-      printf("true");
+       fprintf(fp, "true");
    }
    else
    {
-      printf("false");
+       fprintf(fp, "false");
    }
-   printf(", Female wants stone: ");
+   fprintf(fp, ", Female wants stone: ");
    if (sensors[FEMALE_WANTS_STONE_SENSOR] == 1)
    {
-      printf("true");
+       fprintf(fp, "true");
    }
    else
    {
-      printf("false");
+       fprintf(fp, "false");
    }
-   printf("]");
+   fprintf(fp, "]");
 }
 
 
 // Print needs.
-void Male::printNeeds()
+void Male::printNeeds(FILE *fp)
 {
-   printf("[");
+   fprintf(fp, "Needs: [");
    for (int i = 0; i < NUM_NEEDS; i++)
    {
       switch (i)
       {
       case MOUSE_NEED_INDEX:
-         printf("Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
+         fprintf(fp, "Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
          break;
 
       case FEMALE_MOUSE_NEED_INDEX:
-         printf("Female mouse: %f, ", brain->getNeed(FEMALE_MOUSE_NEED_INDEX));
+         fprintf(fp, "Female mouse: %f, ", brain->getNeed(FEMALE_MOUSE_NEED_INDEX));
          break;
 
       case FEMALE_STONE_NEED_INDEX:
-         printf("Female stone: %f, ", brain->getNeed(FEMALE_STONE_NEED_INDEX));
+         fprintf(fp, "Female stone: %f, ", brain->getNeed(FEMALE_STONE_NEED_INDEX));
          break;
 
       case ATTEND_FEMALE_NEED_INDEX:
-         printf("Attend female: %f", brain->getNeed(ATTEND_FEMALE_NEED_INDEX));
+         fprintf(fp, "Attend female: %f", brain->getNeed(ATTEND_FEMALE_NEED_INDEX));
          break;
       }
    }
-   printf("]");
+   fprintf(fp, "]");
 }
 
 
 // Print response.
-void Male::printResponse()
+void Male::printResponse(FILE *fp)
 {
-   printf(RESPONSE::toString(response));
+    fprintf(fp, "Response: %s", RESPONSE::toString(response));
 }
 
 
