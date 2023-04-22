@@ -100,7 +100,7 @@ const char WorldMap[WIDTH][HEIGHT] =
 
 // Bounds.
 int NEST_CENTER_X   = WIDTH / 2;
-int NEST_CENTER_Y   = (HEIGHT / 2) + 1;
+int NEST_CENTER_Y   = HEIGHT / 2;
 int NEST_MIN_X      = NEST_CENTER_X - 1;
 int NEST_MAX_X      = NEST_CENTER_X + 1;
 int NEST_MIN_Y      = NEST_CENTER_Y - 1;
@@ -275,7 +275,7 @@ void init()
    female          = new Female();
    female->Verbose = Verbose;
    female->x       = WIDTH / 2;
-   female->y       = HEIGHT / 2;
+   female->y       = (HEIGHT / 2) - 1;
    female->food    = Female::INITIAL_FOOD;
    if (female->food == 0)
    {
@@ -285,7 +285,7 @@ void init()
    male             = new Male();
    male->Verbose    = Verbose;
    male->x          = WIDTH / 2;
-   male->y          = HEIGHT / 2;
+   male->y          = (HEIGHT / 2) - 1;
    male->food       = Male::INITIAL_FOOD;
    if (male->food == 0)
    {
@@ -2734,7 +2734,7 @@ int main(int argc, char *args[])
           }
           fprintf(ReplayFp, "\n");
       }
-      if ((eggLaidStep < 0) && (World[WIDTH / 2][(HEIGHT / 2) + 1].object == OBJECT::EGG))
+      if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
       {
          eggLaidStep = i;
       }
