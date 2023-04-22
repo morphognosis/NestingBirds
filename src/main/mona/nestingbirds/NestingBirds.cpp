@@ -312,6 +312,39 @@ void step()
    // Step mice.
    stepMice();
 
+   if (ReplayFp != NULL)
+   {
+       int count = 0;
+       for (int x = 0; x < WIDTH; x++)
+       {
+           for (int y = 0; y < HEIGHT; y++)
+           {
+               if (World[x][y].object == OBJECT::MOUSE)
+               {
+                   count++;
+               }
+           }
+       }
+       fprintf(ReplayFp, "{ \"Mice\": [");
+       int n = 0;
+       for (int x = 0; x < WIDTH; x++)
+       {
+           for (int y = 0; y < HEIGHT; y++)
+           {
+               if (World[x][y].object == OBJECT::MOUSE)
+               {
+                   fprintf(ReplayFp, " { \"x\": %d, \"y\": %d }", x, y);
+                   if (n < count - 1)
+                   {
+                       fprintf(ReplayFp, ",");
+                   }
+                   n++;
+               }
+           }
+       }
+       fprintf(ReplayFp, " ] },\n");
+   }
+
    // Set female sensors.
    setSensors(FEMALE);
 
@@ -2720,11 +2753,14 @@ int main(int argc, char *args[])
       {
          printf("Step=%d\n", i);
       }
+
       if (ReplayFp != NULL)
       {
           fprintf(ReplayFp, "{ \"Step\": %d, \"Data\": {\n", i);
       }
+
       step();
+
       if (ReplayFp != NULL)
       {
           fprintf(ReplayFp, "} }");
@@ -2734,6 +2770,7 @@ int main(int argc, char *args[])
           }
           fprintf(ReplayFp, "\n");
       }
+
       if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
       {
          eggLaidStep = i;
