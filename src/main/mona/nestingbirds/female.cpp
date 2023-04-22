@@ -125,25 +125,12 @@ void Female::setResponseOverride()
 // Cycle female.
 int Female::cycle()
 {
-   if (Verbose)
-   {
-      printState();
-   }
-
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
    for (int i = 0; i < NUM_SENSORS; i++)
    {
       brainSensors[i] = (Mona::SENSOR)sensors[i];
    }
    response = brain->cycle(brainSensors);
-
-   if (Verbose)
-   {
-      printf(", ");
-      printResponse();
-      printf("\n");
-   }
-
    return(response);
 }
 
@@ -165,7 +152,7 @@ void Female::load(char *filename)
 
    if ((fp = fopen(filename, "r")) == NULL)
    {
-      fprintf(stderr, "Cannot load female");
+      fprintf(stderr, "Cannot load female\n");
       exit(1);
    }
    brain->load(fp);
@@ -180,7 +167,7 @@ void Female::save(char *filename)
 
    if ((fp = fopen(filename, "w")) == NULL)
    {
-      fprintf(stderr, "Cannot save female");
+      fprintf(stderr, "Cannot save female\n");
       exit(1);
    }
    brain->save(fp);
@@ -191,8 +178,9 @@ void Female::save(char *filename)
 // Print state.
 void Female::printState(FILE *fp)
 {
+
    printSensors(fp);
-   fprintf(fp, ", Food: %d, ", food);
+   fprintf(fp, ", \"Food\": %d, ", food);
    printNeeds(fp);
 }
 
@@ -200,94 +188,94 @@ void Female::printState(FILE *fp)
 // Print sensors.
 void Female::printSensors(FILE *fp)
 {
-   fprintf(fp, "Sensors: [Cell sensors: [");
+   fprintf(fp, "\"Sensors\": { \"Cell sensors\": { ");
 
    for (int i = 0; i < NUM_CELL_SENSORS; i++)
    {
       switch (i)
       {
       case 0:
-         fprintf(fp, "Current: ");
+         fprintf(fp, "\"Current\": ");
          break;
 
       case 1:
-         fprintf(fp, "Left: ");
+         fprintf(fp, "\"Left\": ");
          break;
 
       case 2:
-         fprintf(fp, "Left front: ");
+         fprintf(fp, "\"Left front\": ");
          break;
 
       case 3:
-         fprintf(fp, "Front: ");
+         fprintf(fp, "\"Front\": ");
          break;
 
       case 4:
-         fprintf(fp, "Right front: ");
+         fprintf(fp, "\"Right front\": ");
          break;
 
       case 5:
-         fprintf(fp, "Right: ");
+         fprintf(fp, "\"Right\": ");
          break;
 
       case 6:
-         fprintf(fp, "Right rear: ");
+         fprintf(fp, "\"Right rear\": ");
          break;
 
       case 7:
-         printf("Rear: ");
+         printf("\"Rear\": ");
          break;
 
       case 8:
-         fprintf(fp, "Left rear: ");
+         fprintf(fp, "\"Left rear\": ");
          break;
       }
-      fprintf(fp, "[Locale: %s", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
+      fprintf(fp, "{ \"Locale\": %s", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
       fprintf(fp, ", ");
-      fprintf(fp, "Object: %s]", OBJECT::toString(sensors[(i *CELL_SENSOR::NUM_SENSORS)+1]));
+      fprintf(fp, "\"Object\": %s }", OBJECT::toString(sensors[(i *CELL_SENSOR::NUM_SENSORS)+1]));
       if (i < NUM_CELL_SENSORS - 1)
       {
          fprintf(fp, ", ");
       }
    }
-   fprintf(fp, "]");
-   fprintf(fp, ", Orientation: %s", ORIENTATION::toString(orientation));
-   fprintf(fp, ", Goal: ");
+   fprintf(fp, " }");
+   fprintf(fp, ", \"Orientation\": %s", ORIENTATION::toString(orientation));
+   fprintf(fp, ", \"Goal\": ");
    fprintf(fp, "%s", GOAL::toString(sensors[GOAL_SENSOR]));
-   fprintf(fp, ", Has_object: %s", OBJECT::toString(hasObject));
-   fprintf(fp, "]");
+   fprintf(fp, ", \"Has object\": %s", OBJECT::toString(hasObject));
+   fprintf(fp, " }");
 }
 
 
 // Print needs.
 void Female::printNeeds(FILE *fp)
 {
-   fprintf(fp, "Needs: [");
+   fprintf(fp, "\"Needs\": { ");
    for (int i = 0; i < NUM_NEEDS; i++)
    {
       switch (i)
       {
       case MOUSE_NEED_INDEX:
-         fprintf(fp, "Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
+         fprintf(fp, "\"Mouse\": %f, ", brain->getNeed(MOUSE_NEED_INDEX));
          break;
 
       case LAY_EGG_NEED_INDEX:
-         fprintf(fp, "Lay egg: %f, ", brain->getNeed(LAY_EGG_NEED_INDEX));
+         fprintf(fp, "\"Lay egg\": %f, ", brain->getNeed(LAY_EGG_NEED_INDEX));
          break;
 
       case BROOD_EGG_NEED_INDEX:
-         fprintf(fp, "Brood egg: %f", brain->getNeed(BROOD_EGG_NEED_INDEX));
+         fprintf(fp, "\"Brood egg\": %f", brain->getNeed(BROOD_EGG_NEED_INDEX));
          break;
       }
    }
-   printf("]");
+   fprintf(fp, " }");
 }
 
 
 // Print response.
 void Female::printResponse(FILE *fp)
 {
-   fprintf(fp, "Response: %s", RESPONSE::toString(response));
+   fprintf(fp, "\"Response\": %s", RESPONSE::toString(response));
 }
 
 

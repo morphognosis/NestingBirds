@@ -42,5 +42,6 @@ Usage:
       [-femaleBroodEggNeed <amount> (default=0.3)]
       [-verbose <true | false> (default=true)]
       [-randomSeed <seed> (default=4517)]
+      [-writeReplayFile <replay file name> (json)]
       [-version]
     

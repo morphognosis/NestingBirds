@@ -175,29 +175,12 @@ void Male::setResponseOverride()
       trainFlying = false;
    }
    flying = trainFlying;
-   if (Verbose)
-   {
-      printf("Male training response: %s, flying=", RESPONSE::toString(response));
-      if (flying)
-      {
-         printf("true\n");
-      }
-      else
-      {
-         printf("false\n");
-      }
-   }
 }
 
 
 // Cycle male.
 int Male::cycle()
 {
-   if (Verbose)
-   {
-      printState();
-   }
-
    vector<Mona::SENSOR> brainSensors(NUM_SENSORS);
 
    for (int i = 0; i < NUM_SENSORS; i++)
@@ -212,13 +195,6 @@ int Male::cycle()
    else if (response == RESPONSE::ALIGHT)
    {
       flying = false;
-   }
-
-   if (Verbose)
-   {
-      printf(", ");
-      printResponse();
-      printf("\n");
    }
 
    return(response);
@@ -242,7 +218,7 @@ void Male::load(char *filename)
 
    if ((fp = fopen(filename, "r")) == NULL)
    {
-      fprintf(stderr, "Cannot load male");
+      fprintf(stderr, "Cannot load male\n");
       exit(1);
    }
    brain->load(fp);
@@ -257,7 +233,7 @@ void Male::save(char *filename)
 
    if ((fp = fopen(filename, "w")) == NULL)
    {
-      fprintf(stderr, "Cannot save male");
+      fprintf(stderr, "Cannot save male\n");
       exit(1);
    }
    brain->save(fp);
@@ -269,29 +245,28 @@ void Male::save(char *filename)
 void Male::printState(FILE *fp)
 {
    printSensors(fp);
-   fprintf(fp, ", Food: %d, ", food);
+   fprintf(fp, ", \"Food\": %d, ", food);
    printNeeds(fp);
-   printResponse(fp);
 }
 
 
 // Print sensors.
 void Male::printSensors(FILE *fp)
 {
-   fprintf(fp, "Sensors: [");
-   fprintf(fp, "Locale: ");
+   fprintf(fp, "\"Sensors\": { ");
+   fprintf(fp, "\"Locale\": ");
    fprintf(fp, "%s", LOCALE::toString(sensors[LOCALE_SENSOR]));
-   fprintf(fp, ", Mouse proximity: ");
+   fprintf(fp, ", \"Mouse proximity\": ");
    fprintf(fp, "%s", PROXIMITY::toString(sensors[MOUSE_PROXIMITY_SENSOR]));
-   fprintf(fp, ", Stone proximity: ");
+   fprintf(fp, ", \"Stone proximity\": ");
    fprintf(fp, "%s", PROXIMITY::toString(sensors[STONE_PROXIMITY_SENSOR]));
-   fprintf(fp, ", Female proximity: ");
+   fprintf(fp, ", \"Female proximity\": ");
    fprintf(fp, "%s", PROXIMITY::toString(sensors[FEMALE_PROXIMITY_SENSOR]));
-   fprintf(fp, ", Goal: ");
+   fprintf(fp, ", \"Goal\": ");
    fprintf(fp, "%s", GOAL::toString(sensors[GOAL_SENSOR]));
-   fprintf(fp, ", Has object: ");
+   fprintf(fp, ", \"Has object\": ");
    fprintf(fp, "%s", OBJECT::toString(sensors[HAS_OBJECT_SENSOR]));
-   fprintf(fp, ", Flying: ");
+   fprintf(fp, ", \"Flying\": ");
    if (sensors[FLYING_SENSOR] == 1)
    {
        fprintf(fp, "true");
@@ -300,7 +275,7 @@ void Male::printSensors(FILE *fp)
    {
        fprintf(fp, "false");
    }
-   fprintf(fp, ", Female wants mouse: ");
+   fprintf(fp, ", \"Female wants mouse\": ");
    if (sensors[FEMALE_WANTS_MOUSE_SENSOR] == 1)
    {
        fprintf(fp, "true");
@@ -309,7 +284,7 @@ void Male::printSensors(FILE *fp)
    {
        fprintf(fp, "false");
    }
-   fprintf(fp, ", Female wants stone: ");
+   fprintf(fp, ", \"Female wants stone\": ");
    if (sensors[FEMALE_WANTS_STONE_SENSOR] == 1)
    {
        fprintf(fp, "true");
@@ -318,43 +293,43 @@ void Male::printSensors(FILE *fp)
    {
        fprintf(fp, "false");
    }
-   fprintf(fp, "]");
+   fprintf(fp, " }");
 }
 
 
 // Print needs.
 void Male::printNeeds(FILE *fp)
 {
-   fprintf(fp, "Needs: [");
+   fprintf(fp, "\"Needs\": { ");
    for (int i = 0; i < NUM_NEEDS; i++)
    {
       switch (i)
       {
       case MOUSE_NEED_INDEX:
-         fprintf(fp, "Mouse: %f, ", brain->getNeed(MOUSE_NEED_INDEX));
+         fprintf(fp, "\"Mouse\": %f, ", brain->getNeed(MOUSE_NEED_INDEX));
          break;
 
       case FEMALE_MOUSE_NEED_INDEX:
-         fprintf(fp, "Female mouse: %f, ", brain->getNeed(FEMALE_MOUSE_NEED_INDEX));
+         fprintf(fp, "\"Female mouse\": %f, ", brain->getNeed(FEMALE_MOUSE_NEED_INDEX));
          break;
 
       case FEMALE_STONE_NEED_INDEX:
-         fprintf(fp, "Female stone: %f, ", brain->getNeed(FEMALE_STONE_NEED_INDEX));
+         fprintf(fp, "\"Female stone\": %f, ", brain->getNeed(FEMALE_STONE_NEED_INDEX));
          break;
 
       case ATTEND_FEMALE_NEED_INDEX:
-         fprintf(fp, "Attend female: %f", brain->getNeed(ATTEND_FEMALE_NEED_INDEX));
+         fprintf(fp, "\"Attend female\": %f", brain->getNeed(ATTEND_FEMALE_NEED_INDEX));
          break;
       }
    }
-   fprintf(fp, "]");
+   fprintf(fp, " }");
 }
 
 
 // Print response.
 void Male::printResponse(FILE *fp)
 {
-    fprintf(fp, "Response: %s", RESPONSE::toString(response));
+    fprintf(fp, "\"Response\": %s", RESPONSE::toString(response));
 }
 
 

@@ -35,6 +35,7 @@ const char* Usage =
 "      [-femaleBroodEggNeed <amount> (default=" FEMALE_DEFAULT_BROOD_EGG_NEED ")]\n"
 "      [-verbose <true | false> (default=true)]\n"
 "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"
+"      [-writeReplayFile <replay file name> (json)]\n"
 "      [-version]\n"
 "Exit codes:\n"
 "  0=success\n"
@@ -65,6 +66,10 @@ int  FemaleNestSequence;
 // Save/load file names.
 char *MaleFilename;
 char *FemaleFilename;
+
+// Replay file name.
+char* ReplayFilename;
+FILE* ReplayFp;
 
 // World map: plain=0, forest=1, mouse=2, desert=3, stone=4
 const int  WIDTH = 21, HEIGHT = 21;
@@ -313,19 +318,41 @@ void step()
    // Set female needs.
    female->setNeeds();
 
-   if (Verbose)
-   {
-      printf("Female: Location: [%d,%d], ", female->x, female->y);
-   }
-
    // Train?
    if (!FemaleTest)
    {
       train(FEMALE);
    }
 
+   if (Verbose)
+   {
+       printf("Female: Location: [%d,%d], ", female->x, female->y);
+       printf("{ ");
+       female->printState();
+   }
+
+   if (ReplayFp != NULL)
+   {
+       fprintf(ReplayFp, "{ \"Gender\": female, ");
+       female->printState(ReplayFp);
+   }
+
    // Cycle female
    female->cycle();
+
+   if (ReplayFp != NULL)
+   {
+       fprintf(ReplayFp, ", ");
+       female->printResponse(ReplayFp);
+       fprintf(ReplayFp, " },\n");
+   }
+
+   if (Verbose)
+   {
+       printf(", ");
+       female->printResponse();
+       printf(" }\n");
+   }
 
    // Do response in world.
    doResponse(FEMALE);
@@ -339,6 +366,14 @@ void step()
    if (Verbose)
    {
       printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
+      printf("{ ");
+      male->printState();
+   }
+
+   if (ReplayFp != NULL)
+   {
+       fprintf(ReplayFp, "{ \"Gender\": male, ");
+       male->printState(ReplayFp);
    }
 
    // Cycle male.
@@ -348,6 +383,20 @@ void step()
    if (!MaleTest)
    {
       train(MALE);
+   }
+
+   if (ReplayFp != NULL)
+   {
+       fprintf(ReplayFp, ", ");
+       male->printResponse(ReplayFp);
+       fprintf(ReplayFp, " }\n");
+   }
+
+   if (Verbose)
+   {
+       printf(", ");
+       male->printResponse();
+       printf(" }\n");
    }
 
    // Do response in world.
@@ -2565,6 +2614,18 @@ int main(int argc, char *args[])
          }
          continue;
       }
+      if (strcmp(args[i], "-writeReplayFile") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid replay file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          ReplayFilename = args[i];
+          continue;
+      }
       if (strcmp(args[i], "-version") == 0)
       {
          printf("Nesting birds version %s\n", VERSION);
@@ -2640,6 +2701,17 @@ int main(int argc, char *args[])
       female->initNeeds();
    }
 
+   // Write replay file?
+   if (ReplayFilename != NULL)
+   {
+       if ((ReplayFp = fopen(ReplayFilename, "w")) == NULL)
+       {
+           fprintf(stderr, "Cannot open replay file: %s\n", ReplayFilename);
+           exit(1);
+       }
+       fprintf(ReplayFp, "[\n");
+   }
+
    // Run birds.
    int eggLaidStep = -1;
    for (int i = 0; i < Steps; i++)
@@ -2648,7 +2720,20 @@ int main(int argc, char *args[])
       {
          printf("Step=%d\n", i);
       }
+      if (ReplayFp != NULL)
+      {
+          fprintf(ReplayFp, "{ \"Step\": %d, \"Data\": {\n", i);
+      }
       step();
+      if (ReplayFp != NULL)
+      {
+          fprintf(ReplayFp, "} }");
+          if (i < Steps - 1)
+          {
+              fprintf(ReplayFp, ",");
+          }
+          fprintf(ReplayFp, "\n");
+      }
       if ((eggLaidStep < 0) && (World[WIDTH / 2][(HEIGHT / 2) + 1].object == OBJECT::EGG))
       {
          eggLaidStep = i;
@@ -2704,5 +2789,17 @@ int main(int argc, char *args[])
          printf("Female training saved to file %s\n", FemaleFilename);
       }
    }
+
+   // Write replay file?
+   if (ReplayFilename != NULL)
+   {
+       fprintf(ReplayFp, "]\n");
+       fclose(ReplayFp);
+       if (Verbose)
+       {
+           printf("Replay file written to %s\n", ReplayFilename);
+       }
+   }
+
    exit(0);
 }
