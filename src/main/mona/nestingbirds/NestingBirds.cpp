@@ -17,9 +17,13 @@ int RANDOM_NUMBER_SEED = 4517;
 const char* Usage =
 "Usage:\n"
 "    nestingbirds\n"
-"      -trainMale <male save file name> | -testMale <male load file name>\n"
-"      -trainFemale <female save file name> | -testFemale <female load file name>\n"
+"      -trainMale | -testMale\n"
+"      -trainFemale | -testFemale\n"
 "      -steps <steps>\n"
+"      [-saveMaleFile <save file name>]\n"
+"      [-loadMaleFile <load file name>]\n"
+"      [-saveFemaleFile <save file name>]\n"
+"      [-loadFemaleFile <load file name>]\n"
 "      [-maleInitialFood <amount> (default=" MALE_DEFAULT_INITIAL_FOOD "]\n"
 "      [-maleFoodDuration <amount> (default=" MALE_DEFAULT_FOOD_DURATION ")]\n"
 "      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" MALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
@@ -64,8 +68,10 @@ bool FemaleWantsStone;
 int  FemaleNestSequence;
 
 // Save/load file names.
-char *MaleFilename;
-char *FemaleFilename;
+char *MaleSaveFilename;
+char* MaleLoadFilename;
+char *FemaleSaveFilename;
+char* FemaleLoadFilename;
 
 // Replay file name.
 char* ReplayFilename;
@@ -366,7 +372,7 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, "{ \"Gender\": female, ");
+       fprintf(ReplayFp, "{ \"Gender\": female, \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
        female->printState(ReplayFp);
    }
 
@@ -405,7 +411,7 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, "{ \"Gender\": male, ");
+       fprintf(ReplayFp, "{ \"Gender\": male, \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
        male->printState(ReplayFp);
    }
 
@@ -2298,14 +2304,6 @@ int main(int argc, char *args[])
    {
       if (strcmp(args[i], "-trainMale") == 0)
       {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid male save file\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         MaleFilename = args[i];
          MaleTest     = false;
          if (gotMaleTrainTest)
          {
@@ -2318,14 +2316,6 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-testMale") == 0)
       {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid male load file\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         MaleFilename = args[i];
          MaleTest     = true;
          if (gotMaleTrainTest)
          {
@@ -2338,14 +2328,6 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-trainFemale") == 0)
       {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid female save file\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         FemaleFilename = args[i];
          FemaleTest     = false;
          if (gotFemaleTrainTest)
          {
@@ -2358,14 +2340,6 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-testFemale") == 0)
       {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid female load file\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         FemaleFilename = args[i];
          FemaleTest     = true;
          if (gotFemaleTrainTest)
          {
@@ -2394,6 +2368,54 @@ int main(int argc, char *args[])
          }
          gotSteps = true;
          continue;
+      }
+      if (strcmp(args[i], "-saveMaleFile") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid male save file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          MaleSaveFilename = args[i];
+          continue;
+      }
+      if (strcmp(args[i], "-loadMaleFile") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid male load file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          MaleLoadFilename = args[i];
+          continue;
+      }
+      if (strcmp(args[i], "-saveFemaleFile") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid female save file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          FemaleSaveFilename = args[i];
+          continue;
+      }
+      if (strcmp(args[i], "-loadFemaleFile") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid female load file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          FemaleLoadFilename = args[i];
+          continue;
       }
       if (strcmp(args[i], "-maleInitialFood") == 0)
       {
@@ -2688,12 +2710,6 @@ int main(int argc, char *args[])
       fprintf(stderr, Usage);
       exit(1);
    }
-   if (strcmp(MaleFilename, FemaleFilename) == 0)
-   {
-      fprintf(stderr, "Male and female file names must be different\n");
-      fprintf(stderr, Usage);
-      exit(1);
-   }
    if (Male::INITIAL_FOOD > Male::FOOD_DURATION)
    {
       fprintf(stderr, "Male initial food cannot be greater than food duration\n");
@@ -2711,23 +2727,23 @@ int main(int argc, char *args[])
    init();
 
    // Load?
-   if (MaleTest)
+   if (MaleLoadFilename != NULL)
    {
-      male->load(MaleFilename);
+      male->load(MaleLoadFilename);
       if (Verbose)
       {
-         printf("Male network loaded from file %s\n", MaleFilename);
+         printf("Male network loaded from file %s\n", MaleLoadFilename);
       }
 
       // Initialize needs.
       male->initNeeds();
    }
-   if (FemaleTest)
+   if (FemaleLoadFilename != NULL)
    {
-      female->load(FemaleFilename);
+      female->load(FemaleLoadFilename);
       if (Verbose)
       {
-         printf("Female network loaded from file %s\n", FemaleFilename);
+         printf("Female network loaded from file %s\n", FemaleLoadFilename);
       }
 
       // Initialize needs.
@@ -2809,21 +2825,21 @@ int main(int argc, char *args[])
       printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
    }
 
-   // Save training?
-   if (!MaleTest)
+   // Save?
+   if (MaleSaveFilename != NULL)
    {
-      male->save(MaleFilename);
+      male->save(MaleSaveFilename);
       if (Verbose)
       {
-         printf("Male training saved to file %s\n", MaleFilename);
+         printf("Male training saved to file %s\n", MaleSaveFilename);
       }
    }
-   if (!FemaleTest)
+   if (FemaleSaveFilename != NULL)
    {
-      female->save(FemaleFilename);
+      female->save(FemaleSaveFilename);
       if (Verbose)
       {
-         printf("Female training saved to file %s\n", FemaleFilename);
+         printf("Female training saved to file %s\n", FemaleSaveFilename);
       }
    }
 
