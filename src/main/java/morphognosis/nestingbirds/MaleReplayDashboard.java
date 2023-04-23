@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in LICENSE.txt
 
-// The nesting bird dashboard.
+// The nesting bird male replay dashboard.
 
 package morphognosis.nestingbirds;
 
@@ -27,29 +27,33 @@ import javax.swing.JTextField;
 
 import morphognosis.nestingbirds.Bird.ORIENTATION;
 
-public class BirdDashboard extends JFrame
+public class MaleReplayDashboard extends JFrame
 {
    private static final long serialVersionUID = 0L;
+   
+   // Replay state.
+   String locale = "PLAIN";
+   String mouseProximity = "UNKNOWN";
+   String stoneProximity = "UNKNOWN";
+   String femaleProximity = "PRESENT";
+   String goal = "ATTEND_FEMALE";
+   String hasObject = "NO_OBJECT";
+   String flying = "false";
+   String femaleWantsMouse = "false";
+   String femaleWantsStone = "false";
+   String food = "0";
+   String mouseNeed = "0.000000";
+   String femaleMouseNeed = "0.000000";
+   String attendFemaleNeed = "0.000000";
+   String response = "DO_NOTHING";      
 
    // Components.
    StatusPanel statusPanel;
-   FoodPanel   foodPanel;
-
-   // Target bird.
-   Bird bird;
 
    // Constructor.
-   public BirdDashboard(Bird bird)
+   public MaleReplayDashboard()
    {
-      this.bird = bird;
-      if (bird.gender == Bird.MALE)
-      {
-         setTitle("Male bird");
-      }
-      else
-      {
-         setTitle("Female bird");
-      }
+      setTitle("Male bird");
       addWindowListener(new WindowAdapter()
                         {
                            public void windowClosing(WindowEvent e) { close(); }
@@ -59,11 +63,9 @@ public class BirdDashboard extends JFrame
       basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
       statusPanel = new StatusPanel();
       basePanel.add(statusPanel);
-      foodPanel = new FoodPanel();
-      basePanel.add(foodPanel);
       pack();
       setLocation();
-      setVisible(true);
+      setVisible(false);
       update();
    }
 
@@ -463,164 +465,6 @@ public class BirdDashboard extends JFrame
          else
          {
             responseText.setText(FemaleBird.RESPONSE.toString(bird.response));
-         }
-      }
-   }
-
-   // Food panel.
-   class FoodPanel extends JPanel implements ActionListener, ItemListener
-   {
-      private static final long serialVersionUID = 0L;
-
-      JTextField foodText;
-      JButton    foodButton;
-      JTextField foodDurationText;
-      JButton    foodDurationButton;
-      JCheckBox  randomizeFoodLevelCheckBox;
-
-      // Constructor.
-      public FoodPanel()
-      {
-         setBorder(BorderFactory.createTitledBorder(
-                      BorderFactory.createLineBorder(Color.black),
-                      "Food"));
-         setLayout(new FlowLayout(FlowLayout.LEFT));
-         JLabel initialFoodLabel = new JLabel("Food: ");
-         add(initialFoodLabel);
-         foodText = new JTextField(5);
-         if (bird.gender == Bird.MALE)
-         {
-            foodText.setText(MaleBird.INITIAL_FOOD + "");
-         }
-         else
-         {
-            foodText.setText(FemaleBird.INITIAL_FOOD + "");
-         }
-         add(foodText);
-         foodButton = new JButton("Set");
-         foodButton.addActionListener(this);
-         add(foodButton);
-         JLabel foodDurationLabel = new JLabel("Food duration: ");
-         add(foodDurationLabel);
-         foodDurationText = new JTextField(5);
-         if (bird.gender == Bird.MALE)
-         {
-            foodDurationText.setText(MaleBird.FOOD_DURATION + "");
-         }
-         else
-         {
-            foodDurationText.setText(FemaleBird.FOOD_DURATION + "");
-         }
-         add(foodDurationText);
-         foodDurationButton = new JButton("Set");
-         foodDurationButton.addActionListener(this);
-         add(foodDurationButton);
-         randomizeFoodLevelCheckBox = new JCheckBox("Randomize food level", false);
-         randomizeFoodLevelCheckBox.addItemListener(this);
-         add(randomizeFoodLevelCheckBox);
-      }
-
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-         if (e.getSource() == foodButton)
-         {
-            String text = foodText.getText();
-
-            if ((text != null) && !text.isEmpty())
-            {
-               try
-               {
-                  int amount = Integer.parseInt(text);
-                  if (amount < 0)
-                  {
-                     JOptionPane.showMessageDialog(this, "Invalid food value");
-                     return;
-                  }
-                  if (bird.gender == Bird.MALE)
-                  {
-                     if (amount > MaleBird.FOOD_DURATION)
-                     {
-                        JOptionPane.showMessageDialog(this, "Food cannot be greater than food duration");
-                        return;
-                     }
-                     bird.food = amount;
-                  }
-                  else
-                  {
-                     if (amount > FemaleBird.FOOD_DURATION)
-                     {
-                        JOptionPane.showMessageDialog(this, "Food cannot be greater than food duration");
-                        return;
-                     }
-                     bird.food = amount;
-                  }
-               }
-               catch (Exception ex)
-               {
-                  JOptionPane.showMessageDialog(this, "Invalid food value");
-               }
-            }
-            return;
-         }
-
-         if (e.getSource() == foodDurationButton)
-         {
-            String text = foodDurationText.getText();
-
-            if ((text != null) && !text.isEmpty())
-            {
-               try
-               {
-                  int duration = Integer.parseInt(text);
-                  if (duration < 0)
-                  {
-                     JOptionPane.showMessageDialog(this, "Invalid food duration value");
-                     return;
-                  }
-                  if (bird.gender == Bird.MALE)
-                  {
-                     MaleBird.FOOD_DURATION = duration;
-                     if (bird.food > duration)
-                     {
-                        bird.food = duration;
-                        foodText.setText(duration + "");
-                     }
-                  }
-                  else
-                  {
-                     FemaleBird.FOOD_DURATION = duration;
-                     if (bird.food > duration)
-                     {
-                        bird.food = duration;
-                        foodText.setText(duration + "");
-                     }
-                  }
-               }
-               catch (Exception ex)
-               {
-                  JOptionPane.showMessageDialog(this, "Invalid food duration value");
-               }
-            }
-            return;
-         }
-      }
-
-
-      @Override
-      public void itemStateChanged(ItemEvent e)
-      {
-         if (e.getSource() == randomizeFoodLevelCheckBox)
-         {
-            if (bird.gender == Bird.MALE)
-            {
-               MaleBird.RANDOMIZE_FOOD_LEVEL = randomizeFoodLevelCheckBox.isSelected();
-            }
-            else
-            {
-               FemaleBird.RANDOMIZE_FOOD_LEVEL = randomizeFoodLevelCheckBox.isSelected();
-            }
          }
       }
    }

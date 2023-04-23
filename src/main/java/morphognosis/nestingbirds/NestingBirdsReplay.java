@@ -12,31 +12,27 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Label;
 import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.ScrollPane;
+import java.awt.Scrollbar;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
 import javax.imageio.ImageIO;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-public class NestingBirdsReplay extends JFrame implements Runnable, ActionListener, MouseListener
+public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListener, MouseListener
 {
    private static final long serialVersionUID = 0L;
 
@@ -46,7 +42,14 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
    
    // Replay file name.
    static String ReplayFilename;
-
+   
+   // Nesting birds.
+   public NestingBirds nestingbirds;
+   
+   // Milliseconds between world updates.
+   static final int MIN_RESPONSE_DELAY = 100;
+   static final int MAX_RESPONSE_DELAY = 1000;
+   
    // Milliseconds between display updates.
    static final int DISPLAY_UPDATE_DELAY = 50;
 
@@ -88,30 +91,11 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
    Thread     displayThread;
    String     message = "Click bird for dashboard";
 
-   // JComboBox item.
-   public class Item
-   {
-      public int     id;
-      private String description;
-
-      public Item(int id, String description)
-      {
-         this.id          = id;
-         this.description = description;
-      }
-
-
-      @Override
-      public String toString()
-      {
-         return(description);
-      }
-   };
-
    // Control panel.
    JPanel          controlPanel;
    Dimension       controlPanelSize;
-   JButton         runButton;
+   JSlider speedSlider;
+   int speed;
    JLabel          stepCounterLabel;
    int             stepCounter;
 
@@ -136,15 +120,17 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
    int         fontHeight;
 
    // Dashboards.
-   BirdDashboard maleDashboard;
-   BirdDashboard femaleDashboard;
-
-   // Steps.
-   static int steps = 0;
-
+   MaleReplayDashboard maleDashboard;
+   FemaleReplayDashboard femaleDashboard;
+   
    // Constructor.
    public NestingBirdsReplay()
    {
+	      // Create nesting birds.
+	      nestingbirds = new NestingBirds();
+	      nestingbirds.male.y = 9;
+	      nestingbirds.female.y = 9;
+	      
       // Set up display.
       setTitle("Nesting birds");
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -156,15 +142,20 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
       controlPanel     = new JPanel();
       controlPanelSize = CONTROL_PANEL_SIZE;
       controlPanel.setBounds(0, 0, controlPanelSize.width, controlPanelSize.height);
-      runButton = newButton("Start");
-      runButton.addActionListener(this);
-      controlPanel.add(runButton);
-      stepCounterLabel = newLabel("Steps = 0");
+      add(controlPanel, BorderLayout.NORTH);      
+      controlPanel.add(newLabel("Speed: Fast", Label.RIGHT));
+      speedSlider = newSlider(Scrollbar.HORIZONTAL, MIN_RESPONSE_DELAY,
+                                   MAX_RESPONSE_DELAY, MAX_RESPONSE_DELAY);
+      speedSlider.addChangeListener(this);
+      speed = MAX_RESPONSE_DELAY;
+      controlPanel.add(speedSlider);
+      controlPanel.add(newLabel("Stop", Label.LEFT));
+      stepCounterLabel = newLabel("     Step = 0");
       controlPanel.add(stepCounterLabel);
       stepCounter     = 0;
-      maleDashboard   = null;
-      femaleDashboard = null;
-
+      maleDashboard = new MaleReplayDashboard();
+      femaleDashboard = new FemaleReplayDashboard();
+      
       // Create world display.
       canvasScroll     = new ScrollPane();
       canvasScrollSize = new Dimension(screenSize.width, (int)((double)screenSize.height * .95));
@@ -244,14 +235,21 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
       return(label);
    }
 
-
-   // Make button with font.
-   private JButton newButton(String text)
+   // Make justified label with font.
+   private JLabel newLabel(String text, int justification)
    {
-      JButton button = new JButton(text);
+      JLabel label = new JLabel(text, justification);
 
-      button.setFont(font);
-      return(button);
+      label.setFont(font);
+      return(label);
+   }
+
+   // Make slider with font.
+   private JSlider newSlider(int orientation, int min, int max, int value)
+   {
+      JSlider slider = new JSlider(orientation, min, max, value);
+      slider.setFont(font);
+      return(slider);
    }
 
    
@@ -400,12 +398,9 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          worldImageGraphics.drawImage(stoneImage, femaleObjectLocation.x,
                                       femaleObjectLocation.y, this);
       }
-      s = "Orientation: " + Bird.ORIENTATION.toString(nestingbirds.female.orientation);
+      s = "Response: " + femaleDashboard.response;
       x = femaleStatusLocation.x + statusInfoOffset.x;
       y = femaleStatusLocation.y + statusInfoOffset.y;
-      worldImageGraphics.drawString(s, x, y);
-      s  = "Food: " + nestingbirds.female.food;
-      y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
       x2 = nestingbirds.female.x * CELL_SIZE.width;
       y2 = (nestingbirds.female.y * CELL_SIZE.height) + h;
@@ -429,12 +424,9 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          worldImageGraphics.drawImage(stoneImage, maleObjectLocation.x,
                                       maleObjectLocation.y, this);
       }
-      s = "Orientation: " + Bird.ORIENTATION.toString(nestingbirds.male.orientation);
+      s = "Response: " + maleDashboard.response;
       x = maleStatusLocation.x + statusInfoOffset.x;
       y = maleStatusLocation.y + statusInfoOffset.y;
-      worldImageGraphics.drawString(s, x, y);
-      s  = "Food: " + nestingbirds.male.food;
-      y += fontAscent + 2;
       worldImageGraphics.drawString(s, x, y);
       x2 = nestingbirds.male.x * CELL_SIZE.width;
       y2 = (nestingbirds.male.y * CELL_SIZE.height) + h;
@@ -518,36 +510,21 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
       return(true);
    }
 
-
-   // Action listener.
-   @Override
-   public void actionPerformed(ActionEvent e)
-   {
-      // Run button.
-      if (e.getSource() == runButton)
-      {
-         steps = 0;
-         step();
-      }
-   }
-
-
    // Step.
    public synchronized void step()
    {
       stepCounter++;
-      stepCounterLabel.setText("Steps = " + stepCounter + "");
-      if (femaleDashboard != null)
-      {
-         femaleDashboard.update();
-      }
-      if (maleDashboard != null)
-      {
-         maleDashboard.update();
-      }
+      stepCounterLabel.setText("     Step = " + stepCounter + "");
+      femaleDashboard.update();
+      maleDashboard.update();
    }
 
-
+   // Speed slider listener.
+   public void stateChanged(ChangeEvent evt)
+   {
+      speed = speedSlider.getValue();
+   }
+   
    // Canvas mouse listener.
    @Override
    public void mouseClicked(MouseEvent e)
@@ -559,28 +536,14 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
       {
          if ((y >= femaleImageLocation.y) && (y <= femaleImageLocation.y + BIRD_SIZE.height))
          {
-            if (femaleDashboard == null)
-            {
-               femaleDashboard = new BirdDashboard(nestingbirds.female, this);
-            }
-            else
-            {
-               femaleDashboard.open();
-            }
+            femaleDashboard.open();
          }
       }
       if ((x >= maleImageLocation.x) && (x <= maleImageLocation.x + BIRD_SIZE.width))
       {
          if ((y >= maleImageLocation.y) && (y <= maleImageLocation.y + BIRD_SIZE.height))
          {
-            if (maleDashboard == null)
-            {
-               maleDashboard = new BirdDashboard(nestingbirds.male, this);
-            }
-            else
-            {
-               maleDashboard.open();
-            }
+            maleDashboard.open();
          }
       }
    }
@@ -660,32 +623,16 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          System.err.println(Usage);
          System.exit(1);
       }
-
+	  if (ReplayFilename == null)
+	  {
+          System.err.println(Usage);
+          System.exit(1);		  
+	  }
+	  
       // Create display.
-      NestingBirdsReplay nestingbirds = new NestingBirdsReplay();
+      NestingBirdsReplay nestingbirdsReplay = new NestingBirdsReplay();
 
       // Start.
-      nestingbirds.start();
-
-      // Automatic steps?
-      if (steps > 0)
-      {
-         try
-         {
-            TimeUnit.SECONDS.sleep(3);
-         }
-         catch (InterruptedException e) {
-         }
-         for (int i = 0; i < steps; i++)
-         {
-            nestingbirds.step();
-            try
-            {
-               TimeUnit.MILLISECONDS.sleep(100);
-            }
-            catch (InterruptedException e) {
-            }
-         }
-      }
+      nestingbirdsReplay.start();
    }
 }

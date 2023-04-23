@@ -1,6 +1,6 @@
 // For conditions of distribution and use, see copyright notice in LICENSE.txt
 
-// The nesting bird dashboard.
+// The nesting bird female replay dashboard.
 
 package morphognosis.nestingbirds;
 
@@ -27,29 +27,45 @@ import javax.swing.JTextField;
 
 import morphognosis.nestingbirds.Bird.ORIENTATION;
 
-public class BirdDashboard extends JFrame
+public class FemaleReplayDashboard extends JFrame
 {
    private static final long serialVersionUID = 0L;
-
+   
+   // Replay state.
+   String currentLocale = "PLAIN";
+   String currentObject = "NO_OBJECT";
+   String leftLocale = "PLAIN";
+   String leftObject = "NO_OBJECT";
+   String leftFrontLocale = "PLAIN";
+   String leftFrontObject = "NO_OBJECT";
+   String frontLocale = "PLAIN";
+   String frontObject = "NO_OBJECT";
+   String rightFrontLocale = "PLAIN";
+   String rightFrontObject = "NO_OBJECT";
+   String rightLocale = "PLAIN";
+   String rightObject = "NO_OBJECT";
+   String rightRearLocale = "PLAIN";
+   String rightRearObject = "NO_OBJECT";
+   String rearLocale = "PLAIN";
+   String rearObject = "NO_OBJECT";
+   String leftRearLocale = "PLAIN";
+   String leftRearObject = "NO_OBJECT";
+   String orientation = "NORTH";
+   String goal = "LAY_EGG";
+   String hasObject = "NO_OBJECT";
+   String food = "0";
+   String mouseNeed = "0.000000";
+   String layEggNeed = "0.000000";
+   String broodEggNeed = "0.000000";
+   String response = "DO_NOTHING";
+   
    // Components.
    StatusPanel statusPanel;
-   FoodPanel   foodPanel;
-
-   // Target bird.
-   Bird bird;
 
    // Constructor.
-   public BirdDashboard(Bird bird)
+   public FemaleReplayDashboard()
    {
-      this.bird = bird;
-      if (bird.gender == Bird.MALE)
-      {
-         setTitle("Male bird");
-      }
-      else
-      {
-         setTitle("Female bird");
-      }
+      setTitle("Female bird");
       addWindowListener(new WindowAdapter()
                         {
                            public void windowClosing(WindowEvent e) { close(); }
@@ -59,11 +75,9 @@ public class BirdDashboard extends JFrame
       basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
       statusPanel = new StatusPanel();
       basePanel.add(statusPanel);
-      foodPanel = new FoodPanel();
-      basePanel.add(foodPanel);
       pack();
       setLocation();
-      setVisible(true);
+      setVisible(false);
       update();
    }
 
@@ -112,16 +126,27 @@ public class BirdDashboard extends JFrame
       JTextField currentObjectText;
       JTextField leftLocaleText;
       JTextField leftObjectText;
-      JTextField forwardLocaleText;
-      JTextField forwardObjectText;
+      JTextField leftFrontLocaleText;
+      JTextField leftFrontObjectText;      
+      JTextField frontLocaleText;
+      JTextField frontObjectText;
+      JTextField rightFrontLocaleText;
+      JTextField rightFrontObjectText;      
       JTextField rightLocaleText;
       JTextField rightObjectText;
-      JTextField matePresentText;
-      JTextField wantFoodText;
-      JTextField wantStoneText;
+      JTextField rightRearLocaleText;
+      JTextField rightRearObjectText;
+      JTextField rearLocaleText;
+      JTextField rearObjectText;
+      JTextField leftRearLocaleText;
+      JTextField leftRearObjectText;      
       JTextField orientationText;
+      JTextField goalText;
+      JTextField hasObjectText;      
       JTextField foodText;
-      JTextField hasObjectText;
+      JTextField mouseNeedText;
+      JTextField layEggNeedText;      
+      JTextField broodEggNeedText;
       JTextField responseText;
 
       // Constructor.
@@ -165,20 +190,48 @@ public class BirdDashboard extends JFrame
          leftObjectText = new JTextField(10);
          leftObjectText.setEditable(false);
          leftCellPanel.add(leftObjectText);
-         JPanel forwardCellPanel = new JPanel();
-         forwardCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         forwardCellPanel.setBorder(BorderFactory.createTitledBorder(
+         JPanel leftFrontCellPanel = new JPanel();
+         leftFrontCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         leftFrontCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Left front cell"));
+         sensorsPanel.add(leftFrontCellPanel);
+         leftFrontCellPanel.add(new JLabel("Locale:"));
+         leftFrontLocaleText = new JTextField(10);
+         leftFrontLocaleText.setEditable(false);
+         leftFrontCellPanel.add(leftFrontLocaleText);
+         leftFrontCellPanel.add(new JLabel("Object:"));
+         leftFrontObjectText = new JTextField(10);
+         leftFrontObjectText.setEditable(false);
+         leftFrontCellPanel.add(leftFrontObjectText);         
+         JPanel frontCellPanel = new JPanel();
+         frontCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         frontCellPanel.setBorder(BorderFactory.createTitledBorder(
                                        BorderFactory.createLineBorder(Color.black),
-                                       "Forward cell"));
-         sensorsPanel.add(forwardCellPanel);
-         forwardCellPanel.add(new JLabel("Locale:"));
-         forwardLocaleText = new JTextField(10);
-         forwardLocaleText.setEditable(false);
-         forwardCellPanel.add(forwardLocaleText);
-         forwardCellPanel.add(new JLabel("Object:"));
-         forwardObjectText = new JTextField(10);
-         forwardObjectText.setEditable(false);
-         forwardCellPanel.add(forwardObjectText);
+                                       "Front cell"));
+         sensorsPanel.add(frontCellPanel);
+         frontCellPanel.add(new JLabel("Locale:"));
+         frontLocaleText = new JTextField(10);
+         frontLocaleText.setEditable(false);
+         frontCellPanel.add(frontLocaleText);
+         frontCellPanel.add(new JLabel("Object:"));
+         frontObjectText = new JTextField(10);
+         frontObjectText.setEditable(false);
+         frontCellPanel.add(frontObjectText);         
+         JPanel rightFrontCellPanel = new JPanel();
+         rightFrontCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         rightFrontCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Right front cell"));
+         sensorsPanel.add(rightFrontCellPanel);
+         rightFrontCellPanel.add(new JLabel("Locale:"));
+         rightFrontLocaleText = new JTextField(10);
+         rightFrontLocaleText.setEditable(false);
+         rightFrontCellPanel.add(rightFrontLocaleText);
+         rightFrontCellPanel.add(new JLabel("Object:"));
+         rightFrontObjectText = new JTextField(10);
+         rightFrontObjectText.setEditable(false);
+         rightFrontCellPanel.add(rightFrontObjectText);             
          JPanel rightCellPanel = new JPanel();
          rightCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          rightCellPanel.setBorder(BorderFactory.createTitledBorder(
@@ -193,52 +246,127 @@ public class BirdDashboard extends JFrame
          rightObjectText = new JTextField(10);
          rightObjectText.setEditable(false);
          rightCellPanel.add(rightObjectText);
-         JPanel mateSensorPanel = new JPanel();
-         mateSensorPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         sensorsPanel.add(mateSensorPanel);
-         mateSensorPanel.add(new JLabel("Mate present:"));
-         matePresentText = new JTextField(10);
-         matePresentText.setEditable(false);
-         mateSensorPanel.add(matePresentText);
-         if (bird.gender == Bird.MALE)
-         {
-            mateSensorPanel.add(new JLabel("Want food:"));
-            wantFoodText = new JTextField(5);
-            wantFoodText.setEditable(false);
-            mateSensorPanel.add(wantFoodText);
-            mateSensorPanel.add(new JLabel("Want stone:"));
-            wantStoneText = new JTextField(5);
-            wantStoneText.setEditable(false);
-            mateSensorPanel.add(wantStoneText);
-         }
+         JPanel rightRearCellPanel = new JPanel();
+         rightRearCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         rightRearCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Right rear cell"));
+         sensorsPanel.add(rightRearCellPanel);
+         rightRearCellPanel.add(new JLabel("Locale:"));
+         rightRearLocaleText = new JTextField(10);
+         rightRearLocaleText.setEditable(false);
+         rightRearCellPanel.add(rightRearLocaleText);
+         rightRearCellPanel.add(new JLabel("Object:"));
+         rightRearObjectText = new JTextField(10);
+         rightRearObjectText.setEditable(false);
+         rightRearCellPanel.add(rightRearObjectText);                     
+         JPanel rearCellPanel = new JPanel();
+         rearCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         rearCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Rear cell"));
+         sensorsPanel.add(rearCellPanel);
+         rearCellPanel.add(new JLabel("Locale:"));
+         rearLocaleText = new JTextField(10);
+         rearLocaleText.setEditable(false);
+         rearCellPanel.add(rearLocaleText);
+         rearCellPanel.add(new JLabel("Object:"));
+         rearObjectText = new JTextField(10);
+         rearObjectText.setEditable(false);
+         rearCellPanel.add(rearObjectText);                  
+         JPanel leftRearCellPanel = new JPanel();
+         leftRearCellPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         leftRearCellPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Left rear cell"));
+         sensorsPanel.add(leftRearCellPanel);
+         leftRearCellPanel.add(new JLabel("Locale:"));
+         leftRearLocaleText = new JTextField(10);
+         leftRearLocaleText.setEditable(false);
+         leftRearCellPanel.add(leftRearLocaleText);
+         leftRearCellPanel.add(new JLabel("Object:"));
+         leftRearObjectText = new JTextField(10);
+         leftRearObjectText.setEditable(false);
+         leftRearCellPanel.add(leftRearObjectText);            
+         JPanel orientationPanel = new JPanel();
+         orientationPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         orientationPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Orientation"));
+         sensorsPanel.add(orientationPanel);
+         orientationText = new JTextField(10);
+         orientationText.setEditable(false);
+         orientationPanel.add(orientationText);
+         JPanel goalPanel = new JPanel();
+         goalPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         goalPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Goal"));
+         sensorsPanel.add(goalPanel);
+         goalText = new JTextField(10);
+         goalText.setEditable(false);
+         goalPanel.add(goalText);
+         JPanel hasObjectPanel = new JPanel();
+         hasObjectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         hasObjectPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Has object"));
+         sensorsPanel.add(hasObjectPanel);
+         hasObjectText = new JTextField(10);
+         hasObjectText.setEditable(false);
+         hasObjectPanel.add(hasObjectText);
+         JPanel foodPanel = new JPanel();
+         foodPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         foodPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Food"));
+         sensorsPanel.add(foodPanel);
+         foodText = new JTextField(10);
+         foodText.setEditable(false);
+         foodPanel.add(foodText);        
+         JPanel needsPanel = new JPanel();
+         needsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
+         needsPanel.setBorder(BorderFactory.createTitledBorder(
+                                   BorderFactory.createLineBorder(Color.black),
+                                   "Needs"));
+         add(needsPanel, BorderLayout.CENTER);
+         JPanel mousePanel = new JPanel();
+         mousePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         mousePanel.setBorder(BorderFactory.createTitledBorder(
+                                       BorderFactory.createLineBorder(Color.black),
+                                       "Mouse"));
+         needsPanel.add(mousePanel);
+         mouseNeedText = new JTextField(10);
+         mouseNeedText.setEditable(false);
+         needsPanel.add(mouseNeedText);
+         JPanel layEggPanel = new JPanel();
+         layEggPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         layEggPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Lay egg"));
+         needsPanel.add(layEggPanel);
+         layEggNeedText = new JTextField(10);
+         layEggNeedText.setEditable(false);
+         layEggPanel.add(layEggNeedText);
+         JPanel broodEggPanel = new JPanel();
+         broodEggPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         broodEggPanel.setBorder(BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(Color.black),
+                                    "Brood egg"));
+         needsPanel.add(leftFrontCellPanel);
+         broodEggNeedText = new JTextField(10);
+         broodEggNeedText.setEditable(false);
+         broodEggPanel.add(broodEggNeedText);        
          JPanel responsePanel = new JPanel();
          responsePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          responsePanel.setBorder(BorderFactory.createTitledBorder(
                                     BorderFactory.createLineBorder(Color.black),
                                     "Response"));
-         add(responsePanel, BorderLayout.CENTER);
+         add(responsePanel, BorderLayout.SOUTH);
          responsePanel.add(new JLabel("Response:"));
          responseText = new JTextField(25);
          responseText.setEditable(false);
          responsePanel.add(responseText);
-         JPanel statePanel = new JPanel();
-         statePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-         statePanel.setBorder(BorderFactory.createTitledBorder(
-                                 BorderFactory.createLineBorder(Color.black),
-                                 "Internal"));
-         add(statePanel, BorderLayout.SOUTH);
-         statePanel.add(new JLabel("Orientation: "));
-         orientationText = new JTextField(10);
-         orientationText.setEditable(false);
-         statePanel.add(orientationText);
-         statePanel.add(new JLabel("Food: "));
-         foodText = new JTextField(10);
-         foodText.setEditable(false);
-         statePanel.add(foodText);
-         statePanel.add(new JLabel("Has object: "));
-         hasObjectText = new JTextField(10);
-         hasObjectText.setEditable(false);
-         statePanel.add(hasObjectText);
       }
 
 
@@ -249,7 +377,7 @@ public class BirdDashboard extends JFrame
          switch (bird.sensors[Bird.CURRENT_LOCALE_SENSOR])
          {
          case NestingBirds.LOCALE.DESERT:
-            currentLocaleText.setText("desert");
+            currentLocaleText.setText(currentLocale);
             break;
 
          case NestingBirds.LOCALE.FOREST:
@@ -456,172 +584,7 @@ public class BirdDashboard extends JFrame
          }
 
          // Response.
-         if (bird.gender == Bird.MALE)
-         {
-            responseText.setText(MaleBird.RESPONSE.toString(bird.response));
-         }
-         else
-         {
-            responseText.setText(FemaleBird.RESPONSE.toString(bird.response));
-         }
-      }
-   }
-
-   // Food panel.
-   class FoodPanel extends JPanel implements ActionListener, ItemListener
-   {
-      private static final long serialVersionUID = 0L;
-
-      JTextField foodText;
-      JButton    foodButton;
-      JTextField foodDurationText;
-      JButton    foodDurationButton;
-      JCheckBox  randomizeFoodLevelCheckBox;
-
-      // Constructor.
-      public FoodPanel()
-      {
-         setBorder(BorderFactory.createTitledBorder(
-                      BorderFactory.createLineBorder(Color.black),
-                      "Food"));
-         setLayout(new FlowLayout(FlowLayout.LEFT));
-         JLabel initialFoodLabel = new JLabel("Food: ");
-         add(initialFoodLabel);
-         foodText = new JTextField(5);
-         if (bird.gender == Bird.MALE)
-         {
-            foodText.setText(MaleBird.INITIAL_FOOD + "");
-         }
-         else
-         {
-            foodText.setText(FemaleBird.INITIAL_FOOD + "");
-         }
-         add(foodText);
-         foodButton = new JButton("Set");
-         foodButton.addActionListener(this);
-         add(foodButton);
-         JLabel foodDurationLabel = new JLabel("Food duration: ");
-         add(foodDurationLabel);
-         foodDurationText = new JTextField(5);
-         if (bird.gender == Bird.MALE)
-         {
-            foodDurationText.setText(MaleBird.FOOD_DURATION + "");
-         }
-         else
-         {
-            foodDurationText.setText(FemaleBird.FOOD_DURATION + "");
-         }
-         add(foodDurationText);
-         foodDurationButton = new JButton("Set");
-         foodDurationButton.addActionListener(this);
-         add(foodDurationButton);
-         randomizeFoodLevelCheckBox = new JCheckBox("Randomize food level", false);
-         randomizeFoodLevelCheckBox.addItemListener(this);
-         add(randomizeFoodLevelCheckBox);
-      }
-
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-         if (e.getSource() == foodButton)
-         {
-            String text = foodText.getText();
-
-            if ((text != null) && !text.isEmpty())
-            {
-               try
-               {
-                  int amount = Integer.parseInt(text);
-                  if (amount < 0)
-                  {
-                     JOptionPane.showMessageDialog(this, "Invalid food value");
-                     return;
-                  }
-                  if (bird.gender == Bird.MALE)
-                  {
-                     if (amount > MaleBird.FOOD_DURATION)
-                     {
-                        JOptionPane.showMessageDialog(this, "Food cannot be greater than food duration");
-                        return;
-                     }
-                     bird.food = amount;
-                  }
-                  else
-                  {
-                     if (amount > FemaleBird.FOOD_DURATION)
-                     {
-                        JOptionPane.showMessageDialog(this, "Food cannot be greater than food duration");
-                        return;
-                     }
-                     bird.food = amount;
-                  }
-               }
-               catch (Exception ex)
-               {
-                  JOptionPane.showMessageDialog(this, "Invalid food value");
-               }
-            }
-            return;
-         }
-
-         if (e.getSource() == foodDurationButton)
-         {
-            String text = foodDurationText.getText();
-
-            if ((text != null) && !text.isEmpty())
-            {
-               try
-               {
-                  int duration = Integer.parseInt(text);
-                  if (duration < 0)
-                  {
-                     JOptionPane.showMessageDialog(this, "Invalid food duration value");
-                     return;
-                  }
-                  if (bird.gender == Bird.MALE)
-                  {
-                     MaleBird.FOOD_DURATION = duration;
-                     if (bird.food > duration)
-                     {
-                        bird.food = duration;
-                        foodText.setText(duration + "");
-                     }
-                  }
-                  else
-                  {
-                     FemaleBird.FOOD_DURATION = duration;
-                     if (bird.food > duration)
-                     {
-                        bird.food = duration;
-                        foodText.setText(duration + "");
-                     }
-                  }
-               }
-               catch (Exception ex)
-               {
-                  JOptionPane.showMessageDialog(this, "Invalid food duration value");
-               }
-            }
-            return;
-         }
-      }
-
-
-      @Override
-      public void itemStateChanged(ItemEvent e)
-      {
-         if (e.getSource() == randomizeFoodLevelCheckBox)
-         {
-            if (bird.gender == Bird.MALE)
-            {
-               MaleBird.RANDOMIZE_FOOD_LEVEL = randomizeFoodLevelCheckBox.isSelected();
-            }
-            else
-            {
-               FemaleBird.RANDOMIZE_FOOD_LEVEL = randomizeFoodLevelCheckBox.isSelected();
-            }
-         }
+         responseText.setText(response);
       }
    }
 }

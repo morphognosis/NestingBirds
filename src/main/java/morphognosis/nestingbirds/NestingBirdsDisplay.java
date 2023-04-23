@@ -659,7 +659,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
          {
             if (femaleDashboard == null)
             {
-               femaleDashboard = new BirdDashboard(nestingbirds.female, this);
+               femaleDashboard = new BirdDashboard(nestingbirds.female);
             }
             else
             {
@@ -673,7 +673,7 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
          {
             if (maleDashboard == null)
             {
-               maleDashboard = new BirdDashboard(nestingbirds.male, this);
+               maleDashboard = new BirdDashboard(nestingbirds.male);
             }
             else
             {

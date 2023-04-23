@@ -2710,6 +2710,32 @@ int main(int argc, char *args[])
       fprintf(stderr, Usage);
       exit(1);
    }
+   if (MaleTest)
+   {
+       if (MaleLoadFilename == NULL)
+       {
+           fprintf(stderr, "Warning: testing male without load file\n");
+       }
+   }
+   else {
+       if (MaleSaveFilename == NULL)
+       {
+           fprintf(stderr, "Warning: training male without save file\n");
+       }
+   }
+   if (FemaleTest)
+   {
+       if (FemaleLoadFilename == NULL)
+       {
+           fprintf(stderr, "Warning: testing female without load file\n");
+       }
+   }
+   else {
+       if (FemaleSaveFilename == NULL)
+       {
+           fprintf(stderr, "Warning: training female without save file\n");
+       }
+   }
    if (Male::INITIAL_FOOD > Male::FOOD_DURATION)
    {
       fprintf(stderr, "Male initial food cannot be greater than food duration\n");
