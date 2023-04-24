@@ -13,6 +13,10 @@ const char *VERSION = "2.0";
 #define DEFAULT_RANDOM_NUMBER_SEED    "4517"
 int RANDOM_NUMBER_SEED = 4517;
 
+// Probability of mouse movement.
+#define DEFAULT_MOUSE_MOVE_PROBABILITY "0.1"
+static double MOUSE_MOVE_PROBABILITY = 0.1;
+
 // Usage.
 const char* Usage =
 "Usage:\n"
@@ -26,20 +30,21 @@ const char* Usage =
 "      [-loadFemaleFile <load file name>]\n"
 "      [-maleInitialFood <amount> (default=" MALE_DEFAULT_INITIAL_FOOD "]\n"
 "      [-maleFoodDuration <amount> (default=" MALE_DEFAULT_FOOD_DURATION ")]\n"
-"      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" MALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
+"      [-maleRandomizeFoodLevel (food level probabilistically increases 0-" MALE_DEFAULT_FOOD_DURATION " upon eating mouse)]\n"
 "      [-maleMouseNeed <amount> (default=" MALE_DEFAULT_MOUSE_NEED ")]\n"
 "      [-maleFemaleMouseNeed <amount> (default=" MALE_DEFAULT_FEMALE_MOUSE_NEED ")]\n"
 "      [-maleFemaleStoneNeed <amount> (default=" MALE_DEFAULT_FEMALE_STONE_NEED ")]\n"
 "      [-maleAttendFemaleNeed <amount> (default=" MALE_DEFAULT_ATTEND_FEMALE_NEED ")]\n"
 "      [-femaleInitialFood <amount> (default=" FEMALE_DEFAULT_INITIAL_FOOD ")]\n"
 "      [-femaleFoodDuration <amount> (default=" FEMALE_DEFAULT_FOOD_DURATION ")]\n"
-"      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating food)]\n"
+"      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-" FEMALE_DEFAULT_FOOD_DURATION " upon eating mouse)]\n"
 "      [-femaleMouseNeed <amount> (default=" FEMALE_DEFAULT_MOUSE_NEED ")]\n"
 "      [-femaleLayEggNeed <amount> (default=" FEMALE_DEFAULT_LAY_EGG_NEED ")]\n"
 "      [-femaleBroodEggNeed <amount> (default=" FEMALE_DEFAULT_BROOD_EGG_NEED ")]\n"
-"      [-verbose <true | false> (default=true)]\n"
 "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"
+"      [-mouseMoveProbability <probability> (default=" DEFAULT_MOUSE_MOVE_PROBABILITY ")]\n"
 "      [-writeReplayFile <replay file name> (json)]\n"
+"      [-verbose <true | false> (default=true)]\n"
 "      [-version]\n"
 "Exit codes:\n"
 "  0=success\n"
@@ -143,9 +148,6 @@ Cell World[WIDTH][HEIGHT];
 // Birds.
 Male   *male;
 Female *female;
-
-// Probability of mouse movement.
-static double MOUSE_MOVE_PROBABILITY = 0.1;
 
 // Verbosity.
 bool Verbose = true;
@@ -2643,6 +2645,24 @@ int main(int argc, char *args[])
             exit(1);
          }
          continue;
+      }
+      if (strcmp(args[i], "-mouseMoveProbability") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid mouseMoveProbability option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          MOUSE_MOVE_PROBABILITY = atof(args[i]);
+          if (MOUSE_MOVE_PROBABILITY < 0.0 || MOUSE_MOVE_PROBABILITY > 1.0)
+          {
+              fprintf(stderr, "Invalid mouseMoveProbability option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          continue;
       }
       if (strcmp(args[i], "-verbose") == 0)
       {

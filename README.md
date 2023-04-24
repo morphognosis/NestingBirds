@@ -18,10 +18,11 @@ Build nestingbirds.jar and nestingbirds executable in bin directory:
 <pre>build_nestingbirds.sh, build_nestingbirds.bat</pre>
 
 Train/test birds and create a replay file. See src/main/mona/Readme.txt.
+<pre>run_nestingbirds.sh, run_nestingbirds.bat</pre>
 
 Run graphical interface:
 <pre>
-run_nestingbirds.sh, run_nestingbirds.bat
+run_nestingbirds_replay.sh, run_nestingbirds_replay.bat
 
 Usage: java morphognosis.nestingbirds.NestingBirdsReplay -replayFile <replay file name>
 </pre>
