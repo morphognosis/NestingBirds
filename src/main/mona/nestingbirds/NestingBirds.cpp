@@ -333,7 +333,7 @@ void step()
                }
            }
        }
-       fprintf(ReplayFp, "{ \"Mice\": [");
+       fprintf(ReplayFp, "\"Mice\": [");
        int n = 0;
        for (int x = 0; x < WIDTH; x++)
        {
@@ -350,7 +350,7 @@ void step()
                }
            }
        }
-       fprintf(ReplayFp, " ] },\n");
+       fprintf(ReplayFp, " ],\n");
    }
 
    // Set female sensors.
@@ -374,7 +374,7 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, "{ \"Gender\": female, \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
+       fprintf(ReplayFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
        female->printState(ReplayFp);
    }
 
@@ -413,7 +413,7 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, "{ \"Gender\": male, \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
+       fprintf(ReplayFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
        male->printState(ReplayFp);
    }
 

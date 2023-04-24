@@ -255,17 +255,17 @@ void Male::printSensors(FILE *fp)
 {
    fprintf(fp, "\"Sensors\": { ");
    fprintf(fp, "\"Locale\": ");
-   fprintf(fp, "%s", LOCALE::toString(sensors[LOCALE_SENSOR]));
+   fprintf(fp, "\"%s\"", LOCALE::toString(sensors[LOCALE_SENSOR]));
    fprintf(fp, ", \"Mouse proximity\": ");
-   fprintf(fp, "%s", PROXIMITY::toString(sensors[MOUSE_PROXIMITY_SENSOR]));
+   fprintf(fp, "\"%s\"", PROXIMITY::toString(sensors[MOUSE_PROXIMITY_SENSOR]));
    fprintf(fp, ", \"Stone proximity\": ");
-   fprintf(fp, "%s", PROXIMITY::toString(sensors[STONE_PROXIMITY_SENSOR]));
+   fprintf(fp, "\"%s\"", PROXIMITY::toString(sensors[STONE_PROXIMITY_SENSOR]));
    fprintf(fp, ", \"Female proximity\": ");
-   fprintf(fp, "%s", PROXIMITY::toString(sensors[FEMALE_PROXIMITY_SENSOR]));
+   fprintf(fp, "\"%s\"", PROXIMITY::toString(sensors[FEMALE_PROXIMITY_SENSOR]));
    fprintf(fp, ", \"Goal\": ");
-   fprintf(fp, "%s", GOAL::toString(sensors[GOAL_SENSOR]));
+   fprintf(fp, "\"%s\"", GOAL::toString(sensors[GOAL_SENSOR]));
    fprintf(fp, ", \"Has object\": ");
-   fprintf(fp, "%s", OBJECT::toString(sensors[HAS_OBJECT_SENSOR]));
+   fprintf(fp, "\"%s\"", OBJECT::toString(sensors[HAS_OBJECT_SENSOR]));
    fprintf(fp, ", \"Flying\": ");
    if (sensors[FLYING_SENSOR] == 1)
    {
@@ -329,7 +329,7 @@ void Male::printNeeds(FILE *fp)
 // Print response.
 void Male::printResponse(FILE *fp)
 {
-    fprintf(fp, "\"Response\": %s", RESPONSE::toString(response));
+    fprintf(fp, "\"Response\": \"%s\"", RESPONSE::toString(response));
 }
 
 

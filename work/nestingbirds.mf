@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Class-Path: ../lib/gson-2.8.6.jar ../lib/javax.annotation-api-1.3.2.jar ../lib/jsr305-3.0.2.jar ../lib/json-20160810.jar
+Class-Path: ../lib/gson-2.8.6.jar ../lib/javax.annotation-api-1.3.2.jar ../lib/jsr305-3.0.2.jar ../lib/json-20160810.jar ../lib/json-simple-1.1.jar
 Main-Class: morphognosis.nestingbirds.NestingBirdsDisplay

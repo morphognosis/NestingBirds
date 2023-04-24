@@ -223,26 +223,25 @@ void Female::printSensors(FILE *fp)
          break;
 
       case 7:
-         printf("\"Rear\": ");
+         fprintf(fp, "\"Rear\": ");
          break;
 
       case 8:
          fprintf(fp, "\"Left rear\": ");
          break;
       }
-      fprintf(fp, "{ \"Locale\": %s", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
+      fprintf(fp, "{ \"Locale\": \"%s\"", LOCALE::toString(sensors[i * CELL_SENSOR::NUM_SENSORS]));
       fprintf(fp, ", ");
-      fprintf(fp, "\"Object\": %s }", OBJECT::toString(sensors[(i *CELL_SENSOR::NUM_SENSORS)+1]));
+      fprintf(fp, "\"Object\": \"%s\" }", OBJECT::toString(sensors[(i *CELL_SENSOR::NUM_SENSORS)+1]));
       if (i < NUM_CELL_SENSORS - 1)
       {
          fprintf(fp, ", ");
       }
    }
    fprintf(fp, " }");
-   fprintf(fp, ", \"Orientation\": %s", ORIENTATION::toString(orientation));
-   fprintf(fp, ", \"Goal\": ");
-   fprintf(fp, "%s", GOAL::toString(sensors[GOAL_SENSOR]));
-   fprintf(fp, ", \"Has object\": %s", OBJECT::toString(hasObject));
+   fprintf(fp, ", \"Orientation\": \"%s\"", ORIENTATION::toString(orientation));
+   fprintf(fp, ", \"Goal\": \"%s\"", GOAL::toString(sensors[GOAL_SENSOR]));
+   fprintf(fp, ", \"Has object\": \"%s\"", OBJECT::toString(hasObject));
    fprintf(fp, " }");
 }
 
@@ -275,7 +274,7 @@ void Female::printNeeds(FILE *fp)
 // Print response.
 void Female::printResponse(FILE *fp)
 {
-   fprintf(fp, "\"Response\": %s", RESPONSE::toString(response));
+   fprintf(fp, "\"Response\": \"%s\"", RESPONSE::toString(response));
 }
 
 

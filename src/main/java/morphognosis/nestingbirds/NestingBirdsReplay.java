@@ -21,9 +21,17 @@ import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Objects;
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,6 +39,12 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.json.JSONException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListener, MouseListener
 {
@@ -96,6 +110,7 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    Dimension       controlPanelSize;
    JSlider speedSlider;
    int speed;
+   JButton          stepButton;  
    JLabel          stepCounterLabel;
    int             stepCounter;
 
@@ -126,6 +141,9 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    // Constructor.
    public NestingBirdsReplay()
    {
+	   // Load replay file.
+	   loadReplayFile(ReplayFilename);
+	   
 	      // Create nesting birds.
 	      nestingbirds = new NestingBirds();
 	      nestingbirds.male.y = 9;
@@ -150,7 +168,9 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       speed = MAX_RESPONSE_DELAY;
       controlPanel.add(speedSlider);
       controlPanel.add(newLabel("Stop", Label.LEFT));
-      stepCounterLabel = newLabel("     Step = 0");
+      stepButton = newButton("Step");
+      controlPanel.add(stepButton);      
+      stepCounterLabel = newLabel("Step = 0");
       controlPanel.add(stepCounterLabel);
       stepCounter     = 0;
       maleDashboard = new MaleReplayDashboard();
@@ -242,6 +262,15 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
 
       label.setFont(font);
       return(label);
+   }
+   
+   // Make button with font.
+   private JButton newButton(String text)
+   {
+      JButton button = new JButton(text);
+
+      button.setFont(font);
+      return(button);
    }
 
    // Make slider with font.
@@ -514,7 +543,7 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    public synchronized void step()
    {
       stepCounter++;
-      stepCounterLabel.setText("     Step = " + stepCounter + "");
+      stepCounterLabel.setText("Step = " + stepCounter + "");
       femaleDashboard.update();
       maleDashboard.update();
    }
@@ -597,7 +626,44 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       return(image);
    }
 
-
+   // Load replay file.
+   void loadReplayFile(String filename)
+   {
+      try
+      {
+    	  FileReader reader = new FileReader(filename);
+    	  JSONParser parser = new JSONParser();
+    	  JSONArray replay = (JSONArray)parser.parse(reader);
+    	  for (Object step : replay)
+    	  { 		  
+      	      System.out.println((JSONObject)step + "");   		  
+      	      JSONObject entry = (JSONObject)step;
+	      	  Long n = (Long)entry.get("Step");
+	      	  System.out.println("Step = " + n);
+	      	  JSONObject data = (JSONObject)entry.get("Data");
+	      	  System.out.println("Data = " + data);
+	      	  JSONArray mice = (JSONArray)data.get("Mice");
+	      	  System.out.println("Mice = " + mice); 
+	    	  for (Object m : mice)
+	    	  {
+	    		  JSONObject mouse = (JSONObject)m;
+	    		  System.out.println("Mouse = " + mouse);
+	    		  Long x = (Long)mouse.get("x");
+	    		  Long y = (Long)mouse.get("y");
+	    		  System.out.println("x=" + x + ",y=" + y);
+	    	  }
+    	  }
+      }
+      catch (JSONException e)
+      {
+         System.err.println("Cannot parse replay file " + filename + ":" + e.getMessage());
+      }    	  
+      catch (Exception e)
+      {
+         System.err.println("Cannot load replay file " + filename + ":" + e.getMessage());
+      }
+   }
+   
    // Main.
    public static void main(String[] args)
    {

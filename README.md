@@ -2,7 +2,7 @@
 
 Abstract:
 
-An animal behavior problem that involves two cooperating birds, a male and female.
+An animal behavior problem involving two cooperating birds, a male and female.
 The female builds a nest into which she lays an egg. The male's job is to forage in a forest for food for both himself
 and the female. In addition, the male must fetch stones from a nearby desert for the female to use as nesting material.
 Their task is complete when the nest is built and an egg is laid in it. The bird animations are replayed from
