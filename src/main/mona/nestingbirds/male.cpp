@@ -269,29 +269,29 @@ void Male::printSensors(FILE *fp)
    fprintf(fp, ", \"Flying\": ");
    if (sensors[FLYING_SENSOR] == 1)
    {
-       fprintf(fp, "true");
+      fprintf(fp, "true");
    }
    else
    {
-       fprintf(fp, "false");
+      fprintf(fp, "false");
    }
    fprintf(fp, ", \"Female wants mouse\": ");
    if (sensors[FEMALE_WANTS_MOUSE_SENSOR] == 1)
    {
-       fprintf(fp, "true");
+      fprintf(fp, "true");
    }
    else
    {
-       fprintf(fp, "false");
+      fprintf(fp, "false");
    }
    fprintf(fp, ", \"Female wants stone\": ");
    if (sensors[FEMALE_WANTS_STONE_SENSOR] == 1)
    {
-       fprintf(fp, "true");
+      fprintf(fp, "true");
    }
    else
    {
-       fprintf(fp, "false");
+      fprintf(fp, "false");
    }
    fprintf(fp, " }");
 }
@@ -329,7 +329,7 @@ void Male::printNeeds(FILE *fp)
 // Print response.
 void Male::printResponse(FILE *fp)
 {
-    fprintf(fp, "\"Response\": \"%s\"", RESPONSE::toString(response));
+   fprintf(fp, "\"Response\": \"%s\"", RESPONSE::toString(response));
 }
 
 

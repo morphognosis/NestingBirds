@@ -21,7 +21,7 @@ import javax.swing.JTextField;
 public class MaleReplayDashboard extends JFrame
 {
    private static final long serialVersionUID = 0L;
-   
+
    // Replay frame.
    NestingBirdsReplayFrame replayFrame;
 
@@ -45,7 +45,6 @@ public class MaleReplayDashboard extends JFrame
       pack();
       setLocation();
       setVisible(false);
-      update();
    }
 
 
@@ -62,8 +61,10 @@ public class MaleReplayDashboard extends JFrame
 
 
    // Update dashboard.
-   void update()
+   void update(NestingBirdsReplayFrame replayFrame)
    {
+      this.replayFrame = replayFrame;
+
       // Update status.
       statusPanel.update();
    }
@@ -96,7 +97,7 @@ public class MaleReplayDashboard extends JFrame
       JTextField goalText;
       JTextField hasObjectText;
       JTextField flyingText;
-      JTextField foodText;      
+      JTextField foodText;
       JTextField femaleWantsMouseText;
       JTextField femaleWantsStoneText;
       JTextField mouseNeedText;
@@ -124,12 +125,12 @@ public class MaleReplayDashboard extends JFrame
          localePanel.add(new JLabel("Locale:"));
          localeText = new JTextField(10);
          localeText.setEditable(false);
-         localePanel.add(localeText);         
+         localePanel.add(localeText);
          JPanel proximityPanel = new JPanel();
          proximityPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          proximityPanel.setBorder(BorderFactory.createTitledBorder(
-                                       BorderFactory.createLineBorder(Color.black),
-                                       "Proximity"));
+                                     BorderFactory.createLineBorder(Color.black),
+                                     "Proximity"));
          sensorsPanel.add(proximityPanel);
          proximityPanel.add(new JLabel("Mouse:"));
          mouseProximityText = new JTextField(10);
@@ -142,14 +143,14 @@ public class MaleReplayDashboard extends JFrame
          proximityPanel.add(new JLabel("Female:"));
          femaleProximityText = new JTextField(10);
          femaleProximityText.setEditable(false);
-         proximityPanel.add(femaleProximityText);                  
+         proximityPanel.add(femaleProximityText);
          JPanel internalSensorsPanel = new JPanel();
          internalSensorsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          sensorsPanel.add(internalSensorsPanel);
          internalSensorsPanel.add(new JLabel("Goal:"));
          goalText = new JTextField(15);
          goalText.setEditable(false);
-         internalSensorsPanel.add(goalText);            
+         internalSensorsPanel.add(goalText);
          internalSensorsPanel.add(new JLabel("Has object:"));
          hasObjectText = new JTextField(10);
          hasObjectText.setEditable(false);
@@ -157,27 +158,27 @@ public class MaleReplayDashboard extends JFrame
          internalSensorsPanel.add(new JLabel("Flying:"));
          flyingText = new JTextField(10);
          flyingText.setEditable(false);
-         internalSensorsPanel.add(flyingText);         
+         internalSensorsPanel.add(flyingText);
          internalSensorsPanel.add(new JLabel("Food:"));
          foodText = new JTextField(10);
          foodText.setEditable(false);
-         internalSensorsPanel.add(foodText);        
+         internalSensorsPanel.add(foodText);
          JPanel femaleSensorsPanel = new JPanel();
          femaleSensorsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          sensorsPanel.add(femaleSensorsPanel);
          femaleSensorsPanel.add(new JLabel("Female wants mouse:"));
          femaleWantsMouseText = new JTextField(10);
          femaleWantsMouseText.setEditable(false);
-         femaleSensorsPanel.add(femaleWantsMouseText);            
+         femaleSensorsPanel.add(femaleWantsMouseText);
          femaleSensorsPanel.add(new JLabel("Female wants stone:"));
          femaleWantsStoneText = new JTextField(10);
          femaleWantsStoneText.setEditable(false);
-         femaleSensorsPanel.add(femaleWantsStoneText);                
+         femaleSensorsPanel.add(femaleWantsStoneText);
          JPanel needsPanel = new JPanel();
          needsPanel.setLayout(new BoxLayout(needsPanel, BoxLayout.Y_AXIS));
          needsPanel.setBorder(BorderFactory.createTitledBorder(
-                                   BorderFactory.createLineBorder(Color.black),
-                                   "Needs"));
+                                 BorderFactory.createLineBorder(Color.black),
+                                 "Needs"));
          add(needsPanel, BorderLayout.CENTER);
          JPanel internalNeedsPanel = new JPanel();
          internalNeedsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -189,15 +190,15 @@ public class MaleReplayDashboard extends JFrame
          internalNeedsPanel.add(new JLabel("Female mouse:"));
          femaleMouseNeedText = new JTextField(10);
          femaleMouseNeedText.setEditable(false);
-         internalNeedsPanel.add(femaleMouseNeedText);            
+         internalNeedsPanel.add(femaleMouseNeedText);
          internalNeedsPanel.add(new JLabel("Female stone:"));
          femaleStoneNeedText = new JTextField(10);
          femaleStoneNeedText.setEditable(false);
-         internalNeedsPanel.add(femaleStoneNeedText);             
+         internalNeedsPanel.add(femaleStoneNeedText);
          internalNeedsPanel.add(new JLabel("Attend female:"));
          attendFemaleNeedText = new JTextField(10);
          attendFemaleNeedText.setEditable(false);
-         internalNeedsPanel.add(attendFemaleNeedText);         
+         internalNeedsPanel.add(attendFemaleNeedText);
          JPanel responsePanel = new JPanel();
          responsePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          responsePanel.setBorder(BorderFactory.createTitledBorder(
@@ -214,21 +215,21 @@ public class MaleReplayDashboard extends JFrame
       // Update.
       public void update()
       {
-          localeText.setText(replayFrame.maleData.locale);
-          mouseProximityText.setText(replayFrame.maleData.mouseProximity);
-          stoneProximityText.setText(replayFrame.maleData.stoneProximity);
-          femaleProximityText.setText(replayFrame.maleData.femaleProximity);
-          goalText.setText(replayFrame.maleData.goal);
-          hasObjectText.setText(replayFrame.maleData.hasObject);
-          flyingText.setText(replayFrame.maleData.flying);
-          femaleWantsMouseText.setText(replayFrame.maleData.femaleWantsMouse);
-          femaleWantsStoneText.setText(replayFrame.maleData.femaleWantsStone);
-          foodText.setText(replayFrame.maleData.food);
-          mouseNeedText.setText(replayFrame.maleData.mouseNeed);
-          femaleMouseNeedText.setText(replayFrame.maleData.femaleMouseNeed);
-          femaleStoneNeedText.setText(replayFrame.maleData.femaleStoneNeed);
-          attendFemaleNeedText.setText(replayFrame.maleData.attendFemaleNeed);
-          responseText.setText(replayFrame.maleData.response);
+         localeText.setText(replayFrame.maleData.locale);
+         mouseProximityText.setText(replayFrame.maleData.mouseProximity);
+         stoneProximityText.setText(replayFrame.maleData.stoneProximity);
+         femaleProximityText.setText(replayFrame.maleData.femaleProximity);
+         goalText.setText(replayFrame.maleData.goal);
+         hasObjectText.setText(replayFrame.maleData.hasObject);
+         flyingText.setText(replayFrame.maleData.flying);
+         femaleWantsMouseText.setText(replayFrame.maleData.femaleWantsMouse);
+         femaleWantsStoneText.setText(replayFrame.maleData.femaleWantsStone);
+         foodText.setText(replayFrame.maleData.food);
+         mouseNeedText.setText(replayFrame.maleData.mouseNeed);
+         femaleMouseNeedText.setText(replayFrame.maleData.femaleMouseNeed);
+         femaleStoneNeedText.setText(replayFrame.maleData.femaleStoneNeed);
+         attendFemaleNeedText.setText(replayFrame.maleData.attendFemaleNeed);
+         responseText.setText(replayFrame.maleData.response);
       }
    }
 }

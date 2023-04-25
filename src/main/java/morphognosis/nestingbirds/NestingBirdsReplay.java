@@ -18,6 +18,8 @@ import java.awt.Point;
 import java.awt.ScrollPane;
 import java.awt.Scrollbar;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -40,33 +42,33 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListener, MouseListener
+public class NestingBirdsReplay extends JFrame implements Runnable, ActionListener, ChangeListener, MouseListener
 {
    private static final long serialVersionUID = 0L;
 
    // Usage.
    public static final String Usage =
       "Usage: java morphognosis.nestingbirds.NestingBirdsReplay -replayFile <replay file name>";
-   
+
    // Replay file name.
    static String ReplayFilename;
-   
+
    // Replay frames.
    ArrayList<NestingBirdsReplayFrame> replayFrames;
-   
+
    // Nesting birds.
    NestingBirds nestingbirds;
-   
+
    // Milliseconds between world updates.
    static final int MIN_RESPONSE_DELAY = 100;
    static final int MAX_RESPONSE_DELAY = 1000;
-   
+
    // Milliseconds between display updates.
    static final int DISPLAY_UPDATE_DELAY = 50;
 
    // Dimensions.
-   static final int WIDTH = 21;
-   static final int HEIGHT = 21;
+   static final int       WIDTH              = 21;
+   static final int       HEIGHT             = 21;
    static final Dimension SCREEN_SIZE        = new Dimension(652, 680);
    static final Dimension CANVAS_SIZE        = new Dimension(630, 630);
    static final Dimension CONTROL_PANEL_SIZE = new Dimension(652, 100);
@@ -100,20 +102,20 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    Point      femaleImageOffset;
    Point      maleImageOffset;
    String     message = "Click bird for dashboard";
-   
+
    // Threads.
    Thread replayThread;
    Thread displayThread;
 
    // Control panel.
-   JPanel          controlPanel;
-   Dimension       controlPanelSize;
-   JButton rewindButton;
-   JSlider speedSlider;
-   int speed;
-   JButton          stepButton;  
-   JLabel          stepCounterLabel;
-   int             stepCounter;
+   JPanel    controlPanel;
+   Dimension controlPanelSize;
+   JButton   rewindButton;
+   JSlider   speedSlider;
+   int       speed;
+   JButton   stepButton;
+   JLabel    stepCounterLabel;
+   int       stepCounter;
 
    // Images
    Image maleImage;
@@ -136,31 +138,22 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    int         fontHeight;
 
    // Dashboards.
-   MaleReplayDashboard maleDashboard;
+   MaleReplayDashboard   maleDashboard;
    FemaleReplayDashboard femaleDashboard;
-   
+
    // Constructor.
    public NestingBirdsReplay()
    {
-	   // Load replay file.
-	   loadReplayFile(ReplayFilename);
-	   
-	   // Create dashboards.
-	      maleDashboard = new MaleReplayDashboard();
-	      femaleDashboard = new FemaleReplayDashboard();
-	      if (replayFrames.size() > 0)
-	      {
-	    	  maleDashboard.replayFrame = replayFrames.get(0);
-	    	  maleDashboard.update();
-	       	  femaleDashboard.replayFrame = replayFrames.get(0);
-	       	  femaleDashboard.update();
-	      }	
-	      
-	      // Create nesting birds.
-	      nestingbirds = new NestingBirds();
-	      nestingbirds.male.y = 9;
-	      nestingbirds.female.y = 9;
-	      
+      // Load replay file.
+      loadReplayFile(ReplayFilename);
+
+      // Create dashboards.
+      maleDashboard   = new MaleReplayDashboard();
+      femaleDashboard = new FemaleReplayDashboard();
+
+      // Create nesting birds.
+      nestingbirds = new NestingBirds();
+
       // Set up display.
       setTitle("Nesting birds");
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -174,25 +167,23 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       controlPanel.setBounds(0, 0, controlPanelSize.width, controlPanelSize.height);
       add(controlPanel, BorderLayout.NORTH);
       rewindButton = newButton("Rewind");
-      controlPanel.add(rewindButton);      
+      rewindButton.addActionListener(this);
+      controlPanel.add(rewindButton);
       controlPanel.add(newLabel("Speed: Fast", Label.RIGHT));
       speedSlider = newSlider(Scrollbar.HORIZONTAL, MIN_RESPONSE_DELAY,
-                                   MAX_RESPONSE_DELAY, MAX_RESPONSE_DELAY);
+                              MAX_RESPONSE_DELAY, MAX_RESPONSE_DELAY);
       speedSlider.addChangeListener(this);
       speed = MAX_RESPONSE_DELAY;
       controlPanel.add(speedSlider);
       controlPanel.add(newLabel("Stop", Label.LEFT));
       stepButton = newButton("Step");
-      controlPanel.add(stepButton); 
-      if (replayFrames.size() > 0)
-      {
-    	  stepCounterLabel = newLabel("Step = 1/" + replayFrames.size());    	  
-      } else {
-    	  stepCounterLabel = newLabel("Step = 0/" + replayFrames.size());
-      }
+      stepButton.addActionListener(this);
+      controlPanel.add(stepButton);
+      stepCounterLabel = newLabel("");
       controlPanel.add(stepCounterLabel);
-      stepCounter     = 0;
-      
+      stepCounter = 0;
+      stepReplay();
+
       // Create world display.
       canvasScroll     = new ScrollPane();
       canvasScrollSize = new Dimension(screenSize.width, (int)((double)screenSize.height * .95));
@@ -272,6 +263,7 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       return(label);
    }
 
+
    // Make justified label with font.
    private JLabel newLabel(String text, int justification)
    {
@@ -280,7 +272,8 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       label.setFont(font);
       return(label);
    }
-   
+
+
    // Make button with font.
    private JButton newButton(String text)
    {
@@ -290,15 +283,17 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       return(button);
    }
 
+
    // Make slider with font.
    private JSlider newSlider(int orientation, int min, int max, int value)
    {
       JSlider slider = new JSlider(orientation, min, max, value);
+
       slider.setFont(font);
       return(slider);
    }
 
-   
+
    public void setLocation()
    {
       Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -314,13 +309,13 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    // Start.
    public void start()
    {
-	   // Create replay update thread.
-	      if (replayThread == null)
-	      {
-	         replayThread = new Thread(this);
-	         replayThread.start();
-	      }
-	      
+      // Create replay update thread.
+      if (replayThread == null)
+      {
+         replayThread = new Thread(this);
+         replayThread.start();
+      }
+
       // Create display update thread.
       if (displayThread == null)
       {
@@ -333,11 +328,11 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    // Stop.
    public void stop()
    {
-	    if (replayThread != null)
-	      {
-	         replayThread = null;
-	      }	 
-	    
+      if (replayThread != null)
+      {
+         replayThread = null;
+      }
+
       if (displayThread != null)
       {
          displayThread = null;
@@ -350,31 +345,23 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
    {
       // Lower this thread's priority and get the current time.
       Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-      
+
       // Replay update loop.
       while (Thread.currentThread() == replayThread)
       {
-            if ((response < MAX_RESPONSE_DELAY) || (stepButton.getState() == true))
-            {
-               stepReplay();
-            }
-
-            if (stepButton.getState() == true)
-            {
-               stepButton.setState(false);
-               t = System.currentTimeMillis();
-               continue;
-            }
+         if (speed < MAX_RESPONSE_DELAY)
+         {
+            stepReplay();
+         }
 
          // Set the timer for the next loop.
          try
          {
-            t += response;
-            Thread.sleep(Math.max(0, t - System.currentTimeMillis()));
+            Thread.sleep(speed);
          }
          catch (InterruptedException e) { break; }
       }
-      
+
       // Display update loop.
       while (Thread.currentThread() == displayThread)
       {
@@ -385,6 +372,84 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
             Thread.sleep(DISPLAY_UPDATE_DELAY);
          }
          catch (InterruptedException e) { break; }
+      }
+   }
+
+
+   // Step.
+   public synchronized void stepReplay()
+   {
+      if (stepCounter < replayFrames.size())
+      {
+         stepCounterLabel.setText("Step = " + (stepCounter + 1) + "/" + replayFrames.size());
+         NestingBirdsReplayFrame frame     = replayFrames.get(stepCounter);
+         NestingBirdsReplayFrame framePrev = null;
+         if (stepCounter > 0)
+         {
+            framePrev = replayFrames.get(stepCounter - 1);
+         }
+         nestingbirds.male.x   = frame.maleData.x;
+         nestingbirds.male.y   = frame.maleData.y;
+         nestingbirds.female.x = frame.femaleData.x;
+         nestingbirds.female.y = frame.femaleData.y;
+         femaleDashboard.update(frame);
+         maleDashboard.update(frame);
+         for (int x = 0; x < 8; x++)
+         {
+            for (int y = 0; y < 10; y++)
+            {
+               nestingbirds.world[x][y].object = NestingBirds.OBJECT.NO_OBJECT;
+            }
+         }
+         for (int i = 0, j = frame.mice.size(); i < j; i++)
+         {
+            nestingbirds.world[frame.mice.get(i).x][frame.mice.get(i).y].object = NestingBirds.OBJECT.MOUSE;
+         }
+         if (framePrev != null)
+         {
+            if (framePrev.femaleData.response.equals("PUT_OBJECT") &&
+                framePrev.femaleData.hasObject.equals("STONE") &&
+                (nestingbirds.world[nestingbirds.female.x][nestingbirds.female.y].object == NestingBirds.OBJECT.NO_OBJECT))
+            {
+               nestingbirds.world[nestingbirds.female.x][nestingbirds.female.y].object = NestingBirds.OBJECT.STONE;
+            }
+            if (framePrev.femaleData.response.equals("LAY_EGG") &&
+                (nestingbirds.world[nestingbirds.female.x][nestingbirds.female.y].object == NestingBirds.OBJECT.NO_OBJECT))
+            {
+               nestingbirds.world[nestingbirds.female.x][nestingbirds.female.y].object = NestingBirds.OBJECT.EGG;
+            }
+            if (framePrev.maleData.response.equals("GET_OBJECT") &&
+                framePrev.maleData.hasObject.equals("NO_OBJECT") &&
+                (nestingbirds.world[nestingbirds.male.x][nestingbirds.male.y].object == NestingBirds.OBJECT.STONE))
+            {
+               nestingbirds.world[nestingbirds.male.x][nestingbirds.male.y].object = NestingBirds.OBJECT.NO_OBJECT;
+            }
+         }
+         if (frame.maleData.hasObject.equals("MOUSE"))
+         {
+            nestingbirds.male.hasObject = NestingBirds.OBJECT.MOUSE;
+         }
+         else if (frame.maleData.hasObject.equals("STONE"))
+         {
+            nestingbirds.male.hasObject = NestingBirds.OBJECT.STONE;
+         }
+         else
+         {
+            nestingbirds.male.hasObject = NestingBirds.OBJECT.NO_OBJECT;
+         }
+         if (frame.femaleData.hasObject.equals("MOUSE"))
+         {
+            nestingbirds.female.hasObject = NestingBirds.OBJECT.MOUSE;
+         }
+         else if (frame.femaleData.hasObject.equals("STONE"))
+         {
+            nestingbirds.female.hasObject = NestingBirds.OBJECT.STONE;
+         }
+         else
+         {
+            nestingbirds.female.hasObject = NestingBirds.OBJECT.NO_OBJECT;
+         }
+         stepCounter++;
       }
    }
 
@@ -592,21 +657,35 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       return(true);
    }
 
-   // Step.
-   public synchronized void step()
+
+   // Button listener.
+   @Override
+   public void actionPerformed(ActionEvent e)
    {
-      stepCounter++;
-      stepCounterLabel.setText("Step = " + stepCounter + "");
-      femaleDashboard.update();
-      maleDashboard.update();
+      if (e.getSource() == stepButton)
+      {
+         speed = MAX_RESPONSE_DELAY;
+         speedSlider.setValue(MAX_RESPONSE_DELAY);
+         stepReplay();
+      }
+      if (e.getSource() == rewindButton)
+      {
+         speed = MAX_RESPONSE_DELAY;
+         speedSlider.setValue(MAX_RESPONSE_DELAY);
+         stepCounter = 0;
+         stepReplay();
+      }
    }
 
+
    // Speed slider listener.
-   public void stateChanged(ChangeEvent evt)
+   @Override
+   public void stateChanged(ChangeEvent e)
    {
       speed = speedSlider.getValue();
    }
-   
+
+
    // Canvas mouse listener.
    @Override
    public void mouseClicked(MouseEvent e)
@@ -679,133 +758,137 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
       return(image);
    }
 
+
    // Load replay file into frames.
    void loadReplayFile(String filename)
    {
-	  replayFrames = new ArrayList<NestingBirdsReplayFrame>();
-	  
+      replayFrames = new ArrayList<NestingBirdsReplayFrame>();
+
       try
       {
-    	  FileReader reader = new FileReader(filename);
-    	  JSONParser parser = new JSONParser();
-    	  JSONArray replay = (JSONArray)parser.parse(reader);
-    	  for (Object o : replay)
-    	  { 
-    		  NestingBirdsReplayFrame frame = new NestingBirdsReplayFrame();   		  
-      	      JSONObject entry = (JSONObject)o;
-	      	  Long step = (Long)entry.get("Step");
-	      	  frame.step = step.intValue();
-	      	  JSONObject data = (JSONObject)entry.get("Data");
-	      	  JSONArray mice = (JSONArray)data.get("Mice");
-	    	  for (Object m : mice)
-	    	  {
-	    		  JSONObject mouse = (JSONObject)m;
-	    		  Long x = (Long)mouse.get("x");
-	    		  Long y = (Long)mouse.get("y");
-	    		  NestingBirdsReplayFrame.Location location = frame.newLocation();	    		  
-	    		  location.x = x.intValue();
-	    		  location.y = y.intValue();
-	    		  frame.mice.add(location);		  
-	    	  }
-	      	  JSONObject female = (JSONObject)data.get("Female");
-	      	  NestingBirdsReplayFrame.FemaleData femaleData = frame.femaleData;
-	      	  JSONObject location = (JSONObject)female.get("Location");
-    		  Long x = (Long)location.get("x");
-    		  Long y = (Long)location.get("y");    		  
-    		  femaleData.x = x.intValue();
-    		  femaleData.y = y.intValue();
-	      	  JSONObject sensors = (JSONObject)female.get("Sensors");
-	      	  JSONObject cellSensors = (JSONObject)sensors.get("Cell sensors");
-	      	  JSONObject cellSensor = (JSONObject)cellSensors.get("Current");
-	      	  femaleData.currentLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.currentObject = (String)cellSensor.get("Object");
-	      	  cellSensor = (JSONObject)cellSensors.get("Left");
-	      	  femaleData.leftLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.leftObject = (String)cellSensor.get("Object");
-	      	  cellSensor = (JSONObject)cellSensors.get("Left front");
-	      	  femaleData.leftFrontLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.leftFrontObject = (String)cellSensor.get("Object");
-	      	  cellSensor = (JSONObject)cellSensors.get("Front");
-	      	  femaleData.frontLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.frontObject = (String)cellSensor.get("Object");      	  
-	      	  cellSensor = (JSONObject)cellSensors.get("Right front");
-	      	  femaleData.rightFrontLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.rightFrontObject = (String)cellSensor.get("Object");
-	      	  cellSensor = (JSONObject)cellSensors.get("Right");
-	      	  femaleData.rightLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.rightObject = (String)cellSensor.get("Object");      	  
-	      	  cellSensor = (JSONObject)cellSensors.get("Right rear");
-	      	  femaleData.rightRearLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.rightRearObject = (String)cellSensor.get("Object");
-	      	  cellSensor = (JSONObject)cellSensors.get("Rear");
-	      	  femaleData.rearLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.rearObject = (String)cellSensor.get("Object");	      	  
-	      	  cellSensor = (JSONObject)cellSensors.get("Left rear");
-	      	  femaleData.leftRearLocale = (String)cellSensor.get("Locale");
-	      	  femaleData.leftRearObject = (String)cellSensor.get("Object");
-	      	  femaleData.orientation = (String)sensors.get("Orientation");
-	      	  femaleData.goal = (String)sensors.get("Goal");
-	      	  femaleData.hasObject = (String)sensors.get("Has object");
-	      	  femaleData.food = (Long)female.get("Food") + "";
-	      	  JSONObject needs = (JSONObject)female.get("Needs");
-	      	  femaleData.mouseNeed = (Double)needs.get("Mouse") + "";
-	      	  femaleData.layEggNeed = (Double)needs.get("Lay egg") + "";
-	      	  femaleData.broodEggNeed = (Double)needs.get("Brood egg") + "";	
-	      	  femaleData.response = (String)female.get("Response");	      	  
-	      	  JSONObject male = (JSONObject)data.get("Male");
-	      	  NestingBirdsReplayFrame.MaleData maleData = frame.maleData;
-	      	  location = (JSONObject)male.get("Location");
-    		  x = (Long)location.get("x");
-    		  y = (Long)location.get("y");    		  
-    		  maleData.x = x.intValue();
-    		  maleData.y = y.intValue();
-	      	  sensors = (JSONObject)male.get("Sensors");
-	      	  maleData.locale = (String)sensors.get("Locale");
-	      	  maleData.mouseProximity = (String)sensors.get("Mouse proximity");
-	      	  maleData.stoneProximity = (String)sensors.get("Stone proximity");
-	      	  maleData.femaleProximity = (String)sensors.get("Female proximity");	      	  
-	      	  maleData.goal = (String)sensors.get("Goal");
-	      	  maleData.hasObject = (String)sensors.get("Has object");
-	      	  maleData.flying = (Boolean)sensors.get("Flying") + "";
-	      	  maleData.femaleWantsMouse = (Boolean)sensors.get("Female wants mouse") + "";
-	      	  maleData.femaleWantsStone = (Boolean)sensors.get("Female wants stone") + "";	      	  
-	      	  maleData.food = (Long)male.get("Food") + "";
-	      	  needs = (JSONObject)male.get("Needs");
-	      	  maleData.mouseNeed = (Double)needs.get("Mouse") + "";
-	      	  maleData.femaleMouseNeed = (Double)needs.get("Female mouse") + "";
-	      	  maleData.femaleStoneNeed = (Double)needs.get("Female stone") + "";	
-	      	  maleData.response = (String)female.get("Response");		      	  
-	      	  maleData.attendFemaleNeed = (Double)needs.get("Attend female") + "";
-	      	  maleData.response = (String)male.get("Response");	      	  
-	      	  replayFrames.add(frame);	      	  
-    	  }
+         FileReader reader = new FileReader(filename);
+         JSONParser parser = new JSONParser();
+         JSONArray  replay = (JSONArray)parser.parse(reader);
+         for (Object o : replay)
+         {
+            NestingBirdsReplayFrame frame = new NestingBirdsReplayFrame();
+            JSONObject              entry = (JSONObject)o;
+            Long step = (Long)entry.get("Step");
+            frame.step = step.intValue();
+            JSONObject data = (JSONObject)entry.get("Data");
+            JSONArray  mice = (JSONArray)data.get("Mice");
+            for (Object m : mice)
+            {
+               JSONObject mouse = (JSONObject)m;
+               Long       x     = (Long)mouse.get("x");
+               Long       y     = (Long)mouse.get("y");
+               NestingBirdsReplayFrame.Location location = frame.newLocation();
+               location.x = x.intValue();
+               location.y = y.intValue();
+               frame.mice.add(location);
+            }
+            JSONObject female = (JSONObject)data.get("Female");
+            NestingBirdsReplayFrame.FemaleData femaleData = frame.femaleData;
+            JSONObject location = (JSONObject)female.get("Location");
+            Long       x        = (Long)location.get("x");
+            Long       y        = (Long)location.get("y");
+            femaleData.x = x.intValue();
+            femaleData.y = y.intValue();
+            JSONObject sensors     = (JSONObject)female.get("Sensors");
+            JSONObject cellSensors = (JSONObject)sensors.get("Cell sensors");
+            JSONObject cellSensor  = (JSONObject)cellSensors.get("Current");
+            femaleData.currentLocale = (String)cellSensor.get("Locale");
+            femaleData.currentObject = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Left");
+            femaleData.leftLocale       = (String)cellSensor.get("Locale");
+            femaleData.leftObject       = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Left front");
+            femaleData.leftFrontLocale  = (String)cellSensor.get("Locale");
+            femaleData.leftFrontObject  = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Front");
+            femaleData.frontLocale      = (String)cellSensor.get("Locale");
+            femaleData.frontObject      = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Right front");
+            femaleData.rightFrontLocale = (String)cellSensor.get("Locale");
+            femaleData.rightFrontObject = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Right");
+            femaleData.rightLocale      = (String)cellSensor.get("Locale");
+            femaleData.rightObject      = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Right rear");
+            femaleData.rightRearLocale  = (String)cellSensor.get("Locale");
+            femaleData.rightRearObject  = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Rear");
+            femaleData.rearLocale       = (String)cellSensor.get("Locale");
+            femaleData.rearObject       = (String)cellSensor.get("Object");
+            cellSensor                  = (JSONObject)cellSensors.get("Left rear");
+            femaleData.leftRearLocale   = (String)cellSensor.get("Locale");
+            femaleData.leftRearObject   = (String)cellSensor.get("Object");
+            femaleData.orientation      = (String)sensors.get("Orientation");
+            femaleData.goal             = (String)sensors.get("Goal");
+            femaleData.hasObject        = (String)sensors.get("Has object");
+            femaleData.food             = (Long)female.get("Food") + "";
+            JSONObject needs = (JSONObject)female.get("Needs");
+            femaleData.mouseNeed    = (Double)needs.get("Mouse") + "";
+            femaleData.layEggNeed   = (Double)needs.get("Lay egg") + "";
+            femaleData.broodEggNeed = (Double)needs.get("Brood egg") + "";
+            femaleData.response     = (String)female.get("Response");
+            JSONObject male = (JSONObject)data.get("Male");
+            NestingBirdsReplayFrame.MaleData maleData = frame.maleData;
+            location                  = (JSONObject)male.get("Location");
+            x                         = (Long)location.get("x");
+            y                         = (Long)location.get("y");
+            maleData.x                = x.intValue();
+            maleData.y                = y.intValue();
+            sensors                   = (JSONObject)male.get("Sensors");
+            maleData.locale           = (String)sensors.get("Locale");
+            maleData.mouseProximity   = (String)sensors.get("Mouse proximity");
+            maleData.stoneProximity   = (String)sensors.get("Stone proximity");
+            maleData.femaleProximity  = (String)sensors.get("Female proximity");
+            maleData.goal             = (String)sensors.get("Goal");
+            maleData.hasObject        = (String)sensors.get("Has object");
+            maleData.flying           = (Boolean)sensors.get("Flying") + "";
+            maleData.femaleWantsMouse = (Boolean)sensors.get("Female wants mouse") + "";
+            maleData.femaleWantsStone = (Boolean)sensors.get("Female wants stone") + "";
+            maleData.food             = (Long)male.get("Food") + "";
+            needs                     = (JSONObject)male.get("Needs");
+            maleData.mouseNeed        = (Double)needs.get("Mouse") + "";
+            maleData.femaleMouseNeed  = (Double)needs.get("Female mouse") + "";
+            maleData.femaleStoneNeed  = (Double)needs.get("Female stone") + "";
+            maleData.response         = (String)female.get("Response");
+            maleData.attendFemaleNeed = (Double)needs.get("Attend female") + "";
+            maleData.response         = (String)male.get("Response");
+            replayFrames.add(frame);
+         }
       }
       catch (JSONException e)
       {
          System.err.println("Cannot parse replay file " + filename + ":" + e.getMessage());
-      }    	  
+         System.exit(1);
+      }
       catch (Exception e)
       {
          System.err.println("Cannot load replay file " + filename + ":" + e.getMessage());
+         System.exit(1);
       }
    }
-   
+
+
    // Main.
    public static void main(String[] args)
    {
-	  for (int i = 0; i < args.length; i++)
-	  {	   
+      for (int i = 0; i < args.length; i++)
+      {
          if (args[i].equals("-replayFile"))
          {
-             i++;
-             if (i >= args.length)
-             {
-                System.err.println("Invalid replayFile option");
-                System.err.println(Usage);
-                System.exit(1);
-             }        	 
-        	 ReplayFilename = args[i];
-             continue;
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid replayFile option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            ReplayFilename = args[i];
+            continue;
          }
          if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
          {
@@ -815,12 +898,12 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ChangeListen
          System.err.println(Usage);
          System.exit(1);
       }
-	  if (ReplayFilename == null)
-	  {
-          System.err.println(Usage);
-          System.exit(1);		  
-	  }
-	  
+      if (ReplayFilename == null)
+      {
+         System.err.println(Usage);
+         System.exit(1);
+      }
+
       // Create display.
       NestingBirdsReplay nestingbirdsReplay = new NestingBirdsReplay();
 

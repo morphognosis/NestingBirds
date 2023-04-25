@@ -14,7 +14,7 @@ const char *VERSION = "2.0";
 int RANDOM_NUMBER_SEED = 4517;
 
 // Probability of mouse movement.
-#define DEFAULT_MOUSE_MOVE_PROBABILITY "0.1"
+#define DEFAULT_MOUSE_MOVE_PROBABILITY    "0.1"
 static double MOUSE_MOVE_PROBABILITY = 0.1;
 
 // Usage.
@@ -50,7 +50,7 @@ const char* Usage =
 "  0=success\n"
 "  1=error\n";
 
-// Bird sex.
+// Bird gender.
 static const int MALE   = 0;
 static const int FEMALE = 1;
 
@@ -74,13 +74,13 @@ int  FemaleNestSequence;
 
 // Save/load file names.
 char *MaleSaveFilename;
-char* MaleLoadFilename;
+char *MaleLoadFilename;
 char *FemaleSaveFilename;
-char* FemaleLoadFilename;
+char *FemaleLoadFilename;
 
 // Replay file name.
-char* ReplayFilename;
-FILE* ReplayFp;
+char *ReplayFilename;
+FILE *ReplayFp;
 
 // World map: plain=0, forest=1, mouse=2, desert=3, stone=4
 const int  WIDTH = 21, HEIGHT = 21;
@@ -322,35 +322,35 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       int count = 0;
-       for (int x = 0; x < WIDTH; x++)
-       {
-           for (int y = 0; y < HEIGHT; y++)
-           {
-               if (World[x][y].object == OBJECT::MOUSE)
+      int count = 0;
+      for (int x = 0; x < WIDTH; x++)
+      {
+         for (int y = 0; y < HEIGHT; y++)
+         {
+            if (World[x][y].object == OBJECT::MOUSE)
+            {
+               count++;
+            }
+         }
+      }
+      fprintf(ReplayFp, "\"Mice\": [");
+      int n = 0;
+      for (int x = 0; x < WIDTH; x++)
+      {
+         for (int y = 0; y < HEIGHT; y++)
+         {
+            if (World[x][y].object == OBJECT::MOUSE)
+            {
+               fprintf(ReplayFp, " { \"x\": %d, \"y\": %d }", x, y);
+               if (n < count - 1)
                {
-                   count++;
+                  fprintf(ReplayFp, ",");
                }
-           }
-       }
-       fprintf(ReplayFp, "\"Mice\": [");
-       int n = 0;
-       for (int x = 0; x < WIDTH; x++)
-       {
-           for (int y = 0; y < HEIGHT; y++)
-           {
-               if (World[x][y].object == OBJECT::MOUSE)
-               {
-                   fprintf(ReplayFp, " { \"x\": %d, \"y\": %d }", x, y);
-                   if (n < count - 1)
-                   {
-                       fprintf(ReplayFp, ",");
-                   }
-                   n++;
-               }
-           }
-       }
-       fprintf(ReplayFp, " ],\n");
+               n++;
+            }
+         }
+      }
+      fprintf(ReplayFp, " ],\n");
    }
 
    // Set female sensors.
@@ -367,15 +367,15 @@ void step()
 
    if (Verbose)
    {
-       printf("Female: Location: [%d,%d], ", female->x, female->y);
-       printf("{ ");
-       female->printState();
+      printf("Female: Location: [%d,%d], ", female->x, female->y);
+      printf("{ ");
+      female->printState();
    }
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
-       female->printState(ReplayFp);
+      fprintf(ReplayFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
+      female->printState(ReplayFp);
    }
 
    // Cycle female
@@ -383,16 +383,16 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, ", ");
-       female->printResponse(ReplayFp);
-       fprintf(ReplayFp, " },\n");
+      fprintf(ReplayFp, ", ");
+      female->printResponse(ReplayFp);
+      fprintf(ReplayFp, " },\n");
    }
 
    if (Verbose)
    {
-       printf(", ");
-       female->printResponse();
-       printf(" }\n");
+      printf(", ");
+      female->printResponse();
+      printf(" }\n");
    }
 
    // Do response in world.
@@ -413,8 +413,8 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
-       male->printState(ReplayFp);
+      fprintf(ReplayFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
+      male->printState(ReplayFp);
    }
 
    // Cycle male.
@@ -428,16 +428,16 @@ void step()
 
    if (ReplayFp != NULL)
    {
-       fprintf(ReplayFp, ", ");
-       male->printResponse(ReplayFp);
-       fprintf(ReplayFp, " }\n");
+      fprintf(ReplayFp, ", ");
+      male->printResponse(ReplayFp);
+      fprintf(ReplayFp, " }\n");
    }
 
    if (Verbose)
    {
-       printf(", ");
-       male->printResponse();
-       printf(" }\n");
+      printf(", ");
+      male->printResponse();
+      printf(" }\n");
    }
 
    // Do response in world.
@@ -2306,7 +2306,7 @@ int main(int argc, char *args[])
    {
       if (strcmp(args[i], "-trainMale") == 0)
       {
-         MaleTest     = false;
+         MaleTest = false;
          if (gotMaleTrainTest)
          {
             fprintf(stderr, "Duplicate male train/test option\n");
@@ -2318,7 +2318,7 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-testMale") == 0)
       {
-         MaleTest     = true;
+         MaleTest = true;
          if (gotMaleTrainTest)
          {
             fprintf(stderr, "Duplicate male train/test option\n");
@@ -2330,7 +2330,7 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-trainFemale") == 0)
       {
-         FemaleTest     = false;
+         FemaleTest = false;
          if (gotFemaleTrainTest)
          {
             fprintf(stderr, "Duplicate female train/test option\n");
@@ -2342,7 +2342,7 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-testFemale") == 0)
       {
-         FemaleTest     = true;
+         FemaleTest = true;
          if (gotFemaleTrainTest)
          {
             fprintf(stderr, "Duplicate female train/test option\n");
@@ -2373,51 +2373,51 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-saveMaleFile") == 0)
       {
-          i++;
-          if (i >= argc)
-          {
-              fprintf(stderr, "Invalid male save file\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          MaleSaveFilename = args[i];
-          continue;
+         i++;
+         if (i >= argc)
+         {
+            fprintf(stderr, "Invalid male save file\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         MaleSaveFilename = args[i];
+         continue;
       }
       if (strcmp(args[i], "-loadMaleFile") == 0)
       {
-          i++;
-          if (i >= argc)
-          {
-              fprintf(stderr, "Invalid male load file\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          MaleLoadFilename = args[i];
-          continue;
+         i++;
+         if (i >= argc)
+         {
+            fprintf(stderr, "Invalid male load file\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         MaleLoadFilename = args[i];
+         continue;
       }
       if (strcmp(args[i], "-saveFemaleFile") == 0)
       {
-          i++;
-          if (i >= argc)
-          {
-              fprintf(stderr, "Invalid female save file\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          FemaleSaveFilename = args[i];
-          continue;
+         i++;
+         if (i >= argc)
+         {
+            fprintf(stderr, "Invalid female save file\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         FemaleSaveFilename = args[i];
+         continue;
       }
       if (strcmp(args[i], "-loadFemaleFile") == 0)
       {
-          i++;
-          if (i >= argc)
-          {
-              fprintf(stderr, "Invalid female load file\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          FemaleLoadFilename = args[i];
-          continue;
+         i++;
+         if (i >= argc)
+         {
+            fprintf(stderr, "Invalid female load file\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         FemaleLoadFilename = args[i];
+         continue;
       }
       if (strcmp(args[i], "-maleInitialFood") == 0)
       {
@@ -2648,21 +2648,21 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-mouseMoveProbability") == 0)
       {
-          i++;
-          if (i >= argc)
-          {
-              fprintf(stderr, "Invalid mouseMoveProbability option\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          MOUSE_MOVE_PROBABILITY = atof(args[i]);
-          if (MOUSE_MOVE_PROBABILITY < 0.0 || MOUSE_MOVE_PROBABILITY > 1.0)
-          {
-              fprintf(stderr, "Invalid mouseMoveProbability option\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          continue;
+         i++;
+         if (i >= argc)
+         {
+            fprintf(stderr, "Invalid mouseMoveProbability option\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         MOUSE_MOVE_PROBABILITY = atof(args[i]);
+         if ((MOUSE_MOVE_PROBABILITY < 0.0) || (MOUSE_MOVE_PROBABILITY > 1.0))
+         {
+            fprintf(stderr, "Invalid mouseMoveProbability option\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         continue;
       }
       if (strcmp(args[i], "-verbose") == 0)
       {
@@ -2691,15 +2691,15 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-writeReplayFile") == 0)
       {
-          i++;
-          if (i >= argc)
-          {
-              fprintf(stderr, "Invalid replay file\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          ReplayFilename = args[i];
-          continue;
+         i++;
+         if (i >= argc)
+         {
+            fprintf(stderr, "Invalid replay file\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         ReplayFilename = args[i];
+         continue;
       }
       if (strcmp(args[i], "-version") == 0)
       {
@@ -2729,32 +2729,6 @@ int main(int argc, char *args[])
    {
       fprintf(stderr, Usage);
       exit(1);
-   }
-   if (MaleTest)
-   {
-       if (MaleLoadFilename == NULL)
-       {
-           fprintf(stderr, "Warning: testing male without load file\n");
-       }
-   }
-   else {
-       if (MaleSaveFilename == NULL)
-       {
-           fprintf(stderr, "Warning: training male without save file\n");
-       }
-   }
-   if (FemaleTest)
-   {
-       if (FemaleLoadFilename == NULL)
-       {
-           fprintf(stderr, "Warning: testing female without load file\n");
-       }
-   }
-   else {
-       if (FemaleSaveFilename == NULL)
-       {
-           fprintf(stderr, "Warning: training female without save file\n");
-       }
    }
    if (Male::INITIAL_FOOD > Male::FOOD_DURATION)
    {
@@ -2799,12 +2773,12 @@ int main(int argc, char *args[])
    // Write replay file?
    if (ReplayFilename != NULL)
    {
-       if ((ReplayFp = fopen(ReplayFilename, "w")) == NULL)
-       {
-           fprintf(stderr, "Cannot open replay file: %s\n", ReplayFilename);
-           exit(1);
-       }
-       fprintf(ReplayFp, "[\n");
+      if ((ReplayFp = fopen(ReplayFilename, "w")) == NULL)
+      {
+         fprintf(stderr, "Cannot open replay file: %s\n", ReplayFilename);
+         exit(1);
+      }
+      fprintf(ReplayFp, "[\n");
    }
 
    // Run birds.
@@ -2818,19 +2792,19 @@ int main(int argc, char *args[])
 
       if (ReplayFp != NULL)
       {
-          fprintf(ReplayFp, "{ \"Step\": %d, \"Data\": {\n", i);
+         fprintf(ReplayFp, "{ \"Step\": %d, \"Data\": {\n", i);
       }
 
       step();
 
       if (ReplayFp != NULL)
       {
-          fprintf(ReplayFp, "} }");
-          if (i < Steps)
-          {
-              fprintf(ReplayFp, ",");
-          }
-          fprintf(ReplayFp, "\n");
+         fprintf(ReplayFp, "} }");
+         if (i < Steps)
+         {
+            fprintf(ReplayFp, ",");
+         }
+         fprintf(ReplayFp, "\n");
       }
 
       if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
@@ -2892,12 +2866,12 @@ int main(int argc, char *args[])
    // Write replay file?
    if (ReplayFilename != NULL)
    {
-       fprintf(ReplayFp, "]\n");
-       fclose(ReplayFp);
-       if (Verbose)
-       {
-           printf("Replay file written to %s\n", ReplayFilename);
-       }
+      fprintf(ReplayFp, "]\n");
+      fclose(ReplayFp);
+      if (Verbose)
+      {
+         printf("Replay file written to %s\n", ReplayFilename);
+      }
    }
 
    exit(0);

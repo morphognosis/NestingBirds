@@ -178,7 +178,6 @@ void Female::save(char *filename)
 // Print state.
 void Female::printState(FILE *fp)
 {
-
    printSensors(fp);
    fprintf(fp, ", \"Food\": %d, ", food);
    printNeeds(fp);
