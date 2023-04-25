@@ -24,24 +24,29 @@ nestingbirds
 
 Usage:
     nestingbirds
-      -trainMale <male save file name> | -testMale <male load file name>
-      -trainFemale <female save file name> | -testFemale <female load file name>
+      -trainMale | -testMale
+      -trainFemale | -testFemale
       -steps <steps>
+      [-saveMaleFile <save file name>]
+      [-loadMaleFile <load file name>]
+      [-saveFemaleFile <save file name>]
+      [-loadFemaleFile <load file name>]
       [-maleInitialFood <amount> (default=200]
       [-maleFoodDuration <amount> (default=200)]
-      [-maleRandomizeFoodLevel (food level probabilistically increases 0-200 upon eating food)]
+      [-maleRandomizeFoodLevel (food level probabilistically increases 0-200 upon eating mouse)]
       [-maleMouseNeed <amount> (default=1.0)]
       [-maleFemaleMouseNeed <amount> (default=1.0)]
       [-maleFemaleStoneNeed <amount> (default=1.0)]
       [-maleAttendFemaleNeed <amount> (default=1.0)]
       [-femaleInitialFood <amount> (default=0)]
       [-femaleFoodDuration <amount> (default=100)]
-      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-100 upon eating food)]
+      [-femaleRandomizeFoodLevel (food level probabilistically increases 0-100 upon eating mouse)]
       [-femaleMouseNeed <amount> (default=0.2)]
       [-femaleLayEggNeed <amount> (default=0.1)]
       [-femaleBroodEggNeed <amount> (default=0.3)]
-      [-verbose <true | false> (default=true)]
       [-randomSeed <seed> (default=4517)]
+      [-mouseMoveProbability <probability> (default=0.1)]
       [-writeReplayFile <replay file name> (json)]
+      [-verbose <true | false> (default=true)]
       [-version]
-    
+      

@@ -2809,7 +2809,7 @@ int main(int argc, char *args[])
 
    // Run birds.
    int eggLaidStep = -1;
-   for (int i = 0; i < Steps; i++)
+   for (int i = 1; i <= Steps; i++)
    {
       if (Verbose)
       {
@@ -2826,7 +2826,7 @@ int main(int argc, char *args[])
       if (ReplayFp != NULL)
       {
           fprintf(ReplayFp, "} }");
-          if (i < Steps - 1)
+          if (i < Steps)
           {
               fprintf(ReplayFp, ",");
           }
@@ -2842,7 +2842,7 @@ int main(int argc, char *args[])
    if (Verbose)
    {
       printf("Run results: ");
-      if (eggLaidStep >= 0)
+      if (eggLaidStep >= 1)
       {
          printf("egg laid at step %d", eggLaidStep);
       }

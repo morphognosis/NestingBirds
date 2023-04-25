@@ -22,22 +22,8 @@ public class MaleReplayDashboard extends JFrame
 {
    private static final long serialVersionUID = 0L;
    
-   // Replay state.
-   String locale = "PLAIN";
-   String mouseProximity = "UNKNOWN";
-   String stoneProximity = "UNKNOWN";
-   String femaleProximity = "PRESENT";
-   String goal = "ATTEND_FEMALE";
-   String hasObject = "NO_OBJECT";
-   String flying = "false";
-   String food = "0";   
-   String femaleWantsMouse = "false";
-   String femaleWantsStone = "false";
-   String mouseNeed = "0.000000";
-   String femaleMouseNeed = "0.000000";
-   String femaleStoneNeed = "0.000000";
-   String attendFemaleNeed = "0.000000";
-   String response = "DO_NOTHING";      
+   // Replay frame.
+   NestingBirdsReplayFrame replayFrame;
 
    // Components.
    StatusPanel statusPanel;
@@ -53,6 +39,7 @@ public class MaleReplayDashboard extends JFrame
                         );
       JPanel basePanel = (JPanel)getContentPane();
       basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
+      replayFrame = new NestingBirdsReplayFrame();
       statusPanel = new StatusPanel();
       basePanel.add(statusPanel);
       pack();
@@ -160,7 +147,7 @@ public class MaleReplayDashboard extends JFrame
          internalSensorsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          sensorsPanel.add(internalSensorsPanel);
          internalSensorsPanel.add(new JLabel("Goal:"));
-         goalText = new JTextField(10);
+         goalText = new JTextField(15);
          goalText.setEditable(false);
          internalSensorsPanel.add(goalText);            
          internalSensorsPanel.add(new JLabel("Has object:"));
@@ -218,7 +205,7 @@ public class MaleReplayDashboard extends JFrame
                                     "Response"));
          add(responsePanel, BorderLayout.SOUTH);
          responsePanel.add(new JLabel("Response:"));
-         responseText = new JTextField(25);
+         responseText = new JTextField(15);
          responseText.setEditable(false);
          responsePanel.add(responseText);
       }
@@ -227,21 +214,21 @@ public class MaleReplayDashboard extends JFrame
       // Update.
       public void update()
       {
-          localeText.setText(locale);
-          mouseProximityText.setText(mouseProximity);
-          stoneProximityText.setText(stoneProximity);
-          femaleProximityText.setText(femaleProximity);
-          goalText.setText(goal);
-          hasObjectText.setText(hasObject);
-          flyingText.setText(flying);
-          femaleWantsMouseText.setText(femaleWantsMouse);
-          femaleWantsStoneText.setText(femaleWantsStone);
-          foodText.setText(food);
-          mouseNeedText.setText(mouseNeed);
-          femaleMouseNeedText.setText(femaleMouseNeed);
-          femaleStoneNeedText.setText(femaleStoneNeed);
-          attendFemaleNeedText.setText(attendFemaleNeed);
-          responseText.setText(response);
+          localeText.setText(replayFrame.maleData.locale);
+          mouseProximityText.setText(replayFrame.maleData.mouseProximity);
+          stoneProximityText.setText(replayFrame.maleData.stoneProximity);
+          femaleProximityText.setText(replayFrame.maleData.femaleProximity);
+          goalText.setText(replayFrame.maleData.goal);
+          hasObjectText.setText(replayFrame.maleData.hasObject);
+          flyingText.setText(replayFrame.maleData.flying);
+          femaleWantsMouseText.setText(replayFrame.maleData.femaleWantsMouse);
+          femaleWantsStoneText.setText(replayFrame.maleData.femaleWantsStone);
+          foodText.setText(replayFrame.maleData.food);
+          mouseNeedText.setText(replayFrame.maleData.mouseNeed);
+          femaleMouseNeedText.setText(replayFrame.maleData.femaleMouseNeed);
+          femaleStoneNeedText.setText(replayFrame.maleData.femaleStoneNeed);
+          attendFemaleNeedText.setText(replayFrame.maleData.attendFemaleNeed);
+          responseText.setText(replayFrame.maleData.response);
       }
    }
 }

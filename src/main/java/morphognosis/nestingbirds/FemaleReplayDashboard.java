@@ -22,33 +22,8 @@ public class FemaleReplayDashboard extends JFrame
 {
    private static final long serialVersionUID = 0L;
    
-   // Replay state.
-   String currentLocale = "PLAIN";
-   String currentObject = "NO_OBJECT";
-   String leftLocale = "PLAIN";
-   String leftObject = "NO_OBJECT";
-   String leftFrontLocale = "PLAIN";
-   String leftFrontObject = "NO_OBJECT";
-   String frontLocale = "PLAIN";
-   String frontObject = "NO_OBJECT";
-   String rightFrontLocale = "PLAIN";
-   String rightFrontObject = "NO_OBJECT";
-   String rightLocale = "PLAIN";
-   String rightObject = "NO_OBJECT";
-   String rightRearLocale = "PLAIN";
-   String rightRearObject = "NO_OBJECT";
-   String rearLocale = "PLAIN";
-   String rearObject = "NO_OBJECT";
-   String leftRearLocale = "PLAIN";
-   String leftRearObject = "NO_OBJECT";
-   String orientation = "NORTH";
-   String goal = "LAY_EGG";
-   String hasObject = "NO_OBJECT";
-   String food = "0";
-   String mouseNeed = "0.000000";
-   String layEggNeed = "0.000000";
-   String broodEggNeed = "0.000000";
-   String response = "DO_NOTHING";
+   // Replay frame.
+   NestingBirdsReplayFrame replayFrame;
    
    // Components.
    StatusPanel statusPanel;
@@ -64,6 +39,7 @@ public class FemaleReplayDashboard extends JFrame
                         );
       JPanel basePanel = (JPanel)getContentPane();
       basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
+      replayFrame = new NestingBirdsReplayFrame();      
       statusPanel = new StatusPanel();
       basePanel.add(statusPanel);
       pack();
@@ -287,7 +263,7 @@ public class FemaleReplayDashboard extends JFrame
          orientationText.setEditable(false);
          internalSensorsPanel.add(orientationText);
          internalSensorsPanel.add(new JLabel("Goal:"));
-         goalText = new JTextField(10);
+         goalText = new JTextField(15);
          goalText.setEditable(false);
          internalSensorsPanel.add(goalText);            
          internalSensorsPanel.add(new JLabel("Has object:"));
@@ -326,7 +302,7 @@ public class FemaleReplayDashboard extends JFrame
                                     "Response"));
          add(responsePanel, BorderLayout.SOUTH);
          responsePanel.add(new JLabel("Response:"));
-         responseText = new JTextField(25);
+         responseText = new JTextField(15);
          responseText.setEditable(false);
          responsePanel.add(responseText);
       }
@@ -335,32 +311,32 @@ public class FemaleReplayDashboard extends JFrame
       // Update.
       public void update()
       {
-    	   currentLocaleText.setText(currentLocale);
-    	   currentObjectText.setText(currentObject);
-    	   leftLocaleText.setText(leftLocale);
-    	   leftObjectText.setText(leftObject);
-    	   leftFrontLocaleText.setText(leftFrontLocale);
-    	   leftFrontObjectText.setText(leftFrontObject);
-    	   frontLocaleText.setText(frontLocale);
-    	   frontObjectText.setText(frontObject);
-    	   rightFrontLocaleText.setText(rightFrontLocale);
-    	   rightFrontObjectText.setText(rightFrontObject);
-    	   rightLocaleText.setText(rightLocale);
-    	   rightObjectText.setText(rightObject);
-    	   rightRearLocaleText.setText(rightRearLocale);
-    	   rightRearObjectText.setText(rightRearObject);
-    	   rearLocaleText.setText(rearLocale);
-    	   rearObjectText.setText(rearObject);
-    	   leftRearLocaleText.setText(leftRearLocale);
-    	   leftRearObjectText.setText(leftRearObject);
-    	   orientationText.setText(orientation);
-    	   goalText.setText(goal);
-    	   hasObjectText.setText(hasObject);
-    	   foodText.setText(food);
-    	   mouseNeedText.setText(mouseNeed);
-    	   layEggNeedText.setText(layEggNeed);
-    	   broodEggNeedText.setText(broodEggNeed);   	  
-    	   responseText.setText(response);
+    	   currentLocaleText.setText(replayFrame.femaleData.currentLocale);
+    	   currentObjectText.setText(replayFrame.femaleData.currentObject);
+    	   leftLocaleText.setText(replayFrame.femaleData.leftLocale);
+    	   leftObjectText.setText(replayFrame.femaleData.leftObject);
+    	   leftFrontLocaleText.setText(replayFrame.femaleData.leftFrontLocale);
+    	   leftFrontObjectText.setText(replayFrame.femaleData.leftFrontObject);
+    	   frontLocaleText.setText(replayFrame.femaleData.frontLocale);
+    	   frontObjectText.setText(replayFrame.femaleData.frontObject);
+    	   rightFrontLocaleText.setText(replayFrame.femaleData.rightFrontLocale);
+    	   rightFrontObjectText.setText(replayFrame.femaleData.rightFrontObject);
+    	   rightLocaleText.setText(replayFrame.femaleData.rightLocale);
+    	   rightObjectText.setText(replayFrame.femaleData.rightObject);
+    	   rightRearLocaleText.setText(replayFrame.femaleData.rightRearLocale);
+    	   rightRearObjectText.setText(replayFrame.femaleData.rightRearObject);
+    	   rearLocaleText.setText(replayFrame.femaleData.rearLocale);
+    	   rearObjectText.setText(replayFrame.femaleData.rearObject);
+    	   leftRearLocaleText.setText(replayFrame.femaleData.leftRearLocale);
+    	   leftRearObjectText.setText(replayFrame.femaleData.leftRearObject);
+    	   orientationText.setText(replayFrame.femaleData.orientation);
+    	   goalText.setText(replayFrame.femaleData.goal);
+    	   hasObjectText.setText(replayFrame.femaleData.hasObject);
+    	   foodText.setText(replayFrame.femaleData.food);
+    	   mouseNeedText.setText(replayFrame.femaleData.mouseNeed);
+    	   layEggNeedText.setText(replayFrame.femaleData.layEggNeed);
+    	   broodEggNeedText.setText(replayFrame.femaleData.broodEggNeed);   	  
+    	   responseText.setText(replayFrame.femaleData.response);
       }
    }
 }
