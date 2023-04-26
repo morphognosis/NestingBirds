@@ -15,13 +15,28 @@ class Female
 public:
 
    // Sensors.
-   class CELL_SENSOR
-   {
-public:
-      static const int NUM_SENSORS = 2;
-      int              locale;
-      int              object;
-   };
+
+   // Bird senses object in current, left, left front,
+   // front, right front, right, right rear, rear, and left rear cells.
+   static const int CURRENT_OBJECT_SENSOR     = 0;
+   static const int LEFT_OBJECT_SENSOR        = 1;
+   static const int LEFT_FRONT_OBJECT_SENSOR  = 2;
+   static const int FRONT_OBJECT_SENSOR       = 3;
+   static const int RIGHT_FRONT_OBJECT_SENSOR = 4;
+   static const int RIGHT_OBJECT_SENSOR       = 5;
+   static const int RIGHT_REAR_OBJECT_SENSOR  = 6;
+   static const int REAR_OBJECT_SENSOR        = 7;
+   static const int LEFT_REAR_OBJECT_SENSOR   = 8;
+   static const int NUM_CELL_SENSORS          = 9;
+
+   // State sensors.
+   static const int ORIENTATION_SENSOR = 9;
+   static const int GOAL_SENSOR        = 10;
+   static const int HAS_OBJECT_SENSOR  = 11;
+   static const int NUM_SENSORS        = 12;
+
+   // Sensors.
+   int sensors[NUM_SENSORS];
 
    // Goal.
    class GOAL
@@ -50,36 +65,6 @@ public:
          }
       }
    };
-
-   // Bird senses current, left, front, right, and rear cells.
-   static const int NUM_CELL_SENSORS          = 9;
-   static const int CURRENT_LOCALE_SENSOR     = 0;
-   static const int CURRENT_OBJECT_SENSOR     = 1;
-   static const int LEFT_LOCALE_SENSOR        = 2;
-   static const int LEFT_OBJECT_SENSOR        = 3;
-   static const int LEFT_FRONT_LOCALE_SENSOR  = 4;
-   static const int LEFT_FRONT_OBJECT_SENSOR  = 5;
-   static const int FRONT_LOCALE_SENSOR       = 6;
-   static const int FRONT_OBJECT_SENSOR       = 7;
-   static const int RIGHT_FRONT_LOCALE_SENSOR = 8;
-   static const int RIGHT_FRONT_OBJECT_SENSOR = 9;
-   static const int RIGHT_LOCALE_SENSOR       = 10;
-   static const int RIGHT_OBJECT_SENSOR       = 11;
-   static const int RIGHT_REAR_LOCALE_SENSOR  = 12;
-   static const int RIGHT_REAR_OBJECT_SENSOR  = 13;
-   static const int REAR_LOCALE_SENSOR        = 14;
-   static const int REAR_OBJECT_SENSOR        = 15;
-   static const int LEFT_REAR_LOCALE_SENSOR   = 16;
-   static const int LEFT_REAR_OBJECT_SENSOR   = 17;
-
-   // State sensors.
-   static const int ORIENTATION_SENSOR = NUM_CELL_SENSORS * CELL_SENSOR::NUM_SENSORS;
-   static const int GOAL_SENSOR        = ORIENTATION_SENSOR + 1;
-   static const int HAS_OBJECT_SENSOR  = GOAL_SENSOR + 1;
-   static const int NUM_SENSORS        = HAS_OBJECT_SENSOR + 1;
-
-   // Sensors.
-   int sensors[NUM_SENSORS];
 
    // State.
    int x, y;
@@ -219,30 +204,32 @@ private:
 
    // Load mask.
    void loadMask(vector<bool>& mask,
-                 bool currentLocale, bool currentObject,
-                 bool leftLocale, bool leftObject,
-                 bool leftFrontLocale, bool leftFrontObject,
-                 bool frontLocale, bool frontObject,
-                 bool rightFrontLocale, bool rightFrontObject,
-                 bool rightLocale, bool rightObject,
-                 bool rightRearLocale, bool rightRearObject,
-                 bool rearLocale, bool rearObject,
-                 bool leftRearLocale, bool leftRearObject,
-                 bool orientation, bool goal,
-                 bool hasObject);
+                 bool          currentObject,
+                 bool          leftObject,
+                 bool          leftFrontObject,
+                 bool          frontObject,
+                 bool          rightFrontObject,
+                 bool          rightObject,
+                 bool          rightRearObject,
+                 bool          rearObject,
+                 bool          leftRearObject,
+                 bool          orientation,
+                 bool          goal,
+                 bool          hasObject);
 
    // Load sensors.
    void loadSensors(vector<Mona::SENSOR>& sensors,
-                    Mona::SENSOR currentLocale, Mona::SENSOR currentObject,
-                    Mona::SENSOR leftLocale, Mona::SENSOR leftObject,
-                    Mona::SENSOR leftFrontLocale, Mona::SENSOR leftFrontObject,
-                    Mona::SENSOR frontLocale, Mona::SENSOR frontObject,
-                    Mona::SENSOR rightFrontLocale, Mona::SENSOR rightFrontObject,
-                    Mona::SENSOR rightLocale, Mona::SENSOR rightObject,
-                    Mona::SENSOR rightRearLocale, Mona::SENSOR rightRearObject,
-                    Mona::SENSOR rearLocale, Mona::SENSOR rearObject,
-                    Mona::SENSOR leftRearLocale, Mona::SENSOR leftRearObject,
-                    Mona::SENSOR orientation, Mona::SENSOR goal,
-                    Mona::SENSOR hasObject);
+                    Mona::SENSOR          currentObject,
+                    Mona::SENSOR          leftObject,
+                    Mona::SENSOR          leftFrontObject,
+                    Mona::SENSOR          frontObject,
+                    Mona::SENSOR          rightFrontObject,
+                    Mona::SENSOR          rightObject,
+                    Mona::SENSOR          rightRearObject,
+                    Mona::SENSOR          rearObject,
+                    Mona::SENSOR          leftRearObject,
+                    Mona::SENSOR          orientation,
+                    Mona::SENSOR          goal,
+                    Mona::SENSOR          hasObject);
 };
 #endif

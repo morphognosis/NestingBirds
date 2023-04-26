@@ -109,16 +109,13 @@ public class MaleReplayDashboard extends JFrame
       // Constructor.
       public StatusPanel()
       {
-         setLayout(new BorderLayout());
-         setBorder(BorderFactory.createTitledBorder(
-                      BorderFactory.createLineBorder(Color.black),
-                      "State"));
+         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
          JPanel sensorsPanel = new JPanel();
          sensorsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
          sensorsPanel.setBorder(BorderFactory.createTitledBorder(
                                    BorderFactory.createLineBorder(Color.black),
                                    "Sensors"));
-         add(sensorsPanel, BorderLayout.NORTH);
+         add(sensorsPanel);
          JPanel localePanel = new JPanel();
          localePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          sensorsPanel.add(localePanel);
@@ -159,10 +156,6 @@ public class MaleReplayDashboard extends JFrame
          flyingText = new JTextField(10);
          flyingText.setEditable(false);
          internalSensorsPanel.add(flyingText);
-         internalSensorsPanel.add(new JLabel("Food:"));
-         foodText = new JTextField(10);
-         foodText.setEditable(false);
-         internalSensorsPanel.add(foodText);
          JPanel femaleSensorsPanel = new JPanel();
          femaleSensorsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          sensorsPanel.add(femaleSensorsPanel);
@@ -174,12 +167,21 @@ public class MaleReplayDashboard extends JFrame
          femaleWantsStoneText = new JTextField(10);
          femaleWantsStoneText.setEditable(false);
          femaleSensorsPanel.add(femaleWantsStoneText);
+         JPanel foodPanel = new JPanel();
+         foodPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+         foodPanel.setBorder(BorderFactory.createTitledBorder(
+                                BorderFactory.createLineBorder(Color.black),
+                                "Food"));
+         add(foodPanel);
+         foodText = new JTextField(10);
+         foodText.setEditable(false);
+         foodPanel.add(foodText);
          JPanel needsPanel = new JPanel();
-         needsPanel.setLayout(new BoxLayout(needsPanel, BoxLayout.Y_AXIS));
+         needsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          needsPanel.setBorder(BorderFactory.createTitledBorder(
                                  BorderFactory.createLineBorder(Color.black),
                                  "Needs"));
-         add(needsPanel, BorderLayout.CENTER);
+         add(needsPanel);
          JPanel internalNeedsPanel = new JPanel();
          internalNeedsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
          needsPanel.add(internalNeedsPanel);
@@ -204,7 +206,7 @@ public class MaleReplayDashboard extends JFrame
          responsePanel.setBorder(BorderFactory.createTitledBorder(
                                     BorderFactory.createLineBorder(Color.black),
                                     "Response"));
-         add(responsePanel, BorderLayout.SOUTH);
+         add(responsePanel);
          responsePanel.add(new JLabel("Response:"));
          responseText = new JTextField(15);
          responseText.setEditable(false);

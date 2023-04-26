@@ -2758,6 +2758,7 @@ Mona::print(bool brief, FILE *out)
 
 
 
+
    fprintf(out, "</network>\n");
    fflush(out);
 }

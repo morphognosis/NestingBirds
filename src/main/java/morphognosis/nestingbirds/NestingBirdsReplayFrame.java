@@ -16,23 +16,14 @@ public class NestingBirdsReplayFrame
    public class FemaleData
    {
       int    x, y;
-      String currentLocale;
       String currentObject;
-      String leftLocale;
       String leftObject;
-      String leftFrontLocale;
       String leftFrontObject;
-      String frontLocale;
       String frontObject;
-      String rightFrontLocale;
       String rightFrontObject;
-      String rightLocale;
       String rightObject;
-      String rightRearLocale;
       String rightRearObject;
-      String rearLocale;
       String rearObject;
-      String leftRearLocale;
       String leftRearObject;
       String orientation;
       String goal;
