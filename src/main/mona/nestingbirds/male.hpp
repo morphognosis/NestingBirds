@@ -23,7 +23,6 @@ public:
       static const int LEFT    = 2;
       static const int FRONT   = 3;
       static const int RIGHT   = 4;
-      static const int REAR    = 5;
 
       // Proximity to string.
       static const char *toString(int proximity)
@@ -41,9 +40,6 @@ public:
 
          case RIGHT:
             return("RIGHT");
-
-         case REAR:
-            return("REAR");
 
          default:
             return("UNKNOWN");
@@ -113,16 +109,15 @@ public:
       static const int MOVE_FORWARD  = Mona::MOVEMENT_TYPE::MOVE_FORWARD;
       static const int TURN_RIGHT    = Mona::MOVEMENT_TYPE::TURN_RIGHT;
       static const int TURN_LEFT     = Mona::MOVEMENT_TYPE::TURN_LEFT;
-      static const int TURN_AROUND   = Mona::MOVEMENT_TYPE::TURN_AROUND;
-      static const int EAT_MOUSE     = 5;
-      static const int GET_OBJECT    = 6;
-      static const int PUT_OBJECT    = 7;
-      static const int TOSS_OBJECT   = 8;
-      static const int GIVE_MOUSE    = 9;
-      static const int GIVE_STONE    = 10;
-      static const int FLY           = 11;
-      static const int ALIGHT        = 12;
-      static const int NUM_RESPONSES = 13;
+      static const int EAT_MOUSE     = 4;
+      static const int GET_OBJECT    = 5;
+      static const int PUT_OBJECT    = 6;
+      static const int TOSS_OBJECT   = 7;
+      static const int GIVE_MOUSE    = 8;
+      static const int GIVE_STONE    = 9;
+      static const int FLY           = 10;
+      static const int ALIGHT        = 11;
+      static const int NUM_RESPONSES = 12;
 
       // Response to string.
       static const char *toString(int response)
@@ -152,9 +147,6 @@ public:
 
          case TURN_LEFT:
             return("TURN_LEFT");
-
-         case TURN_AROUND:
-            return("TURN_AROUND");
 
          case GIVE_MOUSE:
             return("GIVE_MOUSE");

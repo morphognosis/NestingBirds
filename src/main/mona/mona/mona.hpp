@@ -600,7 +600,6 @@ public:
       static const int MOVE_FORWARD = 1;
       static const int TURN_RIGHT   = 2;
       static const int TURN_LEFT    = 3;
-      static const int TURN_AROUND  = 4;
    };
 
    // Orientation.

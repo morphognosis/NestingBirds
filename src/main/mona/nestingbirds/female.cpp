@@ -10,9 +10,9 @@ int Female:: INITIAL_FOOD         = atoi(FEMALE_DEFAULT_INITIAL_FOOD);
 bool Female::RANDOMIZE_FOOD_LEVEL = false;
 
 // Needs.
-Mona::NEED Female::MOUSE_NEED     = strtod(FEMALE_DEFAULT_MOUSE_NEED, 0);
 Mona::NEED Female::LAY_EGG_NEED   = strtod(FEMALE_DEFAULT_LAY_EGG_NEED, 0);
 Mona::NEED Female::BROOD_EGG_NEED = strtod(FEMALE_DEFAULT_BROOD_EGG_NEED, 0);
+Mona::NEED Female::MOUSE_NEED     = strtod(FEMALE_DEFAULT_MOUSE_NEED, 0);
 
 extern int RANDOM_NUMBER_SEED;
 
@@ -31,35 +31,33 @@ Female::Female()
    brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
    // Motors:
-   Mona::Motor *doNothing  = brain->newMotor();
-   Mona::Motor *move       = brain->newMotor();
-   Mona::Motor *turnRight  = brain->newMotor();
-   Mona::Motor *turnLeft   = brain->newMotor();
-   Mona::Motor *turnAround = brain->newMotor();
-   Mona::Motor *eat        = brain->newMotor();
-   Mona::Motor *get        = brain->newMotor();
-   Mona::Motor *put        = brain->newMotor();
-   Mona::Motor *toss       = brain->newMotor();
-   Mona::Motor *wantMouse  = brain->newMotor();
-   Mona::Motor *wantStone  = brain->newMotor();
-   Mona::Motor *layEgg     = brain->newMotor();
+   Mona::Motor *doNothing = brain->newMotor();
+   Mona::Motor *move      = brain->newMotor();
+   Mona::Motor *turnRight = brain->newMotor();
+   Mona::Motor *turnLeft  = brain->newMotor();
+   Mona::Motor *eat       = brain->newMotor();
+   Mona::Motor *get       = brain->newMotor();
+   Mona::Motor *put       = brain->newMotor();
+   Mona::Motor *toss      = brain->newMotor();
+   Mona::Motor *wantMouse = brain->newMotor();
+   Mona::Motor *wantStone = brain->newMotor();
+   Mona::Motor *layEgg    = brain->newMotor();
 
    // Needs.
    initNeeds();
 
    // Goals:
 
-   // Food goals.
+   // Food goal.
+   vector<bool> mask;
+   loadMask(mask, false, false, false, false,
+            false, false, false, false, false, false, true, true);
+   int eatMouseMode = brain->addSensorMode(mask);
    vector<Mona::SENSOR> sensors;
    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-               DONT_CARE, (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::NO_OBJECT);
-   int wantMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, wantMouse, MOUSE_NEED);
-
-   loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-               DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                DONT_CARE, (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::MOUSE);
-   int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, eat, MOUSE_NEED);
+   int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, eatMouseMode, eat, MOUSE_NEED);
 
    // Lay egg goal.
    loadSensors(sensors, (Mona::SENSOR)OBJECT::EGG, (Mona::SENSOR)OBJECT::STONE, (Mona::SENSOR)OBJECT::STONE,
@@ -82,7 +80,14 @@ Female::Female()
 // Initialize female needs.
 void Female::initNeeds()
 {
-   brain->setNeed(MOUSE_NEED_INDEX, 0.0);
+   if (food == 0)
+   {
+      brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
+   }
+   else
+   {
+      brain->setNeed(MOUSE_NEED_INDEX, 0.0);
+   }
    brain->setNeed(LAY_EGG_NEED_INDEX, LAY_EGG_NEED);
    brain->setNeed(BROOD_EGG_NEED_INDEX, 0.0);
 }
@@ -91,13 +96,13 @@ void Female::initNeeds()
 // Set female needs.
 void Female::setNeeds()
 {
-   if (food == 0)
+   if ((food == 0) && ((response == Female::RESPONSE::PUT_OBJECT) ||
+                       (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::EGG)))
    {
       brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
    }
    else if (sensors[CURRENT_OBJECT_SENSOR] == OBJECT::EGG)
    {
-      brain->setNeed(MOUSE_NEED_INDEX, 0.0);
       brain->setNeed(LAY_EGG_NEED_INDEX, 0.0);
       brain->setNeed(BROOD_EGG_NEED_INDEX, BROOD_EGG_NEED);
    }
@@ -248,16 +253,16 @@ void Female::printNeeds(FILE *fp)
    {
       switch (i)
       {
-      case MOUSE_NEED_INDEX:
-         fprintf(fp, "\"Mouse\": %f, ", brain->getNeed(MOUSE_NEED_INDEX));
-         break;
-
       case LAY_EGG_NEED_INDEX:
          fprintf(fp, "\"Lay egg\": %f, ", brain->getNeed(LAY_EGG_NEED_INDEX));
          break;
 
       case BROOD_EGG_NEED_INDEX:
-         fprintf(fp, "\"Brood egg\": %f", brain->getNeed(BROOD_EGG_NEED_INDEX));
+         fprintf(fp, "\"Brood egg\": %f, ", brain->getNeed(BROOD_EGG_NEED_INDEX));
+         break;
+
+      case MOUSE_NEED_INDEX:
+         fprintf(fp, "\"Mouse\": %f", brain->getNeed(MOUSE_NEED_INDEX));
          break;
       }
    }

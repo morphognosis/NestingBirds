@@ -545,9 +545,12 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          worldImageGraphics.drawImage(stoneImage, femaleObjectLocation.x,
                                       femaleObjectLocation.y, this);
       }
-      s = "Response: " + femaleDashboard.replayFrame.femaleData.response;
+      s = "Goal: " + femaleDashboard.replayFrame.femaleData.goal;
       x = femaleStatusLocation.x + statusInfoOffset.x;
       y = femaleStatusLocation.y + statusInfoOffset.y;
+      worldImageGraphics.drawString(s, x, y);
+      s  = "Response: " + femaleDashboard.replayFrame.femaleData.response;
+      y += statusInfoOffset.y;
       worldImageGraphics.drawString(s, x, y);
       x2 = nestingbirds.female.x * CELL_SIZE.width;
       y2 = (nestingbirds.female.y * CELL_SIZE.height) + h;
@@ -571,9 +574,12 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          worldImageGraphics.drawImage(stoneImage, maleObjectLocation.x,
                                       maleObjectLocation.y, this);
       }
-      s = "Response: " + maleDashboard.replayFrame.maleData.response;
+      s = "Goal: " + maleDashboard.replayFrame.maleData.goal;
       x = maleStatusLocation.x + statusInfoOffset.x;
       y = maleStatusLocation.y + statusInfoOffset.y;
+      worldImageGraphics.drawString(s, x, y);
+      s  = "Response: " + maleDashboard.replayFrame.maleData.response;
+      y += statusInfoOffset.y;
       worldImageGraphics.drawString(s, x, y);
       x2 = nestingbirds.male.x * CELL_SIZE.width;
       y2 = (nestingbirds.male.y * CELL_SIZE.height) + h;
@@ -672,7 +678,8 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
       {
          speed = MAX_RESPONSE_DELAY;
          speedSlider.setValue(MAX_RESPONSE_DELAY);
-         stepCounter = 0;
+         nestingbirds = new NestingBirds();
+         stepCounter  = 0;
          stepReplay();
       }
    }
@@ -698,6 +705,7 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          if ((y >= femaleImageLocation.y) && (y <= femaleImageLocation.y + BIRD_SIZE.height))
          {
             femaleDashboard.open();
+            message = null;
          }
       }
       if ((x >= maleImageLocation.x) && (x <= maleImageLocation.x + BIRD_SIZE.width))
@@ -705,6 +713,7 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          if ((y >= maleImageLocation.y) && (y <= maleImageLocation.y + BIRD_SIZE.height))
          {
             maleDashboard.open();
+            message = null;
          }
       }
    }

@@ -31,24 +31,21 @@ Male::Male()
    Verbose     = false;
 
    // Create Mona bird brain.
-   brain = new Mona();
-   brain->MAX_MEDIATOR_LEVEL = 0;
-   brain->initNet(NUM_SENSORS, 0, NUM_NEEDS, RANDOM_NUMBER_SEED);
+   brain = new Mona(NUM_SENSORS, NUM_NEEDS, RANDOM_NUMBER_SEED);
 
    // Motors:
-   Mona::Motor *doNothing  = brain->newMotor();
-   Mona::Motor *move       = brain->newMovementMotor(RESPONSE::MOVE_FORWARD);
-   Mona::Motor *turnRight  = brain->newMovementMotor(RESPONSE::TURN_RIGHT);
-   Mona::Motor *turnLeft   = brain->newMovementMotor(RESPONSE::TURN_LEFT);
-   Mona::Motor *turnAround = brain->newMovementMotor(RESPONSE::TURN_AROUND);
-   Mona::Motor *eat        = brain->newMotor();
-   Mona::Motor *get        = brain->newMotor();
-   Mona::Motor *put        = brain->newMotor();
-   Mona::Motor *toss       = brain->newMotor();
-   Mona::Motor *giveMouse  = brain->newMotor();
-   Mona::Motor *giveStone  = brain->newMotor();
-   Mona::Motor *fly        = brain->newMovementMotor(Mona::MOVEMENT_TYPE::BEGIN);
-   Mona::Motor *alight     = brain->newMovementMotor(Mona::MOVEMENT_TYPE::END);
+   Mona::Motor *doNothing = brain->newMotor();
+   Mona::Motor *move      = brain->newMovementMotor(RESPONSE::MOVE_FORWARD);
+   Mona::Motor *turnRight = brain->newMovementMotor(RESPONSE::TURN_RIGHT);
+   Mona::Motor *turnLeft  = brain->newMovementMotor(RESPONSE::TURN_LEFT);
+   Mona::Motor *eat       = brain->newMotor();
+   Mona::Motor *get       = brain->newMotor();
+   Mona::Motor *put       = brain->newMotor();
+   Mona::Motor *toss      = brain->newMotor();
+   Mona::Motor *giveMouse = brain->newMotor();
+   Mona::Motor *giveStone = brain->newMotor();
+   Mona::Motor *fly       = brain->newMovementMotor(Mona::MOVEMENT_TYPE::BEGIN);
+   Mona::Motor *alight    = brain->newMovementMotor(Mona::MOVEMENT_TYPE::END);
 
    // Needs.
    initNeeds();
@@ -56,21 +53,28 @@ Male::Male()
    // Goals:
 
    // Food goals.
+   vector<bool> mask;
+   loadMask(mask, true, true, true, true,
+            true, true, true, false, false);
+   int eatMouseMode = brain->addSensorMode(mask);
    vector<Mona::SENSOR> sensors;
    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                (Mona::SENSOR)GOAL::MOUSE_FOR_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
-   brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
+   brain->addGoal(MOUSE_NEED_INDEX, sensors, eatMouseMode, MOUSE_NEED);
    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                (Mona::SENSOR)GOAL::STONE_FOR_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
-   brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
+   brain->addGoal(MOUSE_NEED_INDEX, sensors, eatMouseMode, MOUSE_NEED);
    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                (Mona::SENSOR)GOAL::ATTEND_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
-   brain->addGoal(MOUSE_NEED_INDEX, sensors, 0, MOUSE_NEED);
+   brain->addGoal(MOUSE_NEED_INDEX, sensors, eatMouseMode, MOUSE_NEED);
 
    // Attend female goal.
+   loadMask(mask, true, false, false, true,
+            true, true, true, true, true);
+   int attendFemaleMode = brain->addSensorMode(mask);
    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
                DONT_CARE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
-   brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, 0, ATTEND_FEMALE_NEED);
+   brain->addGoal(ATTEND_FEMALE_NEED_INDEX, sensors, attendFemaleMode, ATTEND_FEMALE_NEED);
 
    // Female want mouse goal.
    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
@@ -196,7 +200,6 @@ int Male::cycle()
    {
       flying = false;
    }
-
    return(response);
 }
 

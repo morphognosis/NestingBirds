@@ -42,23 +42,23 @@ public:
    class GOAL
    {
 public:
-      static const int EAT_MOUSE = 0;
-      static const int LAY_EGG   = 1;
-      static const int BROOD_EGG = 2;
+      static const int LAY_EGG   = 0;
+      static const int BROOD_EGG = 1;
+      static const int EAT_MOUSE = 2;
 
       // Goal to string.
       static const char *toString(int goal)
       {
          switch (goal)
          {
-         case EAT_MOUSE:
-            return("EAT_MOUSE");
-
          case LAY_EGG:
             return("LAY_EGG");
 
          case BROOD_EGG:
             return("BROOD_EGG");
+
+         case EAT_MOUSE:
+            return("EAT_MOUSE");
 
          default:
             return("UNKNOWN");
@@ -77,19 +77,18 @@ public:
    class RESPONSE
    {
 public:
-      static const int DO_NOTHING    = 0;
-      static const int MOVE_FORWARD  = 1;
-      static const int TURN_RIGHT    = 2;
-      static const int TURN_LEFT     = 3;
-      static const int TURN_AROUND   = 4;
-      static const int EAT_MOUSE     = 5;
-      static const int GET_OBJECT    = 6;
-      static const int PUT_OBJECT    = 7;
-      static const int TOSS_OBJECT   = 8;
-      static const int WANT_MOUSE    = 9;
-      static const int WANT_STONE    = 10;
-      static const int LAY_EGG       = 11;
-      static const int NUM_RESPONSES = 12;
+      static const int DO_NOTHING    = Mona::MOVEMENT_TYPE::DO_NOTHING;
+      static const int MOVE_FORWARD  = Mona::MOVEMENT_TYPE::MOVE_FORWARD;
+      static const int TURN_RIGHT    = Mona::MOVEMENT_TYPE::TURN_RIGHT;
+      static const int TURN_LEFT     = Mona::MOVEMENT_TYPE::TURN_LEFT;
+      static const int EAT_MOUSE     = 4;
+      static const int GET_OBJECT    = 5;
+      static const int PUT_OBJECT    = 6;
+      static const int TOSS_OBJECT   = 7;
+      static const int WANT_MOUSE    = 8;
+      static const int WANT_STONE    = 9;
+      static const int LAY_EGG       = 10;
+      static const int NUM_RESPONSES = 11;
 
       // Response to string.
       static const char *toString(int response)
@@ -120,9 +119,6 @@ public:
          case TURN_LEFT:
             return("TURN_LEFT");
 
-         case TURN_AROUND:
-            return("TURN_AROUND");
-
          case WANT_MOUSE:
             return("WANT_MOUSE");
 
@@ -142,22 +138,22 @@ public:
    int response;
 
    // Food.
-#define FEMALE_DEFAULT_FOOD_DURATION    "100"
+#define FEMALE_DEFAULT_FOOD_DURATION    "200"
    static int FOOD_DURATION;
 #define FEMALE_DEFAULT_INITIAL_FOOD     "0"
    static int  INITIAL_FOOD;
    static bool RANDOMIZE_FOOD_LEVEL;
 
    // Needs.
-   static const int MOUSE_NEED_INDEX = 0;
-#define FEMALE_DEFAULT_MOUSE_NEED        "0.2"
-   static Mona::NEED MOUSE_NEED;
-   static const int  LAY_EGG_NEED_INDEX = 1;
+   static const int LAY_EGG_NEED_INDEX = 0;
 #define FEMALE_DEFAULT_LAY_EGG_NEED      "0.1"
    static Mona::NEED LAY_EGG_NEED;
-   static const int  BROOD_EGG_NEED_INDEX = 2;
-#define FEMALE_DEFAULT_BROOD_EGG_NEED    "0.3"
+   static const int  BROOD_EGG_NEED_INDEX = 1;
+#define FEMALE_DEFAULT_BROOD_EGG_NEED    "0.2"
    static Mona::NEED BROOD_EGG_NEED;
+   static const int  MOUSE_NEED_INDEX = 2;
+#define FEMALE_DEFAULT_MOUSE_NEED        "0.3"
+   static Mona::NEED MOUSE_NEED;
    static const int  NUM_NEEDS = 3;
 
    // Brain.

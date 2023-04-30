@@ -603,10 +603,6 @@ bool getMouse()
       male->response = Male::RESPONSE::MOVE_FORWARD;
       break;
 
-   case Male::PROXIMITY::REAR:
-      male->response = Male::RESPONSE::TURN_AROUND;
-      break;
-
    case Male::PROXIMITY::LEFT:
       male->response = Male::RESPONSE::TURN_LEFT;
       break;
@@ -640,10 +636,6 @@ bool getStone()
 
    case Male::PROXIMITY::FRONT:
       male->response = Male::RESPONSE::MOVE_FORWARD;
-      break;
-
-   case Male::PROXIMITY::REAR:
-      male->response = Male::RESPONSE::TURN_AROUND;
       break;
 
    case Male::PROXIMITY::LEFT:
@@ -685,10 +677,6 @@ bool goToFemale()
       male->response = Male::RESPONSE::TURN_RIGHT;
       break;
 
-   case Male::PROXIMITY::REAR:
-      male->response = Male::RESPONSE::TURN_AROUND;
-      break;
-
    case Male::PROXIMITY::UNKNOWN:
       MaleFlyingToNest = true;
       male->response   = Male::RESPONSE::FLY;
@@ -714,7 +702,7 @@ void trainFemale()
    }
 
    // Hunger?
-   if (female->food == 0)
+   if (female->brain->getNeed(Female::MOUSE_NEED_INDEX) > 0.0)
    {
       female->response = Female::RESPONSE::WANT_MOUSE;
       return;
@@ -981,7 +969,7 @@ void setMaleSensors()
             }
             else if (mousey > bird->y)
             {
-               sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+               sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
             }
             else
             {
@@ -1011,7 +999,7 @@ void setMaleSensors()
             }
             else if (stoney > bird->y)
             {
-               sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+               sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
             }
             else
             {
@@ -1041,7 +1029,7 @@ void setMaleSensors()
             }
             else if (female->y > bird->y)
             {
-               sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+               sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
             }
             else
             {
@@ -1070,7 +1058,7 @@ void setMaleSensors()
          {
             if (mousey < bird->y)
             {
-               sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+               sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
             }
             else if (mousey > bird->y)
             {
@@ -1100,7 +1088,7 @@ void setMaleSensors()
          {
             if (stoney < bird->y)
             {
-               sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+               sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
             }
             else if (stoney > bird->y)
             {
@@ -1130,7 +1118,7 @@ void setMaleSensors()
          {
             if (female->y < bird->y)
             {
-               sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+               sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
             }
             else if (female->y > bird->y)
             {
@@ -1153,7 +1141,7 @@ void setMaleSensors()
       {
          if (mousex < bird->x)
          {
-            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
          }
          else if (mousex > bird->x)
          {
@@ -1183,7 +1171,7 @@ void setMaleSensors()
       {
          if (stonex < bird->x)
          {
-            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
          }
          else if (stonex > bird->x)
          {
@@ -1213,7 +1201,7 @@ void setMaleSensors()
       {
          if (female->x < bird->x)
          {
-            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
          }
          else if (female->x > bird->x)
          {
@@ -1250,7 +1238,7 @@ void setMaleSensors()
          }
          else if (mousex > bird->x)
          {
-            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
          }
          else
          {
@@ -1280,7 +1268,7 @@ void setMaleSensors()
          }
          else if (stonex > bird->x)
          {
-            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
          }
          else
          {
@@ -1310,7 +1298,7 @@ void setMaleSensors()
          }
          else if (female->x > bird->x)
          {
-            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::REAR;
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
          }
          else
          {
@@ -1947,27 +1935,6 @@ void doMaleResponse()
       }
       break;
 
-   case Male::RESPONSE::TURN_AROUND:
-      switch (bird->orientation)
-      {
-      case ORIENTATION::NORTH:
-         bird->orientation = ORIENTATION::SOUTH;
-         break;
-
-      case ORIENTATION::SOUTH:
-         bird->orientation = ORIENTATION::NORTH;
-         break;
-
-      case ORIENTATION::EAST:
-         bird->orientation = ORIENTATION::WEST;
-         break;
-
-      case ORIENTATION::WEST:
-         bird->orientation = ORIENTATION::EAST;
-         break;
-      }
-      break;
-
    case Male::RESPONSE::FLY:
       MaleFlying = true;
       break;
@@ -2145,27 +2112,6 @@ void doFemaleResponse()
 
       case ORIENTATION::WEST:
          bird->orientation = ORIENTATION::SOUTH;
-         break;
-      }
-      break;
-
-   case Female::RESPONSE::TURN_AROUND:
-      switch (bird->orientation)
-      {
-      case ORIENTATION::NORTH:
-         bird->orientation = ORIENTATION::SOUTH;
-         break;
-
-      case ORIENTATION::SOUTH:
-         bird->orientation = ORIENTATION::NORTH;
-         break;
-
-      case ORIENTATION::EAST:
-         bird->orientation = ORIENTATION::WEST;
-         break;
-
-      case ORIENTATION::WEST:
-         bird->orientation = ORIENTATION::EAST;
          break;
       }
       break;

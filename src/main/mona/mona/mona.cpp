@@ -99,7 +99,7 @@ void Mona::initParms()
    DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL = 2;
    DEFAULT_NUM_EFFECT_EVENT_INTERVALS         = 3;
    MAX_MEDIATORS      = 500;
-   MAX_MEDIATOR_LEVEL = 1;
+   MAX_MEDIATOR_LEVEL = 0;
    MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL   = 2;
    MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL = 3;
    SENSOR_RESOLUTION                   = 0.0f;
@@ -1051,10 +1051,6 @@ void Mona::Motor::print(FILE *out)
 
          case MOVEMENT_TYPE::TURN_LEFT:
             fprintf(out, "TURN_LEFT");
-            break;
-
-         case MOVEMENT_TYPE::TURN_AROUND:
-            fprintf(out, "TURN_AROUND");
             break;
          }
          fprintf(out, "</movement_type>");

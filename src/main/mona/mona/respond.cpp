@@ -166,6 +166,10 @@ Mona::respond()
             j = 0;
          }
       }
+      if (max == 0.0)
+      {
+         response = (RESPONSE)0;
+      }
    }
 
    // Response overridden?
@@ -374,7 +378,7 @@ int Mona::Motor::gotoPlace(int orientation, int fromX, int fromY, int toX, int t
          }
          else
          {
-            return(Mona::MOVEMENT_TYPE::TURN_AROUND);
+            return(Mona::MOVEMENT_TYPE::TURN_RIGHT);
          }
       }
       return(true);
@@ -397,7 +401,7 @@ int Mona::Motor::gotoPlace(int orientation, int fromX, int fromY, int toX, int t
          }
          else
          {
-            return(Mona::MOVEMENT_TYPE::TURN_AROUND);
+            return(Mona::MOVEMENT_TYPE::TURN_RIGHT);
          }
       }
       return(true);
@@ -420,7 +424,7 @@ int Mona::Motor::gotoPlace(int orientation, int fromX, int fromY, int toX, int t
          }
          else
          {
-            return(Mona::MOVEMENT_TYPE::TURN_AROUND);
+            return(Mona::MOVEMENT_TYPE::TURN_RIGHT);
          }
       }
       return(true);
@@ -443,7 +447,7 @@ int Mona::Motor::gotoPlace(int orientation, int fromX, int fromY, int toX, int t
          }
          else
          {
-            return(Mona::MOVEMENT_TYPE::TURN_AROUND);
+            return(Mona::MOVEMENT_TYPE::TURN_RIGHT);
          }
       }
    }
