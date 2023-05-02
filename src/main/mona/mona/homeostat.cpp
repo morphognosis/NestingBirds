@@ -558,9 +558,9 @@ void Homeostat::load(FILE *fp)
    SENSOR s;
    ID     id;
 
-   FREAD_DOUBLE(&need, fp);
+   need      = 0.0;
+   needDelta = 0.0;
    FREAD_INT(&needIndex, fp);
-   FREAD_DOUBLE(&needDelta, fp);
    FREAD_DOUBLE(&defaultNeed, fp);
    FREAD_DOUBLE(&periodicNeed, fp);
    FREAD_INT(&frequency, fp);
@@ -628,9 +628,7 @@ void Homeostat::save(FILE *fp)
    int i, j, p, q;
    ID  id;
 
-   FWRITE_DOUBLE(&need, fp);
    FWRITE_INT(&needIndex, fp);
-   FWRITE_DOUBLE(&needDelta, fp);
    FWRITE_DOUBLE(&defaultNeed, fp);
    FWRITE_DOUBLE(&periodicNeed, fp);
    FWRITE_INT(&frequency, fp);

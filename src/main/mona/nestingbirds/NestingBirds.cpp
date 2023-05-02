@@ -288,6 +288,7 @@ void init()
    if (female->food == 0)
    {
       female->goal = Female::GOAL::EAT_MOUSE;
+      female->brain->setNeed(Female::MOUSE_NEED_INDEX, Female::MOUSE_NEED);
    }
    female->response = Female::RESPONSE::DO_NOTHING;
    male             = new Male();
@@ -298,6 +299,7 @@ void init()
    if (male->food == 0)
    {
       male->goal = Male::GOAL::EAT_MOUSE;
+      male->brain->setNeed(Male::MOUSE_NEED_INDEX, Male::MOUSE_NEED);
    }
    male->response     = Male::RESPONSE::DO_NOTHING;
    MaleFlying         = false;

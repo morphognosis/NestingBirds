@@ -90,8 +90,8 @@ void Mona::initParms()
    DRIVE_ATTENUATION = 0.0;
    MIN_DRIVE_MOTIVE  = 0.0;
    FIRING_STRENGTH_LEARNING_DAMPER   = 0.1;
-   LEARNING_DECREASE_VELOCITY        = 0.9;
-   LEARNING_INCREASE_VELOCITY        = 0.1;
+   LEARNING_DECREASE_VELOCITY        = 0.01;
+   LEARNING_INCREASE_VELOCITY        = 0.9;
    RESPONSE_RANDOMNESS               = 0.0;
    MIN_MOVEMENT_RESPONSE_PATH_LENGTH = 5;
    MAX_MOVEMENT_RESPONSE_PATH_LENGTH = 50;
@@ -653,7 +653,7 @@ void Mona::Neuron::load(FILE *fp)
    FREAD_INT(&i, fp);
    type = (NEURON_TYPE)i;
    FREAD_LONG_LONG(&creationTime, fp);
-   FREAD_DOUBLE(&firingStrength, fp);
+   firingStrength = 0.0;
    goals.load(fp);
    FREAD_DOUBLE(&motive, fp);
    FREAD_BOOL(&instinct, fp);
@@ -686,7 +686,6 @@ void Mona::Neuron::save(FILE *fp)
    i = (int)type;
    FWRITE_INT(&i, fp);
    FWRITE_LONG_LONG(&creationTime, fp);
-   FWRITE_DOUBLE(&firingStrength, fp);
    goals.save(fp);
    FWRITE_DOUBLE(&motive, fp);
    FWRITE_BOOL(&instinct, fp);
@@ -1177,10 +1176,9 @@ Mona::Mediator::~Mediator()
 void
 Mona::Mediator::updateUtility(WEIGHT updateWeight)
 {
-   WEIGHT w;
-
    // Check for floating point overflow.
-   w = utilityWeight + updateWeight + mona->UTILITY_ASYMPTOTE;
+   WEIGHT w = utilityWeight + updateWeight + mona->UTILITY_ASYMPTOTE;
+
    if (w > (utilityWeight + updateWeight))
    {
       utilityWeight += updateWeight;
@@ -1999,9 +1997,9 @@ Mona::load(FILE *fp)
    initNet(numSensors, 0, numNeeds, randomSeed);
    numResponses = r;
    sensorModes.clear();
-   int n2 = 0;
-   FREAD_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   int n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       sensorMode = new SensorMode();
       assert(sensorMode != NULL);
@@ -2015,24 +2013,11 @@ Mona::load(FILE *fp)
    }
    FREAD_INT(&response, fp);
    FREAD_LONG_LONG(&eventClock, fp);
-   int n = (int)learningEvents.size();
-   for (int i = 0; i < n; i++)
-   {
-      int j = 0;
-      FREAD_INT(&j, fp);
-      for (int k = 0; k < j; k++)
-      {
-         learningEvent = new LearningEvent();
-         assert(learningEvent != NULL);
-         learningEvent->load(fp);
-         learningEvents[i].push_back(learningEvent);
-      }
-   }
    idDispenser = 0;
    receptors.clear();
-   n2 = 0;
-   FREAD_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       receptor = new Receptor(sensors, 0, this);
       assert(receptor != NULL);
@@ -2044,9 +2029,9 @@ Mona::load(FILE *fp)
       }
    }
    motors.clear();
-   n2 = 0;
-   FREAD_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       motor = new Motor(-1, this);
       assert(motor != NULL);
@@ -2058,9 +2043,9 @@ Mona::load(FILE *fp)
       }
    }
    placeMotors.clear();
-   n2 = 0;
-   FREAD_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       motor = new Motor(0, 0, this);
       assert(motor != NULL);
@@ -2072,9 +2057,9 @@ Mona::load(FILE *fp)
       }
    }
    mediators.clear();
-   n2 = 0;
-   FREAD_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       mediator = new Mediator(0.0, this);
       assert(mediator != NULL);
@@ -2182,9 +2167,9 @@ Mona::load(FILE *fp)
       homeostats[i]->load(fp);
    }
    sensorCentroids.clear();
-   n2 = 0;
-   FREAD_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       rdTree = new RDtree(Mona::Receptor::patternDistance,
                           Mona::Receptor::deletePattern);
@@ -2345,39 +2330,28 @@ Mona::save(FILE *fp)
    }
    FWRITE_INT(&response, fp);
    FWRITE_LONG_LONG(&eventClock, fp);
-   for (int i = 0, n = (int)learningEvents.size(); i < n; i++)
-   {
-      j = (int)learningEvents[i].size();
-      FWRITE_INT(&j, fp);
-      for (learningEventItr = learningEvents[i].begin();
-           learningEventItr != learningEvents[i].end(); learningEventItr++)
-      {
-         learningEvent = *learningEventItr;
-         learningEvent->save(fp);
-      }
-   }
-   int n2 = (int)receptors.size();
-   FWRITE_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   int n = (int)receptors.size();
+   FWRITE_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       receptor = receptors[i];
       receptor->save(fp);
    }
-   n2 = (int)motors.size();
-   FWRITE_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   n = (int)motors.size();
+   FWRITE_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       motor = motors[i];
       motor->save(fp);
    }
-   n2 = (int)placeMotors.size();
-   FWRITE_INT(&n2, fp);
-   for (int i = 0; i < n2; i++)
+   n = (int)placeMotors.size();
+   FWRITE_INT(&n, fp);
+   for (int i = 0; i < n; i++)
    {
       motor = placeMotors[i];
       motor->save(fp);
    }
-   int n = (int)mediators.size();
+   n = (int)mediators.size();
    FWRITE_INT(&n, fp);
    for (mediatorItr = mediators.begin();
         mediatorItr != mediators.end(); mediatorItr++)

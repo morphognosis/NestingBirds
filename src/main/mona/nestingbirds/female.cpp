@@ -80,14 +80,7 @@ Female::Female()
 // Initialize female needs.
 void Female::initNeeds()
 {
-   if (food == 0)
-   {
-      brain->setNeed(MOUSE_NEED_INDEX, MOUSE_NEED);
-   }
-   else
-   {
-      brain->setNeed(MOUSE_NEED_INDEX, 0.0);
-   }
+   brain->setNeed(MOUSE_NEED_INDEX, 0.0);
    brain->setNeed(LAY_EGG_NEED_INDEX, LAY_EGG_NEED);
    brain->setNeed(BROOD_EGG_NEED_INDEX, 0.0);
 }
