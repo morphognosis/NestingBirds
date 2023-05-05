@@ -43,7 +43,7 @@ const char* Usage =
 "      [-femaleBroodEggNeed <amount> (default=" FEMALE_DEFAULT_BROOD_EGG_NEED ")]\n"
 "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"
 "      [-mouseMoveProbability <probability> (default=" DEFAULT_MOUSE_MOVE_PROBABILITY ")]\n"
-"      [-writeReplayFile <replay file name> (json)]\n"
+"      [-writeBehaviorFile <behavior file name> (json)]\n"
 "      [-verbose <true | false> (default=true)]\n"
 "      [-version]\n"
 "Exit codes:\n"
@@ -78,9 +78,9 @@ char *MaleLoadFilename;
 char *FemaleSaveFilename;
 char *FemaleLoadFilename;
 
-// Replay file name.
-char *ReplayFilename;
-FILE *ReplayFp;
+// Behavior file name.
+char *BehaviorFilename;
+FILE *BehaviorFp;
 
 // World map: plain=0, forest=1, mouse=2, desert=3, stone=4
 const int  WIDTH = 21, HEIGHT = 21;
@@ -322,7 +322,7 @@ void step()
    // Step mice.
    stepMice();
 
-   if (ReplayFp != NULL)
+   if (BehaviorFp != NULL)
    {
       int count = 0;
       for (int x = 0; x < WIDTH; x++)
@@ -335,7 +335,7 @@ void step()
             }
          }
       }
-      fprintf(ReplayFp, "\"Mice\": [");
+      fprintf(BehaviorFp, "\"Mice\": [");
       int n = 0;
       for (int x = 0; x < WIDTH; x++)
       {
@@ -343,16 +343,16 @@ void step()
          {
             if (World[x][y].object == OBJECT::MOUSE)
             {
-               fprintf(ReplayFp, " { \"x\": %d, \"y\": %d }", x, y);
+               fprintf(BehaviorFp, " { \"x\": %d, \"y\": %d }", x, y);
                if (n < count - 1)
                {
-                  fprintf(ReplayFp, ",");
+                  fprintf(BehaviorFp, ",");
                }
                n++;
             }
          }
       }
-      fprintf(ReplayFp, " ],\n");
+      fprintf(BehaviorFp, " ],\n");
    }
 
    // Set female sensors.
@@ -374,20 +374,20 @@ void step()
       female->printState();
    }
 
-   if (ReplayFp != NULL)
+   if (BehaviorFp != NULL)
    {
-      fprintf(ReplayFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
-      female->printState(ReplayFp);
+      fprintf(BehaviorFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
+      female->printState(BehaviorFp);
    }
 
    // Cycle female
    female->cycle();
 
-   if (ReplayFp != NULL)
+   if (BehaviorFp != NULL)
    {
-      fprintf(ReplayFp, ", ");
-      female->printResponse(ReplayFp);
-      fprintf(ReplayFp, " },\n");
+      fprintf(BehaviorFp, ", ");
+      female->printResponse(BehaviorFp);
+      fprintf(BehaviorFp, " },\n");
    }
 
    if (Verbose)
@@ -413,10 +413,10 @@ void step()
       male->printState();
    }
 
-   if (ReplayFp != NULL)
+   if (BehaviorFp != NULL)
    {
-      fprintf(ReplayFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
-      male->printState(ReplayFp);
+      fprintf(BehaviorFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
+      male->printState(BehaviorFp);
    }
 
    // Cycle male.
@@ -428,11 +428,11 @@ void step()
       train(MALE);
    }
 
-   if (ReplayFp != NULL)
+   if (BehaviorFp != NULL)
    {
-      fprintf(ReplayFp, ", ");
-      male->printResponse(ReplayFp);
-      fprintf(ReplayFp, " }\n");
+      fprintf(BehaviorFp, ", ");
+      male->printResponse(BehaviorFp);
+      fprintf(BehaviorFp, " }\n");
    }
 
    if (Verbose)
@@ -2604,16 +2604,16 @@ int main(int argc, char *args[])
          }
          continue;
       }
-      if (strcmp(args[i], "-writeReplayFile") == 0)
+      if (strcmp(args[i], "-writeBehaviorFile") == 0)
       {
          i++;
          if (i >= argc)
          {
-            fprintf(stderr, "Invalid replay file\n");
+            fprintf(stderr, "Invalid behavior file\n");
             fprintf(stderr, Usage);
             exit(1);
          }
-         ReplayFilename = args[i];
+         BehaviorFilename = args[i];
          continue;
       }
       if (strcmp(args[i], "-version") == 0)
@@ -2685,15 +2685,15 @@ int main(int argc, char *args[])
       female->initNeeds();
    }
 
-   // Write replay file?
-   if (ReplayFilename != NULL)
+   // Write behavior file?
+   if (BehaviorFilename != NULL)
    {
-      if ((ReplayFp = fopen(ReplayFilename, "w")) == NULL)
+      if ((BehaviorFp = fopen(BehaviorFilename, "w")) == NULL)
       {
-         fprintf(stderr, "Cannot open replay file: %s\n", ReplayFilename);
+         fprintf(stderr, "Cannot open behavior file: %s\n", BehaviorFilename);
          exit(1);
       }
-      fprintf(ReplayFp, "[\n");
+      fprintf(BehaviorFp, "[\n");
    }
 
    // Run birds.
@@ -2705,21 +2705,21 @@ int main(int argc, char *args[])
          printf("Step=%d\n", i);
       }
 
-      if (ReplayFp != NULL)
+      if (BehaviorFp != NULL)
       {
-         fprintf(ReplayFp, "{ \"Step\": %d, \"Data\": {\n", i);
+         fprintf(BehaviorFp, "{ \"Step\": %d, \"Data\": {\n", i);
       }
 
       step();
 
-      if (ReplayFp != NULL)
+      if (BehaviorFp != NULL)
       {
-         fprintf(ReplayFp, "} }");
+         fprintf(BehaviorFp, "} }");
          if (i < Steps)
          {
-            fprintf(ReplayFp, ",");
+            fprintf(BehaviorFp, ",");
          }
-         fprintf(ReplayFp, "\n");
+         fprintf(BehaviorFp, "\n");
       }
 
       if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
@@ -2778,14 +2778,14 @@ int main(int argc, char *args[])
       }
    }
 
-   // Write replay file?
-   if (ReplayFilename != NULL)
+   // Write behavior file?
+   if (BehaviorFilename != NULL)
    {
-      fprintf(ReplayFp, "]\n");
-      fclose(ReplayFp);
+      fprintf(BehaviorFp, "]\n");
+      fclose(BehaviorFp);
       if (Verbose)
       {
-         printf("Replay file written to %s\n", ReplayFilename);
+         printf("Behavior file written to %s\n", BehaviorFilename);
       }
    }
 

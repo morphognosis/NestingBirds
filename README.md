@@ -24,5 +24,5 @@ Run graphical interface:
 <pre>
 run_nestingbirds_replay.sh, run_nestingbirds_replay.bat
 
-Usage: java morphognosis.nestingbirds.NestingBirdsReplay -replayFile file_name
+Usage: java morphognosis.nestingbirds.NestingBirdsReplay -behaviorFile file_name
 </pre>

@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="nestingbirds">
+      <UniqueIdentifier>{94bb59a7-d091-4c55-a671-e1cf28cc9589}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{396f17e2-5311-46a9-9181-5e2ff29f8945}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mona">
+      <UniqueIdentifier>{9165cf83-8a92-4384-a662-494ecee64f1b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="NestingBirdsRNN.cpp">
+      <Filter>nestingbirds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\fileio.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\gettime.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\log.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\md5.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\quaternion.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\random.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\RDtree.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="female.cpp">
+      <Filter>nestingbirds</Filter>
+    </ClCompile>
+    <ClCompile Include="male.cpp">
+      <Filter>nestingbirds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mona\drive.cpp">
+      <Filter>mona</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mona\enable.cpp">
+      <Filter>mona</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mona\homeostat.cpp">
+      <Filter>mona</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mona\learn.cpp">
+      <Filter>mona</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mona\mona.cpp">
+      <Filter>mona</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mona\respond.cpp">
+      <Filter>mona</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mona\sense.cpp">
+      <Filter>mona</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\common.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\fileio.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\gettime.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\log.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\matrix.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\md5.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\quaternion.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\random.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\RDtree.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\valueset.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\vector.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="female.hpp">
+      <Filter>nestingbirds</Filter>
+    </ClInclude>
+    <ClInclude Include="locale.hpp">
+      <Filter>nestingbirds</Filter>
+    </ClInclude>
+    <ClInclude Include="male.hpp">
+      <Filter>nestingbirds</Filter>
+    </ClInclude>
+    <ClInclude Include="object.hpp">
+      <Filter>nestingbirds</Filter>
+    </ClInclude>
+    <ClInclude Include="orientation.hpp">
+      <Filter>nestingbirds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mona\homeostat.hpp">
+      <Filter>mona</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mona\mona.hpp">
+      <Filter>mona</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mona\mona-aux.hpp">
+      <Filter>mona</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -48,10 +48,10 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
 
    // Usage.
    public static final String Usage =
-      "Usage: java morphognosis.nestingbirds.NestingBirdsReplay -replayFile <replay file name>";
+      "Usage: java morphognosis.nestingbirds.NestingBirdsReplay -behaviorFile <behavior file name>";
 
-   // Replay file name.
-   static String ReplayFilename;
+   // Behavior file name.
+   static String BehaviorFilename;
 
    // Replay frames.
    ArrayList<NestingBirdsReplayFrame> replayFrames;
@@ -144,8 +144,8 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
    // Constructor.
    public NestingBirdsReplay()
    {
-      // Load replay file.
-      loadReplayFile(ReplayFilename);
+      // Load behavior file.
+      loadReplayFile(BehaviorFilename);
 
       // Create dashboards.
       maleDashboard   = new MaleReplayDashboard();
@@ -869,16 +869,16 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
    {
       for (int i = 0; i < args.length; i++)
       {
-         if (args[i].equals("-replayFile"))
+         if (args[i].equals("-behaviorFile"))
          {
             i++;
             if (i >= args.length)
             {
-               System.err.println("Invalid replayFile option");
+               System.err.println("Invalid behaviorFile option");
                System.err.println(Usage);
                System.exit(1);
             }
-            ReplayFilename = args[i];
+            BehaviorFilename = args[i];
             continue;
          }
          if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
@@ -889,7 +889,7 @@ public class NestingBirdsReplay extends JFrame implements Runnable, ActionListen
          System.err.println(Usage);
          System.exit(1);
       }
-      if (ReplayFilename == null)
+      if (BehaviorFilename == null)
       {
          System.err.println(Usage);
          System.exit(1);

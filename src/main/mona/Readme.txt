@@ -16,11 +16,11 @@ Directories:
 mona: mona neural network.
 common files.
 nestingbirds: nesting birds.
-../../../bin: nestingbirds executable.
+../../../bin: nestingbirds and nestingbirds_rnn executables.
 
 Commands:
 
-nestingbirds
+nestingbirds: run nestingbirds.
 
 Usage:
     nestingbirds
@@ -46,7 +46,13 @@ Usage:
       [-femaleBroodEggNeed <amount> (default=0.3)]
       [-randomSeed <seed> (default=4517)]
       [-mouseMoveProbability <probability> (default=0.1)]
-      [-writeReplayFile <replay file name> (json)]
+      [-writeBehaviorFile <behavior file name> (json)]
       [-verbose <true | false> (default=true)]
       [-version]
       
+nestingbirds_rnn: train and test nestingbirds with RNN.
+
+Usage:
+    nestingbirds_rnn
+      -behaviorTrainFiles <behavior files> (comma-separated list)
+      [-behaviorTestFiles <behavior files> (comma-separated list)]
