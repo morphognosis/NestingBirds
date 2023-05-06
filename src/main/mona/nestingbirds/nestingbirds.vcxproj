@@ -38,6 +38,7 @@
     <ClInclude Include="male.hpp" />
     <ClInclude Include="object.hpp" />
     <ClInclude Include="orientation.hpp" />
+    <ClInclude Include="world.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\fileio.cpp" />
@@ -57,6 +58,7 @@
     <ClCompile Include="female.cpp" />
     <ClCompile Include="male.cpp" />
     <ClCompile Include="NestingBirds.cpp" />
+    <ClCompile Include="world.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B3746F26-576F-4950-9490-9D00F9591C23}</ProjectGuid>

@@ -17,7 +17,7 @@ Import Eclipse project, build and run with scripts in the work directory.
 Build nestingbirds.jar and nestingbirds executables:
 <pre>build_nestingbirds.sh, build_nestingbirds.bat</pre>
 
-Train/test birds and create a replay file. See src/main/mona/Readme.txt.
+Train/test birds and create behavior files. See src/main/mona/Readme.txt.
 <pre>run_nestingbirds.sh, run_nestingbirds.bat</pre>
 
 Run graphical interface:
@@ -26,3 +26,10 @@ run_nestingbirds_replay.sh, run_nestingbirds_replay.bat
 
 Usage: java morphognosis.nestingbirds.NestingBirdsReplay -behaviorFile file_name
 </pre>
+
+
+Train/test RNN:
+<pre>
+run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat
+</pre>
+
