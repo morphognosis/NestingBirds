@@ -2211,7 +2211,7 @@ void writeBehaviorFile(char* text)
 {
     if (BehaviorFp != NULL)
     {
-        fprintf(BehaviorFp, (const char *)text);
+        fprintf(BehaviorFp, text);
     }
 }
 

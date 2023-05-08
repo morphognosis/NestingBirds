@@ -542,12 +542,12 @@ int main(int argc, char *args[])
 
       if (BehaviorFilename != NULL)
       {
-         writeBehaviorFile("} }");
+         writeBehaviorFile((char *)"} }");
          if (i < Steps)
          {
-             writeBehaviorFile(",");
+             writeBehaviorFile((char*)",");
          }
-         writeBehaviorFile("\n");
+         writeBehaviorFile((char*)"\n");
       }
 
       if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))

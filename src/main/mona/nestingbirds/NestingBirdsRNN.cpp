@@ -2,8 +2,7 @@
 
 // The nesting birds RNN.
 
-#include "male.hpp"
-#include "female.hpp"
+#include "world.hpp"
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
@@ -14,23 +13,24 @@
 
 using namespace std;
 
-// Random numbers.
-#define DEFAULT_RANDOM_NUMBER_SEED    "4517"
-int RANDOM_NUMBER_SEED = 4517;
-int TEST_RANDOM_NUMBER_SEED = -1;
-
 // Usage.
 const char* Usage =
 "Usage:\n"
 "    nestingbirds_rnn\n"
-"      -behaviorTrainFiles <behavior files> (comma-separated list)\n"
-"      [-testRandomSeed <random seed>]\n"
+"      -steps <steps>\n"
+"      -trainRandomSeeds <random seeds> (comma-separated list)\n"
+"      [-testRandomSeeds <random seeds>]\n"
+"      [-verbose <true | false> (default=true)]\n"
 "Exit codes:\n"
 "  0=success\n"
 "  1=error\n";
 
-// Train file names.
-vector<string> BehaviorTrainFilenames;
+// Steps.
+int Steps;
+
+// Random numbers.
+vector<int> trainRandomSeeds;
+vector<int> testRandomSeeds;
 
 // Sensory-response activity.
 class MaleSensoryResponse
@@ -94,8 +94,9 @@ vector<vector<MaleSensoryResponse>> MaleTrainDataset;
 vector<vector<MaleSensoryResponse>> MaleTestDataset;
 vector<vector<FemaleSensoryResponse>> FemaleTrainDataset;
 vector<vector<FemaleSensoryResponse>> FemaleTestDataset;
-void importBehaviorFileDataset(string filename, 
-    vector<MaleSensoryResponse> &MaleDataset, vector<FemaleSensoryResponse>& FemaleDataset);
+void createBehaviorFileSequences(int randomSeed, int steps, bool maleTest, bool femaleTest, 
+    vector<MaleSensoryResponse> &maleSequence, vector<FemaleSensoryResponse>& femaleSequence);
+void createRNNtrainingDataset();
 
 // Trim string.
 string trim(string& str);
@@ -103,14 +104,34 @@ string trim(string& str);
 // Main.
 int main(int argc, char *args[])
 {
+    bool gotSteps = false;
    for (int i = 1; i < argc; i++)
    {
-      if (strcmp(args[i], "-behaviorTrainFiles") == 0)
+       if (strcmp(args[i], "-steps") == 0)
+       {
+           i++;
+           if (i >= argc)
+           {
+               fprintf(stderr, "Invalid steps option\n");
+               fprintf(stderr, Usage);
+               exit(1);
+           }
+           Steps = atoi(args[i]);
+           if (Steps < 0)
+           {
+               fprintf(stderr, "Invalid steps option\n");
+               fprintf(stderr, Usage);
+               exit(1);
+           }
+           gotSteps = true;
+           continue;
+       }
+      if (strcmp(args[i], "-trainRandomSeeds") == 0)
       {
          i++;
          if (i >= argc)
          {
-            fprintf(stderr, "Invalid behaviorTrainFiles option\n");
+            fprintf(stderr, "Invalid trainRandomSeeds option\n");
             fprintf(stderr, Usage);
             exit(1);
          }
@@ -119,27 +140,52 @@ int main(int argc, char *args[])
          {
              string substr;
              getline(s_stream, substr, ',');
-             BehaviorTrainFilenames.push_back(trim(substr));
+             trainRandomSeeds.push_back(atoi(trim(substr).c_str()));
          }
          continue;
       }
-      if (strcmp(args[i], "-testRandomSeed") == 0)
+      if (strcmp(args[i], "-testRandomSeeds") == 0)
       {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid testRandomSeed option\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         TEST_RANDOM_NUMBER_SEED = atoi(args[i]);
-         if (TEST_RANDOM_NUMBER_SEED < 0)
-         {
-             fprintf(stderr, "Invalid testRandomSeed option\n");
-             fprintf(stderr, Usage);
-             exit(1);
-         }
-         continue;
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid testRandomSeeds option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          stringstream s_stream(args[i]);
+          while (s_stream.good())
+          {
+              string substr;
+              getline(s_stream, substr, ',');
+              testRandomSeeds.push_back(atoi(trim(substr).c_str()));
+          }
+          continue;
+      }
+      if (strcmp(args[i], "-verbose") == 0)
+      {
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid verbose option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          if (strcmp(args[i], "true") == 0)
+          {
+              Verbose = true;
+          }
+          else if (strcmp(args[i], "false") == 0)
+          {
+              Verbose = false;
+          }
+          else
+          {
+              fprintf(stderr, "Invalid verbose option\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          continue;
       }
       if ((strcmp(args[i], "-help") == 0) || (strcmp(args[i], "-h") == 0) || (strcmp(args[i], "-?") == 0))
       {
@@ -149,31 +195,110 @@ int main(int argc, char *args[])
       fprintf(stderr, Usage);
       exit(1);
    }
-   if (BehaviorTrainFilenames.size() == 0)
+   if (!gotSteps)
+   {
+       fprintf(stderr, Usage);
+       exit(1);
+   }
+   if (trainRandomSeeds.size() == 0)
    {
        fprintf(stderr, Usage);
        exit(1);
    }
 
-   // Import behavior datasets.
-   for (string filename : BehaviorTrainFilenames)
+   // Create behavior training datasets.
+   for (int seed : trainRandomSeeds)
    {
-       vector<MaleSensoryResponse> maleDataset;
-       vector<FemaleSensoryResponse> femaleDataset;
-       importBehaviorFileDataset(filename, maleDataset, femaleDataset);
-       MaleTrainDataset.push_back(maleDataset);
-       FemaleTrainDataset.push_back(femaleDataset);
+       vector<MaleSensoryResponse> maleSequence;
+       vector<FemaleSensoryResponse> femaleSequence;
+       createBehaviorFileSequences(seed, Steps, false, false, maleSequence, femaleSequence);
+       MaleTrainDataset.push_back(maleSequence);
+       FemaleTrainDataset.push_back(femaleSequence);
    }
+
+   // Convert to RNN training dataset.
+   createRNNtrainingDataset();
+
+   // Train RNN.
 
    exit(0);
 }
 
-// Import behavior file dataset.
-void importBehaviorFileDataset(string filename, 
-    vector<MaleSensoryResponse>& maleDataset, vector<FemaleSensoryResponse>& femaleDataset)
+// Create behavior sequences.
+void createBehaviorFileSequences(int randomSeed, int steps, bool maleTest, bool femaleTest, 
+    vector<MaleSensoryResponse>& maleSequence, vector<FemaleSensoryResponse>& femaleSequence)
 {
-    maleDataset.clear();
-    femaleDataset.clear();
+    // Generate behavior file.
+    char *filename = (char*)"nestingbirds_rnn_behavior.json";
+    RANDOM_NUMBER_SEED = randomSeed;
+    init(maleTest, femaleTest);
+    openBehaviorFile(filename);
+    int eggLaidStep = -1;
+    char buf[100];
+    if (Verbose)
+    {
+        printf("Generating behavior file %s\n", filename);
+    }
+    for (int i = 1; i <= steps; i++)
+    {
+        if (Verbose)
+        {
+            printf("Step=%d\n", i);
+        }
+        sprintf(buf, "{ \"Step\": %d, \"Data\": {\n", i);
+        writeBehaviorFile(buf);
+        step();
+        writeBehaviorFile((char*)"} }");
+        if (i < Steps)
+        {
+            writeBehaviorFile((char*)",");
+        }
+        writeBehaviorFile((char*)"\n");
+        if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
+        {
+            eggLaidStep = i;
+        }
+    }
+    if (Verbose)
+    {
+        printf("Run results: ");
+        if (eggLaidStep >= 1)
+        {
+            printf("egg laid at step %d", eggLaidStep);
+        }
+        else
+        {
+            printf("no egg");
+        }
+        int mouseCount = 0;
+        int stoneCount = 0;
+        for (int x = 0; x < WIDTH; x++)
+        {
+            for (int y = 0; y < HEIGHT; y++)
+            {
+                if ((World[x][y].locale == LOCALE::FOREST) &&
+                    (World[x][y].object == OBJECT::MOUSE))
+                {
+                    mouseCount++;
+                }
+                if ((World[x][y].locale == LOCALE::DESERT) &&
+                    (World[x][y].object == OBJECT::STONE))
+                {
+                    stoneCount++;
+                }
+            }
+        }
+        printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
+    }
+    closeBehaviorFile();
+
+    // Import behavior dataset.
+    if (Verbose)
+    {
+        printf("Importing behavior dataset\n");
+    }
+    maleSequence.clear();
+    femaleSequence.clear();
     ifstream file;
     file.open(filename);
     if (!file.is_open())
@@ -238,7 +363,11 @@ void importBehaviorFileDataset(string filename,
                 end = json.find("\"");
                 i++;
             }
-            femaleDataset.push_back(sensoryResponse);
+            if (Verbose)
+            {
+                printf("Female data:\n"); sensoryResponse.print();
+            }
+            femaleSequence.push_back(sensoryResponse);
             continue;
         }
         if (gender == "Ma")
@@ -303,11 +432,22 @@ void importBehaviorFileDataset(string filename,
                 end = json.find("\"");
                 i++;
             }
-            maleDataset.push_back(sensoryResponse);
+            if (Verbose)
+            {
+                printf("Male data:\n"); sensoryResponse.print();
+            }
+            maleSequence.push_back(sensoryResponse);
             continue;
         }
     }
     file.close();
+    unlink(filename);
+}
+
+// Convert to RNN training dataset.
+void createRNNtrainingDataset()
+{
+
 }
 
 // Trim string.

@@ -63,6 +63,9 @@
     <ClCompile Include="..\mona\sense.cpp">
       <Filter>mona</Filter>
     </ClCompile>
+    <ClCompile Include="world.cpp">
+      <Filter>nestingbirds</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\common.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="..\mona\mona-aux.hpp">
       <Filter>mona</Filter>
+    </ClInclude>
+    <ClInclude Include="world.hpp">
+      <Filter>nestingbirds</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

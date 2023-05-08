@@ -12,10 +12,10 @@ all: ../../../../bin/nestingbirds ../../../../bin/nestingbirds_rnn
 		../mona/drive.o ../mona/enable.o ../mona/homeostat.o ../mona/learn.o ../mona/mona.o ../mona/respond.o ../mona/sense.o \
 		-lm -lstdc++
 
-../../../../bin/nestingbirds_rnn: NestingBirdsRNN.o male.o female.o \
+../../../../bin/nestingbirds_rnn: NestingBirdsRNN.o world.o male.o female.o \
 		../common/fileio.o ../common/gettime.o ../common/log.o ../common/md5.o ../common/quaternion.o ../common/random.o ../common/RDtree.o \
 		../mona/drive.o ../mona/enable.o ../mona/homeostat.o ../mona/learn.o ../mona/mona.o ../mona/respond.o ../mona/sense.o
-	$(CC) -o ../../../../bin/nestingbirds_rnn NestingBirdsRNN.o male.o female.o \
+	$(CC) -o ../../../../bin/nestingbirds_rnn NestingBirdsRNN.o world.o male.o female.o \
 		../common/fileio.o ../common/gettime.o ../common/log.o ../common/md5.o ../common/quaternion.o ../common/random.o ../common/RDtree.o \
 		../mona/drive.o ../mona/enable.o ../mona/homeostat.o ../mona/learn.o ../mona/mona.o ../mona/respond.o ../mona/sense.o \
 		-lm -lstdc++

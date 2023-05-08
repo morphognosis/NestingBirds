@@ -54,5 +54,7 @@ nestingbirds_rnn: train and test nestingbirds with RNN.
 
 Usage:
     nestingbirds_rnn
-      -behaviorTrainFiles <behavior files> (comma-separated list)
-      [-testRandomSeed <random seed>]
+      -steps <steps>
+      -trainRandomSeeds <random seeds> (comma-separated list)
+      [-testRandomSeeds <random seeds>]
+      [-verbose <true | false> (default=true)]      
