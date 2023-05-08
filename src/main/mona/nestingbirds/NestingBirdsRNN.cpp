@@ -231,6 +231,8 @@ void createBehaviorFileSequences(int randomSeed, int steps, bool maleTest, bool 
     // Generate behavior file.
     char *filename = (char*)"nestingbirds_rnn_behavior.json";
     RANDOM_NUMBER_SEED = randomSeed;
+    Male::RANDOMIZE_FOOD_LEVEL = true;
+    Female::RANDOMIZE_FOOD_LEVEL = true;
     init(maleTest, femaleTest);
     openBehaviorFile(filename);
     int eggLaidStep = -1;

@@ -20,7 +20,7 @@ all: ../../../../bin/nestingbirds ../../../../bin/nestingbirds_rnn
 		../mona/drive.o ../mona/enable.o ../mona/homeostat.o ../mona/learn.o ../mona/mona.o ../mona/respond.o ../mona/sense.o \
 		-lm -lstdc++
 
-world.o: world.hpp ../mona/mona.hpp male.hpp male.cpp object.hpp locale.hpp orientation.hpp
+world.o: ../mona/mona.hpp world.hpp world.cpp object.hpp locale.hpp orientation.hpp
 	$(CC) $(CCFLAGS) -c world.cpp
 
 male.o: ../mona/mona.hpp male.hpp male.cpp object.hpp locale.hpp orientation.hpp
