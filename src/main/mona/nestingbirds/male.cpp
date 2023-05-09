@@ -17,6 +17,8 @@ Mona::NEED Male::ATTEND_FEMALE_NEED = strtod(MALE_DEFAULT_ATTEND_FEMALE_NEED, 0)
 
 extern int RANDOM_NUMBER_SEED;
 
+//#define NO_PLACE_MOTORS 1
+
 // Construct male bird.
 Male::Male()
 {
@@ -35,17 +37,28 @@ Male::Male()
 
    // Motors:
    Mona::Motor *doNothing = brain->newMotor();
-   Mona::Motor *move      = brain->newMovementMotor(RESPONSE::MOVE_FORWARD);
-   Mona::Motor *turnRight = brain->newMovementMotor(RESPONSE::TURN_RIGHT);
-   Mona::Motor *turnLeft  = brain->newMovementMotor(RESPONSE::TURN_LEFT);
+#ifdef NO_PLACE_MOTORS
+   Mona::Motor *move      = brain->newMotor();
+   Mona::Motor *turnRight = brain->newMotor();
+   Mona::Motor *turnLeft  = brain->newMotor();
+#else
+   Mona::Motor* move = brain->newMovementMotor(RESPONSE::MOVE_FORWARD);
+   Mona::Motor* turnRight = brain->newMovementMotor(RESPONSE::TURN_RIGHT);
+   Mona::Motor* turnLeft = brain->newMovementMotor(RESPONSE::TURN_LEFT);
+#endif
    Mona::Motor *eat       = brain->newMotor();
    Mona::Motor *get       = brain->newMotor();
    Mona::Motor *put       = brain->newMotor();
    Mona::Motor *toss      = brain->newMotor();
    Mona::Motor *giveMouse = brain->newMotor();
    Mona::Motor *giveStone = brain->newMotor();
-   Mona::Motor *fly       = brain->newMovementMotor(Mona::MOVEMENT_TYPE::BEGIN);
-   Mona::Motor *alight    = brain->newMovementMotor(Mona::MOVEMENT_TYPE::END);
+#ifdef NO_PLACE_MOTORS
+   Mona::Motor *fly       = brain->newMotor();
+   Mona::Motor *alight    = brain->newMotor();
+#else
+   Mona::Motor* fly = brain->newMovementMotor(Mona::MOVEMENT_TYPE::BEGIN);
+   Mona::Motor* alight = brain->newMovementMotor(Mona::MOVEMENT_TYPE::END);
+#endif
 
    // Needs.
    initNeeds();
