@@ -13,6 +13,7 @@ public:
    static const int EGG       = 1;
    static const int MOUSE     = 2;
    static const int STONE     = 3;
+   static const int NUM_OBJECTS = 4;
 
    // Object to string.
    static const char *toString(int object)

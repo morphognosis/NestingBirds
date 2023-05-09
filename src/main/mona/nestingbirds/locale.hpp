@@ -10,6 +10,7 @@ public:
    static const int DESERT = 0;
    static const int FOREST = 1;
    static const int PLAIN  = 2;
+   static const int NUM_LOCALES = 3;
 
    // Locale to string.
    static const char *toString(int locale)

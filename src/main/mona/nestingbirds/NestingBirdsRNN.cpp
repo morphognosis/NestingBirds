@@ -32,6 +32,12 @@ int Steps;
 vector<int> trainRandomSeeds;
 vector<int> testRandomSeeds;
 
+// File names.
+#define BEHAVIOR_FILENAME (char *)"nestingbirds_rnn_behavior.json"
+#define RNN_MALE_DATASET_FILENAME (char *)"nestingbirds_rnn_male_dataset.csv"
+#define RNN_FEMALE_DATASET_FILENAME (char *)"nestingbirds_rnn_female_dataset.csv"
+#define RNN_FILENAME (char *)"nestingbirds_rnn.py"
+
 // Sensory-response activity.
 class MaleSensoryResponse
 {
@@ -59,6 +65,50 @@ public:
         printf("femaleWantsMouse=%s\n", femaleWantsMouse.c_str());
         printf("femaleWantsStone=%s\n", femaleWantsStone.c_str());
         printf("response=%s\n", response.c_str());
+    }
+
+    // Convert to one-hot encoding.
+    string oneHot()
+    {
+        string encoding = "";
+        if (locale == "DESERT")
+        {
+            encoding += "1,0,0";
+        }
+        else if (locale == "FOREST")
+        {
+            encoding += "0,1,0";
+        }
+        else {
+            encoding += "0,0,1";
+        }
+        encoding += ",";
+        if (mouseProximity == "UNKNOWN")
+        {
+            encoding += "1,0,0,0,0";
+        }
+        else if (mouseProximity == "PRESENT")
+        {
+            encoding += "0,1,0,0,0";
+        }
+        else if (mouseProximity == "LEFT")
+        {
+            encoding += "0,0,1,0,0";
+        }
+        else if (mouseProximity == "FRONT")
+        {
+            encoding += "0,0,0,1,0";
+        }
+        else {
+            encoding += "0,0,0,0,1";
+        }
+        return encoding;
+    }
+
+    // Get length of encoding.
+    int oneHotLength()
+    {
+        return 0;
     }
 };
 
@@ -96,7 +146,7 @@ vector<vector<FemaleSensoryResponse>> FemaleTrainDataset;
 vector<vector<FemaleSensoryResponse>> FemaleTestDataset;
 void createBehaviorFileSequences(int randomSeed, int steps, bool maleTest, bool femaleTest, 
     vector<MaleSensoryResponse> &maleSequence, vector<FemaleSensoryResponse>& femaleSequence);
-void createRNNtrainingDataset();
+void createRNNdataset();
 
 // Trim string.
 string trim(string& str);
@@ -216,8 +266,8 @@ int main(int argc, char *args[])
        FemaleTrainDataset.push_back(femaleSequence);
    }
 
-   // Convert to RNN training dataset.
-   createRNNtrainingDataset();
+   // Convert to RNN dataset.
+   createRNNdataset();
 
    // Train RNN.
 
@@ -229,17 +279,16 @@ void createBehaviorFileSequences(int randomSeed, int steps, bool maleTest, bool 
     vector<MaleSensoryResponse>& maleSequence, vector<FemaleSensoryResponse>& femaleSequence)
 {
     // Generate behavior file.
-    char *filename = (char*)"nestingbirds_rnn_behavior.json";
     RANDOM_NUMBER_SEED = randomSeed;
     Male::RANDOMIZE_FOOD_LEVEL = true;
     Female::RANDOMIZE_FOOD_LEVEL = true;
     init(maleTest, femaleTest);
-    openBehaviorFile(filename);
+    openBehaviorFile(BEHAVIOR_FILENAME);
     int eggLaidStep = -1;
     char buf[100];
     if (Verbose)
     {
-        printf("Generating behavior file %s\n", filename);
+        printf("Generating behavior file %s\n", BEHAVIOR_FILENAME);
     }
     for (int i = 1; i <= steps; i++)
     {
@@ -302,10 +351,10 @@ void createBehaviorFileSequences(int randomSeed, int steps, bool maleTest, bool 
     maleSequence.clear();
     femaleSequence.clear();
     ifstream file;
-    file.open(filename);
+    file.open(BEHAVIOR_FILENAME);
     if (!file.is_open())
     {
-        fprintf(stderr, "Cannot open behavior file %s\n", filename);
+        fprintf(stderr, "Cannot open behavior file %s\n", BEHAVIOR_FILENAME);
         exit(1);
     }
     string json;
@@ -443,13 +492,34 @@ void createBehaviorFileSequences(int randomSeed, int steps, bool maleTest, bool 
         }
     }
     file.close();
-    unlink(filename);
+    unlink(BEHAVIOR_FILENAME);
 }
 
-// Convert to RNN training dataset.
-void createRNNtrainingDataset()
+// Convert to RNN dataset.
+void createRNNdataset()
 {
-
+    ofstream file;
+    FILE *fp = fopen(RNN_MALE_DATASET_FILENAME, "w");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Cannot open male dataset file %s\n", RNN_MALE_DATASET_FILENAME);
+        exit(1);
+    }
+    for (int i = 0; i < MaleTrainDataset.size(); i++)
+    {
+        vector<MaleSensoryResponse> behaviorSequence = MaleTrainDataset[i];
+        for (int j = 0; j < behaviorSequence.size(); j++)
+        {
+            MaleSensoryResponse sensoryResponse = behaviorSequence[j];
+            fprintf(fp, "%s", sensoryResponse.oneHot().c_str());
+            if (i < MaleTrainDataset.size() - 1 || j < behaviorSequence.size() - 1)
+            {
+                fprintf(fp, ",");
+            }
+            fprintf(fp, "\n");
+        }
+    }
+    fclose(fp);
 }
 
 // Trim string.
