@@ -17,25 +17,25 @@ extern double MOUSE_MOVE_PROBABILITY;
 class Cell
 {
 public:
-    int locale;
-    int object;
-    Cell()
-    {
-        locale = LOCALE::DESERT;
-        object = OBJECT::NO_OBJECT;
-    }
+   int locale;
+   int object;
+   Cell()
+   {
+      locale = LOCALE::DESERT;
+      object = OBJECT::NO_OBJECT;
+   }
 };
 
 // World.
-#define WIDTH 21
-#define HEIGHT 21
+#define WIDTH     21
+#define HEIGHT    21
 extern Cell World[WIDTH][HEIGHT];
-extern int NEST_CENTER_X;
-extern int NEST_CENTER_Y;
+extern int  NEST_CENTER_X;
+extern int  NEST_CENTER_Y;
 
 // Birds.
-extern Male* male;
-extern Female* female;
+extern Male   *male;
+extern Female *female;
 
 // Initialize.
 void init(bool maleTest, bool femaleTest);
@@ -44,14 +44,14 @@ void init(bool maleTest, bool femaleTest);
 void step();
 
 // Save/load.
-void saveMale(char* filename);
-void loadMale(char* filename);
-void saveFemale(char* filename);
-void loadFemale(char* filename);
+void saveMale(char *filename);
+void loadMale(char *filename);
+void saveFemale(char *filename);
+void loadFemale(char *filename);
 
 // Behavior.
-void openBehaviorFile(char* filename);
-void writeBehaviorFile(char* text);
+void openBehaviorFile(char *filename);
+void writeBehaviorFile(char *text);
 void closeBehaviorFile();
 
 // Verbosity.

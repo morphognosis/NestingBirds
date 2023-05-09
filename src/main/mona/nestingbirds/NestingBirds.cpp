@@ -56,12 +56,12 @@ char *BehaviorFilename;
 // Main.
 int main(int argc, char *args[])
 {
-    bool maleTest = false;
-    bool femaleTest = false;
+   bool maleTest           = false;
+   bool femaleTest         = false;
    bool gotMaleTrainTest   = false;
    bool gotFemaleTrainTest = false;
    bool gotSteps           = false;
-   char buf[100];
+   char buf[BUFSIZ];
 
    for (int i = 1; i < argc; i++)
    {
@@ -510,7 +510,7 @@ int main(int argc, char *args[])
    // Load?
    if (MaleLoadFilename != NULL)
    {
-       loadMale(MaleLoadFilename);
+      loadMale(MaleLoadFilename);
    }
    if (FemaleLoadFilename != NULL)
    {
@@ -520,7 +520,7 @@ int main(int argc, char *args[])
    // Write behavior file?
    if (BehaviorFilename != NULL)
    {
-       openBehaviorFile(BehaviorFilename);
+      openBehaviorFile(BehaviorFilename);
    }
 
    // Run birds.
@@ -534,7 +534,7 @@ int main(int argc, char *args[])
 
       if (BehaviorFilename != NULL)
       {
-          sprintf(buf, "{ \"Step\": %d, \"Data\": {\n", i);
+         sprintf(buf, "{ \"Step\": %d, \"Data\": {\n", i);
          writeBehaviorFile(buf);
       }
 
@@ -545,9 +545,9 @@ int main(int argc, char *args[])
          writeBehaviorFile((char *)"} }");
          if (i < Steps)
          {
-             writeBehaviorFile((char*)",");
+            writeBehaviorFile((char *)",");
          }
-         writeBehaviorFile((char*)"\n");
+         writeBehaviorFile((char *)"\n");
       }
 
       if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
@@ -601,7 +601,7 @@ int main(int argc, char *args[])
    // Write behavior file?
    if (BehaviorFilename != NULL)
    {
-       closeBehaviorFile();
+      closeBehaviorFile();
    }
 
    exit(0);

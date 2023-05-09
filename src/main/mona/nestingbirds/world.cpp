@@ -110,8 +110,8 @@ int distance(int x1, int y1, int x2, int y2);
 // Initialize.
 void init(bool maleTest, bool femaleTest)
 {
-    MaleTest = maleTest;
-    FemaleTest = femaleTest;
+   MaleTest   = maleTest;
+   FemaleTest = femaleTest;
 
    // Random numbers.
    srand(RANDOM_NUMBER_SEED);
@@ -2149,78 +2149,85 @@ void stepMice()
    }
 }
 
+
 // Save male.
 void saveMale(char *filename)
 {
-    male->save(filename);
-    if (Verbose)
-    {
-        printf("Male training saved to file %s\n", filename);
-    }
+   male->save(filename);
+   if (Verbose)
+   {
+      printf("Male training saved to file %s\n", filename);
+   }
 }
+
 
 // Save female.
 void saveFemale(char *filename)
 {
-    female->save(filename);
-    if (Verbose)
-    {
-        printf("Female training saved to file %s\n", filename);
-    }
+   female->save(filename);
+   if (Verbose)
+   {
+      printf("Female training saved to file %s\n", filename);
+   }
 }
+
 
 // Load male.
 void loadMale(char *filename)
 {
-    male->load(filename);
-    if (Verbose)
-    {
-        printf("Male network loaded from file %s\n", filename);
-    }
+   male->load(filename);
+   if (Verbose)
+   {
+      printf("Male network loaded from file %s\n", filename);
+   }
 
-    // Initialize needs.
-    male->initNeeds();
+   // Initialize needs.
+   male->initNeeds();
 }
+
 
 // Load female.
-void loadFemale(char* filename)
+void loadFemale(char *filename)
 {
-    female->load(filename);
-    if (Verbose)
-    {
-        printf("Female network loaded from file %s\n", filename);
-    }
+   female->load(filename);
+   if (Verbose)
+   {
+      printf("Female network loaded from file %s\n", filename);
+   }
 
-    // Initialize needs.
-    female->initNeeds();
+   // Initialize needs.
+   female->initNeeds();
 }
+
 
 // Open behavior file.
 void openBehaviorFile(char *filename)
 {
-    if ((BehaviorFp = fopen(filename, "w")) == NULL)
-    {
-        fprintf(stderr, "Cannot open behavior file: %s\n", filename);
-        exit(1);
-    }
-    fprintf(BehaviorFp, "[\n");
+   if ((BehaviorFp = fopen(filename, "w")) == NULL)
+   {
+      fprintf(stderr, "Cannot open behavior file: %s\n", filename);
+      exit(1);
+   }
+   fprintf(BehaviorFp, "[\n");
 }
 
+
 // Write to behavior file.
-void writeBehaviorFile(char* text)
+void writeBehaviorFile(char *text)
 {
-    if (BehaviorFp != NULL)
-    {
-        fprintf(BehaviorFp, text);
-    }
+   if (BehaviorFp != NULL)
+   {
+      fprintf(BehaviorFp, text);
+   }
 }
+
 
 // Close behavior file.
 void closeBehaviorFile()
 {
-    if (BehaviorFp != NULL)
-    {
-        fprintf(BehaviorFp, "]\n");
-        fclose(BehaviorFp);
-    }
+   if (BehaviorFp != NULL)
+   {
+      fprintf(BehaviorFp, "]\n");
+      fclose(BehaviorFp);
+   }
 }

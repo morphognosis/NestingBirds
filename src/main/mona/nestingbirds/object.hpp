@@ -9,10 +9,10 @@
 class OBJECT
 {
 public:
-   static const int NO_OBJECT = 0;
-   static const int EGG       = 1;
-   static const int MOUSE     = 2;
-   static const int STONE     = 3;
+   static const int NO_OBJECT   = 0;
+   static const int EGG         = 1;
+   static const int MOUSE       = 2;
+   static const int STONE       = 3;
    static const int NUM_OBJECTS = 4;
 
    // Object to string.

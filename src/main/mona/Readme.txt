@@ -57,4 +57,6 @@ Usage:
       -steps <steps>
       -trainRandomSeeds <random seeds> (comma-separated list)
       [-testRandomSeeds <random seeds>]
-      [-verbose <true | false> (default=true)]      
+      [-verbose <true | false> (default=true)]
+      
+Results: nestingbirds_rnn_male_results.json and nestingbirds_rnn_female_results.json
