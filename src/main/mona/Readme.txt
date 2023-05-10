@@ -59,4 +59,8 @@ Usage:
       [-testRandomSeeds <random seeds>]
       [-verbose <true | false> (default=true)]
       
-Results: nestingbirds_rnn_male_results.json and nestingbirds_rnn_female_results.json
+Results: 
+nestingbirds_rnn_male_train_results.json
+nestingbirds_rnn_male_test_results.json
+nestingbirds_rnn_female_train_results.json
+nestingbirds_rnn_female_test_results.json

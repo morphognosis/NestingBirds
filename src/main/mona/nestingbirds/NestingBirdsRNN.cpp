@@ -33,14 +33,19 @@ vector<int> trainRandomSeeds;
 vector<int> testRandomSeeds;
 
 // File names.
-#define BEHAVIOR_FILENAME              (char *)"nestingbirds_rnn_behavior.json"
-#define RNN_MALE_DATASET_FILENAME      (char *)"nestingbirds_rnn_male_dataset.csv"
-#define RNN_FEMALE_DATASET_FILENAME    (char *)"nestingbirds_rnn_female_dataset.csv"
-#define RNN_DATASET_FILENAME           (char *)"nestingbirds_rnn_dataset.py"
-#define RNN_FILENAME                   (char *)"nestingbirds_rnn.py"
-#define RNN_RESULTS_FILENAME           (char *)"nestingbirds_rnn_results.json"
-#define RNN_MALE_RESULTS_FILENAME      (char *)"nestingbirds_rnn_male_results.json"
-#define RNN_FEMALE_RESULTS_FILENAME    (char *)"nestingbirds_rnn_female_results.json"
+#define BEHAVIOR_FILENAME                 (char *)"nestingbirds_rnn_behavior.json"
+#define RNN_MALE_DATASET_FILENAME         (char *)"nestingbirds_rnn_male_dataset.csv"
+#define RNN_FEMALE_DATASET_FILENAME       (char *)"nestingbirds_rnn_female_dataset.csv"
+#define RNN_DATASET_FILENAME              (char *)"nestingbirds_rnn_dataset.py"
+#define TRAIN_RNN_FILENAME                (char *)"nestingbirds_train_rnn.py"
+#define TEST_RNN_FILENAME                 (char *)"nestingbirds_test_rnn.py"
+#define RNN_MODEL_FILENAME                (char *)"nestingbirds_rnn.model"
+#define RNN_TRAIN_RESULTS_FILENAME        (char *)"nestingbirds_rnn_train_results.json"
+#define RNN_TEST_RESULTS_FILENAME         (char *)"nestingbirds_rnn_test_results.json"
+#define RNN_MALE_TRAIN_RESULTS_FILENAME   (char *)"nestingbirds_rnn_male_train_results.json"
+#define RNN_MALE_TEST_RESULTS_FILENAME    (char *)"nestingbirds_rnn_male_test_results.json"
+#define RNN_FEMALE_TRAIN_RESULTS_FILENAME (char *)"nestingbirds_rnn_female_train_results.json"
+#define RNN_FEMALE_TEST_RESULTS_FILENAME  (char *)"nestingbirds_rnn_female_test_results.json"
 
 // Sensory-response activity.
 class MaleSensoryResponse
@@ -602,25 +607,40 @@ int main(int argc, char *args[])
    char buf[BUFSIZ];
    sprintf(buf, "cp %s %s", RNN_MALE_DATASET_FILENAME, RNN_DATASET_FILENAME);
    system(buf);
-   sprintf(buf, "python %s", RNN_FILENAME);
+   sprintf(buf, "python %s", TRAIN_RNN_FILENAME);
    system(buf);
-   sprintf(buf, "cp %s %s", RNN_RESULTS_FILENAME, RNN_MALE_RESULTS_FILENAME);
+   sprintf(buf, "cp %s %s", RNN_TRAIN_RESULTS_FILENAME, RNN_MALE_TRAIN_RESULTS_FILENAME);
    system(buf);
    if (Verbose)
    {
-      printf("Male results in %s\n", RNN_MALE_RESULTS_FILENAME);
+       printf("Male train results in %s\n", RNN_MALE_TRAIN_RESULTS_FILENAME);
+   }
+   sprintf(buf, "python %s", TEST_RNN_FILENAME);
+   system(buf);
+   sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_MALE_TEST_RESULTS_FILENAME);
+   system(buf);
+   if (Verbose)
+   {
+      printf("Male test results in %s\n", RNN_MALE_TEST_RESULTS_FILENAME);
       printf("Running female dataset\n");
    }
-   buf[BUFSIZ];
    sprintf(buf, "cp %s %s", RNN_FEMALE_DATASET_FILENAME, RNN_DATASET_FILENAME);
    system(buf);
-   sprintf(buf, "python %s", RNN_FILENAME);
+   sprintf(buf, "python %s", TRAIN_RNN_FILENAME);
    system(buf);
-   sprintf(buf, "cp %s %s", RNN_RESULTS_FILENAME, RNN_FEMALE_RESULTS_FILENAME);
+   sprintf(buf, "cp %s %s", RNN_TRAIN_RESULTS_FILENAME, RNN_FEMALE_TRAIN_RESULTS_FILENAME);
    system(buf);
    if (Verbose)
    {
-      printf("Female results in %s\n", RNN_FEMALE_RESULTS_FILENAME);
+       printf("Female train results in %s\n", RNN_FEMALE_TRAIN_RESULTS_FILENAME);
+   }
+   sprintf(buf, "python %s", TEST_RNN_FILENAME);
+   system(buf);
+   sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_FEMALE_TEST_RESULTS_FILENAME);
+   system(buf);
+   if (Verbose)
+   {
+      printf("Female test results in %s\n", RNN_FEMALE_TEST_RESULTS_FILENAME);
    }
 
    exit(0);
