@@ -19,7 +19,7 @@ const char* Usage =
 "    nestingbirds_rnn\n"
 "      -steps <steps>\n"
 "      -trainRandomSeeds <random seeds> (comma-separated list)\n"
-"      [-testRandomSeeds <random seeds>]\n"
+"      [-testRandomSeed <random seed> [-dynamic (world generates sensory inputs from predicted responses)]]\n"
 "      [-verbose <true | false> (default=true)]\n"
 "Exit codes:\n"
 "  0=success\n"
@@ -29,8 +29,9 @@ const char* Usage =
 int Steps;
 
 // Random numbers.
-vector<int> trainRandomSeeds;
-vector<int> testRandomSeeds;
+vector<int> TrainRandomSeeds;
+int TestRandomSeed;
+bool Dynamic;
 
 // File names.
 #define BEHAVIOR_FILENAME                 (char *)"nestingbirds_rnn_behavior.json"
@@ -39,9 +40,10 @@ vector<int> testRandomSeeds;
 #define RNN_DATASET_FILENAME              (char *)"nestingbirds_rnn_dataset.py"
 #define TRAIN_RNN_FILENAME                (char *)"nestingbirds_train_rnn.py"
 #define TEST_RNN_FILENAME                 (char *)"nestingbirds_test_rnn.py"
-#define RNN_MODEL_FILENAME                (char *)"nestingbirds_rnn.model"
+#define RNN_MODEL_FILENAME                (char *)"nestingbirds_rnn_model"
 #define RNN_TRAIN_RESULTS_FILENAME        (char *)"nestingbirds_rnn_train_results.json"
 #define RNN_TEST_RESULTS_FILENAME         (char *)"nestingbirds_rnn_test_results.json"
+#define RNN_TEST_PREDICTIONS_FILENAME     (char *)"nestingbirds_rnn_test_predictions.txt"
 #define RNN_MALE_TRAIN_RESULTS_FILENAME   (char *)"nestingbirds_rnn_male_train_results.json"
 #define RNN_MALE_TEST_RESULTS_FILENAME    (char *)"nestingbirds_rnn_male_test_results.json"
 #define RNN_FEMALE_TRAIN_RESULTS_FILENAME (char *)"nestingbirds_rnn_female_train_results.json"
@@ -460,9 +462,9 @@ public:
 
 // Imported behavior datasets.
 vector < vector < MaleSensoryResponse >> MaleTrainDataset;
-vector < vector < MaleSensoryResponse >> MaleTestDataset;
+vector < MaleSensoryResponse > MaleTestDataset;
 vector < vector < FemaleSensoryResponse >> FemaleTrainDataset;
-vector < vector < FemaleSensoryResponse >> FemaleTestDataset;
+vector < FemaleSensoryResponse > FemaleTestDataset;
 void createBehaviorFileSequences(int randomSeed, int steps,
                                  vector<MaleSensoryResponse>& maleSequence, vector<FemaleSensoryResponse>& femaleSequence);
 void createRNNdatasets();
@@ -473,6 +475,8 @@ string trim(string& str);
 // Main.
 int main(int argc, char *args[])
 {
+    TestRandomSeed = -1;
+    Dynamic = false;
    bool gotSteps = false;
 
    for (int i = 1; i < argc; i++)
@@ -510,27 +514,45 @@ int main(int argc, char *args[])
          {
             string substr;
             getline(s_stream, substr, ',');
-            trainRandomSeeds.push_back(atoi(trim(substr).c_str()));
+            int seed = atoi(trim(substr).c_str());
+            if (seed <= 0)
+            {
+                fprintf(stderr, "Invalid trainRandomSeed %d\n", seed);
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            TrainRandomSeeds.push_back(seed);
          }
          continue;
       }
-      if (strcmp(args[i], "-testRandomSeeds") == 0)
+      if (strcmp(args[i], "-testRandomSeed") == 0)
       {
          i++;
          if (i >= argc)
          {
-            fprintf(stderr, "Invalid testRandomSeeds option\n");
+            fprintf(stderr, "Invalid testRandomSeed option\n");
             fprintf(stderr, Usage);
             exit(1);
          }
-         stringstream s_stream(args[i]);
-         while (s_stream.good())
+         string arg(args[i]);
+         if (arg == "-dynamic")
          {
-            string substr;
-            getline(s_stream, substr, ',');
-            testRandomSeeds.push_back(atoi(trim(substr).c_str()));
+             fprintf(stderr, Usage);
+             exit(1);
+         }
+         TestRandomSeed = atoi(trim(arg).c_str());
+         if (TestRandomSeed <= 0)
+         {
+             fprintf(stderr, "Invalid testRandomSeed %d\n", TestRandomSeed);
+             fprintf(stderr, Usage);
+             exit(1);
          }
          continue;
+      }
+      if (strcmp(args[i], "-dynamic") == 0)
+      {
+          Dynamic = true;
+          continue;
       }
       if (strcmp(args[i], "-verbose") == 0)
       {
@@ -570,14 +592,14 @@ int main(int argc, char *args[])
       fprintf(stderr, Usage);
       exit(1);
    }
-   if (trainRandomSeeds.size() == 0)
+   if (TrainRandomSeeds.size() == 0)
    {
       fprintf(stderr, Usage);
       exit(1);
    }
 
    // Create behavior training datasets.
-   for (int randomSeed : trainRandomSeeds)
+   for (int randomSeed : TrainRandomSeeds)
    {
       vector<MaleSensoryResponse>   maleSequence;
       vector<FemaleSensoryResponse> femaleSequence;
@@ -587,13 +609,9 @@ int main(int argc, char *args[])
    }
 
    // Create behavior testing datasets.
-   for (int randomSeed : testRandomSeeds)
+   if (TestRandomSeed != -1)
    {
-      vector<MaleSensoryResponse>   maleSequence;
-      vector<FemaleSensoryResponse> femaleSequence;
-      createBehaviorFileSequences(randomSeed, Steps, maleSequence, femaleSequence);
-      MaleTestDataset.push_back(maleSequence);
-      FemaleTestDataset.push_back(femaleSequence);
+      createBehaviorFileSequences(TestRandomSeed, Steps, MaleTestDataset, FemaleTestDataset);
    }
 
    // Convert to RNN datasets.
@@ -615,14 +633,20 @@ int main(int argc, char *args[])
    {
        printf("Male train results in %s\n", RNN_MALE_TRAIN_RESULTS_FILENAME);
    }
-   sprintf(buf, "python %s", TEST_RNN_FILENAME);
-   system(buf);
-   sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_MALE_TEST_RESULTS_FILENAME);
-   system(buf);
+   if (TestRandomSeed != -1)
+   {
+       sprintf(buf, "python %s", TEST_RNN_FILENAME);
+       system(buf);
+       sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_MALE_TEST_RESULTS_FILENAME);
+       system(buf);
+       if (Verbose)
+       {
+           printf("Male test results in %s\n", RNN_MALE_TEST_RESULTS_FILENAME);
+       }
+   }
    if (Verbose)
    {
-      printf("Male test results in %s\n", RNN_MALE_TEST_RESULTS_FILENAME);
-      printf("Running female dataset\n");
+       printf("Running female dataset\n");
    }
    sprintf(buf, "cp %s %s", RNN_FEMALE_DATASET_FILENAME, RNN_DATASET_FILENAME);
    system(buf);
@@ -634,14 +658,24 @@ int main(int argc, char *args[])
    {
        printf("Female train results in %s\n", RNN_FEMALE_TRAIN_RESULTS_FILENAME);
    }
-   sprintf(buf, "python %s", TEST_RNN_FILENAME);
-   system(buf);
-   sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_FEMALE_TEST_RESULTS_FILENAME);
-   system(buf);
-   if (Verbose)
+   if (TestRandomSeed != -1)
    {
-      printf("Female test results in %s\n", RNN_FEMALE_TEST_RESULTS_FILENAME);
+       sprintf(buf, "python %s", TEST_RNN_FILENAME);
+       system(buf);
+       sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_FEMALE_TEST_RESULTS_FILENAME);
+       system(buf);
+       if (Verbose)
+       {
+           printf("Female test results in %s\n", RNN_FEMALE_TEST_RESULTS_FILENAME);
+       }
    }
+
+   // Clean up files.
+   unlink(RNN_MALE_DATASET_FILENAME);
+   unlink(RNN_FEMALE_DATASET_FILENAME);
+   unlink(RNN_DATASET_FILENAME);
+   unlink(RNN_TRAIN_RESULTS_FILENAME);
+   unlink(RNN_TEST_RESULTS_FILENAME);
 
    exit(0);
 }
@@ -940,38 +974,44 @@ void createRNNdatasets()
       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "X_test_shape = [%d, %d, %d]\n", MaleTestDataset.size(), Steps, MaleSensoryResponse::oneHotSensoryLength());
-   fprintf(fp, "X_test_seq = [\n");
-   for (int i = 0; i < MaleTestDataset.size(); i++)
+   if (MaleTestDataset.size() == 0)
    {
-      vector<MaleSensoryResponse> behaviorSequence = MaleTestDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-         if ((i < MaleTestDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
+       fprintf(fp, "X_test_shape = [0, %d, %d]\n", Steps, MaleSensoryResponse::oneHotSensoryLength());
+       fprintf(fp, "X_test_seq = [\n");
+   }
+   else {
+       fprintf(fp, "X_test_shape = [1, %d, %d]\n", Steps, MaleSensoryResponse::oneHotSensoryLength());
+       fprintf(fp, "X_test_seq = [\n");
+       for (int i = 0; i < MaleTestDataset.size(); i++)
+       {
+           MaleSensoryResponse sensoryResponse = MaleTestDataset[i];
+           fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+           if (i < MaleTestDataset.size() - 1)
+           {
+               fprintf(fp, ",");
+           }
+           fprintf(fp, "\n");
+       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "y_test_shape = [%d, %d, %d]\n", MaleTestDataset.size(), Steps, MaleSensoryResponse::oneHotResponseLength());
-   fprintf(fp, "y_test_seq = [\n");
-   for (int i = 0; i < MaleTestDataset.size(); i++)
+   if (MaleTestDataset.size() == 0)
    {
-      vector<MaleSensoryResponse> behaviorSequence = MaleTestDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-         if ((i < MaleTestDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
+       fprintf(fp, "y_test_shape = [0, %d, %d]\n", Steps, MaleSensoryResponse::oneHotResponseLength());
+       fprintf(fp, "y_test_seq = [\n");
+   }
+   else {
+       fprintf(fp, "y_test_shape = [1, %d, %d]\n", Steps, MaleSensoryResponse::oneHotResponseLength());
+       fprintf(fp, "y_test_seq = [\n");
+       for (int i = 0; i < MaleTestDataset.size(); i++)
+       {
+           MaleSensoryResponse sensoryResponse = MaleTestDataset[i];
+           fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+           if (i < MaleTestDataset.size() - 1)
+           {
+               fprintf(fp, ",");
+           }
+           fprintf(fp, "\n");
+       }
    }
    fprintf(fp, "]\n");
    fclose(fp);
@@ -1017,38 +1057,44 @@ void createRNNdatasets()
       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "X_test_shape = [%d, %d, %d]\n", FemaleTestDataset.size(), Steps, FemaleSensoryResponse::oneHotSensoryLength());
-   fprintf(fp, "X_test_seq = [\n");
-   for (int i = 0; i < FemaleTestDataset.size(); i++)
+   if (FemaleTestDataset.size() == 0)
    {
-      vector<FemaleSensoryResponse> behaviorSequence = FemaleTestDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-         if ((i < FemaleTestDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
+       fprintf(fp, "X_test_shape = [0, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotSensoryLength());
+       fprintf(fp, "X_test_seq = [\n");
+   }
+   else {
+       fprintf(fp, "X_test_shape = [1, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotSensoryLength());
+       fprintf(fp, "X_test_seq = [\n");
+       for (int i = 0; i < FemaleTestDataset.size(); i++)
+       {
+           FemaleSensoryResponse sensoryResponse = FemaleTestDataset[i];
+           fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+           if (i < FemaleTestDataset.size() - 1)
+           {
+               fprintf(fp, ",");
+           }
+           fprintf(fp, "\n");
+       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "y_test_shape = [%d, %d, %d]\n", FemaleTestDataset.size(), Steps, FemaleSensoryResponse::oneHotResponseLength());
-   fprintf(fp, "y_test_seq = [\n");
-   for (int i = 0; i < FemaleTestDataset.size(); i++)
+   if (FemaleTestDataset.size() == 0)
    {
-      vector<FemaleSensoryResponse> behaviorSequence = FemaleTestDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-         if ((i < FemaleTestDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
+       fprintf(fp, "y_test_shape = [0, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotResponseLength());
+       fprintf(fp, "y_test_seq = [\n");
+   }
+   else {
+       fprintf(fp, "y_test_shape = [1, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotResponseLength());
+       fprintf(fp, "y_test_seq = [\n");
+       for (int i = 0; i < MaleTestDataset.size(); i++)
+       {
+           FemaleSensoryResponse sensoryResponse = FemaleTestDataset[i];
+           fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+           if (i < FemaleTestDataset.size() - 1)
+           {
+               fprintf(fp, ",");
+           }
+           fprintf(fp, "\n");
+       }
    }
    fprintf(fp, "]\n");
    fclose(fp);

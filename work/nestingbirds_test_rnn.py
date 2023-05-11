@@ -8,11 +8,12 @@ from keras.layers import LSTM
 from keras.models import load_model
 import sys
 
-# results file name
+# file names
 results_filename = 'nestingbirds_rnn_test_results.json'
+predictions_filename = 'nestingbirds_rnn_test_predictions.txt'
 
 # load model
-model = load_model('nestingbirds_rnn.model')
+model = load_model('nestingbirds_rnn_model')
 
 # predict
 from nestingbirds_rnn_dataset import X_test_shape, X_test_seq, y_test_shape, y_test_seq
@@ -45,6 +46,11 @@ if X_test_shape[0] > 0:
                     errs += 1
             testErrors += errs
         testTotal += len(p)
+        
+        # write predictions
+        with open(predictions_filename, 'w') as f:
+            for i in range(len(p)):
+                f.write(str(p[i]) + ' ')
 
 # results to nestingbirds_rnn_test_results.txt
 print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')

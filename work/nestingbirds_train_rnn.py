@@ -47,7 +47,7 @@ model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=2)
 
 # save model
-model.save('nestingbirds_rnn.model')
+model.save('nestingbirds_rnn_model')
 
 # validate training
 seq = array(X_train_seq)

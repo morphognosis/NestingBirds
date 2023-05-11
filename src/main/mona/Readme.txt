@@ -56,7 +56,7 @@ Usage:
     nestingbirds_rnn
       -steps <steps>
       -trainRandomSeeds <random seeds> (comma-separated list)
-      [-testRandomSeeds <random seeds>]
+      [-testRandomSeed <random seed> [-dynamic (world generates sensory inputs from predicted responses)]]
       [-verbose <true | false> (default=true)]
       
 Results: 
