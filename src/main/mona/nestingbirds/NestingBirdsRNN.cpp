@@ -471,6 +471,9 @@ void importBehaviorDataset(
     vector<FemaleSensoryResponse>& femaleSequence);
 void createRNNdatasets();
 
+// Write nest completion results.
+void writeNestResults(char *filename);
+
 // Trim string.
 string trim(string& str);
 
@@ -716,7 +719,6 @@ int main(int argc, char *args[])
                else {
                    sensoryResponse.femaleWantsStone = "false";
                }
-               trainMale();
                sensoryResponse.response = Male::RESPONSE::toString(male->response);
                MaleTestDataset.push_back(sensoryResponse);
                FILE* fp = fopen(RNN_DATASET_FILENAME, "w");
@@ -772,6 +774,8 @@ int main(int argc, char *args[])
                    fprintf(stderr, "Invalid male test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
                    exit(1);
                }
+               MaleTestDataset[MaleTestDataset.size() - 1].response =
+                   Male::RESPONSE::toString(response);
                male->response = response;
                male->setResponseOverride();
                male->cycle();
@@ -781,6 +785,7 @@ int main(int argc, char *args[])
                    eggLaidStep = i;
                }
            }
+           writeNestResults(RNN_MALE_TEST_RESULTS_FILENAME);
            if (Verbose)
            {
                printf("Run results: ");
@@ -896,7 +901,6 @@ int main(int argc, char *args[])
                sensoryResponse.goal = Female::GOAL::toString(sensor);
                sensor = female->sensors[Female::HAS_OBJECT_SENSOR];
                sensoryResponse.hasObject = OBJECT::toString(sensor);
-               trainFemale();
                sensoryResponse.response = Female::RESPONSE::toString(female->response);
                FemaleTestDataset.push_back(sensoryResponse);
                FILE* fp = fopen(RNN_DATASET_FILENAME, "w");
@@ -952,6 +956,8 @@ int main(int argc, char *args[])
                    fprintf(stderr, "Invalid female test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
                    exit(1);
                }
+               FemaleTestDataset[FemaleTestDataset.size() - 1].response = 
+                   Female::RESPONSE::toString(response);
                female->response = response;
                female->setResponseOverride();
                female->cycle();
@@ -964,6 +970,7 @@ int main(int argc, char *args[])
                    eggLaidStep = i;
                }
            }
+           writeNestResults(RNN_FEMALE_TEST_RESULTS_FILENAME);
            if (Verbose)
            {
                printf("Run results: ");
@@ -1017,6 +1024,29 @@ int main(int argc, char *args[])
    unlink(RNN_TEST_PREDICTIONS_FILENAME);
 
    exit(0);
+}
+
+// Write nest completion results.
+void writeNestResults(char* filename)
+{
+    int nestCount = 0;
+    if (World[10][9].object == OBJECT::STONE) nestCount++;
+    if (World[9][9].object == OBJECT::STONE) nestCount++;
+    if (World[9][10].object == OBJECT::STONE) nestCount++;
+    if (World[9][11].object == OBJECT::STONE) nestCount++;
+    if (World[10][11].object == OBJECT::STONE) nestCount++;
+    if (World[11][11].object == OBJECT::STONE) nestCount++;
+    if (World[11][10].object == OBJECT::STONE) nestCount++;
+    if (World[11][9].object == OBJECT::STONE) nestCount++;
+    if (World[10][10].object == OBJECT::EGG) nestCount++;
+    FILE* fp;
+    if ((fp = fopen(filename, "w")) == NULL)
+    {
+        fprintf(stderr, "Cannot write test results file %s\n", filename);
+        exit(1);
+    }
+    fprintf(fp, "{\"nest_completed\":\"%d\", \"nest_total\":\"9\"}\n", nestCount);
+    fclose(fp);
 }
 
 // Generate behavior.
