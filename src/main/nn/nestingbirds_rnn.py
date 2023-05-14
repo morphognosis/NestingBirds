@@ -117,9 +117,8 @@ print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end=
 trainErrorPct=0
 if trainTotal > 0:
     trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
-    print(" (", str(round(trainErrorPct, 2)), "%)", sep='')
-else:
-    print('')
+    print(" (", str(round(trainErrorPct, 2)), "%)", sep='', end='')
+print('')
 print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
 if X_test_shape[0] > 0:
     r = (float(testOK) / float(X_test_shape[0])) * 100.0
@@ -129,8 +128,7 @@ testErrorPct=0
 if testTotal > 0:
     testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
     print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
-else:
-    print('')
+print('')
 
 # Write results to file.
 with open(results_filename, 'w') as f:

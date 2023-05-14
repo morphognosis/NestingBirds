@@ -207,6 +207,9 @@ public:
    // Set response override.
    void setResponseOverride();
 
+   // Reset response.
+   void resetResponse();
+
    // Cycle.
    int cycle();
 

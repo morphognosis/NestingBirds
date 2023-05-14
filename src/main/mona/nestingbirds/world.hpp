@@ -42,6 +42,13 @@ void init(bool maleTest, bool femaleTest);
 
 // Step.
 void step();
+void stepMice();
+void preCycleFemale();
+void postCycleFemale();
+void preCycleMale();
+void postCycleMale();
+void trainMale();
+void trainFemale();
 
 // Save/load.
 void saveMale(char *filename);

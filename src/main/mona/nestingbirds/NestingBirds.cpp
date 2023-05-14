@@ -525,6 +525,24 @@ int main(int argc, char *args[])
 
    // Run birds.
    int eggLaidStep = -1;
+   int mouseTotal = 0;
+   int stoneTotal = 0;
+   for (int x = 0; x < WIDTH; x++)
+   {
+       for (int y = 0; y < HEIGHT; y++)
+       {
+           if ((World[x][y].locale == LOCALE::FOREST) &&
+               (World[x][y].object == OBJECT::MOUSE))
+           {
+               mouseTotal++;
+           }
+           if ((World[x][y].locale == LOCALE::DESERT) &&
+               (World[x][y].object == OBJECT::STONE))
+           {
+               stoneTotal++;
+           }
+       }
+   }
    for (int i = 1; i <= Steps; i++)
    {
       if (Verbose)
@@ -585,7 +603,7 @@ int main(int argc, char *args[])
             }
          }
       }
-      printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
+      printf(", remaining mice=%d/%d, remaining stones=%d/%d\n", mouseCount, mouseTotal, stoneCount, stoneTotal);
    }
 
    // Save?

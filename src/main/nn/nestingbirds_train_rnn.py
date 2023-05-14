@@ -88,9 +88,8 @@ print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end=
 trainErrorPct=0
 if trainTotal > 0:
     trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
-    print(" (", str(round(trainErrorPct, 2)), "%)", sep='')
-else:
-    print('')
+    print(" (", str(round(trainErrorPct, 2)), "%)", sep='', end='')
+print('')
 
 # Write results to file.
 with open(results_filename, 'w') as f:

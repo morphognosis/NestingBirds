@@ -161,6 +161,12 @@ void Male::setNeeds()
 // Set response override.
 void Male::setResponseOverride()
 {
+    brain->responseOverride = response;
+}
+
+// Reset response.
+void Male::resetResponse()
+{
    if (response != brain->response)
    {
       for (int i = 0, j = (int)brain->motors.size(); i < j; i++)

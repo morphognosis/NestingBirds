@@ -50,7 +50,7 @@ if X_test_shape[0] > 0:
         # write predictions
         with open(predictions_filename, 'w') as f:
             for i in range(len(p)):
-                f.write(str(p[i]) + ' ')
+                f.write(str(p[i]) + '\n')
 
 # results to nestingbirds_rnn_test_results.txt
 print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
@@ -62,8 +62,7 @@ testErrorPct=0
 if testTotal > 0:
     testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
     print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
-else:
-    print('')
+print('')
 
 # Write results to file.
 with open(results_filename, 'w') as f:

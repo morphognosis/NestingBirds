@@ -262,130 +262,124 @@ void step()
    // Step mice.
    stepMice();
 
-   if (BehaviorFp != NULL)
-   {
-      int count = 0;
-      for (int x = 0; x < WIDTH; x++)
-      {
-         for (int y = 0; y < HEIGHT; y++)
-         {
-            if (World[x][y].object == OBJECT::MOUSE)
-            {
-               count++;
-            }
-         }
-      }
-      fprintf(BehaviorFp, "\"Mice\": [");
-      int n = 0;
-      for (int x = 0; x < WIDTH; x++)
-      {
-         for (int y = 0; y < HEIGHT; y++)
-         {
-            if (World[x][y].object == OBJECT::MOUSE)
-            {
-               fprintf(BehaviorFp, " { \"x\": %d, \"y\": %d }", x, y);
-               if (n < count - 1)
-               {
-                  fprintf(BehaviorFp, ",");
-               }
-               n++;
-            }
-         }
-      }
-      fprintf(BehaviorFp, " ],\n");
-   }
-
-   // Set female sensors.
-   setSensors(FEMALE);
-
-   // Set female needs.
-   female->setNeeds();
-
-   // Train?
-   if (!FemaleTest)
-   {
-      train(FEMALE);
-   }
-
-   if (Verbose)
-   {
-      printf("Female: Location: [%d,%d], ", female->x, female->y);
-      printf("{ ");
-      female->printState();
-   }
-
-   if (BehaviorFp != NULL)
-   {
-      fprintf(BehaviorFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
-      female->printState(BehaviorFp);
-   }
+   // Pre-cycle female.
+   preCycleFemale();
 
    // Cycle female
    female->cycle();
 
-   if (BehaviorFp != NULL)
-   {
-      fprintf(BehaviorFp, ", ");
-      female->printResponse(BehaviorFp);
-      fprintf(BehaviorFp, " },\n");
-   }
+   // Post-cycle female.
+   postCycleFemale();
 
-   if (Verbose)
-   {
-      printf(", ");
-      female->printResponse();
-      printf(" }\n");
-   }
-
-   // Do response in world.
-   doResponse(FEMALE);
-
-   // Set male sensors.
-   setSensors(MALE);
-
-   // Set male needs.
-   male->setNeeds();
-
-   if (Verbose)
-   {
-      printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
-      printf("{ ");
-      male->printState();
-   }
-
-   if (BehaviorFp != NULL)
-   {
-      fprintf(BehaviorFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
-      male->printState(BehaviorFp);
-   }
+   // Pre-cycle male.
+   preCycleMale();
 
    // Cycle male.
    male->cycle();
 
-   // Train?
-   if (!MaleTest)
-   {
-      train(MALE);
-   }
-
-   if (BehaviorFp != NULL)
-   {
-      fprintf(BehaviorFp, ", ");
-      male->printResponse(BehaviorFp);
-      fprintf(BehaviorFp, " }\n");
-   }
-
-   if (Verbose)
-   {
-      printf(", ");
-      male->printResponse();
-      printf(" }\n");
-   }
-
-   // Do response in world.
-   doResponse(MALE);
+   // Post-cycle male.
+   postCycleMale();
 }
 
+// Pre-cycle female.
+void preCycleFemale()
+{
+    // Set female sensors.
+    setSensors(FEMALE);
+
+    // Set female needs.
+    female->setNeeds();
+
+    // Train?
+    if (!FemaleTest)
+    {
+        train(FEMALE);
+    }
+
+    if (Verbose)
+    {
+        printf("Female: Location: [%d,%d], ", female->x, female->y);
+        printf("{ ");
+        female->printState();
+    }
+
+    if (BehaviorFp != NULL)
+    {
+        fprintf(BehaviorFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
+        female->printState(BehaviorFp);
+    }
+}
+
+// Post-cycle female.
+void postCycleFemale()
+{
+    if (BehaviorFp != NULL)
+    {
+        fprintf(BehaviorFp, ", ");
+        female->printResponse(BehaviorFp);
+        fprintf(BehaviorFp, " },\n");
+    }
+
+    if (Verbose)
+    {
+        printf(", ");
+        female->printResponse();
+        printf(" }\n");
+    }
+
+    // Do response in world.
+    doResponse(FEMALE);
+}
+
+// Pre-cycle male.
+void preCycleMale()
+{
+    // Set male sensors.
+    setSensors(MALE);
+
+    // Set male needs.
+    male->setNeeds();
+
+    if (Verbose)
+    {
+        printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
+        printf("{ ");
+        male->printState();
+    }
+
+    if (BehaviorFp != NULL)
+    {
+        fprintf(BehaviorFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
+        male->printState(BehaviorFp);
+    }
+}
+
+// Post-cycle male.
+void postCycleMale()
+{
+    // Train?
+    if (!MaleTest)
+    {
+        train(MALE);
+    }
+
+    if (BehaviorFp != NULL)
+    {
+        fprintf(BehaviorFp, ", ");
+        male->printResponse(BehaviorFp);
+        fprintf(BehaviorFp, " }\n");
+    }
+
+    if (Verbose)
+    {
+        printf(", ");
+        male->printResponse();
+        printf(" }\n");
+    }
+
+    // Do response in world.
+    doResponse(MALE);
+}
 
 // Train.
 void train(int gender)
@@ -393,7 +387,7 @@ void train(int gender)
    if (gender == MALE)
    {
       trainMale();
-      male->setResponseOverride();
+      male->resetResponse();
    }
    else
    {
@@ -2147,6 +2141,39 @@ void stepMice()
          }
       }
    }
+
+   if (BehaviorFp != NULL)
+   {
+       int count = 0;
+       for (int x = 0; x < WIDTH; x++)
+       {
+           for (int y = 0; y < HEIGHT; y++)
+           {
+               if (World[x][y].object == OBJECT::MOUSE)
+               {
+                   count++;
+               }
+           }
+       }
+       fprintf(BehaviorFp, "\"Mice\": [");
+       int n = 0;
+       for (int x = 0; x < WIDTH; x++)
+       {
+           for (int y = 0; y < HEIGHT; y++)
+           {
+               if (World[x][y].object == OBJECT::MOUSE)
+               {
+                   fprintf(BehaviorFp, " { \"x\": %d, \"y\": %d }", x, y);
+                   if (n < count - 1)
+                   {
+                       fprintf(BehaviorFp, ",");
+                   }
+                   n++;
+               }
+           }
+       }
+       fprintf(BehaviorFp, " ],\n");
+   }
 }
 
 
@@ -2209,6 +2236,7 @@ void openBehaviorFile(char *filename)
       exit(1);
    }
    fprintf(BehaviorFp, "[\n");
+   fflush(BehaviorFp);
 }
 
 
@@ -2218,6 +2246,7 @@ void writeBehaviorFile(char *text)
    if (BehaviorFp != NULL)
    {
       fprintf(BehaviorFp, text);
+      fflush(BehaviorFp);
    }
 }
 
@@ -2229,5 +2258,6 @@ void closeBehaviorFile()
    {
       fprintf(BehaviorFp, "]\n");
       fclose(BehaviorFp);
+      BehaviorFp = NULL;
    }
 }

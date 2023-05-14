@@ -465,8 +465,10 @@ vector < vector < MaleSensoryResponse >> MaleTrainDataset;
 vector < MaleSensoryResponse > MaleTestDataset;
 vector < vector < FemaleSensoryResponse >> FemaleTrainDataset;
 vector < FemaleSensoryResponse > FemaleTestDataset;
-void createBehaviorFileSequences(int randomSeed, int steps,
-                                 vector<MaleSensoryResponse>& maleSequence, vector<FemaleSensoryResponse>& femaleSequence);
+void generateBehavior(int randomSeed, int steps);
+void importBehaviorDataset(
+    vector<MaleSensoryResponse>& maleSequence,
+    vector<FemaleSensoryResponse>& femaleSequence);
 void createRNNdatasets();
 
 // Trim string.
@@ -597,13 +599,23 @@ int main(int argc, char *args[])
       fprintf(stderr, Usage);
       exit(1);
    }
+   if (TestRandomSeed == -1 && Dynamic)
+   {
+       fprintf(stderr, Usage);
+       exit(1);
+   }
+   if (Steps == 0)
+   {
+       exit(0);
+   }
 
    // Create behavior training datasets.
    for (int randomSeed : TrainRandomSeeds)
    {
       vector<MaleSensoryResponse>   maleSequence;
       vector<FemaleSensoryResponse> femaleSequence;
-      createBehaviorFileSequences(randomSeed, Steps, maleSequence, femaleSequence);
+      generateBehavior(randomSeed, Steps);
+      importBehaviorDataset(maleSequence, femaleSequence);
       MaleTrainDataset.push_back(maleSequence);
       FemaleTrainDataset.push_back(femaleSequence);
    }
@@ -611,7 +623,8 @@ int main(int argc, char *args[])
    // Create behavior testing datasets.
    if (TestRandomSeed != -1)
    {
-      createBehaviorFileSequences(TestRandomSeed, Steps, MaleTestDataset, FemaleTestDataset);
+       generateBehavior(TestRandomSeed, Steps);
+       importBehaviorDataset(MaleTestDataset, FemaleTestDataset);
    }
 
    // Convert to RNN datasets.
@@ -635,10 +648,177 @@ int main(int argc, char *args[])
    }
    if (TestRandomSeed != -1)
    {
-       sprintf(buf, "python %s", TEST_RNN_FILENAME);
-       system(buf);
-       sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_MALE_TEST_RESULTS_FILENAME);
-       system(buf);
+       if (Dynamic)
+       {
+           MaleTestDataset.clear();
+           RANDOM_NUMBER_SEED = TestRandomSeed;
+           Male::RANDOMIZE_FOOD_LEVEL = true;
+           Female::RANDOMIZE_FOOD_LEVEL = true;
+           init(true, false);
+           int  eggLaidStep = -1;
+           int mouseTotal = 0;
+           int stoneTotal = 0;
+               for (int x = 0; x < WIDTH; x++)
+               {
+                   for (int y = 0; y < HEIGHT; y++)
+                   {
+                       if ((World[x][y].locale == LOCALE::FOREST) &&
+                           (World[x][y].object == OBJECT::MOUSE))
+                       {
+                           mouseTotal++;
+                       }
+                       if ((World[x][y].locale == LOCALE::DESERT) &&
+                           (World[x][y].object == OBJECT::STONE))
+                       {
+                           stoneTotal++;
+                       }
+                   }
+               }
+           char buf[BUFSIZ];
+           for (int i = 1; i <= Steps; i++)
+           {
+               stepMice();
+               preCycleFemale();
+               female->cycle();
+               postCycleFemale();
+               preCycleMale();
+               MaleSensoryResponse sensoryResponse;
+               int sensor = male->sensors[Male::LOCALE_SENSOR];
+               sensoryResponse.locale = LOCALE::toString(sensor);
+               sensor = male->sensors[Male::MOUSE_PROXIMITY_SENSOR];
+               sensoryResponse.mouseProximity = Male::PROXIMITY::toString(sensor);
+               sensor = male->sensors[Male::STONE_PROXIMITY_SENSOR];
+               sensoryResponse.stoneProximity = Male::PROXIMITY::toString(sensor);
+               sensor = male->sensors[Male::FEMALE_PROXIMITY_SENSOR];
+               sensoryResponse.femaleProximity = Male::PROXIMITY::toString(sensor);
+               sensor = male->sensors[Male::GOAL_SENSOR];
+               sensoryResponse.goal = Male::GOAL::toString(sensor);
+               sensor = male->sensors[Male::HAS_OBJECT_SENSOR];
+               sensoryResponse.hasObject = OBJECT::toString(sensor);
+               if (male->sensors[Male::FLYING_SENSOR] == 1)
+               {
+                   sensoryResponse.flying = "true";
+               }
+               else {
+                   sensoryResponse.flying = "false";
+               }
+               if (male->sensors[Male::FEMALE_WANTS_MOUSE_SENSOR] == 1)
+               {
+                   sensoryResponse.femaleWantsMouse = "true";
+               }
+               else {
+                   sensoryResponse.femaleWantsMouse = "false";
+               }
+               if (male->sensors[Male::FEMALE_WANTS_STONE_SENSOR] == 1)
+               {
+                   sensoryResponse.femaleWantsStone = "true";
+               }
+               else {
+                   sensoryResponse.femaleWantsStone = "false";
+               }
+               trainMale();
+               sensoryResponse.response = Male::RESPONSE::toString(male->response);
+               MaleTestDataset.push_back(sensoryResponse);
+               FILE* fp = fopen(RNN_DATASET_FILENAME, "w");
+               if (fp == NULL)
+               {
+                   fprintf(stderr, "Cannot open male dataset file %s\n", RNN_DATASET_FILENAME);
+                   exit(1);
+               }
+               fprintf(fp, "X_test_shape = [1, %d, %d]\n", i, MaleSensoryResponse::oneHotSensoryLength());
+               fprintf(fp, "X_test_seq = [\n");
+               for (int j = 0; j < MaleTestDataset.size(); j++)
+               {
+                   MaleSensoryResponse sensoryResponse = MaleTestDataset[j];
+                   fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+                   if (j < MaleTestDataset.size() - 1)
+                   {
+                       fprintf(fp, ",");
+                   }
+                   fprintf(fp, "\n");
+               }
+               fprintf(fp, "]\n");
+               fprintf(fp, "y_test_shape = [1, %d, %d]\n", i, MaleSensoryResponse::oneHotResponseLength());
+               fprintf(fp, "y_test_seq = [\n");
+               for (int j = 0; j < MaleTestDataset.size(); j++)
+               {
+                   MaleSensoryResponse sensoryResponse = MaleTestDataset[j];
+                   fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+                   if (j < MaleTestDataset.size() - 1)
+                   {
+                       fprintf(fp, ",");
+                   }
+                   fprintf(fp, "\n");
+               }
+               fprintf(fp, "]\n");
+               fclose(fp);
+               sprintf(buf, "python %s", TEST_RNN_FILENAME);
+               system(buf);
+               fp = fopen(RNN_TEST_PREDICTIONS_FILENAME, "r");
+               if (fp == NULL)
+               {
+                   fprintf(stderr, "Cannot open male test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
+                   exit(1);
+               }
+               int response = -1;
+               int n;
+               while (fscanf(fp, "%d", &n) != EOF)
+               {
+                   response = n;
+               }
+               fclose(fp);
+               if (response == -1)
+               {
+                   fprintf(stderr, "Invalid male test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
+                   exit(1);
+               }
+               male->response = response;
+               male->setResponseOverride();
+               male->cycle();
+               postCycleMale();
+               if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
+               {
+                   eggLaidStep = i;
+               }
+           }
+           if (Verbose)
+           {
+               printf("Run results: ");
+               if (eggLaidStep >= 1)
+               {
+                   printf("egg laid at step %d", eggLaidStep);
+               }
+               else
+               {
+                   printf("no egg");
+               }
+               int mouseCount = 0;
+               int stoneCount = 0;
+               for (int x = 0; x < WIDTH; x++)
+               {
+                   for (int y = 0; y < HEIGHT; y++)
+                   {
+                       if ((World[x][y].locale == LOCALE::FOREST) &&
+                           (World[x][y].object == OBJECT::MOUSE))
+                       {
+                           mouseCount++;
+                       }
+                       if ((World[x][y].locale == LOCALE::DESERT) &&
+                           (World[x][y].object == OBJECT::STONE))
+                       {
+                           stoneCount++;
+                       }
+                   }
+               }
+               printf(", remaining mice=%d/%d, remaining stones=%d/%d\n", mouseCount, mouseTotal, stoneCount, stoneTotal);
+           }
+       }
+       else {
+           sprintf(buf, "python %s", TEST_RNN_FILENAME);
+           system(buf);
+           sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_MALE_TEST_RESULTS_FILENAME);
+           system(buf);
+       }
        if (Verbose)
        {
            printf("Male test results in %s\n", RNN_MALE_TEST_RESULTS_FILENAME);
@@ -660,10 +840,168 @@ int main(int argc, char *args[])
    }
    if (TestRandomSeed != -1)
    {
-       sprintf(buf, "python %s", TEST_RNN_FILENAME);
-       system(buf);
-       sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_FEMALE_TEST_RESULTS_FILENAME);
-       system(buf);
+       if (Dynamic)
+       {
+           FemaleTestDataset.clear();
+           RANDOM_NUMBER_SEED = TestRandomSeed;
+           Male::RANDOMIZE_FOOD_LEVEL = true;
+           Female::RANDOMIZE_FOOD_LEVEL = true;
+           init(false, true);
+           int  eggLaidStep = -1;
+           int mouseTotal = 0;
+           int stoneTotal = 0;
+               for (int x = 0; x < WIDTH; x++)
+               {
+                   for (int y = 0; y < HEIGHT; y++)
+                   {
+                       if ((World[x][y].locale == LOCALE::FOREST) &&
+                           (World[x][y].object == OBJECT::MOUSE))
+                       {
+                           mouseTotal++;
+                       }
+                       if ((World[x][y].locale == LOCALE::DESERT) &&
+                           (World[x][y].object == OBJECT::STONE))
+                       {
+                           stoneTotal++;
+                       }
+                   }
+               }
+           char buf[BUFSIZ];
+           for (int i = 1; i <= Steps; i++)
+           {
+               stepMice();
+               preCycleFemale();
+               FemaleSensoryResponse sensoryResponse;
+               int sensor = female->sensors[Female::CURRENT_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::LEFT_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::LEFT_FRONT_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::FRONT_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::RIGHT_FRONT_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::RIGHT_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::RIGHT_REAR_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::REAR_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::LEFT_REAR_OBJECT_SENSOR];
+               sensoryResponse.cellSensors.push_back(OBJECT::toString(sensor));
+               sensor = female->sensors[Female::ORIENTATION_SENSOR];
+               sensoryResponse.orientation = ORIENTATION::toString(sensor);
+               sensor = female->sensors[Female::GOAL_SENSOR];
+               sensoryResponse.goal = Female::GOAL::toString(sensor);
+               sensor = female->sensors[Female::HAS_OBJECT_SENSOR];
+               sensoryResponse.hasObject = OBJECT::toString(sensor);
+               trainFemale();
+               sensoryResponse.response = Female::RESPONSE::toString(female->response);
+               FemaleTestDataset.push_back(sensoryResponse);
+               FILE* fp = fopen(RNN_DATASET_FILENAME, "w");
+               if (fp == NULL)
+               {
+                   fprintf(stderr, "Cannot open female dataset file %s\n", RNN_DATASET_FILENAME);
+                   exit(1);
+               }
+               fprintf(fp, "X_test_shape = [1, %d, %d]\n", i, FemaleSensoryResponse::oneHotSensoryLength());
+               fprintf(fp, "X_test_seq = [\n");
+               for (int j = 0; j < FemaleTestDataset.size(); j++)
+               {
+                   FemaleSensoryResponse sensoryResponse = FemaleTestDataset[j];
+                   fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+                   if (j < FemaleTestDataset.size() - 1)
+                   {
+                       fprintf(fp, ",");
+                   }
+                   fprintf(fp, "\n");
+               }
+               fprintf(fp, "]\n");
+               fprintf(fp, "y_test_shape = [1, %d, %d]\n", i, FemaleSensoryResponse::oneHotResponseLength());
+               fprintf(fp, "y_test_seq = [\n");
+               for (int j = 0; j < FemaleTestDataset.size(); j++)
+               {
+                   FemaleSensoryResponse sensoryResponse = FemaleTestDataset[j];
+                   fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+                   if (j < FemaleTestDataset.size() - 1)
+                   {
+                       fprintf(fp, ",");
+                   }
+                   fprintf(fp, "\n");
+               }
+               fprintf(fp, "]\n");
+               fclose(fp);
+               sprintf(buf, "python %s", TEST_RNN_FILENAME);
+               system(buf);
+               fp = fopen(RNN_TEST_PREDICTIONS_FILENAME, "r");
+               if (fp == NULL)
+               {
+                   fprintf(stderr, "Cannot open female test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
+                   exit(1);
+               }
+               int response = -1;
+               int n;
+               while (fscanf(fp, "%d", &n) != EOF)
+               {
+                   response = n;
+               }
+               fclose(fp);
+               if (response == -1)
+               {
+                   fprintf(stderr, "Invalid female test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
+                   exit(1);
+               }
+               female->response = response;
+               female->setResponseOverride();
+               female->cycle();
+               postCycleFemale();
+               preCycleMale();
+               male->cycle();
+               postCycleMale();
+               if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
+               {
+                   eggLaidStep = i;
+               }
+           }
+           if (Verbose)
+           {
+               printf("Run results: ");
+               if (eggLaidStep >= 1)
+               {
+                   printf("egg laid at step %d", eggLaidStep);
+               }
+               else
+               {
+                   printf("no egg");
+               }
+               int mouseCount = 0;
+               int stoneCount = 0;
+               for (int x = 0; x < WIDTH; x++)
+               {
+                   for (int y = 0; y < HEIGHT; y++)
+                   {
+                       if ((World[x][y].locale == LOCALE::FOREST) &&
+                           (World[x][y].object == OBJECT::MOUSE))
+                       {
+                           mouseCount++;
+                       }
+                       if ((World[x][y].locale == LOCALE::DESERT) &&
+                           (World[x][y].object == OBJECT::STONE))
+                       {
+                           stoneCount++;
+                       }
+                   }
+               }
+               printf(", remaining mice=%d/%d, remaining stones=%d/%d\n", mouseCount, mouseTotal, stoneCount, stoneTotal);
+           }
+       }
+       else {
+           sprintf(buf, "python %s", TEST_RNN_FILENAME);
+           system(buf);
+           sprintf(buf, "cp %s %s", RNN_TEST_RESULTS_FILENAME, RNN_FEMALE_TEST_RESULTS_FILENAME);
+           system(buf);
+       }
        if (Verbose)
        {
            printf("Female test results in %s\n", RNN_FEMALE_TEST_RESULTS_FILENAME);
@@ -676,81 +1014,84 @@ int main(int argc, char *args[])
    unlink(RNN_DATASET_FILENAME);
    unlink(RNN_TRAIN_RESULTS_FILENAME);
    unlink(RNN_TEST_RESULTS_FILENAME);
+   unlink(RNN_TEST_PREDICTIONS_FILENAME);
 
    exit(0);
 }
 
-
-// Create behavior sequences.
-void createBehaviorFileSequences(int randomSeed, int steps,
-                                 vector<MaleSensoryResponse>& maleSequence, vector<FemaleSensoryResponse>& femaleSequence)
+// Generate behavior.
+void generateBehavior(int randomSeed, int steps)
 {
-   // Generate behavior file.
-   RANDOM_NUMBER_SEED           = randomSeed;
-   Male::RANDOMIZE_FOOD_LEVEL   = true;
-   Female::RANDOMIZE_FOOD_LEVEL = true;
-   init(false, false);
-   openBehaviorFile(BEHAVIOR_FILENAME);
-   int  eggLaidStep = -1;
-   char buf[BUFSIZ];
-   if (Verbose)
-   {
-      printf("Generating behavior file %s\n", BEHAVIOR_FILENAME);
-   }
-   for (int i = 1; i <= steps; i++)
-   {
-      if (Verbose)
-      {
-         printf("Step=%d\n", i);
-      }
-      sprintf(buf, "{ \"Step\": %d, \"Data\": {\n", i);
-      writeBehaviorFile(buf);
-      step();
-      writeBehaviorFile((char *)"} }");
-      if (i < Steps)
-      {
-         writeBehaviorFile((char *)",");
-      }
-      writeBehaviorFile((char *)"\n");
-      if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
-      {
-         eggLaidStep = i;
-      }
-   }
-   if (Verbose)
-   {
-      printf("Run results: ");
-      if (eggLaidStep >= 1)
-      {
-         printf("egg laid at step %d", eggLaidStep);
-      }
-      else
-      {
-         printf("no egg");
-      }
-      int mouseCount = 0;
-      int stoneCount = 0;
-      for (int x = 0; x < WIDTH; x++)
-      {
-         for (int y = 0; y < HEIGHT; y++)
-         {
-            if ((World[x][y].locale == LOCALE::FOREST) &&
-                (World[x][y].object == OBJECT::MOUSE))
+    RANDOM_NUMBER_SEED = randomSeed;
+    Male::RANDOMIZE_FOOD_LEVEL = true;
+    Female::RANDOMIZE_FOOD_LEVEL = true;
+    init(false, false);
+    openBehaviorFile(BEHAVIOR_FILENAME);
+    int  eggLaidStep = -1;
+    char buf[BUFSIZ];
+    if (Verbose)
+    {
+        printf("Generating behavior file %s\n", BEHAVIOR_FILENAME);
+    }
+    for (int i = 1; i <= steps; i++)
+    {
+        if (Verbose)
+        {
+            printf("Step=%d\n", i);
+        }
+        sprintf(buf, "{ \"Step\": %d, \"Data\": {\n", i);
+        writeBehaviorFile(buf);
+        step();
+        writeBehaviorFile((char*)"} }");
+        if (i < Steps)
+        {
+            writeBehaviorFile((char*)",");
+        }
+        writeBehaviorFile((char*)"\n");
+        if ((eggLaidStep < 0) && (World[NEST_CENTER_X][NEST_CENTER_Y].object == OBJECT::EGG))
+        {
+            eggLaidStep = i;
+        }
+    }
+    if (Verbose)
+    {
+        printf("Run results: ");
+        if (eggLaidStep >= 1)
+        {
+            printf("egg laid at step %d", eggLaidStep);
+        }
+        else
+        {
+            printf("no egg");
+        }
+        int mouseCount = 0;
+        int stoneCount = 0;
+        for (int x = 0; x < WIDTH; x++)
+        {
+            for (int y = 0; y < HEIGHT; y++)
             {
-               mouseCount++;
+                if ((World[x][y].locale == LOCALE::FOREST) &&
+                    (World[x][y].object == OBJECT::MOUSE))
+                {
+                    mouseCount++;
+                }
+                if ((World[x][y].locale == LOCALE::DESERT) &&
+                    (World[x][y].object == OBJECT::STONE))
+                {
+                    stoneCount++;
+                }
             }
-            if ((World[x][y].locale == LOCALE::DESERT) &&
-                (World[x][y].object == OBJECT::STONE))
-            {
-               stoneCount++;
-            }
-         }
-      }
-      printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
-   }
-   closeBehaviorFile();
+        }
+        printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
+    }
+    closeBehaviorFile();
+}
 
-   // Import behavior dataset.
+// Import behavior dataset.
+void importBehaviorDataset(
+    vector<MaleSensoryResponse>& maleSequence,
+    vector<FemaleSensoryResponse>& femaleSequence)
+{
    if (Verbose)
    {
       printf("Importing behavior dataset\n");
@@ -927,7 +1268,6 @@ void createBehaviorFileSequences(int randomSeed, int steps,
    file.close();
    unlink(BEHAVIOR_FILENAME);
 }
-
 
 // Convert to RNN datasets.
 void createRNNdatasets()
