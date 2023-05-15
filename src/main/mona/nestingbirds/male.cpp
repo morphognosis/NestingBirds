@@ -42,9 +42,9 @@ Male::Male()
    Mona::Motor *turnRight = brain->newMotor();
    Mona::Motor *turnLeft  = brain->newMotor();
 #else
-   Mona::Motor* move = brain->newMovementMotor(RESPONSE::MOVE_FORWARD);
-   Mona::Motor* turnRight = brain->newMovementMotor(RESPONSE::TURN_RIGHT);
-   Mona::Motor* turnLeft = brain->newMovementMotor(RESPONSE::TURN_LEFT);
+   Mona::Motor *move      = brain->newMovementMotor(RESPONSE::MOVE_FORWARD);
+   Mona::Motor *turnRight = brain->newMovementMotor(RESPONSE::TURN_RIGHT);
+   Mona::Motor *turnLeft  = brain->newMovementMotor(RESPONSE::TURN_LEFT);
 #endif
    Mona::Motor *eat       = brain->newMotor();
    Mona::Motor *get       = brain->newMotor();
@@ -53,11 +53,11 @@ Male::Male()
    Mona::Motor *giveMouse = brain->newMotor();
    Mona::Motor *giveStone = brain->newMotor();
 #ifdef NO_PLACE_MOTORS
-   Mona::Motor *fly       = brain->newMotor();
-   Mona::Motor *alight    = brain->newMotor();
+   Mona::Motor *fly    = brain->newMotor();
+   Mona::Motor *alight = brain->newMotor();
 #else
-   Mona::Motor* fly = brain->newMovementMotor(Mona::MOVEMENT_TYPE::BEGIN);
-   Mona::Motor* alight = brain->newMovementMotor(Mona::MOVEMENT_TYPE::END);
+   Mona::Motor *fly    = brain->newMovementMotor(Mona::MOVEMENT_TYPE::BEGIN);
+   Mona::Motor *alight = brain->newMovementMotor(Mona::MOVEMENT_TYPE::END);
 #endif
 
    // Needs.
@@ -161,8 +161,9 @@ void Male::setNeeds()
 // Set response override.
 void Male::setResponseOverride()
 {
-    brain->responseOverride = response;
+   brain->responseOverride = response;
 }
+
 
 // Reset response.
 void Male::resetResponse()

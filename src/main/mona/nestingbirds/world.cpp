@@ -281,105 +281,110 @@ void step()
    postCycleMale();
 }
 
+
 // Pre-cycle female.
 void preCycleFemale()
 {
-    // Set female sensors.
-    setSensors(FEMALE);
+   // Set female sensors.
+   setSensors(FEMALE);
 
-    // Set female needs.
-    female->setNeeds();
+   // Set female needs.
+   female->setNeeds();
 
-    // Train?
-    if (!FemaleTest)
-    {
-        train(FEMALE);
-    }
+   // Train?
+   if (!FemaleTest)
+   {
+      train(FEMALE);
+   }
 
-    if (Verbose)
-    {
-        printf("Female: Location: [%d,%d], ", female->x, female->y);
-        printf("{ ");
-        female->printState();
-    }
+   if (Verbose)
+   {
+      printf("Female: Location: [%d,%d], ", female->x, female->y);
+      printf("{ ");
+      female->printState();
+   }
 
-    if (BehaviorFp != NULL)
-    {
-        fprintf(BehaviorFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
-        female->printState(BehaviorFp);
-    }
+   if (BehaviorFp != NULL)
+   {
+      fprintf(BehaviorFp, "\"Female\": { \"Location\": { \"x\": %d, \"y\": %d }, ", female->x, female->y);
+      female->printState(BehaviorFp);
+   }
 }
+
 
 // Post-cycle female.
 void postCycleFemale()
 {
-    if (BehaviorFp != NULL)
-    {
-        fprintf(BehaviorFp, ", ");
-        female->printResponse(BehaviorFp);
-        fprintf(BehaviorFp, " },\n");
-    }
+   if (BehaviorFp != NULL)
+   {
+      fprintf(BehaviorFp, ", ");
+      female->printResponse(BehaviorFp);
+      fprintf(BehaviorFp, " },\n");
+   }
 
-    if (Verbose)
-    {
-        printf(", ");
-        female->printResponse();
-        printf(" }\n");
-    }
+   if (Verbose)
+   {
+      printf(", ");
+      female->printResponse();
+      printf(" }\n");
+   }
 
-    // Do response in world.
-    doResponse(FEMALE);
+   // Do response in world.
+   doResponse(FEMALE);
 }
+
 
 // Pre-cycle male.
 void preCycleMale()
 {
-    // Set male sensors.
-    setSensors(MALE);
+   // Set male sensors.
+   setSensors(MALE);
 
-    // Set male needs.
-    male->setNeeds();
+   // Set male needs.
+   male->setNeeds();
 
-    if (Verbose)
-    {
-        printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
-        printf("{ ");
-        male->printState();
-    }
+   if (Verbose)
+   {
+      printf("Male: Location: [%d,%d], Orientation: %s, ", male->x, male->y, ORIENTATION::toString(male->orientation));
+      printf("{ ");
+      male->printState();
+   }
 
-    if (BehaviorFp != NULL)
-    {
-        fprintf(BehaviorFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
-        male->printState(BehaviorFp);
-    }
+   if (BehaviorFp != NULL)
+   {
+      fprintf(BehaviorFp, "\"Male\": { \"Location\": { \"x\": %d, \"y\": %d }, ", male->x, male->y);
+      male->printState(BehaviorFp);
+   }
 }
+
 
 // Post-cycle male.
 void postCycleMale()
 {
-    // Train?
-    if (!MaleTest)
-    {
-        train(MALE);
-    }
+   // Train?
+   if (!MaleTest)
+   {
+      train(MALE);
+   }
 
-    if (BehaviorFp != NULL)
-    {
-        fprintf(BehaviorFp, ", ");
-        male->printResponse(BehaviorFp);
-        fprintf(BehaviorFp, " }\n");
-    }
+   if (BehaviorFp != NULL)
+   {
+      fprintf(BehaviorFp, ", ");
+      male->printResponse(BehaviorFp);
+      fprintf(BehaviorFp, " }\n");
+   }
 
-    if (Verbose)
-    {
-        printf(", ");
-        male->printResponse();
-        printf(" }\n");
-    }
+   if (Verbose)
+   {
+      printf(", ");
+      male->printResponse();
+      printf(" }\n");
+   }
 
-    // Do response in world.
-    doResponse(MALE);
+   // Do response in world.
+   doResponse(MALE);
 }
+
 
 // Train.
 void train(int gender)
@@ -2144,35 +2149,35 @@ void stepMice()
 
    if (BehaviorFp != NULL)
    {
-       int count = 0;
-       for (int x = 0; x < WIDTH; x++)
-       {
-           for (int y = 0; y < HEIGHT; y++)
-           {
-               if (World[x][y].object == OBJECT::MOUSE)
+      int count = 0;
+      for (int x = 0; x < WIDTH; x++)
+      {
+         for (int y = 0; y < HEIGHT; y++)
+         {
+            if (World[x][y].object == OBJECT::MOUSE)
+            {
+               count++;
+            }
+         }
+      }
+      fprintf(BehaviorFp, "\"Mice\": [");
+      int n = 0;
+      for (int x = 0; x < WIDTH; x++)
+      {
+         for (int y = 0; y < HEIGHT; y++)
+         {
+            if (World[x][y].object == OBJECT::MOUSE)
+            {
+               fprintf(BehaviorFp, " { \"x\": %d, \"y\": %d }", x, y);
+               if (n < count - 1)
                {
-                   count++;
+                  fprintf(BehaviorFp, ",");
                }
-           }
-       }
-       fprintf(BehaviorFp, "\"Mice\": [");
-       int n = 0;
-       for (int x = 0; x < WIDTH; x++)
-       {
-           for (int y = 0; y < HEIGHT; y++)
-           {
-               if (World[x][y].object == OBJECT::MOUSE)
-               {
-                   fprintf(BehaviorFp, " { \"x\": %d, \"y\": %d }", x, y);
-                   if (n < count - 1)
-                   {
-                       fprintf(BehaviorFp, ",");
-                   }
-                   n++;
-               }
-           }
-       }
-       fprintf(BehaviorFp, " ],\n");
+               n++;
+            }
+         }
+      }
+      fprintf(BehaviorFp, " ],\n");
    }
 }
 
