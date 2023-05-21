@@ -1098,6 +1098,24 @@ void generateBehavior(int randomSeed, int steps)
    {
       printf("Generating behavior file %s\n", BEHAVIOR_FILENAME);
    }
+   int mouseCount = 0;
+   int stoneCount = 0;
+   for (int x = 0; x < WIDTH; x++)
+   {
+       for (int y = 0; y < HEIGHT; y++)
+       {
+           if ((World[x][y].locale == LOCALE::FOREST) &&
+               (World[x][y].object == OBJECT::MOUSE))
+           {
+               mouseCount++;
+           }
+           if ((World[x][y].locale == LOCALE::DESERT) &&
+               (World[x][y].object == OBJECT::STONE))
+           {
+               stoneCount++;
+           }
+       }
+   }
    for (int i = 1; i <= steps; i++)
    {
       if (Verbose)
@@ -1147,7 +1165,7 @@ void generateBehavior(int randomSeed, int steps)
             }
          }
       }
-      printf(", remaining mice=%d, remaining stones=%d\n", mouseCount, stoneCount);
+      printf(", remaining mice=%d/%d, remaining stones=%d/%d\n", mouseCount, mouseTotal, stoneCount, stoneTotal);
    }
    closeBehaviorFile();
 }
