@@ -8,9 +8,9 @@ and the female. In addition, the male must fetch stones from a nearby desert for
 Their task is complete when the nest is built and an egg is laid in it. The bird animations are replayed from
 training and testing the birds in the environment.
 
-See:
+Paper:
+<br>https://www.biorxiv.org/content/10.1101/2023.05.30.542884v1
 <br>http://tom.portegys.com/research.html#nestingbirds
-<br>http://tom.portegys.com/research.html#mona2
 
 Import Eclipse project, build and run with scripts in the work directory.
 
@@ -27,9 +27,11 @@ run_nestingbirds_replay.sh, run_nestingbirds_replay.bat
 Usage: java morphognosis.nestingbirds.NestingBirdsReplay -behaviorFile file_name
 </pre>
 
-
 Train/test RNN:
 <pre>
 run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat
 </pre>
 
+Original nesting birds:
+<br>http://tom.portegys.com/research.html#mona2
+<br>Download and run interactive demo: http://tom.portegys.com/research/NestViewer/NestViewer.zip
