@@ -67,6 +67,7 @@ nestingbirds_rnn_female_train_results.json
 nestingbirds_rnn_female_test_results.json
 
 pattern_detector: detect input patterns having only signals that are important to the output.
+Requires Eigen package: https://eigen.tuxfamily.org
 
 Usage:
     pattern_detector 
