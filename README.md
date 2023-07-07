@@ -32,6 +32,11 @@ Train/test RNN:
 run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat
 </pre>
 
+Detect input patterns having only signals that are important to the output:
+<pre>
+pattern_detector
+</pre>
+
 Original nesting birds:
 <br>http://tom.portegys.com/research.html#mona2
 <br>Download and run interactive demo: http://tom.portegys.com/research/NestViewer/NestViewer.zip
