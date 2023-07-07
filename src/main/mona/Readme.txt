@@ -16,7 +16,8 @@ Directories:
 mona: mona neural network.
 common files.
 nestingbirds: nesting birds.
-../../../bin: nestingbirds and nestingbirds_rnn executables.
+pattern_detector: pattern detection.
+../../../bin: nestingbirds, nestingbirds_rnn, and pattern_detector executables.
 
 Commands:
 
@@ -64,3 +65,16 @@ nestingbirds_rnn_male_train_results.json
 nestingbirds_rnn_male_test_results.json
 nestingbirds_rnn_female_train_results.json
 nestingbirds_rnn_female_test_results.json
+
+pattern_detector: detect input patterns having only signals that are important to the output.
+
+Usage:
+    pattern_detector 
+      [--network_dimensions <input_dimension>, <hidden_dimension>]
+      [--pattern_indexes <indexes> :: = <pattern>; <pattern>; ... where <pattern> :: = <index>, <index>, ...]
+      [--signal_range <range percent>]
+      [--noise_probability <probability>]
+      [--dataset_size <size>]
+      [--learning_rate <rate>]
+      [--epochs <epochs>]
+      [--random_seed <seed>]

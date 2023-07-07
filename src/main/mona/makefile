@@ -7,7 +7,6 @@ all:
 	@(cd mona; make)
 	@echo "Making nestingbirds..."
 	@(cd nestingbirds; make)
-	@echo "done"
 
 clean:
 	(cd common; make clean)
