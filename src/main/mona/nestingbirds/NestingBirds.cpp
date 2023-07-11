@@ -3,6 +3,7 @@
 // The nesting birds.
 
 #include "world.hpp"
+#include "datasets.hpp"
 #include <stdlib.h>
 
 // Version.

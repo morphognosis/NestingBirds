@@ -72,6 +72,9 @@
     <ClInclude Include="world.hpp">
       <Filter>nestingbirds</Filter>
     </ClInclude>
+    <ClInclude Include="datasets.hpp">
+      <Filter>nestingbirds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\random.cpp">
@@ -126,6 +129,9 @@
       <Filter>nestingbirds</Filter>
     </ClCompile>
     <ClCompile Include="world.cpp">
+      <Filter>nestingbirds</Filter>
+    </ClCompile>
+    <ClCompile Include="datasets.cpp">
       <Filter>nestingbirds</Filter>
     </ClCompile>
   </ItemGroup>

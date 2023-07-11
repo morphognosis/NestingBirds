@@ -33,6 +33,7 @@
     <ClInclude Include="..\mona\homeostat.hpp" />
     <ClInclude Include="..\mona\mona-aux.hpp" />
     <ClInclude Include="..\mona\mona.hpp" />
+    <ClInclude Include="datasets.hpp" />
     <ClInclude Include="female.hpp" />
     <ClInclude Include="locale.hpp" />
     <ClInclude Include="male.hpp" />
@@ -55,6 +56,7 @@
     <ClCompile Include="..\mona\mona.cpp" />
     <ClCompile Include="..\mona\respond.cpp" />
     <ClCompile Include="..\mona\sense.cpp" />
+    <ClCompile Include="datasets.cpp" />
     <ClCompile Include="female.cpp" />
     <ClCompile Include="male.cpp" />
     <ClCompile Include="NestingBirds.cpp" />
@@ -133,12 +135,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Link>
-      <OutputFile>./Debug/$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>../../../../bin/$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Link>
-      <OutputFile>..\..\../../bin/$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>../../../../bin/$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -12,6 +12,10 @@ int output_dim;
 // Patterns.
 vector<vector<int>> pattern_idxs = { {1}, {4}, {1, 4}, {3} };
 
+// Files.
+string pattern_input_filename;
+string pattern_output_filename;
+
 // Signal range percentage.
 double signal_range = 0.8;
 
@@ -27,11 +31,39 @@ int epochs = 500;
 // Random seed.
 int random_seed = 4517;
 
+// Verbose.
+enum Verbosity { DEBUG, NORMAL, SILENT };
+verbosity = SILENT;
+
+// Split string on delimiter.
 int split(string const& str, const char delim, vector<string>& out);
 
 // Usage.
-const char* usage = "pattern_detector [--network_dimensions <input_dimension>, <hidden_dimension>] [--pattern_indexes <indexes> :: = <pattern>; <pattern>; ... where <pattern> :: = <index>, <index>, ...] [--signal_range <range percent>] [--noise_probability <probability>] [--dataset_size <size>] [--learning_rate <rate>] [--epochs <epochs>] [--random_seed <seed>]\n";
-
+const char* Usage =
+"Usage:\n"
+"    pattern_detector\n"
+"      [-pattern_indexes <indexes> :: = <pattern>; <pattern>; ... where <pattern> :: = <index>, <index>, ...]\n"
+"      [-signal_range <range percent>]\n"
+"      [-noise_probability <probability>]\n"
+"      [-dataset_size <size>]\n"
+"      [-network_dimensions <input_dimension>, <hidden_dimension>]\n"
+"      [-learning_rate <rate>]\n"
+"      [-epochs <epochs>]\n"
+"      [-random_seed <seed>]\n"
+"      [-verbose <true | false> (default=true)]\n"
+"  or\n"
+"    pattern_detector\n"
+"      -pattern_input_file <input file name>\n"
+"      -pattern_output_file <output file name>\n"
+"      [-signal_range <range percent>]\n"
+"      [-network_hidden_dimension <dimension>]\n"
+"      [-learning_rate <rate>]\n"
+"      [-epochs <epochs>]\n"
+"      [-random_seed <seed>]\n"
+"      [-verbose <true | false> (default=true)]\n"
+"Exit codes:\n"
+"  0=success\n"
+"  1=error\n";
 double unary(double x) 
 {
 	return x > .8 ? 1 : x < .2 ? 0 : x;
@@ -53,13 +85,16 @@ vector<int> detectPattern(NeuralNetwork& net, RowVector& input, RowVector& outpu
             maxOutVal = v;
         }
     }
-    cout << "activations: [ ";
-    for (int i = 0; i < output_dim; i++)
+    if (verbose)
     {
-        cout << activations->coeffRef(i) << " ";
+        cout << "activations: [ ";
+        for (int i = 0; i < output_dim; i++)
+        {
+            cout << activations->coeffRef(i) << " ";
+        }
+        cout << "]" << endl;
+        cout << "maxOutIdx=" << maxOutIdx << ", maxOutVal=" << maxOutVal << endl;
     }
-    cout << "]" << endl;
-    cout << "maxOutIdx=" << maxOutIdx << ", maxOutVal=" << maxOutVal << endl;
     if (maxOutIdx != -1 && maxOutVal > 0.0)
     {
         int maxInIdx = -1;
@@ -73,12 +108,15 @@ vector<int> detectPattern(NeuralNetwork& net, RowVector& input, RowVector& outpu
                 net.test(input, output);
                 activations = net.mNeurons.back();
                 input.coeffRef(i) = v;
-                cout << "zero index=" << i << ", activations: [ ";
-                for (int j = 0; j < output_dim; j++)
+                if (verbose)
                 {
-                    cout << activations->coeffRef(j) << " ";
+                    cout << "zero index=" << i << ", activations: [ ";
+                    for (int j = 0; j < output_dim; j++)
+                    {
+                        cout << activations->coeffRef(j) << " ";
+                    }
+                    cout << "]" << endl;
                 }
-                cout << "]" << endl;
                 double d = maxOutVal - activations->coeffRef(maxOutIdx);
                 if (d > maxOutVal) d = maxOutVal;
                 if (d > 0.0 && (maxInIdx == -1 || d > maxInDelta))
@@ -90,7 +128,10 @@ vector<int> detectPattern(NeuralNetwork& net, RowVector& input, RowVector& outpu
         }
         if (maxInIdx != -1)
         {
-            cout << "maxInIdx=" << maxInIdx << ", maxInDelta=" << maxInDelta << endl;
+            if (verbose)
+            {
+                cout << "maxInIdx=" << maxInIdx << ", maxInDelta=" << maxInDelta << endl;
+            }
             for (int i = 0; i < input_dim; i++)
             {
                 if (input.coeffRef(i) > 0.0)
@@ -110,77 +151,102 @@ vector<int> detectPattern(NeuralNetwork& net, RowVector& input, RowVector& outpu
             }
         }
     }
-    cout << "Pattern [ ";
-    for (int i : pattern)
+    if (verbose)
     {
-        cout << i << " ";
+        cout << "Pattern [ ";
+        for (int i : pattern)
+        {
+            cout << i << " ";
+        }
+        cout << "]" << endl;
     }
-    cout << "]" << endl;
     return pattern;
 }
 
+// Test.
 void test(NeuralNetwork& net, vector<RowVector *>& input, vector<RowVector *>& output) 
 {
-	cout << "Testing:" << endl;
+    if (verbose)
+    {
+        cout << "Testing:" << endl;
+    }
 
 	for (int num = 0; num < dataset_size; num++) {
 
 		net.test(*input[num], *output[num]);
 
 		double mse = net.mse();
-		cout << "In [" << *input[num] << "] "
-			<< " Desired [" << *output[num] << "] "
-			<< " Out [" << net.mNeurons.back()->unaryExpr(ptr_fun(unary)) << "] "
-			<< " MSE [" << mse << "]" << endl;
+        if (verbose)
+        {
+            cout << "In [" << *input[num] << "] "
+                << " Desired [" << *output[num] << "] "
+                << " Out [" << net.mNeurons.back()->unaryExpr(ptr_fun(unary)) << "] "
+                << " MSE [" << mse << "]" << endl;
+        }
 
         // Pattern detection.
         vector<int> patttern = detectPattern(net, *input[num], *output[num]);
 	}
 }
 
+// Train.
 void train(NeuralNetwork& net, vector<RowVector *>& input, vector<RowVector *>& output)
 {
-	cout << "Training:" << endl;
+    if (verbose)
+    {
+        cout << "Training:" << endl;
+    }
 
     int stop = 0;
 	for (int i = 0; stop < 8 && i < epochs; i++) {
-		cout << i + 1 << endl;
+        if (verbose)
+        {
+            cout << i + 1 << endl;
+        }
 		for (int num = 0; stop < 8 && num < dataset_size; num++) {
 			net.train(*input[num], *output[num]);
 			double mse = net.mse();
-			cout << "In [" << *input[num] << "] "
-				<< " Desired [" << *output[num] << "] "
-				<< " Out [" << net.mNeurons.back()->unaryExpr(ptr_fun(unary)) << "] "
-				<< " MSE [" << mse << "]" << endl;
+            if (verbose)
+            {
+                cout << "In [" << *input[num] << "] "
+                    << " Desired [" << *output[num] << "] "
+                    << " Out [" << net.mNeurons.back()->unaryExpr(ptr_fun(unary)) << "] "
+                    << " MSE [" << mse << "]" << endl;
+            }
 			stop = mse < 0.2 ? stop + 1 : 0;
 		}
 	}
 }
 
+// Main.
 int main(int argc, char *args[]) 
 {
     // Get options.
+    bool gotNetworkDimensions = false;
+    bool gotNetworkHiddenDimension = false;
+    bool gotPatternIndexes = false;
+    bool gotDatasetSize = false;
     for (int i = 1; i < argc; i++)
     {
-        if (strcmp(args[i], "-h") == 0 || strcmp(args[i], "--help") == 0)
+        if (strcmp(args[i], "-?") == 0 || strcmp(args[i], "-help") == 0)
         {
-            printf(usage);
+            printf(Usage);
             exit(0);
         }
-        if (strcmp(args[i], "-d") == 0 || strcmp(args[i], "--network_dimensions") == 0)
+        if (strcmp(args[i], "-d") == 0 || strcmp(args[i], "-network_dimensions") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid network_dimensions option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             vector<string> dimensions;
             if (split(string(args[i]), ',', dimensions) != 2)
             {
                 fprintf(stderr, "invalid network_dimensions");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             input_dim = atoi(dimensions[0].c_str());
@@ -195,15 +261,16 @@ int main(int argc, char *args[])
                 fprintf(stderr, "invalid hidden dimension");
                 exit(1);
             }
+            gotNetworkDimensions = true;
             continue;
         }
-        if (strcmp(args[i], "-i") == 0 || strcmp(args[i], "--pattern_indexes") == 0)
+        if (strcmp(args[i], "-i") == 0 || strcmp(args[i], "-pattern_indexes") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid pattern_indexes option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             pattern_idxs.clear();
@@ -222,13 +289,13 @@ int main(int argc, char *args[])
             }
             continue;
         }
-        if (strcmp(args[i], "-s") == 0 || strcmp(args[i], "--signal_range") == 0)
+        if (strcmp(args[i], "-s") == 0 || strcmp(args[i], "-signal_range") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid signal_range option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             signal_range = atof(args[i]);
@@ -237,15 +304,16 @@ int main(int argc, char *args[])
                 fprintf(stderr, "invalid signal_range");
                 exit(1);
             }
+            gotPatternIndexes = true;
             continue;
         }
-        if (strcmp(args[i], "-p") == 0 || strcmp(args[i], "--noise_probability") == 0)
+        if (strcmp(args[i], "-p") == 0 || strcmp(args[i], "-noise_probability") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid noise_probability option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             noise_probability = atof(args[i]);
@@ -256,13 +324,13 @@ int main(int argc, char *args[])
             }
             continue;
         }
-        if (strcmp(args[i], "-n") == 0 || strcmp(args[i], "--dataset_size") == 0)
+        if (strcmp(args[i], "-n") == 0 || strcmp(args[i], "-dataset_size") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid dataset_size option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             dataset_size = atoi(args[i]);
@@ -271,15 +339,16 @@ int main(int argc, char *args[])
                 fprintf(stderr, "invalid dataset_size");
                 exit(1);
             }
+            gotDatasetSize = true;
             continue;
         }
-        if (strcmp(args[i], "-e") == 0 || strcmp(args[i], "--epochs") == 0)
+        if (strcmp(args[i], "-e") == 0 || strcmp(args[i], "-epochs") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid epochs option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             epochs = atoi(args[i]);
@@ -290,13 +359,13 @@ int main(int argc, char *args[])
             }
             continue;
         }
-        if (strcmp(args[i], "-l") == 0 || strcmp(args[i], "--learning_rate") == 0)
+        if (strcmp(args[i], "-l") == 0 || strcmp(args[i], "-learning_rate") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid learning_rate option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             LEARNING_RATE = atof(args[i]);
@@ -307,25 +376,50 @@ int main(int argc, char *args[])
             }
             continue;
         }
-        if (strcmp(args[i], "-r") == 0 || strcmp(args[i], "--random_seed") == 0)
+        if (strcmp(args[i], "-r") == 0 || strcmp(args[i], "-random_seed") == 0)
         {
             i++;
             if (i >= argc)
             {
                 fprintf(stderr, "Invalid random_seed option\n");
-                fprintf(stderr, usage);
+                fprintf(stderr, Usage);
                 exit(1);
             }
             random_seed = atoi(args[i]);
             continue;
         }
-        printf(usage);
+        if (strcmp(args[i], "-v") == 0 || strcmp(args[i], "-verbose") == 0)
+        {
+            i++;
+            if (i >= argc)
+            {
+                fprintf(stderr, "Invalid verbose option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            string v = args[i];
+            if (v == "true")
+            {
+                verbose = true;
+            }
+            else if (v == "false")
+            {
+                verbose = false;
+            }
+            else {
+                fprintf(stderr, "Invalid verbose option\n");
+                fprintf(stderr, Usage);
+                exit(1);
+            }
+            continue;
+        }
+        printf(Usage);
         exit(1);
     }
     if (pattern_idxs.size() == 0)
     {
         printf("pattern index lengths must be > 0");
-        printf(usage);
+        printf(Usage);
         exit(1);
     }
     output_dim = (int)pattern_idxs.size();
@@ -385,12 +479,15 @@ int main(int argc, char *args[])
 	test(net, input, output);
 	//net.save("params.txt");
 
-	cout << endl << "Neurons:" << endl;
-	for(int i = 0; i < net.mNeurons.size(); i++)
-		cout << *net.mNeurons[i] << endl;
-	cout << endl << "Weights:" << endl;
-	for (int i = 0; i < net.mWeights.size(); i++)
-		cout << *net.mWeights[i] << endl;
+    if (verbose)
+    {
+        cout << endl << "Neurons:" << endl;
+        for (int i = 0; i < net.mNeurons.size(); i++)
+            cout << *net.mNeurons[i] << endl;
+        cout << endl << "Weights:" << endl;
+        for (int i = 0; i < net.mWeights.size(); i++)
+            cout << *net.mWeights[i] << endl;
+    }
 
 	return 0;
 }

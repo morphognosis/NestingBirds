@@ -3,6 +3,7 @@
 // The nesting birds RNN.
 
 #include "world.hpp"
+#include "datasets.hpp"
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
@@ -48,428 +49,6 @@ bool        Dynamic;
 #define RNN_MALE_TEST_RESULTS_FILENAME       (char *)"nestingbirds_rnn_male_test_results.json"
 #define RNN_FEMALE_TRAIN_RESULTS_FILENAME    (char *)"nestingbirds_rnn_female_train_results.json"
 #define RNN_FEMALE_TEST_RESULTS_FILENAME     (char *)"nestingbirds_rnn_female_test_results.json"
-
-// Sensory-response activity.
-class MaleSensoryResponse
-{
-public:
-   string locale;
-   string mouseProximity;
-   string stoneProximity;
-   string femaleProximity;
-   string goal;
-   string hasObject;
-   string flying;
-   string femaleWantsMouse;
-   string femaleWantsStone;
-   string response;
-
-   void print()
-   {
-      printf("locale=%s\n", locale.c_str());
-      printf("mouseProximity=%s\n", mouseProximity.c_str());
-      printf("stoneProximity=%s\n", stoneProximity.c_str());
-      printf("femaleProximity=%s\n", femaleProximity.c_str());
-      printf("goal=%s\n", goal.c_str());
-      printf("hasObject=%s\n", hasObject.c_str());
-      printf("flying=%s\n", flying.c_str());
-      printf("femaleWantsMouse=%s\n", femaleWantsMouse.c_str());
-      printf("femaleWantsStone=%s\n", femaleWantsStone.c_str());
-      printf("response=%s\n", response.c_str());
-   }
-
-
-   // Convert sensory to one-hot encoding.
-   string oneHotSensory()
-   {
-      string encoding = "";
-
-      if (locale == "DESERT")
-      {
-         encoding += "1,0,0";
-      }
-      else if (locale == "FOREST")
-      {
-         encoding += "0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,1";
-      }
-      encoding += ",";
-      if (mouseProximity == "UNKNOWN")
-      {
-         encoding += "1,0,0,0,0";
-      }
-      else if (mouseProximity == "PRESENT")
-      {
-         encoding += "0,1,0,0,0";
-      }
-      else if (mouseProximity == "LEFT")
-      {
-         encoding += "0,0,1,0,0";
-      }
-      else if (mouseProximity == "FRONT")
-      {
-         encoding += "0,0,0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,0,0,1";
-      }
-      encoding += ",";
-      if (stoneProximity == "UNKNOWN")
-      {
-         encoding += "1,0,0,0,0";
-      }
-      else if (stoneProximity == "PRESENT")
-      {
-         encoding += "0,1,0,0,0";
-      }
-      else if (stoneProximity == "LEFT")
-      {
-         encoding += "0,0,1,0,0";
-      }
-      else if (stoneProximity == "FRONT")
-      {
-         encoding += "0,0,0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,0,0,1";
-      }
-      encoding += ",";
-      if (femaleProximity == "UNKNOWN")
-      {
-         encoding += "1,0,0,0,0";
-      }
-      else if (femaleProximity == "PRESENT")
-      {
-         encoding += "0,1,0,0,0";
-      }
-      else if (femaleProximity == "LEFT")
-      {
-         encoding += "0,0,1,0,0";
-      }
-      else if (femaleProximity == "FRONT")
-      {
-         encoding += "0,0,0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,0,0,1";
-      }
-      encoding += ",";
-      if (goal == "EAT_MOUSE")
-      {
-         encoding += "1,0,0,0";
-      }
-      else if (goal == "MOUSE_FOR_FEMALE")
-      {
-         encoding += "0,1,0,0";
-      }
-      else if (goal == "STONE_FOR_FEMALE")
-      {
-         encoding += "0,0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,0,1";
-      }
-      encoding += ",";
-      if (hasObject == "NO_OBJECT")
-      {
-         encoding += "1,0,0";
-      }
-      else if (hasObject == "MOUSE")
-      {
-         encoding += "0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,1";
-      }
-      encoding += ",";
-      if (flying == "true")
-      {
-         encoding += "1";
-      }
-      else
-      {
-         encoding += "0";
-      }
-      encoding += ",";
-      if (femaleWantsMouse == "true")
-      {
-         encoding += "1";
-      }
-      else
-      {
-         encoding += "0";
-      }
-      encoding += ",";
-      if (femaleWantsStone == "true")
-      {
-         encoding += "1";
-      }
-      else
-      {
-         encoding += "0";
-      }
-      return(encoding);
-   }
-
-
-   // Get length of sensory encoding.
-   static int oneHotSensoryLength()
-   {
-      return(28);
-   }
-
-
-   // Convert response to one-hot encoding.
-   string oneHotResponse()
-   {
-      string encoding = "";
-
-      if (response == "DO_NOTHING")
-      {
-         encoding += "1,0,0,0,0,0,0,0,0,0,0,0";
-      }
-      else if (response == "MOVE_FORWARD")
-      {
-         encoding += "0,1,0,0,0,0,0,0,0,0,0,0";
-      }
-      else if (response == "TURN_RIGHT")
-      {
-         encoding += "0,0,1,0,0,0,0,0,0,0,0,0";
-      }
-      else if (response == "TURN_LEFT")
-      {
-         encoding += "0,0,0,1,0,0,0,0,0,0,0,0";
-      }
-      else if (response == "EAT_MOUSE")
-      {
-         encoding += "0,0,0,0,1,0,0,0,0,0,0,0";
-      }
-      else if (response == "GET_OBJECT")
-      {
-         encoding += "0,0,0,0,0,1,0,0,0,0,0,0";
-      }
-      else if (response == "PUT_OBJECT")
-      {
-         encoding += "0,0,0,0,0,0,1,0,0,0,0,0";
-      }
-      else if (response == "TOSS_OBJECT")
-      {
-         encoding += "0,0,0,0,0,0,0,1,0,0,0,0";
-      }
-      else if (response == "GIVE_MOUSE")
-      {
-         encoding += "0,0,0,0,0,0,0,0,1,0,0,0";
-      }
-      else if (response == "GIVE_STONE")
-      {
-         encoding += "0,0,0,0,0,0,0,0,0,1,0,0";
-      }
-      else if (response == "FLY")
-      {
-         encoding += "0,0,0,0,0,0,0,0,0,0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,0,0,0,0,0,0,0,0,0,1";
-      }
-      return(encoding);
-   }
-
-
-   // Get length of response encoding.
-   static int oneHotResponseLength()
-   {
-      return(12);
-   }
-};
-
-class FemaleSensoryResponse
-{
-public:
-   vector<string> cellSensors;
-   string         orientation;
-   string         goal;
-   string         hasObject;
-   string         response;
-
-   void print()
-   {
-      printf("currentCell=%s\n", cellSensors[0].c_str());
-      printf("leftCell=%s\n", cellSensors[1].c_str());
-      printf("leftFrontCell=%s\n", cellSensors[2].c_str());
-      printf("frontCell=%s\n", cellSensors[3].c_str());
-      printf("rightFrontCell=%s\n", cellSensors[4].c_str());
-      printf("rightCell=%s\n", cellSensors[5].c_str());
-      printf("rightRearCell=%s\n", cellSensors[6].c_str());
-      printf("rearCell=%s\n", cellSensors[7].c_str());
-      printf("leftRearCell=%s\n", cellSensors[8].c_str());
-      printf("orientation=%s\n", orientation.c_str());
-      printf("goal=%s\n", goal.c_str());
-      printf("hasObject=%s\n", hasObject.c_str());
-      printf("response=%s\n", response.c_str());
-   }
-
-
-   // Convert sensory to one-hot encoding.
-   string oneHotSensory()
-   {
-      string encoding = "";
-
-      for (int i = 0; i < 9; i++)
-      {
-         if (cellSensors[i] == "NO_OBJECT")
-         {
-            encoding += "1,0,0";
-         }
-         else if (cellSensors[i] == "MOUSE")
-         {
-            encoding += "0,1,0";
-         }
-         else
-         {
-            encoding += "0,0,1";
-         }
-         if (i < 8)
-         {
-            encoding += ",";
-         }
-      }
-      encoding += ",";
-      if (orientation == "NORTH")
-      {
-         encoding += "1,0,0,0";
-      }
-      else if (orientation == "EAST")
-      {
-         encoding += "0,1,0,0";
-      }
-      else if (orientation == "SOUTH")
-      {
-         encoding += "0,0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,0,1";
-      }
-      encoding += ",";
-      if (goal == "LAY_EGG")
-      {
-         encoding += "1,0,0";
-      }
-      else if (goal == "BROOD_EGG")
-      {
-         encoding += "0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,1";
-      }
-      encoding += ",";
-      if (hasObject == "NO_OBJECT")
-      {
-         encoding += "1,0,0";
-      }
-      else if (hasObject == "MOUSE")
-      {
-         encoding += "0,1,0";
-      }
-      else
-      {
-         encoding += "0,0,1";
-      }
-      return(encoding);
-   }
-
-
-   // Get length of sensory encoding.
-   static int oneHotSensoryLength()
-   {
-      return(37);
-   }
-
-
-   // Convert response to one-hot encoding.
-   string oneHotResponse()
-   {
-      string encoding = "";
-
-      if (response == "DO_NOTHING")
-      {
-         encoding += "1,0,0,0,0,0,0,0,0,0,0";
-      }
-      else if (response == "MOVE_FORWARD")
-      {
-         encoding += "0,1,0,0,0,0,0,0,0,0,0";
-      }
-      else if (response == "TURN_RIGHT")
-      {
-         encoding += "0,0,1,0,0,0,0,0,0,0,0";
-      }
-      else if (response == "TURN_LEFT")
-      {
-         encoding += "0,0,0,1,0,0,0,0,0,0,0";
-      }
-      else if (response == "EAT_MOUSE")
-      {
-         encoding += "0,0,0,0,1,0,0,0,0,0,0";
-      }
-      else if (response == "GET_OBJECT")
-      {
-         encoding += "0,0,0,0,0,1,0,0,0,0,0";
-      }
-      else if (response == "PUT_OBJECT")
-      {
-         encoding += "0,0,0,0,0,0,1,0,0,0,0";
-      }
-      else if (response == "TOSS_OBJECT")
-      {
-         encoding += "0,0,0,0,0,0,0,1,0,0,0";
-      }
-      else if (response == "WANT_MOUSE")
-      {
-         encoding += "0,0,0,0,0,0,0,0,1,0,0";
-      }
-      else if (response == "WANT_STONE")
-      {
-         encoding += "0,0,0,0,0,0,0,0,0,1,0";
-      }
-      else if (response == "LAY_EGG")
-      {
-         encoding += "0,0,0,0,0,0,0,0,0,0,1";
-      }
-      else
-      {
-         encoding += "0,0,0,0,0,0,0,0,0,0,1";
-      }
-      return(encoding);
-   }
-
-
-   // Get length of response encoding.
-   static int oneHotResponseLength()
-   {
-      return(11);
-   }
-};
-
-// Imported behavior datasets.
-vector < vector < MaleSensoryResponse >> MaleTrainDataset;
-vector<MaleSensoryResponse> MaleTestDataset;
-vector < vector < FemaleSensoryResponse >> FemaleTrainDataset;
-vector<FemaleSensoryResponse> FemaleTestDataset;
-void generateBehavior(int randomSeed, int steps);
-void importBehaviorDataset(
-   vector<MaleSensoryResponse>&   maleSequence,
-   vector<FemaleSensoryResponse>& femaleSequence);
-void createRNNdatasets();
 
 // Write nest completion results.
 void writeNestResults(char *filename);
@@ -612,26 +191,9 @@ int main(int argc, char *args[])
       exit(0);
    }
 
-   // Create behavior training datasets.
-   for (int randomSeed : TrainRandomSeeds)
-   {
-      vector<MaleSensoryResponse>   maleSequence;
-      vector<FemaleSensoryResponse> femaleSequence;
-      generateBehavior(randomSeed, Steps);
-      importBehaviorDataset(maleSequence, femaleSequence);
-      MaleTrainDataset.push_back(maleSequence);
-      FemaleTrainDataset.push_back(femaleSequence);
-   }
-
-   // Create behavior testing datasets.
-   if (TestRandomSeed != -1)
-   {
-      generateBehavior(TestRandomSeed, Steps);
-      importBehaviorDataset(MaleTestDataset, FemaleTestDataset);
-   }
-
-   // Convert to RNN datasets.
-   createRNNdatasets();
+   // Write datasets.
+   writeDatasets(Steps, TrainRandomSeeds, TestRandomSeed,
+       RNN_MALE_DATASET_FILENAME, RNN_FEMALE_DATASET_FILENAME, Verbose);
 
    // Run RNN.
    if (Verbose)
@@ -653,7 +215,7 @@ int main(int argc, char *args[])
    {
       if (Dynamic)
       {
-         MaleTestDataset.clear();
+         MaleTestBehavior.clear();
          RANDOM_NUMBER_SEED           = TestRandomSeed;
          Male::RANDOMIZE_FOOD_LEVEL   = true;
          Female::RANDOMIZE_FOOD_LEVEL = true;
@@ -723,7 +285,7 @@ int main(int argc, char *args[])
                sensoryResponse.femaleWantsStone = "false";
             }
             sensoryResponse.response = Male::RESPONSE::toString(male->response);
-            MaleTestDataset.push_back(sensoryResponse);
+            MaleTestBehavior.push_back(sensoryResponse);
             FILE *fp = fopen(RNN_DATASET_FILENAME, "w");
             if (fp == NULL)
             {
@@ -732,11 +294,11 @@ int main(int argc, char *args[])
             }
             fprintf(fp, "X_test_shape = [1, %d, %d]\n", i, MaleSensoryResponse::oneHotSensoryLength());
             fprintf(fp, "X_test_seq = [\n");
-            for (int j = 0; j < MaleTestDataset.size(); j++)
+            for (int j = 0; j < MaleTestBehavior.size(); j++)
             {
-               MaleSensoryResponse sensoryResponse = MaleTestDataset[j];
+               MaleSensoryResponse sensoryResponse = MaleTestBehavior[j];
                fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-               if (j < MaleTestDataset.size() - 1)
+               if (j < MaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
                }
@@ -745,11 +307,11 @@ int main(int argc, char *args[])
             fprintf(fp, "]\n");
             fprintf(fp, "y_test_shape = [1, %d, %d]\n", i, MaleSensoryResponse::oneHotResponseLength());
             fprintf(fp, "y_test_seq = [\n");
-            for (int j = 0; j < MaleTestDataset.size(); j++)
+            for (int j = 0; j < MaleTestBehavior.size(); j++)
             {
-               MaleSensoryResponse sensoryResponse = MaleTestDataset[j];
+               MaleSensoryResponse sensoryResponse = MaleTestBehavior[j];
                fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-               if (j < MaleTestDataset.size() - 1)
+               if (j < MaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
                }
@@ -777,7 +339,7 @@ int main(int argc, char *args[])
                fprintf(stderr, "Invalid male test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
                exit(1);
             }
-            MaleTestDataset[MaleTestDataset.size() - 1].response =
+            MaleTestBehavior[MaleTestBehavior.size() - 1].response =
                Male::RESPONSE::toString(response);
             male->response = response;
             male->setResponseOverride();
@@ -851,7 +413,7 @@ int main(int argc, char *args[])
    {
       if (Dynamic)
       {
-         FemaleTestDataset.clear();
+         FemaleTestBehavior.clear();
          RANDOM_NUMBER_SEED           = TestRandomSeed;
          Male::RANDOMIZE_FOOD_LEVEL   = true;
          Female::RANDOMIZE_FOOD_LEVEL = true;
@@ -906,7 +468,7 @@ int main(int argc, char *args[])
             sensor = female->sensors[Female::HAS_OBJECT_SENSOR];
             sensoryResponse.hasObject = OBJECT::toString(sensor);
             sensoryResponse.response  = Female::RESPONSE::toString(female->response);
-            FemaleTestDataset.push_back(sensoryResponse);
+            FemaleTestBehavior.push_back(sensoryResponse);
             FILE *fp = fopen(RNN_DATASET_FILENAME, "w");
             if (fp == NULL)
             {
@@ -915,11 +477,11 @@ int main(int argc, char *args[])
             }
             fprintf(fp, "X_test_shape = [1, %d, %d]\n", i, FemaleSensoryResponse::oneHotSensoryLength());
             fprintf(fp, "X_test_seq = [\n");
-            for (int j = 0; j < FemaleTestDataset.size(); j++)
+            for (int j = 0; j < FemaleTestBehavior.size(); j++)
             {
-               FemaleSensoryResponse sensoryResponse = FemaleTestDataset[j];
+               FemaleSensoryResponse sensoryResponse = FemaleTestBehavior[j];
                fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-               if (j < FemaleTestDataset.size() - 1)
+               if (j < FemaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
                }
@@ -928,11 +490,11 @@ int main(int argc, char *args[])
             fprintf(fp, "]\n");
             fprintf(fp, "y_test_shape = [1, %d, %d]\n", i, FemaleSensoryResponse::oneHotResponseLength());
             fprintf(fp, "y_test_seq = [\n");
-            for (int j = 0; j < FemaleTestDataset.size(); j++)
+            for (int j = 0; j < FemaleTestBehavior.size(); j++)
             {
-               FemaleSensoryResponse sensoryResponse = FemaleTestDataset[j];
+               FemaleSensoryResponse sensoryResponse = FemaleTestBehavior[j];
                fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-               if (j < FemaleTestDataset.size() - 1)
+               if (j < FemaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
                }
@@ -960,7 +522,7 @@ int main(int argc, char *args[])
                fprintf(stderr, "Invalid female test predictions file %s\n", RNN_TEST_PREDICTIONS_FILENAME);
                exit(1);
             }
-            FemaleTestDataset[FemaleTestDataset.size() - 1].response =
+            FemaleTestBehavior[FemaleTestBehavior.size() - 1].response =
                Female::RESPONSE::toString(response);
             female->response = response;
             female->setResponseOverride();
@@ -1352,183 +914,6 @@ void importBehaviorDataset(
    file.close();
    unlink(BEHAVIOR_FILENAME);
 }
-
-
-// Convert to RNN datasets.
-void createRNNdatasets()
-{
-   // Create male dataset.
-   FILE *fp = fopen(RNN_MALE_DATASET_FILENAME, "w");
-
-   if (fp == NULL)
-   {
-      fprintf(stderr, "Cannot open male dataset file %s\n", RNN_MALE_DATASET_FILENAME);
-      exit(1);
-   }
-   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", MaleTrainDataset.size(), Steps, MaleSensoryResponse::oneHotSensoryLength());
-   fprintf(fp, "X_train_seq = [\n");
-   for (int i = 0; i < MaleTrainDataset.size(); i++)
-   {
-      vector<MaleSensoryResponse> behaviorSequence = MaleTrainDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-         if ((i < MaleTrainDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", MaleTrainDataset.size(), Steps, MaleSensoryResponse::oneHotResponseLength());
-   fprintf(fp, "y_train_seq = [\n");
-   for (int i = 0; i < MaleTrainDataset.size(); i++)
-   {
-      vector<MaleSensoryResponse> behaviorSequence = MaleTrainDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-         if ((i < MaleTrainDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   if (MaleTestDataset.size() == 0)
-   {
-      fprintf(fp, "X_test_shape = [0, %d, %d]\n", Steps, MaleSensoryResponse::oneHotSensoryLength());
-      fprintf(fp, "X_test_seq = [\n");
-   }
-   else
-   {
-      fprintf(fp, "X_test_shape = [1, %d, %d]\n", Steps, MaleSensoryResponse::oneHotSensoryLength());
-      fprintf(fp, "X_test_seq = [\n");
-      for (int i = 0; i < MaleTestDataset.size(); i++)
-      {
-         MaleSensoryResponse sensoryResponse = MaleTestDataset[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-         if (i < MaleTestDataset.size() - 1)
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   if (MaleTestDataset.size() == 0)
-   {
-      fprintf(fp, "y_test_shape = [0, %d, %d]\n", Steps, MaleSensoryResponse::oneHotResponseLength());
-      fprintf(fp, "y_test_seq = [\n");
-   }
-   else
-   {
-      fprintf(fp, "y_test_shape = [1, %d, %d]\n", Steps, MaleSensoryResponse::oneHotResponseLength());
-      fprintf(fp, "y_test_seq = [\n");
-      for (int i = 0; i < MaleTestDataset.size(); i++)
-      {
-         MaleSensoryResponse sensoryResponse = MaleTestDataset[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-         if (i < MaleTestDataset.size() - 1)
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   fclose(fp);
-
-   // Create female dataset.
-   fp = fopen(RNN_FEMALE_DATASET_FILENAME, "w");
-   if (fp == NULL)
-   {
-      fprintf(stderr, "Cannot open female dataset file %s\n", RNN_FEMALE_DATASET_FILENAME);
-      exit(1);
-   }
-   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", FemaleTrainDataset.size(), Steps, FemaleSensoryResponse::oneHotSensoryLength());
-   fprintf(fp, "X_train_seq = [\n");
-   for (int i = 0; i < FemaleTrainDataset.size(); i++)
-   {
-      vector<FemaleSensoryResponse> behaviorSequence = FemaleTrainDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-         if ((i < FemaleTrainDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", FemaleTrainDataset.size(), Steps, FemaleSensoryResponse::oneHotResponseLength());
-   fprintf(fp, "y_train_seq = [\n");
-   for (int i = 0; i < FemaleTrainDataset.size(); i++)
-   {
-      vector<FemaleSensoryResponse> behaviorSequence = FemaleTrainDataset[i];
-      for (int j = 0; j < behaviorSequence.size(); j++)
-      {
-         FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-         if ((i < FemaleTrainDataset.size() - 1) || (j < behaviorSequence.size() - 1))
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   if (FemaleTestDataset.size() == 0)
-   {
-      fprintf(fp, "X_test_shape = [0, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotSensoryLength());
-      fprintf(fp, "X_test_seq = [\n");
-   }
-   else
-   {
-      fprintf(fp, "X_test_shape = [1, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotSensoryLength());
-      fprintf(fp, "X_test_seq = [\n");
-      for (int i = 0; i < FemaleTestDataset.size(); i++)
-      {
-         FemaleSensoryResponse sensoryResponse = FemaleTestDataset[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
-         if (i < FemaleTestDataset.size() - 1)
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   if (FemaleTestDataset.size() == 0)
-   {
-      fprintf(fp, "y_test_shape = [0, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotResponseLength());
-      fprintf(fp, "y_test_seq = [\n");
-   }
-   else
-   {
-      fprintf(fp, "y_test_shape = [1, %d, %d]\n", Steps, FemaleSensoryResponse::oneHotResponseLength());
-      fprintf(fp, "y_test_seq = [\n");
-      for (int i = 0; i < MaleTestDataset.size(); i++)
-      {
-         FemaleSensoryResponse sensoryResponse = FemaleTestDataset[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
-         if (i < FemaleTestDataset.size() - 1)
-         {
-            fprintf(fp, ",");
-         }
-         fprintf(fp, "\n");
-      }
-   }
-   fprintf(fp, "]\n");
-   fclose(fp);
-}
-
 
 // Trim string.
 string trim(string& str)

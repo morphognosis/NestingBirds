@@ -32,7 +32,7 @@ Train/test RNN:
 run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat
 </pre>
 
-Detect input patterns having only signals that are important to the output:
+Detect input patterns by extracting signals that are important to the output:
 <pre>
 pattern_detector
 </pre>
