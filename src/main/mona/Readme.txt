@@ -70,12 +70,24 @@ pattern_detector: detect input patterns by extracting signals that are important
 Requires Eigen package: https://eigen.tuxfamily.org
 
 Usage:
-    pattern_detector 
-      [--network_dimensions <input_dimension>, <hidden_dimension>]
-      [--pattern_indexes <indexes> :: = <pattern>; <pattern>; ... where <pattern> :: = <index>, <index>, ...]
-      [--signal_range <range percent>]
-      [--noise_probability <probability>]
-      [--dataset_size <size>]
-      [--learning_rate <rate>]
-      [--epochs <epochs>]
-      [--random_seed <seed>]
+    pattern_detector
+      [-pattern_indexes <indexes> :: = <pattern>; <pattern>; ... where <pattern> :: = <index>, <index>, ...]
+      [-pattern_output_file <output file name>]
+      [-signal_range <range percent>]
+      [-noise_probability <probability>]
+      [-dataset_size <size>]
+      [-network_dimensions <input_dimension>, <hidden_dimension>]
+      [-learning_rate <rate>]
+      [-epochs <epochs>]
+      [-random_seed <seed>]
+      [-verbose <true | false> (default=true)]
+  or
+    pattern_detector
+      -pattern_input_file <input file name>
+      -pattern_output_file <output file name>
+      [-signal_range <range percent>]
+      [-network_hidden_dimension <dimension>]
+      [-learning_rate <rate>]
+      [-epochs <epochs>]
+      [-random_seed <seed>]
+      [-verbose <true | false> (default=true)]
