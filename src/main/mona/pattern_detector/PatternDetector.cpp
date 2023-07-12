@@ -637,16 +637,38 @@ void detectPattern(NeuralNetwork& net, RowVector rowIn, RowVector rowOut)
             }
         }
     }
-    if (Verbose)
+    bool match = true;
+    for (int i = 0; i < input_dim; i++)
     {
-        cout << "Pattern [ ";
-        for (int i : pattern)
+        if (rowIn.coeffRef(i) > 0.0)
         {
-            cout << i << " ";
+            if (pattern[i] == 0)
+            {
+                match = false;
+                break;
+            }
         }
-        cout << "]" << endl;
+        else {
+            if (pattern[i] == 1)
+            {
+                match = false;
+                break;
+            }
+        }
     }
-    patterns.push_back(pattern);
+    if (!match)
+    {
+        if (Verbose)
+        {
+            cout << "Pattern [ ";
+            for (int i : pattern)
+            {
+                cout << i << " ";
+            }
+            cout << "]" << endl;
+        }
+        patterns.push_back(pattern);
+    }
 }
 
 // Write patterns.

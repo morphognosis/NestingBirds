@@ -6,10 +6,10 @@ which allow improved spatial navigation.
 To build:
 
 UNIX:
-Execute 'make' to make executables.
+build_nestinbirds.sh, build_nestingbirds.bat, build_pattern_detector.sh in work directory.
 
 Windows:
-Start Microsoft Visual Studio using solution.
+Start Microsoft Visual Studio using solutions.
 
 Directories:
 
@@ -21,7 +21,7 @@ pattern_detector: pattern detection.
 
 Commands:
 
-nestingbirds: run nestingbirds.
+run_nestingbirds.sh, run_nestingbirds.bat
 
 Usage:
     nestingbirds
@@ -51,7 +51,7 @@ Usage:
       [-verbose <true | false> (default=true)]
       [-version]
       
-nestingbirds_rnn: train and test nestingbirds with RNN.
+run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat: train and test nestingbirds with RNN.
 
 Usage:
     nestingbirds_rnn
@@ -66,7 +66,7 @@ nestingbirds_rnn_male_test_results.json
 nestingbirds_rnn_female_train_results.json
 nestingbirds_rnn_female_test_results.json
 
-pattern_detector: detect input patterns by extracting signals that are important to the output.
+run_pattern_detector.sh: detect input patterns by extracting signals that are important to the output.
 Requires Eigen package: https://eigen.tuxfamily.org
 
 Usage:
