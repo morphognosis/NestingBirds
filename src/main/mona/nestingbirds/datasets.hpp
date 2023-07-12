@@ -8,17 +8,32 @@
 using namespace std;
 
 /*
-Create training and testing dataset files.
-Format:
+Write training and testing datasets from generated behavior sensory-response sequences.
+Format (one-hot encoded):
 X_train_shape = [<number of sequences>, <sequence length>, <input dimension>]
-X_train_seq = [ ... ]
+X_train_seq = [ <comma-separated input sequences> ]
 y_train_shape = [<number of sequences>, <sequence length>, <output dimension>]
-y_train_seq = [ ... ]
+y_train_seq = [ <comma-separted output sequences> ]
 X_test_shape = [<number of sequences>, <sequence length>, <input dimension>]
-X_test_seq = [ ... ]
+X_test_seq = [ <comma-separated input sequences> ]
 y_test_shape = [<number of sequences>, <sequence length>, <output dimension>]
-y_test_seq = [ ... ]
+y_test_seq = [ <comma-separted output sequences> ]
 */
+
+// If testRandomSeed == -1, do not write test dataset.
+void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed,
+    string maleDatasetName, string femaleDatasetName, bool verbose);
+
+/*
+Write pattern detection datasets from generated behavior sensory-response sequences.
+Format:
+<sensory input (comma-separated, one-hot encoded)>, <response>
+...
+*/
+
+// Write pattern detection datasets.
+void writePatternDatasets(int steps, vector<int> randomSeeds,
+    string maleDatasetName, string femaleDatasetName, bool verbose);
 
 // Sensory-response activity.
 class MaleSensoryResponse
@@ -537,14 +552,5 @@ extern vector < vector < MaleSensoryResponse >> MaleTrainBehavior;
 extern vector<MaleSensoryResponse> MaleTestBehavior;
 extern vector < vector < FemaleSensoryResponse >> FemaleTrainBehavior;
 extern vector<FemaleSensoryResponse> FemaleTestBehavior;
-
-// Write datasets.
-// If testRandomSeed == -1, do not write test dataset.
-void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed, 
-    string maleDatasetName, string femaleDatasetName, bool verbose);
-
-// Write pattern datasets.
-void writePatternDatasets(int steps, vector<int> randomSeeds,
-    string maleDatasetName, string femaleDatasetName, bool verbose);
 
 #endif
