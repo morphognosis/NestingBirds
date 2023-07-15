@@ -1,0 +1,1 @@
+ ../bin/sensor_discriminator $*

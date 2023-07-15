@@ -6,7 +6,7 @@ which allow improved spatial navigation.
 To build:
 
 UNIX:
-build_nestinbirds.sh, build_nestingbirds.bat, build_pattern_detector.sh in work directory.
+build_nestinbirds.sh, build_nestingbirds.bat, build_sensor_discriminator.sh in work directory.
 
 Windows:
 Start Microsoft Visual Studio using solutions.
@@ -16,8 +16,8 @@ Directories:
 mona: mona neural network.
 common files.
 nestingbirds: nesting birds.
-pattern_detector: pattern detection.
-../../../bin: nestingbirds, nestingbirds_rnn, and pattern_detector executables.
+sensor_discriminator: sensor discrimination.
+../../../bin: nestingbirds, nestingbirds_rnn, and sensor_discriminator executables.
 
 Commands:
 
@@ -66,13 +66,13 @@ nestingbirds_rnn_male_test_results.json
 nestingbirds_rnn_female_train_results.json
 nestingbirds_rnn_female_test_results.json
 
-run_pattern_detector.sh: detect input patterns by extracting signals that are important to the output.
+run_sensor_discriminator.sh: discriminate input sensors by detecting signals that are important to the output.
 Requires Eigen package: https://eigen.tuxfamily.org
 
 Usage:
-    pattern_detector
-      [-pattern_indexes <indexes> :: = <pattern>; <pattern>; ... where <pattern> :: = <index>, <index>, ...]
-      [-pattern_output_file <output file name>]
+    sensor_discriminator
+      [-sensor_indexes <indexes> :: = <sensors>; <sensors>; ... where <sensors> :: = <index>, <index>, ...]
+      [-sensor_output_file <output file name>]
       [-signal_range <range percent>]
       [-noise_probability <probability>]
       [-dataset_size <size>]
@@ -82,9 +82,9 @@ Usage:
       [-random_seed <seed>]
       [-verbose <true | false> (default=true)]
   or
-    pattern_detector
-      -pattern_input_file <input file name>
-      -pattern_output_file <output file name>
+    sensor_discriminator
+      -sensor_input_file <input file name>
+      -sensor_output_file <output file name>
       [-signal_range <range percent>]
       [-network_hidden_dimension <dimension>]
       [-learning_rate <rate>]

@@ -1,5 +1,5 @@
-// Pattern detector.
-// Detect input patterns by extracting signals that are important to the output.
+// Sensor discriminator.
+// Discriminate input sensors by detecting signals that are important to the output.
 
 #include <iostream>
 #include <fstream>
@@ -8,9 +8,9 @@
 // Usage.
 const char* Usage =
 "Usage:\n"
-"    pattern_detector\n"
-"      [-pattern_indexes <indexes> :: = <pattern>; <pattern>; ... where <pattern> :: = <index>, <index>, ...]\n"
-"      [-pattern_output_file <output file name>]\n"
+"    sensor_discriminator\n"
+"      [-sensor_indexes <indexes> :: = <sensors>; <sensors>; ... where <sensors> :: = <index>, <index>, ...]\n"
+"      [-sensor_output_file <output file name>]\n"
 "      [-signal_range <range percent>]\n"
 "      [-noise_probability <probability>]\n"
 "      [-dataset_size <size>]\n"
@@ -20,9 +20,9 @@ const char* Usage =
 "      [-random_seed <seed>]\n"
 "      [-verbose <true | false> (default=true)]\n"
 "  or\n"
-"    pattern_detector\n"
-"      -pattern_input_file <input file name>\n"
-"      -pattern_output_file <output file name>\n"
+"    sensor_discriminator\n"
+"      -sensor_input_file <input file name>\n"
+"      -sensor_output_file <output file name>\n"
 "      [-signal_range <range percent>]\n"
 "      [-network_hidden_dimension <dimension>]\n"
 "      [-learning_rate <rate>]\n"
@@ -38,12 +38,12 @@ int input_dim = 8;
 int hidden_dim = 32;
 int output_dim;
 
-// Patterns.
-vector<vector<int>> pattern_idxs = { {1}, {4}, {1, 4}, {3} };
+// Sensors.
+vector<vector<int>> sensor_idxs = { {1}, {4}, {1, 4}, {3} };
 
 // Files.
-string pattern_input_filename;
-string pattern_output_filename;
+string sensor_input_filename;
+string sensor_output_filename;
 
 // Signal range percentage.
 double signal_range = 0.8;
@@ -66,16 +66,16 @@ bool Verbose = true;
 // Dataset.
 vector<RowVector*> input, output;
 
-// Patterns.
-vector<vector<int>> patterns;
+// Sensors.
+vector<vector<int>> sensors;
 
 // Declarations.
-void generatePatternDataset();
-void readPatternDataset();
+void generateSensorDataset();
+void readSensorDataset();
 void train(NeuralNetwork& net);
 void test(NeuralNetwork& net);
-void detectPattern(NeuralNetwork& net, RowVector rowIn, RowVector rowOut);
-void writePatterns();
+void discriminateSensors(NeuralNetwork& net, RowVector rowIn, RowVector rowOut);
+void writeSensors();
 
 // Split string on delimiter.
 int split(string const& str, const char delim, vector<string>& out);
@@ -91,7 +91,7 @@ int main(int argc, char *args[])
     // Get options.
     bool gotNetworkDimensions = false;
     bool gotNetworkHiddenDimension = false;
-    bool gotPatternIndexes = false;
+    bool gotSensorIndexes = false;
     bool gotDatasetSize = false;
     for (int i = 1; i < argc; i++)
     {
@@ -100,28 +100,28 @@ int main(int argc, char *args[])
             printf(Usage);
             exit(0);
         }
-        if (strcmp(args[i], "-i") == 0 || strcmp(args[i], "-pattern_input_file") == 0)
+        if (strcmp(args[i], "-i") == 0 || strcmp(args[i], "-sensor_input_file") == 0)
         {
             i++;
             if (i >= argc)
             {
-                fprintf(stderr, "Invalid pattern_input_file option\n");
+                fprintf(stderr, "Invalid sensor_input_file option\n");
                 fprintf(stderr, Usage);
                 exit(1);
             }
-            pattern_input_filename = args[i];
+            sensor_input_filename = args[i];
             continue;
         }
-        if (strcmp(args[i], "-o") == 0 || strcmp(args[i], "-pattern_output_file") == 0)
+        if (strcmp(args[i], "-o") == 0 || strcmp(args[i], "-sensor_output_file") == 0)
         {
             i++;
             if (i >= argc)
             {
-                fprintf(stderr, "Invalid pattern_output_file option\n");
+                fprintf(stderr, "Invalid sensor_output_file option\n");
                 fprintf(stderr, Usage);
                 exit(1);
             }
-            pattern_output_filename = args[i];
+            sensor_output_filename = args[i];
             continue;
         }
         if (strcmp(args[i], "-d") == 0 || strcmp(args[i], "-network_dimensions") == 0)
@@ -173,30 +173,30 @@ int main(int argc, char *args[])
             gotNetworkHiddenDimension = true;
             continue;
         }
-        if (strcmp(args[i], "-x") == 0 || strcmp(args[i], "-pattern_indexes") == 0)
+        if (strcmp(args[i], "-x") == 0 || strcmp(args[i], "-sensor_indexes") == 0)
         {
             i++;
             if (i >= argc)
             {
-                fprintf(stderr, "Invalid pattern_indexes option\n");
+                fprintf(stderr, "Invalid sensor_indexes option\n");
                 fprintf(stderr, Usage);
                 exit(1);
             }
-            pattern_idxs.clear();
-            vector<string> patterns;
-            split(string(args[i]), ';', patterns);
-            for (int j = 0; j < patterns.size(); j++)
+            sensor_idxs.clear();
+            vector<string> sensors;
+            split(string(args[i]), ';', sensors);
+            for (int j = 0; j < sensors.size(); j++)
             {
                 vector<string> sidxs;
                 vector<int> idxs;
-                split(patterns[j], ',', sidxs);
+                split(sensors[j], ',', sidxs);
                 for (string idx : sidxs)
                 {
                     idxs.push_back(atoi(idx.c_str()));
                 }
-                pattern_idxs.push_back(idxs);
+                sensor_idxs.push_back(idxs);
             }
-            gotPatternIndexes = true;
+            gotSensorIndexes = true;
             continue;
         }
         if (strcmp(args[i], "-s") == 0 || strcmp(args[i], "-signal_range") == 0)
@@ -214,7 +214,6 @@ int main(int argc, char *args[])
                 fprintf(stderr, "invalid signal_range");
                 exit(1);
             }
-            gotPatternIndexes = true;
             continue;
         }
         if (strcmp(args[i], "-p") == 0 || strcmp(args[i], "-noise_probability") == 0)
@@ -326,22 +325,22 @@ int main(int argc, char *args[])
         printf(Usage);
         exit(1);
     }
-    if (pattern_input_filename.empty())
+    if (sensor_input_filename.empty())
     {
         if (gotNetworkHiddenDimension)
         {
             fprintf(stderr, Usage);
             exit(1);
         }
-        output_dim = (int)pattern_idxs.size();
+        output_dim = (int)sensor_idxs.size();
     }
     else {
-        if (gotNetworkDimensions || gotPatternIndexes || gotDatasetSize)
+        if (gotNetworkDimensions || gotSensorIndexes || gotDatasetSize)
         {
             fprintf(stderr, Usage);
             exit(1);
         }
-        if (pattern_output_filename.empty())
+        if (sensor_output_filename.empty())
         {
             printf(Usage);
             exit(1);
@@ -352,14 +351,14 @@ int main(int argc, char *args[])
     srand(random_seed);
 
     vector<RowVector*> input, output;
-    if (pattern_input_filename.empty())
+    if (sensor_input_filename.empty())
     {
-        // Generate pattern dataset.
-        generatePatternDataset();
+        // Generate sensor dataset.
+        generateSensorDataset();
     }
     else {
-        // Read pattern dataset.
-        readPatternDataset();
+        // Read sensor dataset.
+        readSensorDataset();
 
     }
 
@@ -378,17 +377,17 @@ int main(int argc, char *args[])
             cout << *net.mWeights[i] << endl;
     }
 
-    // Write detected patterns.
-    if (!pattern_output_filename.empty())
+    // Write discriminated sensors.
+    if (!sensor_output_filename.empty())
     {
-        writePatterns();
+        writeSensors();
     }
 
 	return 0;
 }
 
-// Generate pattern dataset.
-void generatePatternDataset()
+// Generate sensor dataset.
+void generateSensorDataset()
 {
     // off = 0.0, on = 1.0
     input.clear();
@@ -406,18 +405,18 @@ void generatePatternDataset()
                 rowIn->coeffRef(j) = 0.0f;
             }
         }
-        int idx = rand() % (int)(pattern_idxs.size());
-        for (int j = 0; j < pattern_idxs.size(); j++)
+        int idx = rand() % (int)(sensor_idxs.size());
+        for (int j = 0; j < sensor_idxs.size(); j++)
         {
             if (j != idx)
             {
-                for (int k : pattern_idxs[j])
+                for (int k : sensor_idxs[j])
                 {
                     rowIn->coeffRef(k) = 0.0f;
                 }
             }
         }
-        for (int j : pattern_idxs[idx])
+        for (int j : sensor_idxs[idx])
         {
             rowIn->coeffRef(j) = 1.0f;
         }
@@ -437,16 +436,16 @@ void generatePatternDataset()
     }
 }
 
-// Read pattern dataset.
-void readPatternDataset()
+// Read sensor dataset.
+void readSensorDataset()
 {
     input.clear();
     output.clear();
     ifstream file;
-    file.open(pattern_input_filename);
+    file.open(sensor_input_filename);
     if (!file.is_open())
     {
-        fprintf(stderr, "Cannot open pattern dataset file %s\n", pattern_input_filename.c_str());
+        fprintf(stderr, "Cannot open sensor dataset file %s\n", sensor_input_filename.c_str());
         exit(1);
     }
     string line;
@@ -458,7 +457,7 @@ void readPatternDataset()
     {
         dataset_size++;
         split(line, ',', values);
-        input_dim = values.size() - 1;
+        input_dim = (int)values.size() - 1;
         int response = atoi(values[values.size() - 1].c_str());
         if (response > output_dim)
         {
@@ -467,10 +466,10 @@ void readPatternDataset()
     }
     output_dim++;
     file.close();
-    file.open(pattern_input_filename);
+    file.open(sensor_input_filename);
     if (!file.is_open())
     {
-        fprintf(stderr, "Cannot open pattern dataset file %s\n", pattern_input_filename.c_str());
+        fprintf(stderr, "Cannot open sensor dataset file %s\n", sensor_input_filename.c_str());
         exit(1);
     }
     while (getline(file, line))
@@ -536,7 +535,7 @@ void test(NeuralNetwork& net)
         cout << "Testing:" << endl;
     }
 
-    patterns.clear();
+    sensors.clear();
     for (int num = 0; num < dataset_size; num++) 
     {
         net.test(*input[num], *output[num]);
@@ -550,15 +549,15 @@ void test(NeuralNetwork& net)
                 << " MSE [" << mse << "]" << endl;
         }
 
-        // Pattern detection.
-        detectPattern(net, *input[num], *output[num]);
+        // Sensor discrimination.
+        discriminateSensors(net, *input[num], *output[num]);
     }
 }
 
-// Detect pattern.
-void detectPattern(NeuralNetwork& net, RowVector rowIn, RowVector rowOut)
+// Discriminate sensors.
+void discriminateSensors(NeuralNetwork& net, RowVector rowIn, RowVector rowOut)
 {
-    vector<int> pattern(input_dim);
+    vector<int> signals(input_dim);
     RowVector* activations = net.mNeurons.back();
     int maxOutIdx = -1;
     double maxOutVal = 0.0;
@@ -631,7 +630,7 @@ void detectPattern(NeuralNetwork& net, RowVector rowIn, RowVector rowOut)
                     if (d > maxOutVal) d = maxOutVal;
                     if (d > 0.0 && (d / maxInDelta) >= signal_range)
                     {
-                        pattern[i] = 1;
+                        signals[i] = 1;
                     }
                 }
             }
@@ -642,14 +641,14 @@ void detectPattern(NeuralNetwork& net, RowVector rowIn, RowVector rowOut)
     {
         if (rowIn.coeffRef(i) > 0.0)
         {
-            if (pattern[i] == 0)
+            if (signals[i] == 0)
             {
                 match = false;
                 break;
             }
         }
         else {
-            if (pattern[i] == 1)
+            if (signals[i] == 1)
             {
                 match = false;
                 break;
@@ -658,30 +657,30 @@ void detectPattern(NeuralNetwork& net, RowVector rowIn, RowVector rowOut)
     }
     if (!match)
     {
-        if (Verbose)
+        sensors.push_back(signals);
+    }
+    if (Verbose)
+    {
+        cout << "Sensors [ ";
+        for (int i : signals)
         {
-            cout << "Pattern [ ";
-            for (int i : pattern)
-            {
-                cout << i << " ";
-            }
-            cout << "]" << endl;
+            cout << i << " ";
         }
-        patterns.push_back(pattern);
+        cout << "]" << endl;
     }
 }
 
-// Write patterns.
-void writePatterns()
+// Write sensors.
+void writeSensors()
 {
     ofstream file;
-    file.open(pattern_output_filename);
+    file.open(sensor_output_filename);
     if (!file.is_open())
     {
-        fprintf(stderr, "Cannot open pattern output file %s\n", pattern_output_filename.c_str());
+        fprintf(stderr, "Cannot open sensor output file %s\n", sensor_output_filename.c_str());
         exit(1);
     }
-    for (int i = 0, n = patterns.size(); i < n; i++)
+    for (int i = 0, n = (int)sensors.size(); i < n; i++)
     {
         bool write = true;
         for (int j = 0; j < i; j++)
@@ -689,7 +688,7 @@ void writePatterns()
             bool dup = true;
             for (int k = 0; k < input_dim; k++)
             {
-                if (patterns[j][k] != patterns[i][k])
+                if (sensors[j][k] != sensors[i][k])
                 {
                     dup = false;
                     break;
@@ -705,7 +704,7 @@ void writePatterns()
         {
             for (int j = 0; j < input_dim; j++)
             {
-                file << patterns[i][j];
+                file << sensors[i][j];
                 if (j < input_dim - 1)
                 {
                     file << ",";

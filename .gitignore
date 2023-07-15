@@ -6,9 +6,9 @@
 /src/main/mona/common/*.o
 /src/main/mona/mona/*.o
 /src/main/mona/nestingbirds/*.o
-/src/main/mona/pattern_detector/.vs/
-/src/main/mona/pattern_detector/Eigen/
-/src/main/mona/pattern_detector/pattern_detector.vcxproj.user
-/src/main/mona/pattern_detector/x64/
-/src/main/mona/pattern_detector/*.o
+/src/main/mona/sensor_discriminator/.vs/
+/src/main/mona/sensor_discriminator/Eigen/
+/src/main/mona/sensor_discriminator/pattern_detector.vcxproj.user
+/src/main/mona/sensor_discriminator/x64/
+/src/main/mona/sensor_discriminator/*.o
 

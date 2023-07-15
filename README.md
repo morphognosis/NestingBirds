@@ -32,9 +32,9 @@ Train/test RNN:
 run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat
 </pre>
 
-Detect input patterns by extracting signals that are important to the output:
+Discriminate input sensors by detecting signals that are important to the output:
 <pre>
-pattern_detector
+sensor_discriminator
 </pre>
 
 Original nesting birds:
