@@ -69,8 +69,8 @@ void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed,
    convertBehaviorToDatasets(steps, maleDatasetName, femaleDatasetName);
 }
 
-// Write pattern datasets.
-void writePatternDatasets(int steps, vector<int> randomSeeds,
+// Write sensor discrimination datasets.
+void writeSensorDiscriminationDatasets(int steps, vector<int> randomSeeds,
     string maleDatasetName, string femaleDatasetName, bool verbose)
 {
     if (randomSeeds.size() == 0)

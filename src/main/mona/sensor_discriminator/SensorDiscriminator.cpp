@@ -35,7 +35,7 @@ const char* Usage =
 
 // Dimensions.
 int input_dim = 8;
-int hidden_dim = 32;
+int hidden_dim = 128;
 int output_dim;
 
 // Sensors.
@@ -536,6 +536,7 @@ void test(NeuralNetwork& net)
     }
 
     sensors.clear();
+    int correct = 0;
     for (int num = 0; num < dataset_size; num++) 
     {
         net.test(*input[num], *output[num]);
@@ -549,8 +550,37 @@ void test(NeuralNetwork& net)
                 << " MSE [" << mse << "]" << endl;
         }
 
-        // Sensor discrimination.
-        discriminateSensors(net, *input[num], *output[num]);
+        int maxidx1 = -1;
+        int maxidx2 = -1;
+        double v1, v2;
+        RowVector* activations = net.mNeurons.back();
+        for (int i = 0; i < output_dim; i++)
+        {
+            double v = activations->coeffRef(i);
+            if (maxidx1 == -1 || v > v1)
+            {
+                maxidx1 = i;
+                v1 = v;
+            }
+            v = output[num]->coeffRef(i);
+            if (maxidx2 == -1 || v > v2)
+            {
+                maxidx2 = i;
+                v2 = v;
+            }
+        }
+        if (maxidx1 == maxidx2)
+        {
+            correct++;
+
+            // Sensor discrimination.
+            discriminateSensors(net, *input[num], *output[num]);
+        }
+    }
+
+    if (dataset_size > 0)
+    {
+        cout << "Correct=" << correct << "/" << dataset_size << " (" << (((double)correct / (double)dataset_size) * 100.0) << "%)" << endl;
     }
 }
 

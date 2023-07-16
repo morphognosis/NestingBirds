@@ -31,8 +31,8 @@ Format:
 ...
 */
 
-// Write pattern detection datasets.
-void writePatternDatasets(int steps, vector<int> randomSeeds,
+// Write sensor discrimination datasets.
+void writSensorDiscriminationDatasets(int steps, vector<int> randomSeeds,
     string maleDatasetName, string femaleDatasetName, bool verbose);
 
 // Sensory-response activity.
