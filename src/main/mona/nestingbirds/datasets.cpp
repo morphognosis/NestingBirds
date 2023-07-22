@@ -22,7 +22,7 @@ void generateBehavior(int randomSeed, int steps, bool verbose);
 void importBehaviorDataset(
     vector<MaleSensoryResponse>&   maleSequence,
     vector<FemaleSensoryResponse>& femaleSequence,
-    bool verbose);
+    bool discrimination, bool verbose);
 void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleDatasetName);
 void convertBehaviorToPatternDatasets(int steps, string maleDatasetName, string femaleDatasetName);
 
@@ -53,7 +53,7 @@ void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed,
       vector<MaleSensoryResponse>   maleSequence;
       vector<FemaleSensoryResponse> femaleSequence;
       generateBehavior(randomSeed, steps, verbose);
-      importBehaviorDataset(maleSequence, femaleSequence, verbose);
+      importBehaviorDataset(maleSequence, femaleSequence, false, verbose);
       MaleTrainBehavior.push_back(maleSequence);
       FemaleTrainBehavior.push_back(femaleSequence);
    }
@@ -62,7 +62,7 @@ void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed,
    if (testRandomSeed != -1)
    {
       generateBehavior(testRandomSeed, steps, verbose);
-      importBehaviorDataset(MaleTestBehavior, FemaleTestBehavior, verbose);
+      importBehaviorDataset(MaleTestBehavior, FemaleTestBehavior, false, verbose);
    }
 
    // Convert behavior to datasets.
@@ -89,7 +89,7 @@ void writeSensorDiscriminationDatasets(int steps, vector<int> randomSeeds,
         vector<MaleSensoryResponse>   maleSequence;
         vector<FemaleSensoryResponse> femaleSequence;
         generateBehavior(randomSeed, steps, verbose);
-        importBehaviorDataset(maleSequence, femaleSequence, verbose);
+        importBehaviorDataset(maleSequence, femaleSequence, true, verbose);
         MaleTrainBehavior.push_back(maleSequence);
         FemaleTrainBehavior.push_back(femaleSequence);
     }
@@ -189,7 +189,7 @@ void generateBehavior(int randomSeed, int steps, bool verbose)
 void importBehaviorDataset(
    vector<MaleSensoryResponse>&   maleSequence,
    vector<FemaleSensoryResponse>& femaleSequence, 
-   bool verbose)
+   bool discrimination, bool verbose)
 {
    if (verbose)
    {
@@ -284,6 +284,7 @@ void importBehaviorDataset(
       if (gender == "Ma")
       {
          MaleSensoryResponse sensoryResponse;
+         bool flying = false;
          int                 end = json.find("\"");
          int                 i   = 0;
          while (end != -1)
@@ -318,6 +319,7 @@ void importBehaviorDataset(
                if (json.substr(0, end).find("true") != string::npos)
                {
                   sensoryResponse.flying = "true";
+                  flying = true;
                }
                else
                {
@@ -355,12 +357,15 @@ void importBehaviorDataset(
             end = json.find("\"");
             i++;
          }
-         if (verbose)
+         if (!discrimination || !flying)
          {
-            printf("Male data:\n");
-            sensoryResponse.print();
+             if (verbose)
+             {
+                printf("Male data:\n");
+                sensoryResponse.print();
+             }
+             maleSequence.push_back(sensoryResponse);
          }
-         maleSequence.push_back(sensoryResponse);
          continue;
       }
    }
@@ -380,7 +385,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       fprintf(stderr, "Cannot open male dataset file %s\n", maleDatasetName.c_str());
       exit(1);
    }
-   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", MaleTrainBehavior.size(), steps, MaleSensoryResponse::oneHotSensoryLength());
+   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", MaleTrainBehavior.size(), MaleTrainBehavior[0].size(), MaleSensoryResponse::oneHotSensoryLength());
    fprintf(fp, "X_train_seq = [\n");
    for (int i = 0; i < MaleTrainBehavior.size(); i++)
    {
@@ -397,7 +402,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", MaleTrainBehavior.size(), steps, MaleSensoryResponse::oneHotResponseLength());
+   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", MaleTrainBehavior.size(), MaleTrainBehavior[0].size(), MaleSensoryResponse::oneHotResponseLength());
    fprintf(fp, "y_train_seq = [\n");
    for (int i = 0; i < MaleTrainBehavior.size(); i++)
    {
@@ -421,7 +426,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "X_test_shape = [1, %d, %d]\n", steps, MaleSensoryResponse::oneHotSensoryLength());
+      fprintf(fp, "X_test_shape = [1, %d, %d]\n", MaleTestBehavior.size(), MaleSensoryResponse::oneHotSensoryLength());
       fprintf(fp, "X_test_seq = [\n");
       for (int i = 0; i < MaleTestBehavior.size(); i++)
       {
@@ -442,7 +447,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "y_test_shape = [1, %d, %d]\n", steps, MaleSensoryResponse::oneHotResponseLength());
+      fprintf(fp, "y_test_shape = [1, %d, %d]\n", MaleTestBehavior.size(), MaleSensoryResponse::oneHotResponseLength());
       fprintf(fp, "y_test_seq = [\n");
       for (int i = 0; i < MaleTestBehavior.size(); i++)
       {
@@ -465,7 +470,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       fprintf(stderr, "Cannot open female dataset file %s\n", femaleDatasetName.c_str());
       exit(1);
    }
-   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", FemaleTrainBehavior.size(), steps, FemaleSensoryResponse::oneHotSensoryLength());
+   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", FemaleTrainBehavior.size(), FemaleTrainBehavior[0].size(), FemaleSensoryResponse::oneHotSensoryLength());
    fprintf(fp, "X_train_seq = [\n");
    for (int i = 0; i < FemaleTrainBehavior.size(); i++)
    {
@@ -482,7 +487,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", FemaleTrainBehavior.size(), steps, FemaleSensoryResponse::oneHotResponseLength());
+   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", FemaleTrainBehavior.size(), FemaleTrainBehavior[0].size(), FemaleSensoryResponse::oneHotResponseLength());
    fprintf(fp, "y_train_seq = [\n");
    for (int i = 0; i < FemaleTrainBehavior.size(); i++)
    {
@@ -506,7 +511,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "X_test_shape = [1, %d, %d]\n", steps, FemaleSensoryResponse::oneHotSensoryLength());
+      fprintf(fp, "X_test_shape = [1, %d, %d]\n", FemaleTestBehavior.size(), FemaleSensoryResponse::oneHotSensoryLength());
       fprintf(fp, "X_test_seq = [\n");
       for (int i = 0; i < FemaleTestBehavior.size(); i++)
       {
@@ -527,9 +532,9 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "y_test_shape = [1, %d, %d]\n", steps, FemaleSensoryResponse::oneHotResponseLength());
+      fprintf(fp, "y_test_shape = [1, %d, %d]\n", FemaleTestBehavior.size(), FemaleSensoryResponse::oneHotResponseLength());
       fprintf(fp, "y_test_seq = [\n");
-      for (int i = 0; i < MaleTestBehavior.size(); i++)
+      for (int i = 0; i < FemaleTestBehavior.size(); i++)
       {
          FemaleSensoryResponse sensoryResponse = FemaleTestBehavior[i];
          fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());

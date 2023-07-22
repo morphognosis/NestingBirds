@@ -75,9 +75,9 @@ int main(int argc, char *args[])
             exit(1);
          }
          Steps = atoi(args[i]);
-         if (Steps < 0)
+         if (Steps <= 0)
          {
-            fprintf(stderr, "Invalid steps option\n");
+            fprintf(stderr, "Steps must be positive number\n");
             fprintf(stderr, Usage);
             exit(1);
          }

@@ -366,15 +366,19 @@ public:
         {
             if (cellSensors[i] == "NO_OBJECT")
             {
-                encoding += "1,0,0";
+                encoding += "1,0,0,0";
+            }
+            else if (cellSensors[i] == "EGG")
+            {
+                encoding += "0,1,0,0";
             }
             else if (cellSensors[i] == "MOUSE")
             {
-                encoding += "0,1,0";
+                encoding += "0,0,1,0";
             }
             else
             {
-                encoding += "0,0,1";
+                encoding += "0,0,0,1";
             }
             if (i < 8)
             {
@@ -431,7 +435,7 @@ public:
     // Get length of sensory encoding.
     static int oneHotSensoryLength()
     {
-        return(37);
+        return(46);
     }
 
     // Convert response string to number.

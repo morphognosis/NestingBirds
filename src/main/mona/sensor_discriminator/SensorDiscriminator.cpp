@@ -545,7 +545,7 @@ void test(NeuralNetwork& net)
         if (Verbose)
         {
             cout << "In [" << *input[num] << "] "
-                << " Desired [" << *output[num] << "] "
+                << " Expected [" << *output[num] << "] "
                 << " Out [" << net.mNeurons.back()->unaryExpr(ptr_fun(unary)) << "] "
                 << " MSE [" << mse << "]" << endl;
         }
