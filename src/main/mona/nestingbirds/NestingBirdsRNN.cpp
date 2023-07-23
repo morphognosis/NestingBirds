@@ -59,6 +59,12 @@ string trim(string& str);
 // Main.
 int main(int argc, char *args[])
 {
+    vector<int> randomSeeds;
+    randomSeeds.push_back(44);
+    writeSensorDiscriminationDatasets(900, randomSeeds,
+        string("male_sensors.csv"), string("female_sensors.csv"), true);
+    exit(0);
+
    TestRandomSeed = -1;
    Dynamic        = false;
    bool gotSteps = false;
