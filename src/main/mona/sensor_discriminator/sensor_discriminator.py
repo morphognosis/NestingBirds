@@ -78,10 +78,17 @@ random.seed(random_seed)
 
 # Load input sensors.
 data = np.loadtxt(sensor_input_filename, delimiter=',')
+if len(data) == 0:
+   print('sensor_input_file empty')
+   sys.exit(1)
+if isinstance(data[0], np.ndarray) == False:
+   d = np.zeros((1, len(data)))
+   d[0] = data
+   data = d
 dataset_size = len(data)
 if dataset_size == 0:
    print('sensor_input_file empty')
-   sys.exit(0)
+   sys.exit(1)
 input_data = np.zeros((dataset_size, len(data[0]) - 1))
 output_vals = []
 for i in range(dataset_size):
