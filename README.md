@@ -34,7 +34,7 @@ run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat
 
 Discriminate input sensors by detecting signals that are important to the output:
 <pre>
-sensor_discriminator
+sensor_discriminator.py
 </pre>
 
 Original nesting birds:
