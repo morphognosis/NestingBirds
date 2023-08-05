@@ -1,7 +1,6 @@
 // For conditions of distribution and use, see copyright notice in LICENSE.txt
 
 #include "datasets.hpp"
-#include "world.hpp"
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
@@ -393,7 +392,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int j = 0; j < behaviorSequence.size(); j++)
       {
          MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+         fprintf(fp, "%s", sensoryResponse.oneHotToSensory().c_str());
          if ((i < MaleTrainBehavior.size() - 1) || (j < behaviorSequence.size() - 1))
          {
             fprintf(fp, ",");
@@ -410,7 +409,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int j = 0; j < behaviorSequence.size(); j++)
       {
          MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+         fprintf(fp, "%s", sensoryResponse.responseToOneHot().c_str());
          if ((i < MaleTrainBehavior.size() - 1) || (j < behaviorSequence.size() - 1))
          {
             fprintf(fp, ",");
@@ -431,7 +430,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int i = 0; i < MaleTestBehavior.size(); i++)
       {
          MaleSensoryResponse sensoryResponse = MaleTestBehavior[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+         fprintf(fp, "%s", sensoryResponse.oneHotToSensory().c_str());
          if (i < MaleTestBehavior.size() - 1)
          {
             fprintf(fp, ",");
@@ -452,7 +451,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int i = 0; i < MaleTestBehavior.size(); i++)
       {
          MaleSensoryResponse sensoryResponse = MaleTestBehavior[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+         fprintf(fp, "%s", sensoryResponse.responseToOneHot().c_str());
          if (i < MaleTestBehavior.size() - 1)
          {
             fprintf(fp, ",");
@@ -478,7 +477,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int j = 0; j < behaviorSequence.size(); j++)
       {
          FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+         fprintf(fp, "%s", sensoryResponse.oneHotToSensory().c_str());
          if ((i < FemaleTrainBehavior.size() - 1) || (j < behaviorSequence.size() - 1))
          {
             fprintf(fp, ",");
@@ -495,7 +494,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int j = 0; j < behaviorSequence.size(); j++)
       {
          FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+         fprintf(fp, "%s", sensoryResponse.responseToOneHot().c_str());
          if ((i < FemaleTrainBehavior.size() - 1) || (j < behaviorSequence.size() - 1))
          {
             fprintf(fp, ",");
@@ -516,7 +515,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int i = 0; i < FemaleTestBehavior.size(); i++)
       {
          FemaleSensoryResponse sensoryResponse = FemaleTestBehavior[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+         fprintf(fp, "%s", sensoryResponse.oneHotToSensory().c_str());
          if (i < FemaleTestBehavior.size() - 1)
          {
             fprintf(fp, ",");
@@ -537,7 +536,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       for (int i = 0; i < FemaleTestBehavior.size(); i++)
       {
          FemaleSensoryResponse sensoryResponse = FemaleTestBehavior[i];
-         fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+         fprintf(fp, "%s", sensoryResponse.responseToOneHot().c_str());
          if (i < FemaleTestBehavior.size() - 1)
          {
             fprintf(fp, ",");
@@ -566,8 +565,8 @@ void convertBehaviorToPatternDatasets(int steps, string maleDatasetName, string 
         for (int j = 0; j < behaviorSequence.size(); j++)
         {
             MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-            fprintf(fp, "%s,", sensoryResponse.oneHotSensory().c_str());
-            fprintf(fp, "%d\n", sensoryResponse.responseToInt());
+            fprintf(fp, "%s,", sensoryResponse.oneHotToSensory().c_str());
+            fprintf(fp, "%d\n", sensoryResponse.responseToNum());
         }
     }
     fclose(fp);
@@ -585,10 +584,31 @@ void convertBehaviorToPatternDatasets(int steps, string maleDatasetName, string 
         for (int j = 0; j < behaviorSequence.size(); j++)
         {
             FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-            fprintf(fp, "%s,", sensoryResponse.oneHotSensory().c_str());
-            fprintf(fp, "%d\n", sensoryResponse.responseToInt());
+            fprintf(fp, "%s,", sensoryResponse.oneHotToSensory().c_str());
+            fprintf(fp, "%d\n", sensoryResponse.responseToNum());
         }
     }
     fclose(fp);
+}
+
+// Import male sensors.
+void importMaleSensors(string maleSensorFilename, vector<MaleSensoryResponse>& sensors)
+{
+    ifstream file;
+    file.open(maleSensorFilename);
+    if (!file.is_open())
+    {
+        fprintf(stderr, "Cannot open male sensor file %s\n", maleSensorFilename.c_str());
+        exit(1);
+    }
+    sensors.clear();
+    string encoding;
+    while (getline(file, encoding))
+    {
+        MaleSensoryResponse sensoryResponse;
+        sensoryResponse.sensoryToOneHot(encoding);
+        sensors.push_back(sensoryResponse);
+    }
+    file.close();
 }
 

@@ -200,6 +200,9 @@ public:
    // Constructor.
    Male();
 
+   // Destructor.
+   ~Male();
+
    // Needs.
    void initNeeds();
    void setNeeds();

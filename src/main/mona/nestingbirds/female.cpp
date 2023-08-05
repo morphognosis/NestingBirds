@@ -76,6 +76,11 @@ Female::Female()
    response = RESPONSE::DO_NOTHING;
 }
 
+// Destroy female bird.
+Female::~Female()
+{
+    delete brain;
+}
 
 // Initialize female needs.
 void Female::initNeeds()

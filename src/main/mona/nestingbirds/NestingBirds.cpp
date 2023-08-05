@@ -35,6 +35,7 @@ const char* Usage =
 "      [-femaleBroodEggNeed <amount> (default=" FEMALE_DEFAULT_BROOD_EGG_NEED ")]\n"
 "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"
 "      [-mouseMoveProbability <probability> (default=" DEFAULT_MOUSE_MOVE_PROBABILITY ")]\n"
+"      [-discriminateSensors (discriminate sensors by detecting signals that are important to responses)]\n"
 "      [-writeBehaviorFile <behavior file name> (json)]\n"
 "      [-verbose <true | false> (default=true)]\n"
 "      [-version]\n"
@@ -51,9 +52,6 @@ char *MaleLoadFilename;
 char *FemaleSaveFilename;
 char *FemaleLoadFilename;
 
-// Behavior file name.
-char *BehaviorFilename;
-
 // Main.
 int main(int argc, char *args[])
 {
@@ -62,6 +60,8 @@ int main(int argc, char *args[])
    bool gotMaleTrainTest   = false;
    bool gotFemaleTrainTest = false;
    bool gotSteps           = false;
+   bool gotDiscriminateSensors = false;
+   char* behaviorFilename = NULL;
    char buf[BUFSIZ];
 
    for (int i = 1; i < argc; i++)
@@ -451,17 +451,22 @@ int main(int argc, char *args[])
          }
          continue;
       }
+      if (strcmp(args[i], "-discriminateSensors") == 0)
+      {
+         gotDiscriminateSensors = true;
+         continue;
+      }
       if (strcmp(args[i], "-writeBehaviorFile") == 0)
       {
-         i++;
-         if (i >= argc)
-         {
-            fprintf(stderr, "Invalid behavior file\n");
-            fprintf(stderr, Usage);
-            exit(1);
-         }
-         BehaviorFilename = args[i];
-         continue;
+          i++;
+          if (i >= argc)
+          {
+              fprintf(stderr, "Invalid behavior file\n");
+              fprintf(stderr, Usage);
+              exit(1);
+          }
+          behaviorFilename = args[i];
+          continue;
       }
       if (strcmp(args[i], "-version") == 0)
       {
@@ -518,10 +523,16 @@ int main(int argc, char *args[])
       loadFemale(FemaleLoadFilename);
    }
 
-   // Write behavior file?
-   if (BehaviorFilename != NULL)
+   // Discriminate sensors?
+   if (gotDiscriminateSensors)
    {
-      openBehaviorFile(BehaviorFilename);
+       discriminateSensors(Steps, maleTest, femaleTest);
+   }
+
+   // Write behavior file?
+   if (behaviorFilename != NULL)
+   {
+       openBehaviorFile(behaviorFilename);
    }
 
    // Run birds.
@@ -551,7 +562,7 @@ int main(int argc, char *args[])
          printf("Step=%d\n", i);
       }
 
-      if (BehaviorFilename != NULL)
+      if (behaviorFilename != NULL)
       {
          sprintf(buf, "{ \"Step\": %d, \"Data\": {\n", i);
          writeBehaviorFile(buf);
@@ -559,7 +570,7 @@ int main(int argc, char *args[])
 
       step();
 
-      if (BehaviorFilename != NULL)
+      if (behaviorFilename != NULL)
       {
          writeBehaviorFile((char *)"} }");
          if (i < Steps)
@@ -618,7 +629,7 @@ int main(int argc, char *args[])
    }
 
    // Write behavior file?
-   if (BehaviorFilename != NULL)
+   if (behaviorFilename != NULL)
    {
       closeBehaviorFile();
    }

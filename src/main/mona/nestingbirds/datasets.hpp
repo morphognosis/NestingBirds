@@ -5,6 +5,8 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
+#include "world.hpp"
 using namespace std;
 
 /*
@@ -66,7 +68,7 @@ public:
 
 
     // Convert sensory to one-hot encoding.
-    string oneHotSensory()
+    string oneHotToSensory()
     {
         string encoding = "";
 
@@ -205,6 +207,358 @@ public:
         return(encoding);
     }
 
+    // Convert one-hot encoding to sensory.
+    void sensoryToOneHot(string encoding)
+    {
+        vector<string> values;
+        stringstream stream(encoding);
+        string value;
+
+        while (getline(stream, value, ',')) 
+        {
+            values.push_back(value);
+        }
+        if (values.size() != oneHotSensoryLength())
+        {
+            fprintf(stderr, "Invalid sensory encoding: %s\n", encoding.c_str());
+            exit(1);
+        }
+        int idx = 0;
+        if (values[idx] == "1.0")
+        {
+            locale = "DESERT";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            locale = "FOREST";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            locale = "PLAIN";
+        }
+        else
+        {
+            locale = "DONT_CARE";
+        }
+        idx += 3;
+        if (values[idx] == "1.0")
+        {
+            mouseProximity = "UNKNOWN";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            mouseProximity = "PRESENT";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            mouseProximity = "LEFT";
+        }
+        else if (values[idx + 3] == "1.0")
+        {
+            mouseProximity = "FRONT";
+        }
+        else if (values[idx + 4] == "1.0")
+        {
+            mouseProximity = "RIGHT";
+        }
+        else
+        {
+            mouseProximity = "DONT_CARE";
+        }
+        idx += 5;
+        if (values[idx] == "1.0")
+        {
+            stoneProximity = "UNKNOWN";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            stoneProximity = "PRESENT";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            stoneProximity = "LEFT";
+        }
+        else if (values[idx + 3] == "1.0")
+        {
+            stoneProximity = "FRONT";
+        }
+        else if (values[idx + 4] == "1.0")
+        {
+            stoneProximity = "RIGHT";
+        }
+        else
+        {
+            stoneProximity = "DONT_CARE";
+        }
+        idx += 5;
+        if (values[idx] == "1.0")
+        {
+            femaleProximity = "UNKNOWN";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            femaleProximity = "PRESENT";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            femaleProximity = "LEFT";
+        }
+        else if (values[idx + 3] == "1.0")
+        {
+            femaleProximity = "FRONT";
+        }
+        else if (values[idx + 4] == "1.0")
+        {
+            femaleProximity = "RIGHT";
+        }
+        else
+        {
+            femaleProximity = "DONT_CARE";
+        }
+        idx += 5;
+        if (values[idx] == "1.0")
+        {
+            goal = "EAT_MOUSE";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            goal = "MOUSE_FOR_FEMALE";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            goal = "STONE_FOR_FEMALE";
+        }
+        else if (values[idx + 3] == "1.0")
+        {
+            goal = "ATTEND_FEMALE";
+        }
+        else
+        {
+            goal = "DONT_CARE";
+        }
+        idx += 4;
+        if (values[idx] == "1.0")
+        {
+            hasObject = "NO_OBJECT";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            hasObject = "MOUSE";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            hasObject = "STONE";
+        }
+        else
+        {
+            hasObject = "DONT_CARE";
+        }
+        idx += 3;
+        if (values[idx] == "1.0")
+        {
+            flying = "true";
+        }
+        else if (values[idx] == "0.0")
+        {
+            flying = "false";
+        }
+        else
+        {
+            flying = "DONT_CARE";
+        }
+        idx += 1;
+        if (values[idx] == "1.0")
+        {
+            femaleWantsMouse = "true";
+        }
+        else if (values[idx] == "0.0")
+        {
+            femaleWantsMouse = "false";
+        }
+        else
+        {
+            femaleWantsMouse = "DONT_CARE";
+        }
+        idx += 1;
+        if (values[idx] == "1.0")
+        {
+            femaleWantsStone = "true";
+        }
+        else if (values[idx] == "0.0")
+        {
+            femaleWantsStone = "false";
+        }
+        else
+        {
+            femaleWantsStone = "DONT_CARE";
+        }
+        printf("encoding: %s\n", encoding.c_str());
+        print();  // flibber
+    }
+
+    // Convert to male sensors.
+    void toSensors(int *sensors)
+    {
+        if (locale == "DESERT")
+        {
+            sensors[Male::LOCALE_SENSOR] = LOCALE::DESERT;
+        }
+        else if (locale == "FOREST")
+        {
+            sensors[Male::LOCALE_SENSOR] = LOCALE::FOREST;
+        }
+        else if (locale == "PLAIN")
+        {
+            sensors[Male::LOCALE_SENSOR] = LOCALE::PLAIN;
+        }
+        else {
+            sensors[Male::LOCALE_SENSOR] = DONT_CARE;
+        }
+        if (mouseProximity == "UNKNOWN")
+        {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        else if (mouseProximity == "PRESENT")
+        {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+        }
+        else if (mouseProximity == "LEFT")
+        {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+        }
+        else if (mouseProximity == "FRONT")
+        {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+        }
+        else if (mouseProximity == "RIGHT")
+        {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+        }
+        else
+        {
+            sensors[Male::MOUSE_PROXIMITY_SENSOR] = DONT_CARE;
+        }
+        if (stoneProximity == "UNKNOWN")
+        {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        else if (stoneProximity == "PRESENT")
+        {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+        }
+        else if (stoneProximity == "LEFT")
+        {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+        }
+        else if (stoneProximity == "FRONT")
+        {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+        }
+        else if (stoneProximity == "RIGHT")
+        {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+        }
+        else
+        {
+            sensors[Male::STONE_PROXIMITY_SENSOR] = DONT_CARE;
+        }
+        if (femaleProximity == "UNKNOWN")
+        {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::UNKNOWN;
+        }
+        else if (femaleProximity == "PRESENT")
+        {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::PRESENT;
+        }
+        else if (femaleProximity == "LEFT")
+        {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::LEFT;
+        }
+        else if (femaleProximity == "FRONT")
+        {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::FRONT;
+        }
+        else if (femaleProximity == "RIGHT")
+        {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = Male::PROXIMITY::RIGHT;
+        }
+        else
+        {
+            sensors[Male::FEMALE_PROXIMITY_SENSOR] = DONT_CARE;
+        }
+        if (goal == "EAT_MOUSE")
+        {
+            sensors[Male::GOAL_SENSOR] = Male::GOAL::EAT_MOUSE;
+        }
+        else if (goal == "MOUSE_FOR_FEMALE")
+        {
+            sensors[Male::GOAL_SENSOR] = Male::GOAL::MOUSE_FOR_FEMALE;
+        }
+        else if (goal == "STONE_FOR_FEMALE")
+        {
+            sensors[Male::GOAL_SENSOR] = Male::GOAL::STONE_FOR_FEMALE;
+        }
+        else if (goal == "ATTEND_FEMALE")
+        {
+            sensors[Male::GOAL_SENSOR] = Male::GOAL::ATTEND_FEMALE;
+        }
+        else
+        {
+            sensors[Male::GOAL_SENSOR] = DONT_CARE;
+        }
+        if (hasObject == "NO_OBJECT")
+        {
+            sensors[Male::HAS_OBJECT_SENSOR] = OBJECT::NO_OBJECT;
+        }
+        else if (hasObject == "MOUSE")
+        {
+            sensors[Male::HAS_OBJECT_SENSOR] = OBJECT::MOUSE;
+        }
+        else if (hasObject == "STONE")
+        {
+            sensors[Male::HAS_OBJECT_SENSOR] = OBJECT::STONE;
+        }
+        else
+        {
+            sensors[Male::HAS_OBJECT_SENSOR] = DONT_CARE;
+        }
+        if (flying == "true")
+        {
+            sensors[Male::FLYING_SENSOR] = 1;
+        }
+        else if (flying == "false")
+        {
+            sensors[Male::FLYING_SENSOR] = 0;
+        }
+        else
+        {
+            sensors[Male::FLYING_SENSOR] = DONT_CARE;
+        }
+        if (femaleWantsMouse == "true")
+        {
+            sensors[Male::FEMALE_WANTS_MOUSE_SENSOR] = 1;
+        }
+        else if (femaleWantsMouse == "false")
+        {
+            sensors[Male::FEMALE_WANTS_MOUSE_SENSOR] = 0;
+        }
+        else
+        {
+            sensors[Male::FEMALE_WANTS_MOUSE_SENSOR] = DONT_CARE;
+        }
+        if (femaleWantsStone == "true")
+        {
+            sensors[Male::FEMALE_WANTS_STONE_SENSOR] = 1;
+        }
+        else if (femaleWantsStone == "false")
+        {
+            sensors[Male::FEMALE_WANTS_STONE_SENSOR] = 0;
+        }
+        else
+        {
+            sensors[Male::FEMALE_WANTS_STONE_SENSOR] = DONT_CARE;
+        }
+    }
 
     // Get length of sensory encoding.
     static int oneHotSensoryLength()
@@ -212,9 +566,8 @@ public:
         return(28);
     }
 
-
-    // Convert response string to number.
-    int responseToInt()
+    // Convert response string to numeric.
+    int responseToNum()
     {
         if (response == "DO_NOTHING")
         {
@@ -268,7 +621,7 @@ public:
     }
 
     // Convert response to one-hot encoding.
-    string oneHotResponse()
+    string responseToOneHot()
     {
         string encoding = "";
 
@@ -358,7 +711,7 @@ public:
 
 
     // Convert sensory to one-hot encoding.
-    string oneHotSensory()
+    string oneHotToSensory()
     {
         string encoding = "";
 
@@ -438,8 +791,8 @@ public:
         return(46);
     }
 
-    // Convert response string to number.
-    int responseToInt()
+    // Convert response string to numeric.
+    int responseToNum()
     {
         if (response == "DO_NOTHING")
         {
@@ -489,7 +842,7 @@ public:
     }
 
     // Convert response to one-hot encoding.
-    string oneHotResponse()
+    string responseToOneHot()
     {
         string encoding = "";
 
@@ -556,5 +909,8 @@ extern vector < vector < MaleSensoryResponse >> MaleTrainBehavior;
 extern vector<MaleSensoryResponse> MaleTestBehavior;
 extern vector < vector < FemaleSensoryResponse >> FemaleTrainBehavior;
 extern vector<FemaleSensoryResponse> FemaleTestBehavior;
+
+// Import male sensors.
+void importMaleSensors(string maleSensorFilename, vector<MaleSensoryResponse>& sensors);
 
 #endif

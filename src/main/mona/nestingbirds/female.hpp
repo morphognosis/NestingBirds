@@ -165,6 +165,9 @@ public:
    // Constructor.
    Female();
 
+   // Destructor.
+   ~Female();
+
    // Needs.
    void initNeeds();
    void setNeeds();

@@ -1,5 +1,8 @@
 // For conditions of distribution and use, see copyright notice in LICENSE.txt
 
+#ifndef __WORLD__
+#define __WORLD__
+
 // The nesting birds world.
 
 #include "male.hpp"
@@ -56,6 +59,9 @@ void loadMale(char *filename);
 void saveFemale(char *filename);
 void loadFemale(char *filename);
 
+// Discriminate sensors.
+void discriminateSensors(int steps, bool maleTest, bool femaleTest);
+
 // Behavior.
 void openBehaviorFile(char *filename);
 void writeBehaviorFile(char *text);
@@ -63,3 +69,5 @@ void closeBehaviorFile();
 
 // Verbosity.
 extern bool Verbose;
+
+#endif
