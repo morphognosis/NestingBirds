@@ -2261,6 +2261,13 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
         MALE_DATASET_FILENAME, FEMALE_DATASET_FILENAME, Verbose);
 
     // Run sensor discriminator.
+    FILE* fp = fopen(SENSOR_DISCRIMINATOR_FILENAME.c_str(), "r");
+    if (fp == NULL) 
+    {
+        fprintf(stderr, "Error: %s cannot be found\n", SENSOR_DISCRIMINATOR_FILENAME.c_str());
+        exit(1);
+    }
+    fclose(fp);
     char buf[BUFSIZ];
     char* verbose = (char *)"false";
     if (Verbose) verbose = (char *)"true";

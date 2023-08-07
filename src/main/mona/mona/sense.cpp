@@ -45,120 +45,162 @@ Mona::sense()
       addSensorMode(mask);
    }
 
-   // Fire receptors matching sensor modes.
-   int n = (int)sensorModes.size();
-   for (sensorMode = 0; sensorMode < n; sensorMode++)
+   // Fire receptors matching sensor discriminators.
+   bool firedDiscriminatorReceptor = false;
+   int n = (int)sensorDiscriminators.size();
+   for (int i = 0; i < n; i++)
    {
-      // Apply sensor mode to sensors.
-      applySensorMode(sensors, sensorsWork, sensorMode);
+      // Apply sensor discriminator to sensors.
+      applySensorDiscriminator(sensors, sensorsWork, i);
 
-      // Get firing receptor based on sensor vector and mode.
-      receptor = getCentroidReceptor(sensorsWork, sensorMode, distance);
+      // Get firing receptor based on sensor vector and discriminator.
+      receptor = getSensorDiscriminatorReceptor(sensorsWork, i, distance);
 
-      // Create a receptor that matches sensor vector?
-      addReceptor = false;
-      if ((receptor == NULL) || ((receptor != NULL) &&
-                                 (distance > sensorModes[sensorMode]->resolution) &&
-                                 (distance > NEARLY_ZERO)))
+      // Fire receptor?
+      if (receptor != NULL && distance <= sensorDiscriminators[i]->resolution)
       {
-         receptor    = newReceptor(sensorsWork, sensorMode);
-         addReceptor = true;
-      }
+          // Fire receptor.
+          receptor->firingStrength = 1.0;
+          firedDiscriminatorReceptor = true;
 
-      // Incorporate into sensor mode sets.
-      if (addReceptor)
-      {
-         for (int i = 0, n = (int)oldReceptorSet.size(); i < n; i++)
-         {
-            int j, k;
-            for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
-            {
-               if (oldReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
-               {
-                  receptor->subSensorModes.push_back(oldReceptorSet[i]);
-                  oldReceptorSet[i]->superSensorModes.push_back(receptor);
-                  break;
-               }
-            }
-            if (j < (int)sensorModes[sensorMode]->subsets.size())
-            {
-               continue;
-            }
-            for (j = 0, k = (int)sensorModes[sensorMode]->supersets.size(); j < k; j++)
-            {
-               if (oldReceptorSet[i]->sensorMode == sensorModes[sensorMode]->supersets[j])
-               {
-                  receptor->superSensorModes.push_back(oldReceptorSet[i]);
-                  oldReceptorSet[i]->subSensorModes.push_back(receptor);
-                  break;
-               }
-            }
-         }
-      }
-      for (int i = 0, n = (int)newReceptorSet.size(); i < n; i++)
-      {
-         int j, k;
-         for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
-         {
-            if (newReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
-            {
-               receptor->subSensorModes.push_back(newReceptorSet[i]);
-               newReceptorSet[i]->superSensorModes.push_back(receptor);
-               break;
-            }
-         }
-         if (j < (int)sensorModes[sensorMode]->subsets.size())
-         {
-            continue;
-         }
-         for (j = 0, k = (int)sensorModes[sensorMode]->supersets.size(); j < k; j++)
-         {
-            if (newReceptorSet[i]->sensorMode == sensorModes[sensorMode]->supersets[j])
-            {
-               receptor->superSensorModes.push_back(newReceptorSet[i]);
-               newReceptorSet[i]->subSensorModes.push_back(receptor);
-               break;
-            }
-         }
-      }
+          // Update needs.
+          receptor->updateNeeds();
 
-      if (addReceptor)
-      {
-         newReceptorSet.push_back(receptor);
-      }
-      else
-      {
-         oldReceptorSet.push_back(receptor);
-      }
-
-      // Fire receptor.
-      receptor->firingStrength = 1.0;
-
-      // Add goals to new receptor?
-      if (addReceptor)
-      {
-         receptor->addGoals();
-      }
-
-      // Update needs.
-      receptor->updateNeeds();
-
-      // Update goal values.
-      receptor->updateGoalValues();
+          // Update goal values.
+          receptor->updateGoalValues();
 
 #ifdef MONA_TRACE
-      if (traceSense)
-      {
-         printf("Receptor firing: centroid=[ ");
-         for (int i = 0; i < numSensors; i++)
-         {
-            printf("%f ", receptor->centroid[i]);
-         }
-         printf("], sensorMode=%d\n", receptor->sensorMode);
-      }
+          if (traceSense)
+          {
+              printf("Receptor firing: centroid=[ ");
+              for (int j = 0; j < numSensors; j++)
+              {
+                  printf("%f ", receptor->centroid[j]);
+              }
+              printf("], sensorDiscriminator=%d\n", i);
+          }
 #endif
 #ifdef MONA_TRACKING
-      receptor->tracker.fire = true;
+          receptor->tracker.fire = true;
+#endif
+      }
+   }
+   if (firedDiscriminatorReceptor) return;
+
+   // Fire receptors matching sensor modes.
+   n = (int)sensorModes.size();
+   for (sensorMode = 0; sensorMode < n; sensorMode++)
+   {
+       // Apply sensor mode to sensors.
+       applySensorMode(sensors, sensorsWork, sensorMode);
+
+       // Get firing receptor based on sensor vector and mode.
+       receptor = getSensorModeReceptor(sensorsWork, sensorMode, distance);
+
+       // Create a receptor that matches sensor vector?
+       addReceptor = false;
+       if ((receptor == NULL) || ((receptor != NULL) &&
+           (distance > sensorModes[sensorMode]->resolution) &&
+           (distance > NEARLY_ZERO)))
+       {
+           receptor = newSensorModeReceptor(sensorsWork, sensorMode);
+           addReceptor = true;
+       }
+
+       // Incorporate into sensor mode sets.
+       if (addReceptor)
+       {
+           for (int i = 0, n = (int)oldReceptorSet.size(); i < n; i++)
+           {
+               int j, k;
+               for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
+               {
+                   if (oldReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
+                   {
+                       receptor->subSensorModes.push_back(oldReceptorSet[i]);
+                       oldReceptorSet[i]->superSensorModes.push_back(receptor);
+                       break;
+                   }
+               }
+               if (j < (int)sensorModes[sensorMode]->subsets.size())
+               {
+                   continue;
+               }
+               for (j = 0, k = (int)sensorModes[sensorMode]->supersets.size(); j < k; j++)
+               {
+                   if (oldReceptorSet[i]->sensorMode == sensorModes[sensorMode]->supersets[j])
+                   {
+                       receptor->superSensorModes.push_back(oldReceptorSet[i]);
+                       oldReceptorSet[i]->subSensorModes.push_back(receptor);
+                       break;
+                   }
+               }
+           }
+       }
+       for (int i = 0, n = (int)newReceptorSet.size(); i < n; i++)
+       {
+           int j, k;
+           for (j = 0, k = (int)sensorModes[sensorMode]->subsets.size(); j < k; j++)
+           {
+               if (newReceptorSet[i]->sensorMode == sensorModes[sensorMode]->subsets[j])
+               {
+                   receptor->subSensorModes.push_back(newReceptorSet[i]);
+                   newReceptorSet[i]->superSensorModes.push_back(receptor);
+                   break;
+               }
+           }
+           if (j < (int)sensorModes[sensorMode]->subsets.size())
+           {
+               continue;
+           }
+           for (j = 0, k = (int)sensorModes[sensorMode]->supersets.size(); j < k; j++)
+           {
+               if (newReceptorSet[i]->sensorMode == sensorModes[sensorMode]->supersets[j])
+               {
+                   receptor->superSensorModes.push_back(newReceptorSet[i]);
+                   newReceptorSet[i]->subSensorModes.push_back(receptor);
+                   break;
+               }
+           }
+       }
+
+       if (addReceptor)
+       {
+           newReceptorSet.push_back(receptor);
+       }
+       else
+       {
+           oldReceptorSet.push_back(receptor);
+       }
+
+       // Fire receptor.
+       receptor->firingStrength = 1.0;
+
+       // Add goals to new receptor?
+       if (addReceptor)
+       {
+           receptor->addGoals();
+       }
+
+       // Update needs.
+       receptor->updateNeeds();
+
+       // Update goal values.
+       receptor->updateGoalValues();
+
+#ifdef MONA_TRACE
+       if (traceSense)
+       {
+           printf("Receptor firing: centroid=[ ");
+           for (int i = 0; i < numSensors; i++)
+           {
+               printf("%f ", receptor->centroid[i]);
+           }
+           printf("], sensorMode=%d\n", receptor->sensorMode);
+       }
+#endif
+#ifdef MONA_TRACKING
+       receptor->tracker.fire = true;
 #endif
    }
 }
@@ -189,7 +231,7 @@ void Mona::applySensorMode(vector<SENSOR>& sensorsIn,
       }
       else
       {
-         sensorsOut.push_back(0.0f);
+         sensorsOut.push_back(-1.0f);
       }
    }
 }
@@ -210,10 +252,10 @@ void Mona::applySensorMode(vector<SENSOR>& sensors, SENSOR_MODE sensorMode)
 // the sensor vector for the current sensor mode.
 // Also return the centroid-vector distance.
 Mona::Receptor *
-Mona::getCentroidReceptor(vector<SENSOR>& sensors,
+Mona::getSensorModeReceptor(vector<SENSOR>& sensors,
                           SENSOR_MODE sensorMode, SENSOR& distance)
 {
-   RDtree::RDsearch *result = sensorCentroids[sensorMode]->search((void *)&sensors, 1);
+   RDtree::RDsearch *result = sensorModeCentroids[sensorMode]->search((void *)&sensors, 1);
 
    if (result != NULL)
    {
@@ -229,6 +271,58 @@ Mona::getCentroidReceptor(vector<SENSOR>& sensors,
    }
 }
 
+// Apply sensor discriminator to sensors.
+void Mona::applySensorDiscriminator(vector<SENSOR>& sensorsIn,
+    vector<SENSOR>& sensorsOut, int index)
+{
+    sensorsOut.clear();
+    for (int i = 0, j = (int)sensorsIn.size(); i < j; i++)
+    {
+        if (sensorDiscriminators[index]->mask[i])
+        {
+            sensorsOut.push_back(sensorsIn[i]);
+        }
+        else
+        {
+            sensorsOut.push_back(-1.0f);
+        }
+    }
+}
+
+
+void Mona::applySensorDiscriminator(vector<SENSOR>& sensors, int index)
+{
+    vector<SENSOR> sensorsWork;
+    applySensorDiscriminator(sensors, sensorsWork, index);
+    for (int i = 0, j = (int)sensors.size(); i < j; i++)
+    {
+        sensors[i] = sensorsWork[i];
+    }
+}
+
+
+// Find the receptor containing the centroid closest to
+// the sensor vector for the current sensor discriminator.
+// Also return the centroid-vector distance.
+Mona::Receptor*
+Mona::getSensorDiscriminatorReceptor(vector<SENSOR>& sensors,
+    int index, SENSOR& distance)
+{
+    RDtree::RDsearch* result = sensorDiscriminatorCentroids[index]->search((void*)&sensors, 1);
+
+    if (result != NULL)
+    {
+        distance = result->distance;
+        Receptor* receptor = (Receptor*)(result->node->client);
+        delete result;
+        return(receptor);
+    }
+    else
+    {
+        distance = 0.0f;
+        return(NULL);
+    }
+}
 
 // Get distance from centroid to given sensor vector.
 Mona::SENSOR Mona::Receptor::centroidDistance(vector<SENSOR>& sensors)
@@ -362,7 +456,7 @@ int Mona::addSensorMode(vector<bool>& sensorMask, SENSOR sensorResolution)
    RDtree *t = new RDtree(Mona::Receptor::patternDistance,
                           Mona::Receptor::deletePattern);
    assert(t != NULL);
-   sensorCentroids.push_back(t);
+   sensorModeCentroids.push_back(t);
 
    return(s->mode);
 }
@@ -393,11 +487,83 @@ bool Mona::delSensorMode(int mode)
    sensorModes.erase(sensorModes.begin() + mode);
 
    // Delete centroid.
-   sensorCentroids.erase(sensorCentroids.begin() + mode);
+   sensorModeCentroids.erase(sensorModeCentroids.begin() + mode);
 
    return(true);
 }
 
+// Add sensor discriminator.
+int Mona::addSensorDiscriminator(vector<bool>& sensorMask, SENSOR sensorResolution)
+{
+    // Must add discriminators before cycling.
+    if ((int)receptors.size() > 0)
+    {
+        return(-1);
+    }
+
+    // Duplicate?
+    for (int i = 0, n = (int)sensorDiscriminators.size(); i < n; i++)
+    {
+        bool duplicate = true;
+        for (int j = 0, k = (int)sensorMask.size(); j < k; j++)
+        {
+            if (sensorDiscriminators[i]->mask[j] != sensorMask[j])
+            {
+                duplicate = false;
+                break;
+            }
+        }
+        if (duplicate)
+        {
+            sensorDiscriminators[i]->resolution = sensorResolution;
+            return(i);
+        }
+    }
+
+    // Create sensor discriminator.
+    SensorDiscriminator* s = new SensorDiscriminator();
+    assert(s != NULL);
+    int index = s->init(sensorMask, sensorResolution, &sensorDiscriminators);
+
+    // Create associated centroid search tree.
+    RDtree* t = new RDtree(Mona::Receptor::patternDistance,
+        Mona::Receptor::deletePattern);
+    assert(t != NULL);
+    sensorDiscriminatorCentroids.push_back(t);
+
+    return(index);
+}
+
+
+int Mona::addSensorDiscriminator(vector<bool>& sensorMask)
+{
+    return(addSensorDiscriminator(sensorMask, SENSOR_RESOLUTION));
+}
+
+
+// Delete sensor discriminator.
+bool Mona::delSensorDiscriminator(int index)
+{
+    // Must delete discriminators before cycling.
+    if ((int)receptors.size() > 0)
+    {
+        return(false);
+    }
+
+    // Discriminator exists?
+    if ((int)sensorDiscriminators.size() <= index)
+    {
+        return(false);
+    }
+
+    // Delete discriminator.
+    sensorDiscriminators.erase(sensorDiscriminators.begin() + index);
+
+    // Delete centroid.
+    sensorDiscriminatorCentroids.erase(sensorDiscriminatorCentroids.begin() + index);
+
+    return(true);
+}
 
 // Add goals.
 void Mona::Receptor::addGoals()

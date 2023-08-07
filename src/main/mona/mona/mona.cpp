@@ -702,11 +702,12 @@ void Mona::Neuron::save(FILE *fp)
 }
 
 
-// Create receptor and add to network.
+// Create sensor mode receptor and add to network.
 Mona::Receptor *
-Mona::newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode)
+Mona::newSensorModeReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode)
 {
-   Receptor *r = new Receptor(centroid, sensorMode, this);
+   Receptor *r = new Receptor(centroid, this);
+   r->sensorMode = sensorMode;
 
    assert(r != NULL);
    r->id = idDispenser;
@@ -718,15 +719,14 @@ Mona::newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode)
    {
       sensors->push_back(r->centroid[i]);
    }
-   sensorCentroids[sensorMode]->insert((void *)sensors, (void *)r);
+   sensorModeCentroids[sensorMode]->insert((void *)sensors, (void *)r);
    receptors.push_back(r);
    return(r);
 }
 
 
 // Receptor constructor.
-Mona::Receptor::Receptor(vector<SENSOR>& centroid,
-                         SENSOR_MODE sensorMode, Mona *mona)
+Mona::Receptor::Receptor(vector<SENSOR>& centroid, Mona *mona)
 {
    assert((int)centroid.size() == mona->numSensors);
    this->centroid.clear();
@@ -734,7 +734,8 @@ Mona::Receptor::Receptor(vector<SENSOR>& centroid,
    {
       this->centroid.push_back(centroid[i]);
    }
-   this->sensorMode = sensorMode;
+   sensorMode = 0;
+   sensorDiscriminator = -1;
    init(mona);
    type   = RECEPTOR;
    motive = 0.0;
@@ -757,6 +758,10 @@ bool Mona::Receptor::isDuplicate(Receptor *receptor)
    {
       return(false);
    }
+   if (sensorDiscriminator != receptor->sensorDiscriminator)
+   {
+       return(false);
+   }
    if (centroidDistance(receptor->centroid) == 0.0)
    {
       return(true);
@@ -778,6 +783,7 @@ void Mona::Receptor::load(FILE *fp)
    clear();
    ((Neuron *)this)->load(fp);
    FREAD_INT(&sensorMode, fp);
+   FREAD_INT(&sensorDiscriminator, fp);
    centroid.resize(mona->numSensors);
    for (i = 0; i < mona->numSensors; i++)
    {
@@ -815,6 +821,7 @@ void Mona::Receptor::save(FILE *fp)
 
    ((Neuron *)this)->save(fp);
    FWRITE_INT(&sensorMode, fp);
+   FWRITE_INT(&sensorDiscriminator, fp);
    for (i = 0; i < mona->numSensors; i++)
    {
       s = (float)centroid[i];
@@ -852,6 +859,7 @@ void Mona::Receptor::print(FILE *out)
 {
    fprintf(out, "<receptor><id>%llu</id>", id);
    fprintf(out, "<sensorMode>%d</sensorMode>", sensorMode);
+   fprintf(out, "<sensorDiscriminator>%d</sensorDiscriminator>", sensorDiscriminator);
    fprintf(out, "<centroid>");
    for (int i = 0; i < mona->numSensors; i++)
    {
@@ -1755,9 +1763,9 @@ Mona::deleteNeuron(Neuron *neuron)
       {
          homeostats[i]->removeNeuron(neuron);
       }
-      if ((int)sensorCentroids.size() > 0)
+      if ((int)sensorModeCentroids.size() > 0)
       {
-         sensorCentroids[receptor->sensorMode]->remove((void *)&(receptor->centroid));
+         sensorModeCentroids[receptor->sensorMode]->remove((void *)&(receptor->centroid));
       }
       delete receptor;
       break;
@@ -1918,6 +1926,7 @@ Mona::load(FILE *fp)
    TIME          t;
    double        d;
    SensorMode    *sensorMode;
+   SensorDiscriminator* sensorDiscriminator;
    RDtree        *rdTree;
    LearningEvent *learningEvent;
 
@@ -2006,6 +2015,16 @@ Mona::load(FILE *fp)
       sensorMode->load(fp);
       sensorModes.push_back(sensorMode);
    }
+   sensorDiscriminators.clear();
+   n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
+   {
+       sensorDiscriminator = new SensorDiscriminator();
+       assert(sensorDiscriminator != NULL);
+       sensorDiscriminator->load(fp);
+       sensorDiscriminators.push_back(sensorDiscriminator);
+   }
    random.RAND_LOAD(fp);
    for (int i = 0, j = (int)sensors.size(); i < j; i++)
    {
@@ -2019,7 +2038,7 @@ Mona::load(FILE *fp)
    FREAD_INT(&n, fp);
    for (int i = 0; i < n; i++)
    {
-      receptor = new Receptor(sensors, 0, this);
+      receptor = new Receptor(sensors, this);
       assert(receptor != NULL);
       receptor->load(fp);
       receptors.push_back(receptor);
@@ -2166,7 +2185,7 @@ Mona::load(FILE *fp)
    {
       homeostats[i]->load(fp);
    }
-   sensorCentroids.clear();
+   sensorModeCentroids.clear();
    n = 0;
    FREAD_INT(&n, fp);
    for (int i = 0; i < n; i++)
@@ -2176,7 +2195,7 @@ Mona::load(FILE *fp)
       assert(rdTree != NULL);
       rdTree->load(fp, this, Mona::Receptor::loadPattern,
                    Mona::Receptor::loadClient);
-      sensorCentroids.push_back(rdTree);
+      sensorModeCentroids.push_back(rdTree);
    }
    FREAD_INT(&movementBeginResponse, fp);
    FREAD_INT(&movementEndResponse, fp);
@@ -2323,6 +2342,12 @@ Mona::save(FILE *fp)
    {
       sensorModes[i]->save(fp);
    }
+   j = (int)sensorDiscriminators.size();
+   FWRITE_INT(&j, fp);
+   for (int i = 0; i < j; i++)
+   {
+       sensorDiscriminators[i]->save(fp);
+   }
    random.RAND_SAVE(fp);
    for (int i = 0, j = (int)sensors.size(); i < j; i++)
    {
@@ -2363,11 +2388,11 @@ Mona::save(FILE *fp)
    {
       homeostats[i]->save(fp);
    }
-   j = (int)sensorCentroids.size();
+   j = (int)sensorModeCentroids.size();
    FWRITE_INT(&j, fp);
    for (int i = 0; i < j; i++)
    {
-      sensorCentroids[i]->save(fp, Mona::Receptor::savePattern,
+      sensorModeCentroids[i]->save(fp, Mona::Receptor::savePattern,
                                Mona::Receptor::saveClient);
    }
    FWRITE_INT(&movementBeginResponse, fp);
@@ -2394,11 +2419,17 @@ Mona::clear()
       delete sensorModes[i];
    }
    sensorModes.clear();
-   for (int i = 0, j = (int)sensorCentroids.size(); i < j; i++)
+   for (int i = 0, j = (int)sensorModeCentroids.size(); i < j; i++)
    {
-      delete sensorCentroids[i];
+      delete sensorModeCentroids[i];
    }
-   sensorCentroids.clear();
+   sensorModeCentroids.clear();
+   sensorDiscriminators.clear();
+   for (int i = 0, j = (int)sensorDiscriminatorCentroids.size(); i < j; i++)
+   {
+       delete sensorDiscriminatorCentroids[i];
+   }
+   sensorDiscriminatorCentroids.clear();
    while ((int)receptors.size() > 0)
    {
       receptor = receptors[0];
@@ -2550,6 +2581,12 @@ Mona::print(bool brief, FILE *out)
       sensorModes[i]->print(out);
    }
    fprintf(out, "</sensorModes>\n");
+   fprintf(out, "<sensorDiscriminators");
+   for (int i = 0, j = (int)sensorDiscriminators.size(); i < j; i++)
+   {
+       sensorDiscriminators[i]->print(out);
+   }
+   fprintf(out, "</sensorDiscriminators>\n");
    fprintf(out, "<numResponses>%d</numResponses>\n", numResponses);
    fprintf(out, "<numNeeds>%d</numNeeds>\n", numNeeds);
    fprintf(out, "<randomSeed>%llu</randomSeed>\n", randomSeed);

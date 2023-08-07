@@ -53,7 +53,7 @@ class PUBLIC_API Mona
 public:
 
    // Content format.
-   enum { FORMAT=11 };
+   enum { FORMAT=12 };
 
    // Data types.
    typedef Homeostat::ID            ID;
@@ -106,6 +106,9 @@ public:
    int addSensorMode(vector<bool>& sensorMask);
    int addSensorMode(vector<bool>& sensorMask, SENSOR sensorResolution);
    bool delSensorMode(int mode);
+   int addSensorDiscriminator(vector<bool>& sensorMask);
+   int addSensorDiscriminator(vector<bool>& sensorMask, SENSOR sensorResolution);
+   bool delSensorDiscriminator(int index);
 
    // Destructor.
    ~Mona();
@@ -162,14 +165,27 @@ public:
    void                 applySensorMode(vector<SENSOR> &in, vector<SENSOR> &out, SENSOR_MODE);
    void                 applySensorMode(vector<SENSOR> &sensors, SENSOR_MODE);
 
-   // Sensor centroid search spaces.
-   // Each sensor mode defines a space.
-   vector<RDtree *> sensorCentroids;
+   // Sensor mode centroid search spaces.
+   vector<RDtree *> sensorModeCentroids;
 
    // Find the receptor having the centroid closest to
    // the sensor vector for the give sensor mode.
-   Receptor *getCentroidReceptor(vector<SENSOR>& sensors,
+   Receptor *getSensorModeReceptor(vector<SENSOR>& sensors,
                                  SENSOR_MODE sensorMode, SENSOR& distance);
+
+   // Sensor discriminators.
+   // A sensor discriminator contains sensor centroids filtered by importance to responses.
+   vector<SensorDiscriminator*> sensorDiscriminators;
+   void                 applySensorDiscriminator(vector<SENSOR>& in, vector<SENSOR>& out, int index);
+   void                 applySensorDiscriminator(vector<SENSOR>& sensors, int index);
+
+   // Sensor discriminator centroid search spaces.
+   vector<RDtree*> sensorDiscriminatorCentroids;
+
+   // Find the receptor having the centroid closest to
+   // the sensor vector for the give sensor discriminator.
+   Receptor* getSensorDiscriminatorReceptor(vector<SENSOR>& sensors,
+       int index, SENSOR& distance);
 
    // Response.
    RESPONSE response;
@@ -404,7 +420,7 @@ public:
 public:
 
       // Construct/destruct.
-      Receptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode, Mona *mona);
+      Receptor(vector<SENSOR>& centroid, Mona *mona);
       ~Receptor();
 
       // Centroid sensor vector.
@@ -415,6 +431,9 @@ public:
       SENSOR_MODE        sensorMode;
       vector<Receptor *> subSensorModes;
       vector<Receptor *> superSensorModes;
+
+      // Sensor discriminator index.
+      int sensorDiscriminator;
 
       // Get distance from centroid to given sensor vector.
       SENSOR centroidDistance(vector<SENSOR>& sensors);
@@ -615,7 +634,8 @@ public:
    int X, Y;
 
    // Add/delete neurons to/from network.
-   Receptor *newReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode);
+   Receptor *newSensorModeReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode);
+   Receptor* newSensorDiscriminatorReceptor(vector<SENSOR>& centroid, int index);
    Motor *newMotor();
    Motor *newMovementMotor(int movementType);
    Motor *newPlaceMotor(int x, int y);

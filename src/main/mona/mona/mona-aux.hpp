@@ -238,6 +238,91 @@ public:
    }
 };
 
+// Sensor discriminator.
+class SensorDiscriminator
+{
+public:
+    vector<bool>        mask;
+    SENSOR              resolution;
+
+    // Constructor.
+    SensorDiscriminator()
+    {
+        resolution = 0.0f;
+    }
+
+
+    // Initialize.
+    // Return index.
+    int init(vector<bool>& mask, SENSOR resolution,
+        vector<SensorDiscriminator*>* sensorDiscriminators)
+    {
+        SensorDiscriminator* s;
+
+        // Initialize.
+        this->mask.clear();
+        for (int i = 0, j = (int)mask.size(); i < j; i++)
+        {
+            this->mask.push_back(mask[i]);
+        }
+        int index = (int)sensorDiscriminators->size();
+        this->resolution = resolution;
+        sensorDiscriminators->push_back(this);
+        return(index);
+    }
+
+    // Load.
+    void load(FILE* fp)
+    {
+        int  size;
+        bool v;
+
+        mask.clear();
+        FREAD_INT(&size, fp);
+        for (int i = 0; i < size; i++)
+        {
+            FREAD_BOOL(&v, fp);
+            mask.push_back(v);
+        }
+        FREAD_FLOAT(&resolution, fp);
+    }
+
+
+    // Save.
+    // When changing format increment FORMAT in mona.hpp
+    void save(FILE* fp)
+    {
+        int  size;
+        bool v;
+
+        size = (int)mask.size();
+        FWRITE_INT(&size, fp);
+        for (int i = 0; i < size; i++)
+        {
+            v = mask[i];
+            FWRITE_BOOL(&v, fp);
+        }
+        FWRITE_FLOAT(&resolution, fp);
+    }
+
+
+    // Print.
+    void print(FILE* out = stdout)
+    {
+        int size;
+
+        fprintf(out, "<mask>");
+        size = (int)mask.size();
+        for (int i = 0; i < size; i++)
+        {
+            int j = (int)mask[i];
+            fprintf(out, "%d", j);
+        }
+        fprintf(out, "</mask>");
+        fprintf(out, "<resolution>%f</resolution>", resolution);
+    }
+};
+
 // Goal value.
 class GoalValue
 {

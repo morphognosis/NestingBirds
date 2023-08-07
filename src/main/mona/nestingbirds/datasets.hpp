@@ -68,7 +68,7 @@ public:
 
 
     // Convert sensory to one-hot encoding.
-    string oneHotToSensory()
+    string sensoryToOneHot()
     {
         string encoding = "";
 
@@ -208,7 +208,7 @@ public:
     }
 
     // Convert one-hot encoding to sensory.
-    void sensoryToOneHot(string encoding)
+    void oneHotToSensory(string encoding)
     {
         vector<string> values;
         stringstream stream(encoding);
@@ -392,8 +392,6 @@ public:
         {
             femaleWantsStone = "DONT_CARE";
         }
-        printf("encoding: %s\n", encoding.c_str());
-        print();  // flibber
     }
 
     // Convert to male sensors.
@@ -711,7 +709,7 @@ public:
 
 
     // Convert sensory to one-hot encoding.
-    string oneHotToSensory()
+    string sensoryToOneHot()
     {
         string encoding = "";
 

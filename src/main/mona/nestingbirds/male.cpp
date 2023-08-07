@@ -69,7 +69,12 @@ Male::Male()
    vector<bool> mask;
    loadMask(mask, true, true, true, true,
             true, true, true, false, false);
+#ifdef SENSOR_DISCRIMINATION
+   brain->addSensorDiscriminator(mask);
+   int eatMouseMode = 0;
+#else
    int eatMouseMode = brain->addSensorMode(mask);
+#endif
    vector<Mona::SENSOR> sensors;
    loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                (Mona::SENSOR)GOAL::MOUSE_FOR_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);

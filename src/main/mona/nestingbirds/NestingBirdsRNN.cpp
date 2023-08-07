@@ -297,7 +297,7 @@ int main(int argc, char *args[])
             for (int j = 0; j < MaleTestBehavior.size(); j++)
             {
                MaleSensoryResponse sensoryResponse = MaleTestBehavior[j];
-               fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+               fprintf(fp, "%s", sensoryResponse.sensoryToOneHot().c_str());
                if (j < MaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
@@ -310,7 +310,7 @@ int main(int argc, char *args[])
             for (int j = 0; j < MaleTestBehavior.size(); j++)
             {
                MaleSensoryResponse sensoryResponse = MaleTestBehavior[j];
-               fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+               fprintf(fp, "%s", sensoryResponse.responseToOneHot().c_str());
                if (j < MaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
@@ -480,7 +480,7 @@ int main(int argc, char *args[])
             for (int j = 0; j < FemaleTestBehavior.size(); j++)
             {
                FemaleSensoryResponse sensoryResponse = FemaleTestBehavior[j];
-               fprintf(fp, "%s", sensoryResponse.oneHotSensory().c_str());
+               fprintf(fp, "%s", sensoryResponse.sensoryToOneHot().c_str());
                if (j < FemaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
@@ -493,7 +493,7 @@ int main(int argc, char *args[])
             for (int j = 0; j < FemaleTestBehavior.size(); j++)
             {
                FemaleSensoryResponse sensoryResponse = FemaleTestBehavior[j];
-               fprintf(fp, "%s", sensoryResponse.oneHotResponse().c_str());
+               fprintf(fp, "%s", sensoryResponse.responseToOneHot().c_str());
                if (j < FemaleTestBehavior.size() - 1)
                {
                   fprintf(fp, ",");
