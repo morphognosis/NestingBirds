@@ -740,7 +740,7 @@ bool Homeostat::goalSuperset(int goalIndex, vector<SENSOR>& sensors)
    }
    for (int i = 0, j = (int)goals[goalIndex].sensors.size(); i < j; i++)
    {
-      if ((goals[goalIndex].sensors[i] != DONT_CARE) && (sensors[i] != DONT_CARE))
+      if (goals[goalIndex].sensors[i] != DONT_CARE)
       {
          if (goals[goalIndex].sensors[i] != sensors[i])
          {

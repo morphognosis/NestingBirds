@@ -708,7 +708,7 @@ Mona::newSensorModeReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode)
 {
    Receptor *r = new Receptor(centroid, this);
    r->sensorMode = sensorMode;
-
+   r->sensorDiscriminator = -1;
    assert(r != NULL);
    r->id = idDispenser;
    idDispenser++;
@@ -721,9 +721,32 @@ Mona::newSensorModeReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode)
    }
    sensorModeCentroids[sensorMode]->insert((void *)sensors, (void *)r);
    receptors.push_back(r);
+   r->addGoals();
    return(r);
 }
 
+// Create sensor discriminator receptor and add to network.
+Mona::Receptor*
+Mona::newSensorDiscriminatorReceptor(vector<SENSOR>& centroid, int index)
+{
+    Receptor* r = new Receptor(centroid, this);
+    r->sensorMode = 0;
+    r->sensorDiscriminator = index;
+    assert(r != NULL);
+    r->id = idDispenser;
+    idDispenser++;
+    r->creationTime = eventClock;
+    vector<SENSOR>* sensors = new vector<SENSOR>();
+    assert(sensors != NULL);
+    for (int i = 0, j = (int)r->centroid.size(); i < j; i++)
+    {
+        sensors->push_back(r->centroid[i]);
+    }
+    sensorDiscriminatorCentroids[index]->insert((void*)sensors, (void*)r);
+    receptors.push_back(r);
+    r->addGoals();
+    return(r);
+}
 
 // Receptor constructor.
 Mona::Receptor::Receptor(vector<SENSOR>& centroid, Mona *mona)
@@ -2197,6 +2220,18 @@ Mona::load(FILE *fp)
                    Mona::Receptor::loadClient);
       sensorModeCentroids.push_back(rdTree);
    }
+   sensorDiscriminatorCentroids.clear();
+   n = 0;
+   FREAD_INT(&n, fp);
+   for (int i = 0; i < n; i++)
+   {
+       rdTree = new RDtree(Mona::Receptor::patternDistance,
+           Mona::Receptor::deletePattern);
+       assert(rdTree != NULL);
+       rdTree->load(fp, this, Mona::Receptor::loadPattern,
+           Mona::Receptor::loadClient);
+       sensorDiscriminatorCentroids.push_back(rdTree);
+   }
    FREAD_INT(&movementBeginResponse, fp);
    FREAD_INT(&movementEndResponse, fp);
    return(true);
@@ -2394,6 +2429,13 @@ Mona::save(FILE *fp)
    {
       sensorModeCentroids[i]->save(fp, Mona::Receptor::savePattern,
                                Mona::Receptor::saveClient);
+   }
+   j = (int)sensorDiscriminatorCentroids.size();
+   FWRITE_INT(&j, fp);
+   for (int i = 0; i < j; i++)
+   {
+       sensorDiscriminatorCentroids[i]->save(fp, Mona::Receptor::savePattern,
+           Mona::Receptor::saveClient);
    }
    FWRITE_INT(&movementBeginResponse, fp);
    FWRITE_INT(&movementEndResponse, fp);

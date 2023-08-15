@@ -52,14 +52,20 @@ Female::Female()
    vector<bool> mask;
    loadMask(mask, false, false, false, false,
             false, false, false, false, false, false, true, true);
+#ifdef SENSOR_DISCRIMINATION
+   int eatMouseMode = 0;
+   int eatMouseDiscriminator = brain->addSensorDiscriminator(mask);
+#else
    int eatMouseMode = brain->addSensorMode(mask);
-   vector<Mona::SENSOR> sensors;
-   loadSensors(sensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+#endif
+   vector<Mona::SENSOR> eatMouseSensors;
+   loadSensors(eatMouseSensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                DONT_CARE, (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::MOUSE);
-   int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, sensors, eatMouseMode, eat, MOUSE_NEED);
+   int eatMouseGoal = brain->addGoal(MOUSE_NEED_INDEX, eatMouseSensors, eatMouseMode, eat, MOUSE_NEED);
 
    // Lay egg goal.
+   vector<Mona::SENSOR> sensors;
    loadSensors(sensors, (Mona::SENSOR)OBJECT::EGG, (Mona::SENSOR)OBJECT::STONE, (Mona::SENSOR)OBJECT::STONE,
                (Mona::SENSOR)OBJECT::STONE, (Mona::SENSOR)OBJECT::STONE, (Mona::SENSOR)OBJECT::STONE, (Mona::SENSOR)OBJECT::STONE,
                (Mona::SENSOR)OBJECT::STONE, (Mona::SENSOR)OBJECT::STONE,
@@ -71,6 +77,11 @@ Female::Female()
                DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                DONT_CARE, (Mona::SENSOR)GOAL::BROOD_EGG, DONT_CARE);
    int broodEggGoal = brain->addGoal(BROOD_EGG_NEED_INDEX, sensors, 0, doNothing, BROOD_EGG_NEED);
+
+#ifdef SENSOR_DISCRIMINATION
+   // Add sensor discriminator goal receptor.
+   brain->newSensorDiscriminatorReceptor(eatMouseSensors, eatMouseDiscriminator);
+#endif
 
    // Set initial response.
    response = RESPONSE::DO_NOTHING;

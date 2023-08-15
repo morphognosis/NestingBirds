@@ -48,16 +48,16 @@ Mona::sense()
    // Fire receptors matching sensor discriminators.
    bool firedDiscriminatorReceptor = false;
    int n = (int)sensorDiscriminators.size();
-   for (int i = 0; i < n; i++)
+   for (int index = 0; index < n; index++)
    {
       // Apply sensor discriminator to sensors.
-      applySensorDiscriminator(sensors, sensorsWork, i);
+      applySensorDiscriminator(sensors, sensorsWork, index);
 
       // Get firing receptor based on sensor vector and discriminator.
-      receptor = getSensorDiscriminatorReceptor(sensorsWork, i, distance);
+      receptor = getSensorDiscriminatorReceptor(sensorsWork, index, distance);
 
       // Fire receptor?
-      if (receptor != NULL && distance <= sensorDiscriminators[i]->resolution)
+      if (receptor != NULL && distance <= sensorDiscriminators[index]->resolution)
       {
           // Fire receptor.
           receptor->firingStrength = 1.0;
@@ -73,11 +73,11 @@ Mona::sense()
           if (traceSense)
           {
               printf("Receptor firing: centroid=[ ");
-              for (int j = 0; j < numSensors; j++)
+              for (int i = 0; i < numSensors; i++)
               {
-                  printf("%f ", receptor->centroid[j]);
+                  printf("%f ", receptor->centroid[i]);
               }
-              printf("], sensorDiscriminator=%d\n", i);
+              printf("], sensorDiscriminator=%d\n", index);
           }
 #endif
 #ifdef MONA_TRACKING
@@ -175,12 +175,6 @@ Mona::sense()
 
        // Fire receptor.
        receptor->firingStrength = 1.0;
-
-       // Add goals to new receptor?
-       if (addReceptor)
-       {
-           receptor->addGoals();
-       }
 
        // Update needs.
        receptor->updateNeeds();
@@ -309,7 +303,6 @@ Mona::getSensorDiscriminatorReceptor(vector<SENSOR>& sensors,
     int index, SENSOR& distance)
 {
     RDtree::RDsearch* result = sensorDiscriminatorCentroids[index]->search((void*)&sensors, 1);
-
     if (result != NULL)
     {
         distance = result->distance;
@@ -570,8 +563,8 @@ void Mona::Receptor::addGoals()
 {
    // Add receptor to homeostats.
    for (int i = 0; i < mona->numNeeds; i++)
-   {
-      mona->homeostats[i]->addGoalReceptor(this);
+   {      
+       mona->homeostats[i]->addGoalReceptor(this);
    }
 }
 
