@@ -446,7 +446,6 @@ Mona::createMediator(LearningEvent *effectEvent)
          assert(learningEvent != NULL);
          learningEvents[mediator->level + 1].push_back(learningEvent);
       }
-
 #ifdef MONA_TRACE
       if (traceLearn)
       {

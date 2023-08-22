@@ -28,10 +28,6 @@ bool MaleFlying;
 bool MaleFlyingToForest;
 bool MaleFlyingToDesert;
 bool MaleFlyingToNest;
-bool MaleWantsMouse;
-bool MaleWantsFemale;
-bool FemaleWantsMouse;
-bool FemaleWantsStone;
 int  FemaleNestSequence;
 
 // Behavior file.
@@ -255,10 +251,6 @@ void init(bool maleTest, bool femaleTest)
    MaleFlyingToForest = false;
    MaleFlyingToDesert = false;
    MaleFlyingToNest   = false;
-   MaleWantsMouse     = false;
-   MaleWantsFemale    = false;
-   FemaleWantsMouse   = false;
-   FemaleWantsStone   = false;
    FemaleNestSequence = 0;
    setSensors(FEMALE);
    setSensors(MALE);
@@ -414,48 +406,26 @@ void train(int gender)
 // Train male.
 void trainMale()
 {
-   // Set wants from male needs.
-   MaleWantsMouse   = false;
-   MaleWantsFemale  = false;
-   FemaleWantsMouse = false;
-   FemaleWantsStone = false;
-   if (male->brain->getNeed(Male::MOUSE_NEED_INDEX) > 0.0)
-   {
-      MaleWantsMouse = true;
-   }
-   else if (male->brain->getNeed(Male::FEMALE_MOUSE_NEED_INDEX) > 0.0)
-   {
-      FemaleWantsMouse = true;
-   }
-   else if (male->brain->getNeed(Male::FEMALE_STONE_NEED_INDEX) > 0.0)
-   {
-      FemaleWantsStone = true;
-   }
-   else
-   {
-      MaleWantsFemale = true;
-   }
-
    // Get training response.
    if (flyToPlace())
    {
       if (!doWants())
       {
-         if (MaleWantsMouse)
+         if (male->goal == Male::GOAL::EAT_MOUSE)
          {
             if (getMouse())
             {
                goToFemale();
             }
          }
-         else if (FemaleWantsMouse)
+         else if (male->goal == Male::GOAL::MOUSE_FOR_FEMALE)
          {
             if (getMouse())
             {
                goToFemale();
             }
          }
-         else if (FemaleWantsStone)
+         else if (male->goal == Male::GOAL::STONE_FOR_FEMALE)
          {
             if (getStone())
             {
@@ -513,19 +483,19 @@ bool flyToPlace()
 // Return true when response taken.
 bool doWants()
 {
-   if (MaleWantsMouse && (male->hasObject == OBJECT::MOUSE))
+   if (male->goal == Male::GOAL::EAT_MOUSE && (male->hasObject == OBJECT::MOUSE))
    {
       male->response = Male::RESPONSE::EAT_MOUSE;
       return(true);
    }
    if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
    {
-      if (FemaleWantsMouse && (male->hasObject == OBJECT::MOUSE))
+      if (male->goal == Male::GOAL::MOUSE_FOR_FEMALE && (male->hasObject == OBJECT::MOUSE))
       {
          male->response = Male::RESPONSE::GIVE_MOUSE;
          return(true);
       }
-      if (FemaleWantsStone && (male->hasObject == OBJECT::STONE))
+      if (male->goal == Male::GOAL::STONE_FOR_FEMALE && (male->hasObject == OBJECT::STONE))
       {
          male->response = Male::RESPONSE::GIVE_STONE;
          return(true);

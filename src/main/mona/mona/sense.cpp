@@ -46,7 +46,6 @@ Mona::sense()
    }
 
    // Fire receptors matching sensor discriminators.
-   bool firedDiscriminatorReceptor = false;
    int n = (int)sensorDiscriminators.size();
    for (int index = 0; index < n; index++)
    {
@@ -61,7 +60,6 @@ Mona::sense()
       {
           // Fire receptor.
           receptor->firingStrength = 1.0;
-          firedDiscriminatorReceptor = true;
 
           // Update needs.
           receptor->updateNeeds();
@@ -85,7 +83,6 @@ Mona::sense()
 #endif
       }
    }
-   if (firedDiscriminatorReceptor) return;
 
    // Fire receptors matching sensor modes.
    n = (int)sensorModes.size();

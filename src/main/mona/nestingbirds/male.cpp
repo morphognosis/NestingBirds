@@ -3,6 +3,7 @@
 // The male bird.
 
 #include "male.hpp"
+#define SENSOR_DISCRIMINATION 1
 
 // Food.
 int Male:: FOOD_DURATION        = atoi(MALE_DEFAULT_FOOD_DURATION);
@@ -67,7 +68,7 @@ Male::Male()
 
    // Food goals.
    vector<bool> mask;
-   loadMask(mask, false, false, false, false,
+   loadMask(mask, false, false, false, true,
             true, true, true, false, false);
 #ifdef SENSOR_DISCRIMINATION
    int eatMouseMode = 0;
@@ -75,18 +76,10 @@ Male::Male()
 #else
    int eatMouseMode = brain->addSensorMode(mask);
 #endif
-   vector<Mona::SENSOR> eatMouseForFemaleSensors;
-   loadSensors(eatMouseForFemaleSensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-               (Mona::SENSOR)GOAL::MOUSE_FOR_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
-   brain->addGoal(MOUSE_NEED_INDEX, eatMouseForFemaleSensors, eatMouseMode, MOUSE_NEED);
-   vector<Mona::SENSOR> eatMouseStoneForFemaleSensors;
-   loadSensors(eatMouseStoneForFemaleSensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-               (Mona::SENSOR)GOAL::STONE_FOR_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
-   brain->addGoal(MOUSE_NEED_INDEX, eatMouseStoneForFemaleSensors, eatMouseMode, MOUSE_NEED);
-   vector<Mona::SENSOR> eatMouseAttendFemaleSensors;
-   loadSensors(eatMouseAttendFemaleSensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-               (Mona::SENSOR)GOAL::ATTEND_FEMALE, (Mona::SENSOR)OBJECT::NO_OBJECT, 0.0, DONT_CARE, DONT_CARE);
-   brain->addGoal(MOUSE_NEED_INDEX, eatMouseAttendFemaleSensors, eatMouseMode, MOUSE_NEED);
+   vector<Mona::SENSOR> eatMouseSensors;
+   loadSensors(eatMouseSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::UNKNOWN,
+               (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::MOUSE, 0.0, DONT_CARE, DONT_CARE);
+   brain->addGoal(MOUSE_NEED_INDEX, eatMouseSensors, eatMouseMode, eat, MOUSE_NEED);
 
    // Attend female goal.
    loadMask(mask, false, false, false, true,
@@ -99,30 +92,32 @@ Male::Male()
 #endif
    vector<Mona::SENSOR> attendFemaleSensors;
    loadSensors(attendFemaleSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-               DONT_CARE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
+       (Mona::SENSOR)GOAL::ATTEND_FEMALE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
    brain->addGoal(ATTEND_FEMALE_NEED_INDEX, attendFemaleSensors, attendFemaleMode, ATTEND_FEMALE_NEED);
 
    // Female want mouse goal.
 #ifdef SENSOR_DISCRIMINATION
    loadMask(mask, false, false, false, true,
-       false, false, true, true, true);
+       false, true, true, false, false);
    int femaleWantDiscriminator = brain->addSensorDiscriminator(mask);
 #endif
-   vector<Mona::SENSOR> femaleWantSensors;
-   loadSensors(femaleWantSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-               DONT_CARE, DONT_CARE, 0.0, 0.0, 0.0);
-   brain->addGoal(FEMALE_MOUSE_NEED_INDEX, femaleWantSensors, 0, FEMALE_MOUSE_NEED);
+   vector<Mona::SENSOR> femaleWantMouseSensors;
+   loadSensors(femaleWantMouseSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
+       (Mona::SENSOR)GOAL::MOUSE_FOR_FEMALE, (Mona::SENSOR)OBJECT::MOUSE, 0.0, DONT_CARE, DONT_CARE);
+   brain->addGoal(FEMALE_MOUSE_NEED_INDEX, femaleWantMouseSensors, 0, giveMouse, FEMALE_MOUSE_NEED);
 
    // Female want stone goal.
-   brain->addGoal(FEMALE_STONE_NEED_INDEX, femaleWantSensors, 0, FEMALE_STONE_NEED);
+   vector<Mona::SENSOR> femaleWantStoneSensors;
+   loadSensors(femaleWantStoneSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
+       (Mona::SENSOR)GOAL::STONE_FOR_FEMALE, (Mona::SENSOR)OBJECT::STONE, 0.0, DONT_CARE, DONT_CARE);
+   brain->addGoal(FEMALE_STONE_NEED_INDEX, femaleWantStoneSensors, 0, giveStone, FEMALE_STONE_NEED);
 
 #ifdef SENSOR_DISCRIMINATION
    // Add sensor discriminator goal receptors.
-   brain->newSensorDiscriminatorReceptor(eatMouseForFemaleSensors, eatMouseDiscriminator);
-   brain->newSensorDiscriminatorReceptor(eatMouseStoneForFemaleSensors, eatMouseDiscriminator);
-   brain->newSensorDiscriminatorReceptor(eatMouseAttendFemaleSensors, eatMouseDiscriminator);
+   brain->newSensorDiscriminatorReceptor(eatMouseSensors, eatMouseDiscriminator);
    brain->newSensorDiscriminatorReceptor(attendFemaleSensors, attendFemaleDiscriminator);
-   brain->newSensorDiscriminatorReceptor(femaleWantSensors, femaleWantDiscriminator);
+   brain->newSensorDiscriminatorReceptor(femaleWantMouseSensors, femaleWantDiscriminator);
+   brain->newSensorDiscriminatorReceptor(femaleWantStoneSensors, femaleWantDiscriminator);
 #endif
 
    // Set initial response.

@@ -27,8 +27,6 @@
 #ifndef __MONA__
 #define __MONA__
 
-//#define SENSOR_DISCRIMINATION 1    // flibber
-
 // Version (SCCS "what" format).
 #define MONA_VERSION    "@(#)Mona version 6.0"
 extern const char *MonaVersion;
