@@ -3,6 +3,7 @@
 // The male bird.
 
 #include "male.hpp"
+
 #define SENSOR_DISCRIMINATION 1
 
 // Food.

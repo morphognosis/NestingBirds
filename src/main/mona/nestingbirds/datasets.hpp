@@ -782,6 +782,182 @@ public:
         return(encoding);
     }
 
+    // Convert one-hot encoding to sensory.
+    void oneHotToSensory(string encoding)
+    {
+        vector<string> values;
+        stringstream stream(encoding);
+        string value;
+
+        while (getline(stream, value, ','))
+        {
+            values.push_back(value);
+        }
+        if (values.size() != oneHotSensoryLength())
+        {
+            fprintf(stderr, "Invalid sensory encoding: %s\n", encoding.c_str());
+            exit(1);
+        }
+        int idx = 0;
+        cellSensors.clear();
+        for (int i = 0; i < 9; i++)
+        {
+            if (values[idx] == "1.0")
+            {
+                cellSensors.push_back("NO_OBJECT");
+            }
+            else if (values[idx + 1] == "1.0")
+            {
+                cellSensors.push_back("EGG");
+            }
+            else if (values[idx + 2] == "1.0")
+            {
+                cellSensors.push_back("MOUSE");
+            }
+            else if (values[idx + 3] == "1.0")
+            {
+                cellSensors.push_back("STONE");
+            }
+            else
+            {
+                cellSensors.push_back("DONT_CARE");
+            }
+            idx += 4;
+        }
+        if (values[idx] == "1.0")
+        {
+            orientation = "NORTH";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            orientation = "EAST";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            orientation = "SOUTH";
+        }
+        else if (values[idx + 3] == "1.0")
+        {
+            orientation = "WEST";
+        }
+        else
+        {
+            orientation = "DONT_CARE";
+        }
+        idx += 4;
+        if (values[idx] == "1.0")
+        {
+            goal = "LAY_EGG";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            goal = "BROOD_EGG";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            goal = "EAT_MOUSE";
+        }
+        else
+        {
+           goal = "DONT_CARE";
+        }
+        idx += 3;
+        if (values[idx] == "1.0")
+        {
+            hasObject = "NO_OBJECT";
+        }
+        else if (values[idx + 1] == "1.0")
+        {
+            hasObject = "MOUSE";
+        }
+        else if (values[idx + 2] == "1.0")
+        {
+            hasObject = "STONE";
+        }
+        else
+        {
+            hasObject = "DONT_CARE";
+        }
+    }
+
+    // Convert to female sensors.
+    void toSensors(int* sensors)
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            if (cellSensors[i] == "NO_OBJECT")
+            {
+                sensors[i] = OBJECT::NO_OBJECT;
+            }
+            else if (cellSensors[i] == "EGG")
+            {
+                sensors[i] = OBJECT::EGG;
+            }
+            else if (cellSensors[i] == "MOUSE")
+            {
+                sensors[i] = OBJECT::MOUSE;
+            }
+            else if (cellSensors[i] == "STONE")
+            {
+                sensors[i] = OBJECT::STONE;
+            }
+            else
+            {
+                sensors[i] = DONT_CARE;
+            }
+        }
+        if (orientation == "NORTH")
+        {
+            sensors[Female::ORIENTATION_SENSOR] = ORIENTATION::NORTH;
+        }
+        else if (orientation == "EAST")
+        {
+            sensors[Female::ORIENTATION_SENSOR] = ORIENTATION::EAST;
+        }
+        else if (orientation == "SOUTH")
+        {
+            sensors[Female::ORIENTATION_SENSOR] = ORIENTATION::SOUTH;
+        }
+        else if (orientation == "WEST")
+        {
+            sensors[Female::ORIENTATION_SENSOR] = ORIENTATION::WEST;
+        }
+        else {
+            sensors[Female::ORIENTATION_SENSOR] = DONT_CARE;
+        }
+        if (goal == "LAY_EGG")
+        {
+            sensors[Female::GOAL_SENSOR] = Female::GOAL::LAY_EGG;
+        }
+        else if (goal == "BROOD_EGG")
+        {
+            sensors[Female::GOAL_SENSOR] = Female::GOAL::BROOD_EGG;
+        }
+        else if (goal == "EAT_MOUSE")
+        {
+            sensors[Female::GOAL_SENSOR] = Female::GOAL::EAT_MOUSE;
+        }
+        else
+        {
+            sensors[Female::GOAL_SENSOR] = DONT_CARE;
+        }
+        if (hasObject == "NO_OBJECT")
+        {
+            sensors[Female::HAS_OBJECT_SENSOR] = OBJECT::NO_OBJECT;
+        }
+        else if (hasObject == "MOUSE")
+        {
+            sensors[Female::HAS_OBJECT_SENSOR] = OBJECT::MOUSE;
+        }
+        else if (hasObject == "STONE")
+        {
+            sensors[Female::HAS_OBJECT_SENSOR] = OBJECT::STONE;
+        }
+        else
+        {
+            sensors[Female::HAS_OBJECT_SENSOR] = DONT_CARE;
+        }
+    }
 
     // Get length of sensory encoding.
     static int oneHotSensoryLength()
@@ -834,7 +1010,7 @@ public:
         }
         else if (response == "LAY_EGG")
         {
-           return 10;
+            return 10;
         }
         return(-1);
     }
@@ -908,7 +1084,8 @@ extern vector<MaleSensoryResponse> MaleTestBehavior;
 extern vector < vector < FemaleSensoryResponse >> FemaleTrainBehavior;
 extern vector<FemaleSensoryResponse> FemaleTestBehavior;
 
-// Import male sensors.
+// Import sensors.
 void importMaleSensors(string maleSensorFilename, vector<MaleSensoryResponse>& sensors);
+void importFemaleSensors(string femaleSensorFilename, vector<FemaleSensoryResponse>& sensors);
 
 #endif

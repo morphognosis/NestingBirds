@@ -32,7 +32,7 @@ Train/test RNN:
 run_nestingbirds_rnn.sh, run_nestingbirds_rnn.bat
 </pre>
 
-Discriminate sensors by detecting signals that are important to responses:
+Discriminate sensors by detecting features that are important to responses:
 <pre>
 sensor_discriminator.py
 </pre>

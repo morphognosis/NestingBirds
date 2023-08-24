@@ -28,7 +28,7 @@
 #define __MONA__
 
 // Version (SCCS "what" format).
-#define MONA_VERSION    "@(#)Mona version 6.0"
+#define MONA_VERSION    "@(#)Mona version 6.1"
 extern const char *MonaVersion;
 
 // Tracing and event tracking compilation symbols:

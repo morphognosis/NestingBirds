@@ -617,3 +617,29 @@ void importMaleSensors(string maleSensorFilename, vector<MaleSensoryResponse>& s
     file.close();
 }
 
+// Import female sensors.
+void importFemaleSensors(string femaleSensorFilename, vector<FemaleSensoryResponse>& sensors)
+{
+    ifstream file;
+    file.open(femaleSensorFilename);
+    if (!file.is_open())
+    {
+        fprintf(stderr, "Cannot open female sensor file %s\n", femaleSensorFilename.c_str());
+        exit(1);
+    }
+    sensors.clear();
+    string encoding;
+    while (getline(file, encoding))
+    {
+        FemaleSensoryResponse sensoryResponse;
+        sensoryResponse.oneHotToSensory(encoding);
+        if (Verbose)
+        {
+            printf("encoding: %s\n", encoding.c_str());
+            printf("sensory:\n"); sensoryResponse.print();
+        }
+        sensors.push_back(sensoryResponse);
+    }
+    file.close();
+}
+

@@ -1,7 +1,13 @@
 Nesting birds with the Mona neural network.
 
-Mona 6.0 includes an implemenation of place neurons, in the form of specialized motor neurons,
-which allow improved spatial navigation.
+Mona version:
+
+6.0 An implemenation of place neurons in the form of specialized motor neurons
+    that enhance spatial navigation. Place motors incorporate macro-responses that
+    navigate to a specific location in the environment.
+6.1 Sensor discrimination of features that are important to responses. These are
+    incorporated in receptors that are initialized by results from external discrimination
+    processes, such as pre-training the environment with a multi-layer perceptron.
 
 To build:
 

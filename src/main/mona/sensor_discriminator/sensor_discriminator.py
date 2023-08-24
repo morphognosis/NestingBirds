@@ -1,5 +1,5 @@
 # Sensor discriminator.
-# Detect significant signals in input sensors.
+# Detect significant features in input sensors.
 # ref: "How to measure importance of inputs" by Warren S. Sarle, SAS Institute Inc., Cary, NC, USA 
 #      ftp://ftp.sas.com/pub/neural/importance.html
 

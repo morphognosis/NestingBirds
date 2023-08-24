@@ -37,7 +37,7 @@ FILE *BehaviorFp;
 string SENSOR_DISCRIMINATOR_FILENAME = "sensor_discriminator.py";
 string MALE_DATASET_FILENAME = "nestingbirds_male_dataset.csv";
 string FEMALE_DATASET_FILENAME = "nestingbirds_female_dataset.csv";
-string SENSOR_DISCRIMINATION_RESULTS_FILENAME = "nestingbirds_sensor_discrimination_results.json";
+string SENSOR_DISCRIMINATION_RESULTS_FILENAME = "nestingbirds_sensor_discrimination_results.csv";
 
 // World map: plain=0, forest=1, mouse=2, desert=3, stone=4
 const char WorldMap[WIDTH][HEIGHT] =
@@ -2249,6 +2249,16 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
     // Import male discriminated sensors.
     vector<MaleSensoryResponse> maleSensors;
     importMaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, maleSensors);
+
+    // Run sensor discriminator.
+    sprintf(buf, "python %s --sensor_input_file %s --sensor_output_file %s --verbose %s",
+        SENSOR_DISCRIMINATOR_FILENAME.c_str(), FEMALE_DATASET_FILENAME.c_str(),
+        SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str(), verbose);
+    system(buf);
+
+    // Import female discriminated sensors.
+    vector<FemaleSensoryResponse> femaleSensors;
+    importFemaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, femaleSensors);
 
     unlink(MALE_DATASET_FILENAME.c_str());
     unlink(FEMALE_DATASET_FILENAME.c_str());
