@@ -19,22 +19,22 @@ vector < vector < FemaleSensoryResponse >> FemaleTrainBehavior;
 vector<FemaleSensoryResponse> FemaleTestBehavior;
 void generateBehavior(int randomSeed, int steps, bool verbose);
 void importBehaviorDataset(
-    vector<MaleSensoryResponse>&   maleSequence,
-    vector<FemaleSensoryResponse>& femaleSequence,
-    bool discrimination, bool verbose);
+   vector<MaleSensoryResponse>& maleSequence,
+   vector<FemaleSensoryResponse>& femaleSequence,
+   bool discrimination, bool verbose);
 void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleDatasetName);
 void convertBehaviorToPatternDatasets(int steps, string maleDatasetName, string femaleDatasetName);
 
 // Write datasets.
 // If testRandomSeed == -1, do not write test dataset.
-void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed, 
-    string maleDatasetName, string femaleDatasetName, bool verbose)
+void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed,
+                   string maleDatasetName, string femaleDatasetName, bool verbose)
 {
-    if (steps <= 0)
-    {
-        fprintf(stderr, "Steps must be positive number\n");
-        exit(1);
-    }
+   if (steps <= 0)
+   {
+      fprintf(stderr, "Steps must be positive number\n");
+      exit(1);
+   }
    if (trainRandomSeeds.size() == 0)
    {
       fprintf(stderr, "Must have at least one training random seed\n");
@@ -68,34 +68,36 @@ void writeDatasets(int steps, vector<int> trainRandomSeeds, int testRandomSeed,
    convertBehaviorToDatasets(steps, maleDatasetName, femaleDatasetName);
 }
 
+
 // Write sensor discrimination datasets.
 void writeSensorDiscriminationDatasets(int steps, vector<int> randomSeeds,
-    string maleDatasetName, string femaleDatasetName, bool verbose)
+                                       string maleDatasetName, string femaleDatasetName, bool verbose)
 {
-    if (randomSeeds.size() == 0)
-    {
-        fprintf(stderr, "Must supply at least one random seed\n");
-        exit(1);
-    }
-    if (steps == 0)
-    {
-        return;
-    }
+   if (randomSeeds.size() == 0)
+   {
+      fprintf(stderr, "Must supply at least one random seed\n");
+      exit(1);
+   }
+   if (steps == 0)
+   {
+      return;
+   }
 
-    // Create behavior datasets.
-    for (int randomSeed : randomSeeds)
-    {
-        vector<MaleSensoryResponse>   maleSequence;
-        vector<FemaleSensoryResponse> femaleSequence;
-        generateBehavior(randomSeed, steps, verbose);
-        importBehaviorDataset(maleSequence, femaleSequence, true, verbose);
-        MaleTrainBehavior.push_back(maleSequence);
-        FemaleTrainBehavior.push_back(femaleSequence);
-    }
+   // Create behavior datasets.
+   for (int randomSeed : randomSeeds)
+   {
+      vector<MaleSensoryResponse>   maleSequence;
+      vector<FemaleSensoryResponse> femaleSequence;
+      generateBehavior(randomSeed, steps, verbose);
+      importBehaviorDataset(maleSequence, femaleSequence, true, verbose);
+      MaleTrainBehavior.push_back(maleSequence);
+      FemaleTrainBehavior.push_back(femaleSequence);
+   }
 
-    // Convert behavior to pattern datasets.
-    convertBehaviorToPatternDatasets(steps, maleDatasetName, femaleDatasetName);
+   // Convert behavior to pattern datasets.
+   convertBehaviorToPatternDatasets(steps, maleDatasetName, femaleDatasetName);
 }
+
 
 // Generate behavior.
 void generateBehavior(int randomSeed, int steps, bool verbose)
@@ -109,25 +111,25 @@ void generateBehavior(int randomSeed, int steps, bool verbose)
    char buf[BUFSIZ];
    if (verbose)
    {
-      printf("Generating behavior file %s\n", (char*)BehaviorWorkFilename.c_str());
+      printf("Generating behavior file %s\n", (char *)BehaviorWorkFilename.c_str());
    }
    int mouseTotal = 0;
    int stoneTotal = 0;
    for (int x = 0; x < WIDTH; x++)
    {
-       for (int y = 0; y < HEIGHT; y++)
-       {
-           if ((World[x][y].locale == LOCALE::FOREST) &&
-               (World[x][y].object == OBJECT::MOUSE))
-           {
-               mouseTotal++;
-           }
-           if ((World[x][y].locale == LOCALE::DESERT) &&
-               (World[x][y].object == OBJECT::STONE))
-           {
-               stoneTotal++;
-           }
-       }
+      for (int y = 0; y < HEIGHT; y++)
+      {
+         if ((World[x][y].locale == LOCALE::FOREST) &&
+             (World[x][y].object == OBJECT::MOUSE))
+         {
+            mouseTotal++;
+         }
+         if ((World[x][y].locale == LOCALE::DESERT) &&
+             (World[x][y].object == OBJECT::STONE))
+         {
+            stoneTotal++;
+         }
+      }
    }
    for (int i = 1; i <= steps; i++)
    {
@@ -186,8 +188,8 @@ void generateBehavior(int randomSeed, int steps, bool verbose)
 
 // Import behavior dataset.
 void importBehaviorDataset(
-   vector<MaleSensoryResponse>&   maleSequence,
-   vector<FemaleSensoryResponse>& femaleSequence, 
+   vector<MaleSensoryResponse>& maleSequence,
+   vector<FemaleSensoryResponse>& femaleSequence,
    bool discrimination, bool verbose)
 {
    if (verbose)
@@ -197,10 +199,10 @@ void importBehaviorDataset(
    maleSequence.clear();
    femaleSequence.clear();
    ifstream file;
-   file.open((char*)BehaviorWorkFilename.c_str());
+   file.open((char *)BehaviorWorkFilename.c_str());
    if (!file.is_open())
    {
-      fprintf(stderr, "Cannot open behavior file %s\n", (char*)BehaviorWorkFilename.c_str());
+      fprintf(stderr, "Cannot open behavior file %s\n", (char *)BehaviorWorkFilename.c_str());
       exit(1);
    }
    string json;
@@ -283,9 +285,9 @@ void importBehaviorDataset(
       if (gender == "Ma")
       {
          MaleSensoryResponse sensoryResponse;
-         bool flying = false;
-         int                 end = json.find("\"");
-         int                 i   = 0;
+         bool                flying = false;
+         int                 end    = json.find("\"");
+         int                 i      = 0;
          while (end != -1)
          {
             switch (i)
@@ -358,18 +360,18 @@ void importBehaviorDataset(
          }
          if (!discrimination || !flying)
          {
-             if (verbose)
-             {
-                printf("Male data:\n");
-                sensoryResponse.print();
-             }
-             maleSequence.push_back(sensoryResponse);
+            if (verbose)
+            {
+               printf("Male data:\n");
+               sensoryResponse.print();
+            }
+            maleSequence.push_back(sensoryResponse);
          }
          continue;
       }
    }
    file.close();
-   unlink((char*)BehaviorWorkFilename.c_str());
+   unlink((char *)BehaviorWorkFilename.c_str());
 }
 
 
@@ -548,119 +550,130 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    fclose(fp);
 }
 
+
 // Convert behavior to pattern datasets.
 void convertBehaviorToPatternDatasets(int steps, string maleDatasetName, string femaleDatasetName)
 {
-    // Create male dataset.
-    FILE* fp = fopen(maleDatasetName.c_str(), "w");
+   // Create male dataset.
+   FILE *fp = fopen(maleDatasetName.c_str(), "w");
 
-    if (fp == NULL)
-    {
-        fprintf(stderr, "Cannot open male dataset file %s\n", maleDatasetName.c_str());
-        exit(1);
-    }
-    for (int i = 0; i < MaleTrainBehavior.size(); i++)
-    {
-        vector<MaleSensoryResponse> behaviorSequence = MaleTrainBehavior[i];
-        for (int j = 0; j < behaviorSequence.size(); j++)
-        {
-            MaleSensoryResponse sensoryResponse = behaviorSequence[j];
-            fprintf(fp, "%s,", sensoryResponse.sensoryToOneHot().c_str());
-            fprintf(fp, "%d\n", sensoryResponse.responseToNum());
-        }
-    }
-    fclose(fp);
+   if (fp == NULL)
+   {
+      fprintf(stderr, "Cannot open male dataset file %s\n", maleDatasetName.c_str());
+      exit(1);
+   }
+   for (int i = 0; i < MaleTrainBehavior.size(); i++)
+   {
+      vector<MaleSensoryResponse> behaviorSequence = MaleTrainBehavior[i];
+      for (int j = 0; j < behaviorSequence.size(); j++)
+      {
+         MaleSensoryResponse sensoryResponse = behaviorSequence[j];
+         fprintf(fp, "%s,", sensoryResponse.sensoryToOneHot().c_str());
+         fprintf(fp, "%d\n", sensoryResponse.responseToNum());
+      }
+   }
+   fclose(fp);
 
-    // Create female dataset.
-    fp = fopen(femaleDatasetName.c_str(), "w");
-    if (fp == NULL)
-    {
-        fprintf(stderr, "Cannot open female dataset file %s\n", femaleDatasetName.c_str());
-        exit(1);
-    }
-    for (int i = 0; i < FemaleTrainBehavior.size(); i++)
-    {
-        vector<FemaleSensoryResponse> behaviorSequence = FemaleTrainBehavior[i];
-        for (int j = 0; j < behaviorSequence.size(); j++)
-        {
-            FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
-            fprintf(fp, "%s,", sensoryResponse.sensoryToOneHot().c_str());
-            fprintf(fp, "%d\n", sensoryResponse.responseToNum());
-        }
-    }
-    fclose(fp);
+   // Create female dataset.
+   fp = fopen(femaleDatasetName.c_str(), "w");
+   if (fp == NULL)
+   {
+      fprintf(stderr, "Cannot open female dataset file %s\n", femaleDatasetName.c_str());
+      exit(1);
+   }
+   for (int i = 0; i < FemaleTrainBehavior.size(); i++)
+   {
+      vector<FemaleSensoryResponse> behaviorSequence = FemaleTrainBehavior[i];
+      for (int j = 0; j < behaviorSequence.size(); j++)
+      {
+         FemaleSensoryResponse sensoryResponse = behaviorSequence[j];
+         fprintf(fp, "%s,", sensoryResponse.sensoryToOneHot().c_str());
+         fprintf(fp, "%d\n", sensoryResponse.responseToNum());
+      }
+   }
+   fclose(fp);
 }
+
 
 // Import male sensors.
 void importMaleSensors(string maleSensorFilename, vector<MaleSensoryResponse>& sensors)
 {
-    ifstream file;
-    file.open(maleSensorFilename);
-    if (!file.is_open())
-    {
-        fprintf(stderr, "Cannot open male sensor file %s\n", maleSensorFilename.c_str());
-        exit(1);
-    }
-    sensors.clear();
-    string encoding;
-    while (getline(file, encoding))
-    {
-        MaleSensoryResponse sensoryResponse;
-        sensoryResponse.oneHotToSensory(encoding);
-        if (Verbose)
-        {
-            printf("encoding: %s\n", encoding.c_str());
-            printf("sensory:\n"); sensoryResponse.print();
-        }
-        sensors.push_back(sensoryResponse);
-    }
-    file.close();
+   ifstream file;
+
+   file.open(maleSensorFilename);
+   if (!file.is_open())
+   {
+      fprintf(stderr, "Cannot open male sensor file %s\n", maleSensorFilename.c_str());
+      exit(1);
+   }
+   sensors.clear();
+   string encoding;
+   while (getline(file, encoding))
+   {
+      MaleSensoryResponse sensoryResponse;
+      sensoryResponse.oneHotToSensory(encoding);
+      if (Verbose)
+      {
+         printf("encoding: %s\n", encoding.c_str());
+         printf("sensory:\n");
+         sensoryResponse.print();
+      }
+      sensors.push_back(sensoryResponse);
+   }
+   file.close();
 }
+
 
 // Import female sensors.
 void importFemaleSensors(string femaleSensorFilename, vector<FemaleSensoryResponse>& sensors)
 {
-    ifstream file;
-    file.open(femaleSensorFilename);
-    if (!file.is_open())
-    {
-        fprintf(stderr, "Cannot open female sensor file %s\n", femaleSensorFilename.c_str());
-        exit(1);
-    }
-    sensors.clear();
-    string encoding;
-    while (getline(file, encoding))
-    {
-        FemaleSensoryResponse sensoryResponse;
-        sensoryResponse.oneHotToSensory(encoding);
-        if (Verbose)
-        {
-            printf("encoding: %s\n", encoding.c_str());
-            printf("sensory:\n"); sensoryResponse.print();
-        }
-        sensors.push_back(sensoryResponse);
-    }
-    file.close();
+   ifstream file;
+
+   file.open(femaleSensorFilename);
+   if (!file.is_open())
+   {
+      fprintf(stderr, "Cannot open female sensor file %s\n", femaleSensorFilename.c_str());
+      exit(1);
+   }
+   sensors.clear();
+   string encoding;
+   while (getline(file, encoding))
+   {
+      FemaleSensoryResponse sensoryResponse;
+      sensoryResponse.oneHotToSensory(encoding);
+      if (Verbose)
+      {
+         printf("encoding: %s\n", encoding.c_str());
+         printf("sensory:\n");
+         sensoryResponse.print();
+      }
+      sensors.push_back(sensoryResponse);
+   }
+   file.close();
 }
+
 
 // Install male sensors.
 void installMaleSensors(vector<MaleSensoryResponse>& sensors)
 {
-    int s[Male::NUM_SENSORS];
-    for (MaleSensoryResponse sensoryResponse : sensors)
-    {
-        sensoryResponse.toSensors(s);
-        male->newSensorDiscriminatorReceptor(s);
-    }
+   int s[Male::NUM_SENSORS];
+
+   for (MaleSensoryResponse sensoryResponse : sensors)
+   {
+      sensoryResponse.toSensors(s);
+      male->newSensorDiscriminatorReceptor(s);
+   }
 }
+
 
 // Install female sensors.
 void installFemaleSensors(vector<FemaleSensoryResponse>& sensors)
 {
-    int s[Female::NUM_SENSORS];
-    for (FemaleSensoryResponse sensoryResponse : sensors)
-    {
-        sensoryResponse.toSensors(s);
-        female->newSensorDiscriminatorReceptor(s);
-    }
+   int s[Female::NUM_SENSORS];
+
+   for (FemaleSensoryResponse sensoryResponse : sensors)
+   {
+      sensoryResponse.toSensors(s);
+      female->newSensorDiscriminatorReceptor(s);
+   }
 }

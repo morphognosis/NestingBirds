@@ -200,7 +200,7 @@ public:
    void printResponse(FILE *fp = stdout);
 
    // Create sensor discriminator receptor.
-   void newSensorDiscriminatorReceptor(int* sensors);
+   void newSensorDiscriminatorReceptor(int *sensors);
 
 private:
 

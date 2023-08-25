@@ -34,9 +34,9 @@ int  FemaleNestSequence;
 FILE *BehaviorFp;
 
 // Sensor discrimination files.
-string SENSOR_DISCRIMINATOR_FILENAME = "sensor_discriminator.py";
-string MALE_DATASET_FILENAME = "nestingbirds_male_dataset.csv";
-string FEMALE_DATASET_FILENAME = "nestingbirds_female_dataset.csv";
+string SENSOR_DISCRIMINATOR_FILENAME          = "sensor_discriminator.py";
+string MALE_DATASET_FILENAME                  = "nestingbirds_male_dataset.csv";
+string FEMALE_DATASET_FILENAME                = "nestingbirds_female_dataset.csv";
 string SENSOR_DISCRIMINATION_RESULTS_FILENAME = "nestingbirds_sensor_discrimination_results.csv";
 
 // World map: plain=0, forest=1, mouse=2, desert=3, stone=4
@@ -89,7 +89,7 @@ int DESERT_MAX_Y    = -1;
 Cell World[WIDTH][HEIGHT];
 
 // Birds.
-Male   *male = NULL;
+Male   *male   = NULL;
 Female *female = NULL;
 
 // Prototypes.
@@ -223,7 +223,10 @@ void init(bool maleTest, bool femaleTest)
    DESERT_CENTER_Y = (DESERT_MIN_Y + DESERT_MAX_Y) / 2;
 
    // Create birds.
-   if (female != NULL) delete female;
+   if (female != NULL)
+   {
+      delete female;
+   }
    female          = new Female();
    female->Verbose = Verbose;
    female->x       = WIDTH / 2;
@@ -235,12 +238,15 @@ void init(bool maleTest, bool femaleTest)
       female->brain->setNeed(Female::MOUSE_NEED_INDEX, Female::MOUSE_NEED);
    }
    female->response = Female::RESPONSE::DO_NOTHING;
-   if (male != NULL) delete male;
-   male             = new Male();
-   male->Verbose    = Verbose;
-   male->x          = WIDTH / 2;
-   male->y          = (HEIGHT / 2) - 1;
-   male->food       = Male::INITIAL_FOOD;
+   if (male != NULL)
+   {
+      delete male;
+   }
+   male          = new Male();
+   male->Verbose = Verbose;
+   male->x       = WIDTH / 2;
+   male->y       = (HEIGHT / 2) - 1;
+   male->food    = Male::INITIAL_FOOD;
    if (male->food == 0)
    {
       male->goal = Male::GOAL::EAT_MOUSE;
@@ -483,19 +489,19 @@ bool flyToPlace()
 // Return true when response taken.
 bool doWants()
 {
-   if (male->goal == Male::GOAL::EAT_MOUSE && (male->hasObject == OBJECT::MOUSE))
+   if ((male->goal == Male::GOAL::EAT_MOUSE) && (male->hasObject == OBJECT::MOUSE))
    {
       male->response = Male::RESPONSE::EAT_MOUSE;
       return(true);
    }
    if (male->sensors[Male::FEMALE_PROXIMITY_SENSOR] == Male::PROXIMITY::PRESENT)
    {
-      if (male->goal == Male::GOAL::MOUSE_FOR_FEMALE && (male->hasObject == OBJECT::MOUSE))
+      if ((male->goal == Male::GOAL::MOUSE_FOR_FEMALE) && (male->hasObject == OBJECT::MOUSE))
       {
          male->response = Male::RESPONSE::GIVE_MOUSE;
          return(true);
       }
-      if (male->goal == Male::GOAL::STONE_FOR_FEMALE && (male->hasObject == OBJECT::STONE))
+      if ((male->goal == Male::GOAL::STONE_FOR_FEMALE) && (male->hasObject == OBJECT::STONE))
       {
          male->response = Male::RESPONSE::GIVE_STONE;
          return(true);
@@ -2210,73 +2216,78 @@ void loadFemale(char *filename)
    female->initNeeds();
 }
 
+
 // Discriminate sensors.
 void discriminateSensors(int steps, bool maleTest, bool femaleTest)
 {
-    if (Verbose)
-    {
-        printf("Discriminating sensors\n");
-    }
+   if (Verbose)
+   {
+      printf("Discriminating sensors\n");
+   }
 
-    // Save initialized birds.
-    Male* m = male;
-    male = NULL;
-    Female* f = female;
-    female = NULL;
+   // Save initialized birds.
+   Male *m = male;
+   male = NULL;
+   Female *f = female;
+   female = NULL;
 
-    // Write sensor discrimination datasets.
-    vector<int> randomSeeds;
-    randomSeeds.push_back(RANDOM_NUMBER_SEED);
-    writeSensorDiscriminationDatasets(steps, randomSeeds,
-        MALE_DATASET_FILENAME, FEMALE_DATASET_FILENAME, Verbose);
+   // Write sensor discrimination datasets.
+   vector<int> randomSeeds;
+   randomSeeds.push_back(RANDOM_NUMBER_SEED);
+   writeSensorDiscriminationDatasets(steps, randomSeeds,
+                                     MALE_DATASET_FILENAME, FEMALE_DATASET_FILENAME, Verbose);
 
-    // Run sensor discriminator for male.
-    FILE* fp = fopen(SENSOR_DISCRIMINATOR_FILENAME.c_str(), "r");
-    if (fp == NULL) 
-    {
-        fprintf(stderr, "Error: %s cannot be found\n", SENSOR_DISCRIMINATOR_FILENAME.c_str());
-        exit(1);
-    }
-    fclose(fp);
-    char buf[BUFSIZ];
-    char* verbose = (char *)"false";
-    if (Verbose) verbose = (char *)"true";
-    sprintf(buf, "python %s --sensor_input_file %s --sensor_output_file %s --verbose %s", 
-        SENSOR_DISCRIMINATOR_FILENAME.c_str(), MALE_DATASET_FILENAME.c_str(), 
-        SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str(), verbose);
-    system(buf);
+   // Run sensor discriminator for male.
+   FILE *fp = fopen(SENSOR_DISCRIMINATOR_FILENAME.c_str(), "r");
+   if (fp == NULL)
+   {
+      fprintf(stderr, "Error: %s cannot be found\n", SENSOR_DISCRIMINATOR_FILENAME.c_str());
+      exit(1);
+   }
+   fclose(fp);
+   char buf[BUFSIZ];
+   char *verbose = (char *)"false";
+   if (Verbose)
+   {
+      verbose = (char *)"true";
+   }
+   sprintf(buf, "python %s --sensor_input_file %s --sensor_output_file %s --verbose %s",
+           SENSOR_DISCRIMINATOR_FILENAME.c_str(), MALE_DATASET_FILENAME.c_str(),
+           SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str(), verbose);
+   system(buf);
 
-    // Import male discriminated sensors.
-    vector<MaleSensoryResponse> maleSensors;
-    importMaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, maleSensors);
+   // Import male discriminated sensors.
+   vector<MaleSensoryResponse> maleSensors;
+   importMaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, maleSensors);
 
-    // Install sensors.
-    installMaleSensors(maleSensors);
+   // Install sensors.
+   installMaleSensors(maleSensors);
 
-    // Run sensor discriminator for female.
-    sprintf(buf, "python %s --sensor_input_file %s --sensor_output_file %s --verbose %s",
-        SENSOR_DISCRIMINATOR_FILENAME.c_str(), FEMALE_DATASET_FILENAME.c_str(),
-        SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str(), verbose);
-    system(buf);
+   // Run sensor discriminator for female.
+   sprintf(buf, "python %s --sensor_input_file %s --sensor_output_file %s --verbose %s",
+           SENSOR_DISCRIMINATOR_FILENAME.c_str(), FEMALE_DATASET_FILENAME.c_str(),
+           SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str(), verbose);
+   system(buf);
 
-    // Import female discriminated sensors.
-    vector<FemaleSensoryResponse> femaleSensors;
-    importFemaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, femaleSensors);
+   // Import female discriminated sensors.
+   vector<FemaleSensoryResponse> femaleSensors;
+   importFemaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, femaleSensors);
 
-    // Install sensors.
-    installFemaleSensors(femaleSensors);
+   // Install sensors.
+   installFemaleSensors(femaleSensors);
 
-    unlink(MALE_DATASET_FILENAME.c_str());
-    unlink(FEMALE_DATASET_FILENAME.c_str());
-    unlink(SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str());
+   unlink(MALE_DATASET_FILENAME.c_str());
+   unlink(FEMALE_DATASET_FILENAME.c_str());
+   unlink(SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str());
 
-    // Restore initialized birds.
-    init(maleTest, femaleTest);
-    delete male;
-    male = m;
-    delete female;
-    female = f;
+   // Restore initialized birds.
+   init(maleTest, femaleTest);
+   delete male;
+   male = m;
+   delete female;
+   female = f;
 }
+
 
 // Open behavior file.
 void openBehaviorFile(char *filename)

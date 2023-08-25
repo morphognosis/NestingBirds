@@ -59,7 +59,7 @@ Usage:
       [-femaleBroodEggNeed <amount> (default=0.3)]
       [-randomSeed <seed> (default=4517)]
       [-mouseMoveProbability <probability> (default=0.1)]
-      [-discriminateSensors (discriminate sensors by detecting signals that are important to responses)]
+      [-discriminateSensors (discriminate sensors by detecting features that are important to responses)]
       [-verbose <true | false> (default=true)]
       [-version]
       
@@ -78,7 +78,7 @@ nestingbirds_rnn_male_test_results.json
 nestingbirds_rnn_female_train_results.json
 nestingbirds_rnn_female_test_results.json
 
-sensor_discriminator.py: discriminate sensors by detecting signals that are important to responses.
+sensor_discriminator.py: discriminate sensors by detecting features that are important to responses.
 
 Usage:
 python sensor_discriminator.py

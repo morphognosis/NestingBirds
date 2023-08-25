@@ -15,16 +15,16 @@
 using namespace std;
 
 // Usage.
-const char* Usage =
-"Usage:\n"
-"    nestingbirds_rnn\n"
-"      -steps <steps>\n"
-"      -trainRandomSeeds <random seeds> (comma-separated list)\n"
-"      [-testRandomSeed <random seed> [-dynamic (world generates sensory inputs from predicted responses)]]\n"
-"      [-verbose <true | false> (default=true)]\n"
-"Exit codes:\n"
-"  0=success\n"
-"  1=error\n";
+const char *Usage =
+   "Usage:\n"
+   "    nestingbirds_rnn\n"
+   "      -steps <steps>\n"
+   "      -trainRandomSeeds <random seeds> (comma-separated list)\n"
+   "      [-testRandomSeed <random seed> [-dynamic (world generates sensory inputs from predicted responses)]]\n"
+   "      [-verbose <true | false> (default=true)]\n"
+   "Exit codes:\n"
+   "  0=success\n"
+   "  1=error\n";
 
 // Steps.
 int Steps;
@@ -193,7 +193,7 @@ int main(int argc, char *args[])
 
    // Write datasets.
    writeDatasets(Steps, TrainRandomSeeds, TestRandomSeed,
-       RNN_MALE_DATASET_FILENAME, RNN_FEMALE_DATASET_FILENAME, Verbose);
+                 RNN_MALE_DATASET_FILENAME, RNN_FEMALE_DATASET_FILENAME, Verbose);
 
    // Run RNN.
    if (Verbose)
@@ -664,19 +664,19 @@ void generateBehavior(int randomSeed, int steps)
    int stoneTotal = 0;
    for (int x = 0; x < WIDTH; x++)
    {
-       for (int y = 0; y < HEIGHT; y++)
-       {
-           if ((World[x][y].locale == LOCALE::FOREST) &&
-               (World[x][y].object == OBJECT::MOUSE))
-           {
-               mouseTotal++;
-           }
-           if ((World[x][y].locale == LOCALE::DESERT) &&
-               (World[x][y].object == OBJECT::STONE))
-           {
-               stoneTotal++;
-           }
-       }
+      for (int y = 0; y < HEIGHT; y++)
+      {
+         if ((World[x][y].locale == LOCALE::FOREST) &&
+             (World[x][y].object == OBJECT::MOUSE))
+         {
+            mouseTotal++;
+         }
+         if ((World[x][y].locale == LOCALE::DESERT) &&
+             (World[x][y].object == OBJECT::STONE))
+         {
+            stoneTotal++;
+         }
+      }
    }
    for (int i = 1; i <= steps; i++)
    {
@@ -914,6 +914,7 @@ void importBehaviorDataset(
    file.close();
    unlink(BEHAVIOR_FILENAME);
 }
+
 
 // Trim string.
 string trim(string& str)

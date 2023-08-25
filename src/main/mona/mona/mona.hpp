@@ -171,21 +171,21 @@ public:
    // Find the receptor having the centroid closest to
    // the sensor vector for the give sensor mode.
    Receptor *getSensorModeReceptor(vector<SENSOR>& sensors,
-                                 SENSOR_MODE sensorMode, SENSOR& distance);
+                                   SENSOR_MODE sensorMode, SENSOR& distance);
 
    // Sensor discriminators.
    // A sensor discriminator contains sensor centroids filtered by importance to responses.
-   vector<SensorDiscriminator*> sensorDiscriminators;
-   void                 applySensorDiscriminator(vector<SENSOR>& in, vector<SENSOR>& out, int index);
-   void                 applySensorDiscriminator(vector<SENSOR>& sensors, int index);
+   vector<SensorDiscriminator *> sensorDiscriminators;
+   void applySensorDiscriminator(vector<SENSOR>& in, vector<SENSOR>& out, int index);
+   void applySensorDiscriminator(vector<SENSOR>& sensors, int index);
 
    // Sensor discriminator centroid search spaces.
-   vector<RDtree*> sensorDiscriminatorCentroids;
+   vector<RDtree *> sensorDiscriminatorCentroids;
 
    // Find the receptor having the centroid closest to
    // the sensor vector for the give sensor discriminator.
-   Receptor* getSensorDiscriminatorReceptor(vector<SENSOR>& sensors,
-       int index, SENSOR& distance);
+   Receptor *getSensorDiscriminatorReceptor(vector<SENSOR>& sensors,
+                                            int index, SENSOR& distance);
 
    // Response.
    RESPONSE response;
@@ -635,7 +635,7 @@ public:
 
    // Add/delete neurons to/from network.
    Receptor *newSensorModeReceptor(vector<SENSOR>& centroid, SENSOR_MODE sensorMode);
-   Receptor* newSensorDiscriminatorReceptor(vector<SENSOR>& centroid, int index);
+   Receptor *newSensorDiscriminatorReceptor(vector<SENSOR>& centroid, int index);
    Motor *newMotor();
    Motor *newMovementMotor(int movementType);
    Motor *newPlaceMotor(int x, int y);

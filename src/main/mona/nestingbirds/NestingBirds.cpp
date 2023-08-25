@@ -35,7 +35,7 @@ const char* Usage =
 "      [-femaleBroodEggNeed <amount> (default=" FEMALE_DEFAULT_BROOD_EGG_NEED ")]\n"
 "      [-randomSeed <seed> (default=" DEFAULT_RANDOM_NUMBER_SEED ")]\n"
 "      [-mouseMoveProbability <probability> (default=" DEFAULT_MOUSE_MOVE_PROBABILITY ")]\n"
-"      [-discriminateSensors (discriminate sensors by detecting signals that are important to responses)]\n"
+"      [-discriminateSensors (discriminate sensors by detecting features that are important to responses)]\n"
 "      [-writeBehaviorFile <behavior file name> (json)]\n"
 "      [-verbose <true | false> (default=true)]\n"
 "      [-version]\n"
@@ -55,13 +55,13 @@ char *FemaleLoadFilename;
 // Main.
 int main(int argc, char *args[])
 {
-   bool maleTest           = false;
-   bool femaleTest         = false;
-   bool gotMaleTrainTest   = false;
-   bool gotFemaleTrainTest = false;
-   bool gotSteps           = false;
+   bool maleTest               = false;
+   bool femaleTest             = false;
+   bool gotMaleTrainTest       = false;
+   bool gotFemaleTrainTest     = false;
+   bool gotSteps               = false;
    bool gotDiscriminateSensors = false;
-   char* behaviorFilename = NULL;
+   char *behaviorFilename      = NULL;
    char buf[BUFSIZ];
 
    for (int i = 1; i < argc; i++)
@@ -458,15 +458,15 @@ int main(int argc, char *args[])
       }
       if (strcmp(args[i], "-writeBehaviorFile") == 0)
       {
-          i++;
-          if (i >= argc)
-          {
-              fprintf(stderr, "Invalid behavior file\n");
-              fprintf(stderr, Usage);
-              exit(1);
-          }
-          behaviorFilename = args[i];
-          continue;
+         i++;
+         if (i >= argc)
+         {
+            fprintf(stderr, "Invalid behavior file\n");
+            fprintf(stderr, Usage);
+            exit(1);
+         }
+         behaviorFilename = args[i];
+         continue;
       }
       if (strcmp(args[i], "-version") == 0)
       {
@@ -526,13 +526,13 @@ int main(int argc, char *args[])
    // Discriminate sensors?
    if (gotDiscriminateSensors)
    {
-       discriminateSensors(Steps, maleTest, femaleTest);
+      discriminateSensors(Steps, maleTest, femaleTest);
    }
 
    // Write behavior file?
    if (behaviorFilename != NULL)
    {
-       openBehaviorFile(behaviorFilename);
+      openBehaviorFile(behaviorFilename);
    }
 
    // Run birds.

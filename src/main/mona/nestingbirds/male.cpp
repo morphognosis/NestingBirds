@@ -4,7 +4,7 @@
 
 #include "male.hpp"
 
-#define SENSOR_DISCRIMINATION 1
+#define SENSOR_DISCRIMINATION    1
 
 // Food.
 int Male:: FOOD_DURATION        = atoi(MALE_DEFAULT_FOOD_DURATION);
@@ -72,7 +72,7 @@ Male::Male()
    loadMask(mask, false, false, false, true,
             true, true, true, false, false);
 #ifdef SENSOR_DISCRIMINATION
-   int eatMouseMode = 0;
+   int eatMouseMode          = 0;
    int eatMouseDiscriminator = brain->addSensorDiscriminator(mask);
 #else
    int eatMouseMode = brain->addSensorMode(mask);
@@ -84,33 +84,33 @@ Male::Male()
 
    // Attend female goal.
    loadMask(mask, false, false, false, true,
-       false, false, true, false, false);
+            false, false, true, false, false);
 #ifdef SENSOR_DISCRIMINATION
-   int attendFemaleMode = 0;
+   int attendFemaleMode          = 0;
    int attendFemaleDiscriminator = brain->addSensorDiscriminator(mask);
 #else
    int attendFemaleMode = brain->addSensorMode(mask);
 #endif
    vector<Mona::SENSOR> attendFemaleSensors;
    loadSensors(attendFemaleSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-       (Mona::SENSOR)GOAL::ATTEND_FEMALE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
+               (Mona::SENSOR)GOAL::ATTEND_FEMALE, DONT_CARE, 0.0, DONT_CARE, DONT_CARE);
    brain->addGoal(ATTEND_FEMALE_NEED_INDEX, attendFemaleSensors, attendFemaleMode, ATTEND_FEMALE_NEED);
 
    // Female want mouse goal.
 #ifdef SENSOR_DISCRIMINATION
    loadMask(mask, false, false, false, true,
-       false, true, true, false, false);
+            false, true, true, false, false);
    int femaleWantDiscriminator = brain->addSensorDiscriminator(mask);
 #endif
    vector<Mona::SENSOR> femaleWantMouseSensors;
    loadSensors(femaleWantMouseSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-       (Mona::SENSOR)GOAL::MOUSE_FOR_FEMALE, (Mona::SENSOR)OBJECT::MOUSE, 0.0, DONT_CARE, DONT_CARE);
+               (Mona::SENSOR)GOAL::MOUSE_FOR_FEMALE, (Mona::SENSOR)OBJECT::MOUSE, 0.0, DONT_CARE, DONT_CARE);
    brain->addGoal(FEMALE_MOUSE_NEED_INDEX, femaleWantMouseSensors, 0, giveMouse, FEMALE_MOUSE_NEED);
 
    // Female want stone goal.
    vector<Mona::SENSOR> femaleWantStoneSensors;
    loadSensors(femaleWantStoneSensors, DONT_CARE, DONT_CARE, DONT_CARE, PROXIMITY::PRESENT,
-       (Mona::SENSOR)GOAL::STONE_FOR_FEMALE, (Mona::SENSOR)OBJECT::STONE, 0.0, DONT_CARE, DONT_CARE);
+               (Mona::SENSOR)GOAL::STONE_FOR_FEMALE, (Mona::SENSOR)OBJECT::STONE, 0.0, DONT_CARE, DONT_CARE);
    brain->addGoal(FEMALE_STONE_NEED_INDEX, femaleWantStoneSensors, 0, giveStone, FEMALE_STONE_NEED);
 
 #ifdef SENSOR_DISCRIMINATION
@@ -125,11 +125,13 @@ Male::Male()
    response = RESPONSE::DO_NOTHING;
 }
 
+
 // Destroy male bird.
 Male::~Male()
 {
-    delete brain;
+   delete brain;
 }
+
 
 // Initialize male needs.
 void Male::initNeeds()
@@ -381,29 +383,32 @@ void Male::printResponse(FILE *fp)
    fprintf(fp, "\"Response\": \"%s\"", RESPONSE::toString(response));
 }
 
+
 // Create sensor discriminator receptor.
-void Male::newSensorDiscriminatorReceptor(int* sensors)
+void Male::newSensorDiscriminatorReceptor(int *sensors)
 {
 #ifdef SENSOR_DISCRIMINATION
-    vector<bool> mask;
-    vector<Mona::SENSOR> s;
-    for (int i = 0; i < NUM_SENSORS; i++)
-    { 
-        if (sensors[i] == DONT_CARE)
-        {
-            mask.push_back(false);
-        }
-        else {
-            mask.push_back(true);
-        }
-        s.push_back((Mona::SENSOR)sensors[i]);
-    }
-    brain->newSensorDiscriminatorReceptor(s, brain->addSensorDiscriminator(mask));
+   vector<bool>         mask;
+   vector<Mona::SENSOR> s;
+   for (int i = 0; i < NUM_SENSORS; i++)
+   {
+      if (sensors[i] == DONT_CARE)
+      {
+         mask.push_back(false);
+      }
+      else
+      {
+         mask.push_back(true);
+      }
+      s.push_back((Mona::SENSOR)sensors[i]);
+   }
+   brain->newSensorDiscriminatorReceptor(s, brain->addSensorDiscriminator(mask));
 #else
-    fprintf(stderr, "Cannot create discriminator receptor: SENSOR_DISCRIMINATION symbol undefined\n");
-    exit(1);
+   fprintf(stderr, "Cannot create discriminator receptor: SENSOR_DISCRIMINATION symbol undefined\n");
+   exit(1);
 #endif
 }
+
 
 // Load mask.
 void Male::loadMask(vector<bool>& mask,

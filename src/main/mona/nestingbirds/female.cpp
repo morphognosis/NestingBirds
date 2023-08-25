@@ -4,7 +4,7 @@
 
 #include "female.hpp"
 
-#define SENSOR_DISCRIMINATION 1
+#define SENSOR_DISCRIMINATION    1
 
 // Food.
 int Female:: FOOD_DURATION        = atoi(FEMALE_DEFAULT_FOOD_DURATION);
@@ -55,7 +55,7 @@ Female::Female()
    loadMask(mask, false, false, false, false,
             false, false, false, false, false, false, true, true);
 #ifdef SENSOR_DISCRIMINATION
-   int eatMouseMode = 0;
+   int eatMouseMode       = 0;
    int mouseDiscriminator = brain->addSensorDiscriminator(mask);
 #else
    int eatMouseMode = brain->addSensorMode(mask);
@@ -73,7 +73,7 @@ Female::Female()
                (Mona::SENSOR)OBJECT::STONE, (Mona::SENSOR)OBJECT::STONE,
                (Mona::SENSOR)ORIENTATION::SOUTH, (Mona::SENSOR)GOAL::LAY_EGG, DONT_CARE);
    int layEggGoal = brain->addGoal(LAY_EGG_NEED_INDEX, sensors, 0, layEgg, LAY_EGG_NEED);
-   
+
    // Brooding egg.
    loadSensors(sensors, (Mona::SENSOR)OBJECT::EGG, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
                DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
@@ -85,8 +85,8 @@ Female::Female()
    brain->newSensorDiscriminatorReceptor(eatMouseSensors, mouseDiscriminator);
    vector<Mona::SENSOR> wantMouseSensors;
    loadSensors(wantMouseSensors, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-       DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
-       DONT_CARE, (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::NO_OBJECT);
+               DONT_CARE, DONT_CARE, DONT_CARE, DONT_CARE,
+               DONT_CARE, (Mona::SENSOR)GOAL::EAT_MOUSE, (Mona::SENSOR)OBJECT::NO_OBJECT);
    brain->newSensorDiscriminatorReceptor(wantMouseSensors, mouseDiscriminator);
 #endif
 
@@ -94,11 +94,13 @@ Female::Female()
    response = RESPONSE::DO_NOTHING;
 }
 
+
 // Destroy female bird.
 Female::~Female()
 {
-    delete brain;
+   delete brain;
 }
+
 
 // Initialize female needs.
 void Female::initNeeds()
@@ -292,29 +294,32 @@ void Female::printResponse(FILE *fp)
    fprintf(fp, "\"Response\": \"%s\"", RESPONSE::toString(response));
 }
 
+
 // Create sensor discriminator receptor.
-void Female::newSensorDiscriminatorReceptor(int* sensors)
+void Female::newSensorDiscriminatorReceptor(int *sensors)
 {
 #ifdef SENSOR_DISCRIMINATION
-    vector<bool> mask;
-    vector<Mona::SENSOR> s;
-    for (int i = 0; i < NUM_SENSORS; i++)
-    {
-        if (sensors[i] == DONT_CARE)
-        {
-            mask.push_back(false);
-        }
-        else {
-            mask.push_back(true);
-        }
-        s.push_back((Mona::SENSOR)sensors[i]);
-    }
-    brain->newSensorDiscriminatorReceptor(s, brain->addSensorDiscriminator(mask));
+   vector<bool>         mask;
+   vector<Mona::SENSOR> s;
+   for (int i = 0; i < NUM_SENSORS; i++)
+   {
+      if (sensors[i] == DONT_CARE)
+      {
+         mask.push_back(false);
+      }
+      else
+      {
+         mask.push_back(true);
+      }
+      s.push_back((Mona::SENSOR)sensors[i]);
+   }
+   brain->newSensorDiscriminatorReceptor(s, brain->addSensorDiscriminator(mask));
 #else
-    fprintf(stderr, "Cannot create discriminator receptor: SENSOR_DISCRIMINATION symbol undefined\n");
-    exit(1);
+   fprintf(stderr, "Cannot create discriminator receptor: SENSOR_DISCRIMINATION symbol undefined\n");
+   exit(1);
 #endif
 }
+
 
 // Load mask.
 void Female::loadMask(vector<bool>& mask,
