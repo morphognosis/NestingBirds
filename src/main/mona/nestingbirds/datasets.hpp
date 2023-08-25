@@ -1088,4 +1088,8 @@ extern vector<FemaleSensoryResponse> FemaleTestBehavior;
 void importMaleSensors(string maleSensorFilename, vector<MaleSensoryResponse>& sensors);
 void importFemaleSensors(string femaleSensorFilename, vector<FemaleSensoryResponse>& sensors);
 
+// Install sensors.
+void installMaleSensors(vector<MaleSensoryResponse>& sensors);
+void installFemaleSensors(vector<FemaleSensoryResponse>& sensors);
+
 #endif

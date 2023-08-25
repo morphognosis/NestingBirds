@@ -643,3 +643,24 @@ void importFemaleSensors(string femaleSensorFilename, vector<FemaleSensoryRespon
     file.close();
 }
 
+// Install male sensors.
+void installMaleSensors(vector<MaleSensoryResponse>& sensors)
+{
+    int s[Male::NUM_SENSORS];
+    for (MaleSensoryResponse sensoryResponse : sensors)
+    {
+        sensoryResponse.toSensors(s);
+        male->newSensorDiscriminatorReceptor(s);
+    }
+}
+
+// Install female sensors.
+void installFemaleSensors(vector<FemaleSensoryResponse>& sensors)
+{
+    int s[Female::NUM_SENSORS];
+    for (FemaleSensoryResponse sensoryResponse : sensors)
+    {
+        sensoryResponse.toSensors(s);
+        female->newSensorDiscriminatorReceptor(s);
+    }
+}

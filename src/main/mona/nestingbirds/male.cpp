@@ -67,7 +67,7 @@ Male::Male()
 
    // Goals:
 
-   // Food goals.
+   // Food goal.
    vector<bool> mask;
    loadMask(mask, false, false, false, true,
             true, true, true, false, false);
@@ -381,6 +381,29 @@ void Male::printResponse(FILE *fp)
    fprintf(fp, "\"Response\": \"%s\"", RESPONSE::toString(response));
 }
 
+// Create sensor discriminator receptor.
+void Male::newSensorDiscriminatorReceptor(int* sensors)
+{
+#ifdef SENSOR_DISCRIMINATION
+    vector<bool> mask;
+    vector<Mona::SENSOR> s;
+    for (int i = 0; i < NUM_SENSORS; i++)
+    { 
+        if (sensors[i] == DONT_CARE)
+        {
+            mask.push_back(false);
+        }
+        else {
+            mask.push_back(true);
+        }
+        s.push_back((Mona::SENSOR)sensors[i]);
+    }
+    brain->newSensorDiscriminatorReceptor(s, brain->addSensorDiscriminator(mask));
+#else
+    fprintf(stderr, "Cannot create discriminator receptor: SENSOR_DISCRIMINATION symbol undefined\n");
+    exit(1);
+#endif
+}
 
 // Load mask.
 void Male::loadMask(vector<bool>& mask,

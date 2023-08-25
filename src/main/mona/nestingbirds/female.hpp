@@ -199,6 +199,9 @@ public:
    // Print response.
    void printResponse(FILE *fp = stdout);
 
+   // Create sensor discriminator receptor.
+   void newSensorDiscriminatorReceptor(int* sensors);
+
 private:
 
    // Load mask.

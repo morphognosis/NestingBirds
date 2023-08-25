@@ -2230,7 +2230,7 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
     writeSensorDiscriminationDatasets(steps, randomSeeds,
         MALE_DATASET_FILENAME, FEMALE_DATASET_FILENAME, Verbose);
 
-    // Run sensor discriminator.
+    // Run sensor discriminator for male.
     FILE* fp = fopen(SENSOR_DISCRIMINATOR_FILENAME.c_str(), "r");
     if (fp == NULL) 
     {
@@ -2250,7 +2250,10 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
     vector<MaleSensoryResponse> maleSensors;
     importMaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, maleSensors);
 
-    // Run sensor discriminator.
+    // Install sensors.
+    installMaleSensors(maleSensors);
+
+    // Run sensor discriminator for female.
     sprintf(buf, "python %s --sensor_input_file %s --sensor_output_file %s --verbose %s",
         SENSOR_DISCRIMINATOR_FILENAME.c_str(), FEMALE_DATASET_FILENAME.c_str(),
         SENSOR_DISCRIMINATION_RESULTS_FILENAME.c_str(), verbose);
@@ -2259,6 +2262,9 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
     // Import female discriminated sensors.
     vector<FemaleSensoryResponse> femaleSensors;
     importFemaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, femaleSensors);
+
+    // Install sensors.
+    installFemaleSensors(femaleSensors);
 
     unlink(MALE_DATASET_FILENAME.c_str());
     unlink(FEMALE_DATASET_FILENAME.c_str());

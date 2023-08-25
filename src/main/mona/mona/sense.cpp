@@ -485,12 +485,6 @@ bool Mona::delSensorMode(int mode)
 // Add sensor discriminator.
 int Mona::addSensorDiscriminator(vector<bool>& sensorMask, SENSOR sensorResolution)
 {
-    // Must add discriminators before cycling.
-    if ((int)receptors.size() > 0)
-    {
-        return(-1);
-    }
-
     // Duplicate?
     for (int i = 0, n = (int)sensorDiscriminators.size(); i < n; i++)
     {
