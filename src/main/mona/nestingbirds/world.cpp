@@ -2260,9 +2260,6 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
    vector<MaleSensoryResponse> maleSensors;
    importMaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, maleSensors);
 
-   // Install sensors.
-   installMaleSensors(maleSensors);
-
    // Run sensor discriminator for female.
    sprintf(buf, "python %s --sensor_input_file %s --sensor_output_file %s --verbose %s",
            SENSOR_DISCRIMINATOR_FILENAME.c_str(), FEMALE_DATASET_FILENAME.c_str(),
@@ -2272,9 +2269,6 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
    // Import female discriminated sensors.
    vector<FemaleSensoryResponse> femaleSensors;
    importFemaleSensors(SENSOR_DISCRIMINATION_RESULTS_FILENAME, femaleSensors);
-
-   // Install sensors.
-   installFemaleSensors(femaleSensors);
 
    unlink(MALE_DATASET_FILENAME.c_str());
    unlink(FEMALE_DATASET_FILENAME.c_str());
@@ -2286,6 +2280,10 @@ void discriminateSensors(int steps, bool maleTest, bool femaleTest)
    male = m;
    delete female;
    female = f;
+
+   // Install sensors.
+   installMaleSensors(maleSensors);
+   installFemaleSensors(femaleSensors);
 }
 
 

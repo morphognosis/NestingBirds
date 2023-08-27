@@ -13,7 +13,7 @@ Mona::sense()
    SENSOR             distance;
    bool               addReceptor;
    vector<Receptor *> oldReceptorSet, newReceptorSet;
-
+ 
 #ifdef MONA_TRACE
    if (traceSense)
    {
