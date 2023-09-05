@@ -2,6 +2,7 @@
 /src/main/mona/.vs/
 /src/main/mona/nestingbirds/Debug/
 /src/main/mona/nestingbirds/Release/
+/src/main/mona/nestingbirds/x64/
 /src/main/mona/nestingbirds/nestingbirds.vcxproj.user
 /src/main/mona/common/*.o
 /src/main/mona/mona/*.o

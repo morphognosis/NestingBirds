@@ -180,29 +180,29 @@ public:
       encoding += ",";
       if (flying == "true")
       {
-         encoding += "1";
+         encoding += "1,0";
       }
       else
       {
-         encoding += "0";
+         encoding += "0,1";
       }
       encoding += ",";
       if (femaleWantsMouse == "true")
       {
-         encoding += "1";
+         encoding += "1,0";
       }
       else
       {
-         encoding += "0";
+         encoding += "0,1";
       }
       encoding += ",";
       if (femaleWantsStone == "true")
       {
-         encoding += "1";
+         encoding += "1,0";
       }
       else
       {
-         encoding += "0";
+         encoding += "0,1";
       }
       return(encoding);
    }
@@ -359,7 +359,7 @@ public:
       {
          flying = "true";
       }
-      else if (values[idx] == "0.0")
+      else if (values[idx + 1] == "1.0")
       {
          flying = "false";
       }
@@ -367,12 +367,12 @@ public:
       {
          flying = "DONT_CARE";
       }
-      idx += 1;
+      idx += 2;
       if (values[idx] == "1.0")
       {
          femaleWantsMouse = "true";
       }
-      else if (values[idx] == "0.0")
+      else if (values[idx + 1] == "1.0")
       {
          femaleWantsMouse = "false";
       }
@@ -380,12 +380,12 @@ public:
       {
          femaleWantsMouse = "DONT_CARE";
       }
-      idx += 1;
+      idx += 2;
       if (values[idx] == "1.0")
       {
          femaleWantsStone = "true";
       }
-      else if (values[idx] == "0.0")
+      else if (values[idx + 1] == "1.0")
       {
          femaleWantsStone = "false";
       }
@@ -565,7 +565,7 @@ public:
    // Get length of sensory encoding.
    static int oneHotSensoryLength()
    {
-      return(28);
+      return(31);
    }
 
 

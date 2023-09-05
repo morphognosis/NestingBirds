@@ -386,7 +386,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       fprintf(stderr, "Cannot open male dataset file %s\n", maleDatasetName.c_str());
       exit(1);
    }
-   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", MaleTrainBehavior.size(), MaleTrainBehavior[0].size(), MaleSensoryResponse::oneHotSensoryLength());
+   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", (int)MaleTrainBehavior.size(), (int)MaleTrainBehavior[0].size(), MaleSensoryResponse::oneHotSensoryLength());
    fprintf(fp, "X_train_seq = [\n");
    for (int i = 0; i < MaleTrainBehavior.size(); i++)
    {
@@ -403,7 +403,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", MaleTrainBehavior.size(), MaleTrainBehavior[0].size(), MaleSensoryResponse::oneHotResponseLength());
+   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", (int)MaleTrainBehavior.size(), (int)MaleTrainBehavior[0].size(), MaleSensoryResponse::oneHotResponseLength());
    fprintf(fp, "y_train_seq = [\n");
    for (int i = 0; i < MaleTrainBehavior.size(); i++)
    {
@@ -427,7 +427,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "X_test_shape = [1, %d, %d]\n", MaleTestBehavior.size(), MaleSensoryResponse::oneHotSensoryLength());
+      fprintf(fp, "X_test_shape = [1, %d, %d]\n", (int)MaleTestBehavior.size(), (int)MaleSensoryResponse::oneHotSensoryLength());
       fprintf(fp, "X_test_seq = [\n");
       for (int i = 0; i < MaleTestBehavior.size(); i++)
       {
@@ -448,7 +448,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "y_test_shape = [1, %d, %d]\n", MaleTestBehavior.size(), MaleSensoryResponse::oneHotResponseLength());
+      fprintf(fp, "y_test_shape = [1, %d, %d]\n", (int)MaleTestBehavior.size(), (int)MaleSensoryResponse::oneHotResponseLength());
       fprintf(fp, "y_test_seq = [\n");
       for (int i = 0; i < MaleTestBehavior.size(); i++)
       {
@@ -471,7 +471,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       fprintf(stderr, "Cannot open female dataset file %s\n", femaleDatasetName.c_str());
       exit(1);
    }
-   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", FemaleTrainBehavior.size(), FemaleTrainBehavior[0].size(), FemaleSensoryResponse::oneHotSensoryLength());
+   fprintf(fp, "X_train_shape = [%d, %d, %d]\n", (int)FemaleTrainBehavior.size(), (int)FemaleTrainBehavior[0].size(), FemaleSensoryResponse::oneHotSensoryLength());
    fprintf(fp, "X_train_seq = [\n");
    for (int i = 0; i < FemaleTrainBehavior.size(); i++)
    {
@@ -488,7 +488,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
       }
    }
    fprintf(fp, "]\n");
-   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", FemaleTrainBehavior.size(), FemaleTrainBehavior[0].size(), FemaleSensoryResponse::oneHotResponseLength());
+   fprintf(fp, "y_train_shape = [%d, %d, %d]\n", (int)FemaleTrainBehavior.size(), (int)FemaleTrainBehavior[0].size(), FemaleSensoryResponse::oneHotResponseLength());
    fprintf(fp, "y_train_seq = [\n");
    for (int i = 0; i < FemaleTrainBehavior.size(); i++)
    {
@@ -512,7 +512,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "X_test_shape = [1, %d, %d]\n", FemaleTestBehavior.size(), FemaleSensoryResponse::oneHotSensoryLength());
+      fprintf(fp, "X_test_shape = [1, %d, %d]\n", (int)FemaleTestBehavior.size(), (int)FemaleSensoryResponse::oneHotSensoryLength());
       fprintf(fp, "X_test_seq = [\n");
       for (int i = 0; i < FemaleTestBehavior.size(); i++)
       {
@@ -533,7 +533,7 @@ void convertBehaviorToDatasets(int steps, string maleDatasetName, string femaleD
    }
    else
    {
-      fprintf(fp, "y_test_shape = [1, %d, %d]\n", FemaleTestBehavior.size(), FemaleSensoryResponse::oneHotResponseLength());
+      fprintf(fp, "y_test_shape = [1, %d, %d]\n", (int)FemaleTestBehavior.size(), (int)FemaleSensoryResponse::oneHotResponseLength());
       fprintf(fp, "y_test_seq = [\n");
       for (int i = 0; i < FemaleTestBehavior.size(); i++)
       {
@@ -610,6 +610,8 @@ void importMaleSensors(string maleSensorFilename, vector<MaleSensoryResponse>& s
    string encoding;
    while (getline(file, encoding))
    {
+      encoding.erase(std::remove(encoding.begin(), encoding.end(), '\n'), encoding.end());
+      encoding.erase(std::remove(encoding.begin(), encoding.end(), '\r'), encoding.end());
       MaleSensoryResponse sensoryResponse;
       sensoryResponse.oneHotToSensory(encoding);
       if (Verbose)
@@ -639,6 +641,8 @@ void importFemaleSensors(string femaleSensorFilename, vector<FemaleSensoryRespon
    string encoding;
    while (getline(file, encoding))
    {
+      encoding.erase(std::remove(encoding.begin(), encoding.end(), '\n'), encoding.end());
+      encoding.erase(std::remove(encoding.begin(), encoding.end(), '\r'), encoding.end());
       FemaleSensoryResponse sensoryResponse;
       sensoryResponse.oneHotToSensory(encoding);
       if (Verbose)
@@ -656,12 +660,34 @@ void importFemaleSensors(string femaleSensorFilename, vector<FemaleSensoryRespon
 // Install male sensors.
 void installMaleSensors(vector<MaleSensoryResponse>& sensors)
 {
-   int s[Male::NUM_SENSORS];
+   int sInt[Male::NUM_SENSORS];
 
+   vector<Mona::SENSOR> sFloat;
+   vector<bool>         mask;
+   Mona::SENSOR         distance;
    for (MaleSensoryResponse sensoryResponse : sensors)
    {
-      sensoryResponse.toSensors(s);
-      male->newSensorDiscriminatorReceptor(s);
+      sensoryResponse.toSensors(sInt);
+      mask.clear();
+      sFloat.clear();
+      for (int i = 0; i < Male::NUM_SENSORS; i++)
+      {
+         if (sInt[i] == DONT_CARE)
+         {
+            mask.push_back(false);
+         }
+         else
+         {
+            mask.push_back(true);
+         }
+         sFloat.push_back((Mona::SENSOR)sInt[i]);
+      }
+      int            index     = male->brain->addSensorDiscriminator(mask);
+      Mona::Receptor *receptor = male->brain->getSensorDiscriminatorReceptor(sFloat, index, distance);
+      if ((receptor == NULL) || ((receptor != NULL) && (distance > male->brain->sensorDiscriminators[index]->resolution)))
+      {
+         male->newSensorDiscriminatorReceptor(sInt);
+      }
    }
 }
 
@@ -669,11 +695,33 @@ void installMaleSensors(vector<MaleSensoryResponse>& sensors)
 // Install female sensors.
 void installFemaleSensors(vector<FemaleSensoryResponse>& sensors)
 {
-   int s[Female::NUM_SENSORS];
+   int sInt[Female::NUM_SENSORS];
 
+   vector<Mona::SENSOR> sFloat;
+   vector<bool>         mask;
+   Mona::SENSOR         distance;
    for (FemaleSensoryResponse sensoryResponse : sensors)
    {
-      sensoryResponse.toSensors(s);
-      female->newSensorDiscriminatorReceptor(s);
+      sensoryResponse.toSensors(sInt);
+      mask.clear();
+      sFloat.clear();
+      for (int i = 0; i < Female::NUM_SENSORS; i++)
+      {
+         if (sInt[i] == DONT_CARE)
+         {
+            mask.push_back(false);
+         }
+         else
+         {
+            mask.push_back(true);
+         }
+         sFloat.push_back((Mona::SENSOR)sInt[i]);
+      }
+      int            index     = female->brain->addSensorDiscriminator(mask);
+      Mona::Receptor *receptor = female->brain->getSensorDiscriminatorReceptor(sFloat, index, distance);
+      if ((receptor == NULL) || ((receptor != NULL) && (distance > female->brain->sensorDiscriminators[index]->resolution)))
+      {
+         female->newSensorDiscriminatorReceptor(sInt);
+      }
    }
 }

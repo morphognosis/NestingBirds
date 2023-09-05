@@ -7,8 +7,8 @@
 #include <stdlib.h>
 
 // Version.
-#define VERSION "2.0"
-const char* Version = "@(#)Nesting birds version 2.0";
+#define VERSION    "2.0"
+const char *Version = "@(#)Nesting birds version 2.0";
 
 // Usage.
 const char* Usage =

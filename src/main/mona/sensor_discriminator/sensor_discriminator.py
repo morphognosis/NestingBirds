@@ -22,9 +22,6 @@ input_dim = -1
 output_dim = -1
 hidden_dim = 256
 
-# Significant change in output.
-significant_output_delta = 0.01
-
 # Dataset size.
 dataset_size = -1
 
@@ -40,9 +37,9 @@ random_seed = 4517
 # Verbose.
 verbose = True
 
-usage = 'sensor_discriminator.py --sensor_input_file <input file name> --sensor_output_file <output file name> [--significant_output_delta <delta>] [--network_hidden_dimension <hidden layer dimension>] [--learning_rate <learning rate>] [--epochs <training epochs>] [--random_seed <random seed>] [--verbose <true | false>]'
+usage = 'sensor_discriminator.py --sensor_input_file <input file name> --sensor_output_file <output file name> [--network_hidden_dimension <hidden layer dimension>] [--learning_rate <learning rate>] [--epochs <training epochs>] [--random_seed <random seed>] [--verbose <true | false>]'
 try:
-  opts, args = getopt.getopt(sys.argv[1:],"i:o:s:h:l:e:r:v:?",["sensor_input_file=","sensor_output_file=","significant_output_delta=","network_hidden_dimension=","learning_rate=","epochs=","random_seed=","verbose=","help"])
+  opts, args = getopt.getopt(sys.argv[1:],"i:o:s:h:l:e:r:v:?",["sensor_input_file=","sensor_output_file=","network_hidden_dimension=","learning_rate=","epochs=","random_seed=","verbose=","help"])
 except getopt.GetoptError:
   print(usage)
   sys.exit(1)
@@ -54,8 +51,6 @@ for opt, arg in opts:
      sensor_input_filename = arg
   elif opt in ("-o", "--sensor_output_file"):
      sensor_output_filename = arg
-  elif opt in ("-s", "--significant_output_delta"):
-     significant_output_delta = float(arg)
   elif opt in ("-h", "--network_hidden_dimension"):
      hidden_dim = int(arg)
   elif opt in ("-l", "--learning_rate"):
@@ -177,49 +172,32 @@ for i in range(dataset_size):
                             maxInDelta = d
                 print('maxInIdx=', maxInIdx, 'maxInDelta=', maxInDelta)
             discriminated_input = []
+            count = 0
             for j in range(input_dim):
                 v = input_sensors[0][j]
                 if v == 1.0:
                     input_sensors[0][j] = 0.0
                     prediction = model.predict(input_sensors)
-                    input_sensors[0][j] = v
-                    if maxOutVal - prediction[0][maxOutIdx] >=  significant_output_delta:
-                        discriminated_input.append(v)
+                    input_sensors[0][j] = 1.0
+                    if maxOutVal > prediction[0][maxOutIdx]:
+                        discriminated_input.append(1.0)
+                        count = count + 1
                     else:
-                         discriminated_input.append(0.0)
+                         discriminated_input.append(-1.0)
                 else:
-                     discriminated_input.append(0.0)
-            count = 0
-            for j in range(input_dim):
-                if discriminated_input[j] == 0.0:
-                    discriminated_input[j] = -1.0
-                else:
-                    count = count + 1
+                     discriminated_input.append(-1.0)
             if count > 0:
-                do_subset = True
+                add = True
                 for j in range(len(results)):
                     duplicate = True
                     for k in range(input_dim):
-                        if (discriminated_input[k] == 1.0 and results[j][k] == 1.0) or (discriminated_input[k] != 1.0 and results[j][k] != 1.0):
-                            pass
-                        else:
+                        if discriminated_input[k] != results[j][k]:
                             duplicate = False
                             break
                     if duplicate == True:
-                        do_subset = False
+                        add = False
                         break
-                if do_subset == True:
-                    for j in range(len(results)):
-                        subset = True
-                        for k in range(input_dim):
-                            if discriminated_input[k] == 1.0 and results[j][k] != 1.0:
-                                subset = False
-                                break
-                        if subset == True:
-                            for k in range(input_dim):
-                                if discriminated_input[k] == -1.0 and results[j][k] != -1.0:
-                                    discriminated_input[k] = 0.0
-                            break
+                if add == True:
                     results.append(discriminated_input)
                     if verbose == True:
                        print('discriminated input:', discriminated_input)

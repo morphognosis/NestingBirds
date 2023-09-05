@@ -98,7 +98,7 @@ void Mona::initParms()
    UTILITY_ASYMPTOTE = 10.0;
    DEFAULT_MAX_LEARNING_EFFECT_EVENT_INTERVAL = 2;
    DEFAULT_NUM_EFFECT_EVENT_INTERVALS         = 3;
-   MAX_MEDIATORS      = 500;
+   MAX_MEDIATORS      = 1000;
    MAX_MEDIATOR_LEVEL = 0;
    MAX_RESPONSE_EQUIPPED_MEDIATOR_LEVEL   = 2;
    MIN_RESPONSE_UNEQUIPPED_MEDIATOR_LEVEL = 3;
@@ -665,9 +665,10 @@ void Mona::Neuron::load(FILE *fp)
    {
       notify = new struct Notify;
       assert(notify != NULL);
-      notify->mediator = (Mediator *)new ID;
-      assert(notify->mediator != NULL);
-      FREAD_LONG_LONG((ID *)notify->mediator, fp);
+      ID *mediatorId = new ID;
+      assert(mediatorId != NULL);
+      FREAD_LONG_LONG(mediatorId, fp);
+      notify->mediator = (Mediator *)mediatorId;
       FREAD_INT(&j, fp);
       notify->eventType = (EVENT_TYPE)j;
       notifyList[i]     = notify;
@@ -821,19 +822,19 @@ void Mona::Receptor::load(FILE *fp)
    subSensorModes.clear();
    for (i = 0; i < j; i++)
    {
-      receptor = (Receptor *)new ID;
-      assert(receptor != NULL);
-      FREAD_LONG_LONG((ID *)receptor, fp);
-      subSensorModes.push_back(receptor);
+      ID *receptorId = new ID;
+      assert(receptorId != NULL);
+      FREAD_LONG_LONG(receptorId, fp);
+      subSensorModes.push_back((Receptor *)receptorId);
    }
    FREAD_INT(&j, fp);
    superSensorModes.clear();
    for (i = 0; i < j; i++)
    {
-      receptor = (Receptor *)new ID;
-      assert(receptor != NULL);
-      FREAD_LONG_LONG((ID *)receptor, fp);
-      superSensorModes.push_back(receptor);
+      ID *receptorId = new ID;
+      assert(receptorId != NULL);
+      FREAD_LONG_LONG(receptorId, fp);
+      superSensorModes.push_back((Receptor *)receptorId);
    }
 }
 
@@ -1364,23 +1365,26 @@ void Mona::Mediator::load(FILE *fp)
    FREAD_DOUBLE(&baseEnablement, fp);
    FREAD_DOUBLE(&utility, fp);
    FREAD_DOUBLE(&utilityWeight, fp);
-   cause = (Neuron *)new ID;
-   assert(cause != NULL);
-   FREAD_LONG_LONG((ID *)cause, fp);
+   ID *neuronId = new ID;
+   assert(neuronId != NULL);
+   FREAD_LONG_LONG(neuronId, fp);
+   cause = (Neuron *)neuronId;
    FREAD_INT(&i, fp);
    if (i == 1)
    {
-      response = (Neuron *)new ID;
-      assert(response != NULL);
-      FREAD_LONG_LONG((ID *)response, fp);
+      neuronId = new ID;
+      assert(neuronId != NULL);
+      FREAD_LONG_LONG(neuronId, fp);
+      response = (Neuron *)neuronId;
    }
    else
    {
       response = NULL;
    }
-   effect = (Neuron *)new ID;
-   assert(effect != NULL);
-   FREAD_LONG_LONG((ID *)effect, fp);
+   neuronId = new ID;
+   assert(neuronId != NULL);
+   FREAD_LONG_LONG(neuronId, fp);
+   effect = (Neuron *)neuronId;
    responseEnablings.load(fp);
    effectEnablings.load(fp);
    FREAD_LONG_LONG(&causeBegin, fp);
@@ -2069,7 +2073,7 @@ Mona::load(FILE *fp)
       assert(receptor != NULL);
       receptor->load(fp);
       receptors.push_back(receptor);
-      if (receptor->id > idDispenser)
+      if (receptor->id >= idDispenser)
       {
          idDispenser = receptor->id + 1;
       }
@@ -2083,7 +2087,7 @@ Mona::load(FILE *fp)
       assert(motor != NULL);
       motor->load(fp);
       motors.push_back(motor);
-      if (motor->id > idDispenser)
+      if (motor->id >= idDispenser)
       {
          idDispenser = motor->id + 1;
       }
@@ -2097,7 +2101,7 @@ Mona::load(FILE *fp)
       assert(motor != NULL);
       motor->load(fp);
       placeMotors.push_back(motor);
-      if (motor->id > idDispenser)
+      if (motor->id >= idDispenser)
       {
          idDispenser = motor->id + 1;
       }
@@ -2111,7 +2115,7 @@ Mona::load(FILE *fp)
       assert(mediator != NULL);
       mediator->load(fp);
       mediators.push_back(mediator);
-      if (mediator->id > idDispenser)
+      if (mediator->id >= idDispenser)
       {
          idDispenser = mediator->id + 1;
       }

@@ -15,16 +15,16 @@
 using namespace std;
 
 // Usage.
-const char *Usage =
-   "Usage:\n"
-   "    nestingbirds_rnn\n"
-   "      -steps <steps>\n"
-   "      -trainRandomSeeds <random seeds> (comma-separated list)\n"
-   "      [-testRandomSeed <random seed> [-dynamic (world generates sensory inputs from predicted responses)]]\n"
-   "      [-verbose <true | false> (default=true)]\n"
-   "Exit codes:\n"
-   "  0=success\n"
-   "  1=error\n";
+const char* Usage =
+"Usage:\n"
+"    nestingbirds_rnn\n"
+"      -steps <steps>\n"
+"      -trainRandomSeeds <random seeds> (comma-separated list)\n"
+"      [-testRandomSeed <random seed> [-dynamic (world generates sensory inputs from predicted responses)]]\n"
+"      [-verbose <true | false> (default=true)]\n"
+"Exit codes:\n"
+"  0=success\n"
+"  1=error\n";
 
 // Steps.
 int Steps;
