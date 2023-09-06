@@ -73,7 +73,7 @@ int main(int argc, char *args[])
          if (gotMaleTrainTest)
          {
             fprintf(stderr, "Duplicate male train/test option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          gotMaleTrainTest = true;
@@ -85,7 +85,7 @@ int main(int argc, char *args[])
          if (gotMaleTrainTest)
          {
             fprintf(stderr, "Duplicate male train/test option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          gotMaleTrainTest = true;
@@ -97,7 +97,7 @@ int main(int argc, char *args[])
          if (gotFemaleTrainTest)
          {
             fprintf(stderr, "Duplicate female train/test option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          gotFemaleTrainTest = true;
@@ -109,7 +109,7 @@ int main(int argc, char *args[])
          if (gotFemaleTrainTest)
          {
             fprintf(stderr, "Duplicate female train/test option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          gotFemaleTrainTest = true;
@@ -121,14 +121,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid steps option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Steps = atoi(args[i]);
          if (Steps < 0)
          {
             fprintf(stderr, "Invalid steps option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          gotSteps = true;
@@ -140,7 +140,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid male save file\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          MaleSaveFilename = args[i];
@@ -152,7 +152,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid male load file\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          MaleLoadFilename = args[i];
@@ -164,7 +164,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid female save file\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          FemaleSaveFilename = args[i];
@@ -176,7 +176,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid female load file\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          FemaleLoadFilename = args[i];
@@ -188,14 +188,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid maleInitialFood option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Male::INITIAL_FOOD = atoi(args[i]);
          if (Male::INITIAL_FOOD < 0)
          {
             fprintf(stderr, "Invalid maleInitialFood option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -206,14 +206,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid maleFoodDuration option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Male::FOOD_DURATION = atoi(args[i]);
          if (Male::FOOD_DURATION < 0)
          {
             fprintf(stderr, "Invalid maleFoodDuration option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -229,14 +229,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid maleMouseNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Male::MOUSE_NEED = strtod(args[i], 0);
          if (Male::MOUSE_NEED < 0.0)
          {
             fprintf(stderr, "Invalid maleMouseNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -247,14 +247,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid maleFemaleMouseNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Male::FEMALE_MOUSE_NEED = strtod(args[i], 0);
          if (Male::FEMALE_MOUSE_NEED < 0.0)
          {
             fprintf(stderr, "Invalid maleFemaleMouseNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -265,14 +265,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid maleAttendFemaleNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Male::ATTEND_FEMALE_NEED = strtod(args[i], 0);
          if (Male::ATTEND_FEMALE_NEED < 0.0)
          {
             fprintf(stderr, "Invalid maleAttendFemaleNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -283,14 +283,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid maleFemaleStoneNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Male::FEMALE_STONE_NEED = strtod(args[i], 0);
          if (Male::FEMALE_STONE_NEED < 0.0)
          {
             fprintf(stderr, "Invalid maleFemaleStoneNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -301,14 +301,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid femaleInitialFood option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Female::INITIAL_FOOD = atoi(args[i]);
          if (Female::INITIAL_FOOD < 0)
          {
             fprintf(stderr, "Invalid femaleInitialFood option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -319,14 +319,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid femaleFoodDuration option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Female::FOOD_DURATION = atoi(args[i]);
          if (Female::FOOD_DURATION < 0)
          {
             fprintf(stderr, "Invalid femaleFoodDuration option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -342,7 +342,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid femaleMouseNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Female::MOUSE_NEED = 1.0;
@@ -350,7 +350,7 @@ int main(int argc, char *args[])
          if (Female::MOUSE_NEED < 0.0)
          {
             fprintf(stderr, "Invalid femaleMouseNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -361,14 +361,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid femaleLayEggNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Female::LAY_EGG_NEED = strtod(args[i], 0);
          if (Female::LAY_EGG_NEED < 0.0)
          {
             fprintf(stderr, "Invalid femaleLayEggNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -379,14 +379,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid femaleBroodEggNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Female::BROOD_EGG_NEED = strtod(args[i], 0);
          if (Female::BROOD_EGG_NEED < 0.0)
          {
             fprintf(stderr, "Invalid femaleBroodEggNeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -397,14 +397,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid randomSeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          RANDOM_NUMBER_SEED = atoi(args[i]);
          if (RANDOM_NUMBER_SEED <= 0)
          {
             fprintf(stderr, "Invalid randomSeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -415,14 +415,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid mouseMoveProbability option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          MOUSE_MOVE_PROBABILITY = atof(args[i]);
          if ((MOUSE_MOVE_PROBABILITY < 0.0) || (MOUSE_MOVE_PROBABILITY > 1.0))
          {
             fprintf(stderr, "Invalid mouseMoveProbability option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -433,7 +433,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid verbose option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          if (strcmp(args[i], "true") == 0)
@@ -447,7 +447,7 @@ int main(int argc, char *args[])
          else
          {
             fprintf(stderr, "Invalid verbose option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -463,7 +463,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid behavior file\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          behaviorFilename = args[i];
@@ -477,37 +477,37 @@ int main(int argc, char *args[])
       }
       if ((strcmp(args[i], "-help") == 0) || (strcmp(args[i], "-h") == 0) || (strcmp(args[i], "-?") == 0))
       {
-         printf(Usage);
+         printf("%s", Usage);
          exit(0);
       }
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (!gotMaleTrainTest)
    {
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (!gotFemaleTrainTest)
    {
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (!gotSteps)
    {
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (Male::INITIAL_FOOD > Male::FOOD_DURATION)
    {
       fprintf(stderr, "Male initial food cannot be greater than food duration\n");
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (Female::INITIAL_FOOD > Female::FOOD_DURATION)
    {
       fprintf(stderr, "Female initial food cannot be greater than food duration");
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
 

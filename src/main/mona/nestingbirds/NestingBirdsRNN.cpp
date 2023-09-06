@@ -71,14 +71,14 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid steps option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          Steps = atoi(args[i]);
          if (Steps <= 0)
          {
             fprintf(stderr, "Steps must be positive number\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          gotSteps = true;
@@ -90,7 +90,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid trainRandomSeeds option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          stringstream s_stream(args[i]);
@@ -102,7 +102,7 @@ int main(int argc, char *args[])
             if (seed <= 0)
             {
                fprintf(stderr, "Invalid trainRandomSeed %d\n", seed);
-               fprintf(stderr, Usage);
+               fprintf(stderr, "%s", Usage);
                exit(1);
             }
             TrainRandomSeeds.push_back(seed);
@@ -115,20 +115,20 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid testRandomSeed option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          string arg(args[i]);
          if (arg == "-dynamic")
          {
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          TestRandomSeed = atoi(trim(arg).c_str());
          if (TestRandomSeed <= 0)
          {
             fprintf(stderr, "Invalid testRandomSeed %d\n", TestRandomSeed);
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
@@ -144,7 +144,7 @@ int main(int argc, char *args[])
          if (i >= argc)
          {
             fprintf(stderr, "Invalid verbose option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          if (strcmp(args[i], "true") == 0)
@@ -158,32 +158,32 @@ int main(int argc, char *args[])
          else
          {
             fprintf(stderr, "Invalid verbose option\n");
-            fprintf(stderr, Usage);
+            fprintf(stderr, "%s", Usage);
             exit(1);
          }
          continue;
       }
       if ((strcmp(args[i], "-help") == 0) || (strcmp(args[i], "-h") == 0) || (strcmp(args[i], "-?") == 0))
       {
-         printf(Usage);
+         printf("%s", Usage);
          exit(0);
       }
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (!gotSteps)
    {
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (TrainRandomSeeds.size() == 0)
    {
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if ((TestRandomSeed == -1) && Dynamic)
    {
-      fprintf(stderr, Usage);
+      fprintf(stderr, "%s", Usage);
       exit(1);
    }
    if (Steps == 0)
