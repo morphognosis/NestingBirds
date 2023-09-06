@@ -2305,7 +2305,7 @@ void writeBehaviorFile(char *text)
 {
    if (BehaviorFp != NULL)
    {
-      fprintf(BehaviorFp, text);
+      fprintf(BehaviorFp, "%s", text);
       fflush(BehaviorFp);
    }
 }
