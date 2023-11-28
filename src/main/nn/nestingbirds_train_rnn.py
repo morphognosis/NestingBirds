@@ -30,6 +30,9 @@ for opt, arg in opts:
      n_neurons = int(arg)
   elif opt in ("-e", "--epochs"):
      n_epochs = int(arg)
+  else:
+     print(usage)
+     sys.exit(1)
 
 # prepare data
 from nestingbirds_rnn_dataset import X_train_shape, X_train_seq, y_train_shape, y_train_seq
