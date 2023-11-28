@@ -1,3 +1,5 @@
+# For conditions of distribution and use, see copyright notice in LICENSE.txt
+
 # Nesting birds RNN.
 # results written to nestingbirds_rnn_test_results.txt
 from numpy import array, argmax
@@ -71,4 +73,6 @@ with open(results_filename, 'w') as f:
     f.write('\"test_total_predictions\":\"'+str(testTotal)+'\",')
     f.write('\"test_error_pct\":\"'+str(round(testErrorPct, 2))+'\"')
     f.write('}\n')
+
+sys.extit(0)
 

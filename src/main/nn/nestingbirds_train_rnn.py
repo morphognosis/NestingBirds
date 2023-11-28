@@ -1,3 +1,5 @@
+# For conditions of distribution and use, see copyright notice in LICENSE.txt
+
 # Nesting birds RNN.
 # results written to nestingbirds_rnn_train_results.txt
 from numpy import array, argmax
@@ -19,11 +21,11 @@ try:
   opts, args = getopt.getopt(sys.argv[1:],"hn:e:",["neurons=","epochs="])
 except getopt.GetoptError:
   print('nestingbirds_rnn.py [-n <neurons>] [-e <epochs>]')
-  sys.exit(2)
+  sys.exit(1)
 for opt, arg in opts:
   if opt == '-h':
      print('nestingbirds_rnn.py [-n <neurons>] [-e <epochs>]')
-     sys.exit()
+     sys.exit(0)
   if opt in ("-n", "--neurons"):
      n_neurons = int(arg)
   elif opt in ("-e", "--epochs"):

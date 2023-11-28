@@ -1,3 +1,5 @@
+# For conditions of distribution and use, see copyright notice in LICENSE.txt
+
 # Sensor discriminator.
 # Detect significant features in input sensors.
 # ref: "How to measure importance of inputs" by Warren S. Sarle, SAS Institute Inc., Cary, NC, USA 

@@ -1,3 +1,5 @@
+# For conditions of distribution and use, see copyright notice in LICENSE.txt
+
 # Nesting birds NN.
 # results written to nestingbirds_nn_results.txt
 from numpy import array, argmax
