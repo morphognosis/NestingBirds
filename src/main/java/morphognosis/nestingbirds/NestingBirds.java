@@ -1157,11 +1157,11 @@ public class NestingBirds
             if (i > width / 2) { i = width / 2; }
             for (int j = 5; j < i; j++)
             {
-               int x = (int)(Randomizer.nextInt() % (long)j);
-               int y = (int)(Randomizer.nextInt() % (long)j);
+               int x = (int)(Randomizer.nextInt(j));
+               int y = (int)(Randomizer.nextInt(j));
                if ((x == 0) && (y == 0)) { continue; }
-               if ((Randomizer.nextInt() % 2) == 0) { x = -x; }
-               if ((Randomizer.nextInt() % 2) == 0) { y = -y; }
+               if ((Randomizer.nextInt(2)) == 0) { x = -x; }
+               if ((Randomizer.nextInt(2)) == 0) { y = -y; }
                x += bird.x;
                if ((x < 0) || (x >= width)) { continue; }
                y += bird.y;
