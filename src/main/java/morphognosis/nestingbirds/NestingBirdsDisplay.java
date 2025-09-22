@@ -932,6 +932,20 @@ public class NestingBirdsDisplay extends JFrame implements Runnable, ActionListe
          }
          if (args[i].equals("-writeMaleDataset"))
          {
+            if (((i + 1) < args.length) && !args[i + 1].startsWith("-"))
+            {
+               i++;
+               if ((args[i] != null) && !args[i].isEmpty())
+               {
+                  NestingBirds.MALE_DATASET_FILE_NAME = args[i];
+               }
+               else
+               {
+                  System.err.println("Invalid writeMaleDataset file name");
+                  System.err.println(Usage);
+                  System.exit(1);
+               }
+            }
             try
             {
                NestingBirds.MaleDatasetWriter = new PrintWriter(new FileOutputStream(new File(NestingBirds.MALE_DATASET_FILE_NAME + ".csv")));
